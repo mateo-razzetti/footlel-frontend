@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Footlel - Iniciar Sesión</title>
+    <title>Footlel - Crear Cuenta</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../../assets/styles/login.css">
+    <link rel="stylesheet" href="../../assets/styles/registro.css">
 </head>
 <body>
     <div class="background-overlay"></div>
@@ -17,21 +17,25 @@
                 <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
                 <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
             </picture>
-            <h1 class="brand-title">FOOTLEL</h1>
+            <h1 class="brand-title">CREÁ TU CUENTA</h1>
         </header>
         <form class="login-form" action="#" method="POST" novalidate>
             <div class="form-group">
-                <input class="form-input" type="text" id="username" name="username" placeholder="Usuario o Correo" autocomplete="username" required>
+                <input class="form-input" type="email" id="email" name="email" placeholder="Correo electrónico" autocomplete="email" required>
             </div>
             <div class="form-group">
-                <input class="form-input" type="password" id="password" name="password" placeholder="Contraseña" autocomplete="current-password" required>
-                <a href="#" class="forgot-password">Olvídé mi contraseña</a>
+                <input class="form-input" type="text" id="username" name="username" placeholder="Usuario" autocomplete="username" required>
             </div>
-            <button type="submit" class="btn-primary">Iniciar Sesión</button>
+            <div class="form-group">
+                <input class="form-input" type="password" id="password" name="password" placeholder="Contraseña" autocomplete="new-password" required>
+            </div>
+            <div class="form-group">
+                <input class="form-input" type="password" id="confirm-password" name="confirm-password" placeholder="Confirmar Contraseña" autocomplete="new-password" required>
+            </div>
+            <button type="submit" class="btn-primary">Registrarse</button>
         </form>
         <nav class="secondary-links">
-            <a href="registro.html" class="link-register">Registrarse</a>
-            <a href="#" class="link-guest">Continuar como invitado</a>
+            <a href="login.html" class="link-login">¿Ya tenés cuenta? Iniciá sesión</a>
         </nav>
     </main>
 </body>
