@@ -1,0 +1,89 @@
+/* =========================================================
+   recuperar.css — Pantalla de Recuperación de Cuenta | Footlel
+   Solo overrides y componentes nuevos sobre login.css.
+   Las variables :root y los estilos base vienen de login.css.
+   ========================================================= */
+
+/* ── Encabezado: logo centrado + bloque de texto a la izquierda ── */
+.recover-header {
+    align-items: flex-start;    /* sobreescribe el align-items:center del login */
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+/* Logo se mantiene centrado respecto a la card */
+.recover-header .logo-wrapper {
+    align-self: center;
+}
+
+/* Bloque de título + subtítulo, texto a la izquierda */
+.recover-heading {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    text-align: left;
+}
+
+.recover-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 22px;
+    letter-spacing: 0.5px;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.recover-subtitle {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+/* ── Input con ícono de sobre ── */
+.input-icon-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 18px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+    transition: color 0.2s ease;
+    /* Phosphor Icons usa línea base ligeramente distinta; ajuste fino: */
+    line-height: 1;
+}
+
+/* El input recibe padding-left extra para no solaparse con el ícono */
+.input-with-icon {
+    padding-left: 42px;
+}
+
+/* Cuando el input tiene foco, el ícono adopta el color verde */
+.input-icon-wrapper:focus-within .input-icon {
+    color: var(--color-brand-green);
+}
+
+/* ── Enlace "Volver al Login" ── */
+.link-back-login {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-brand-green);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+.link-back-login:hover { opacity: 0.8; }
+
+/* ── Responsive ── */
+@media (max-width: 420px) {
+    .recover-title    { font-size: 18px; }
+    .recover-subtitle { font-size: 12px; }
+}

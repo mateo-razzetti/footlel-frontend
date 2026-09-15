@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Recuperar Cuenta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Ícono de sobre via Phosphor Icons (ligero, sin dependencias pesadas) -->
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="../../assets/styles/login.css">
+    <link rel="stylesheet" href="../../assets/styles/recuperar.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card">
+
+        <header class="card-header recover-header">
+            <picture class="logo-wrapper">
+                <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
+                <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
+            </picture>
+            <div class="recover-heading">
+                <h1 class="recover-title">Recuperar cuenta</h1>
+                <p class="recover-subtitle">Ingresá tu correo electrónico y te enviaremos un código de seguridad</p>
+            </div>
+        </header>
+
+        <form class="login-form" id="recover-form" action="verificar.html" method="GET" novalidate>
+            <div class="form-group">
+                <div class="input-icon-wrapper">
+                    <i class="ph ph-envelope input-icon" aria-hidden="true"></i>
+                    <input
+                        class="form-input input-with-icon"
+                        type="email"
+                        id="recovery-email"
+                        name="recovery-email"
+                        placeholder="ejemplo@correo.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+                <!-- Error de validación de correo (oculto por defecto) -->
+                <p class="field-error" id="email-error" aria-live="polite" hidden>
+                    Ingresá un correo válido.
+                </p>
+            </div>
+            <button type="submit" class="btn-primary">Enviar código</button>
+        </form>
+
+        <nav class="secondary-links">
+            <a href="login.html" class="link-back-login">Volver al Login</a>
+        </nav>
+
+    </main>
+
+    <script>
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,8}$/;
+
+        /* ── Validación de email en submit ── */
+        document.getElementById('recover-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const email      = document.getElementById('recovery-email').value.trim();
+            const emailError = document.getElementById('email-error');
+
+            if (!EMAIL_REGEX.test(email)) {
+                emailError.hidden = false;
+                document.getElementById('recovery-email').focus();
+            } else {
+                emailError.hidden = true;
+                window.location.href = 'verificar.html';
+            }
+        });
+
+        /* ── Limpieza en tiempo real ── */
+        document.getElementById('recovery-email').addEventListener('input', () => {
+            const emailError = document.getElementById('email-error');
+            if (!emailError.hidden && EMAIL_REGEX.test(document.getElementById('recovery-email').value.trim())) {
+                emailError.hidden = true;
+            }
+        });
+    </script>
+</body>
+</html>

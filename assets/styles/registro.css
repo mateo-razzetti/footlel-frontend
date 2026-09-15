@@ -143,6 +143,53 @@ body {
 .link-login strong,
 .link-login span   { color: var(--color-brand-green); }
 
+/* ── Wrapper input + botón ojo ── */
+.input-toggle-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Padding derecho para no solaparse con el ícono */
+.input-toggle-wrapper .form-input {
+    padding-right: 44px;
+}
+
+/* Botón de mostrar/ocultar contraseña */
+.toggle-visibility {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+.toggle-visibility:hover { color: var(--color-text-primary); }
+
+.eye-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* ── Mensaje de error de validación ── */
+.field-error {
+    width: 100%;
+    margin-top: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef5350;
+    text-align: left;
+}
+
 /* ── Responsive ── */
 @media (max-width: 420px) {
     .login-card  { width: calc(100% - 32px); padding: 32px 24px; }
