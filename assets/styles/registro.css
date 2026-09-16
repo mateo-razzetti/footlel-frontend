@@ -1,3 +1,8 @@
+/* =========================================================
+   registro.css — Pantalla de Creación de Cuenta | Footlel
+   Extiende el mismo sistema de diseño que login.css.
+   ========================================================= */
+
 :root {
     --color-brand-green:   #4CAF50;
     --color-surface-card:  #292929;
@@ -30,6 +35,7 @@ body {
     background-attachment: fixed;
 }
 
+/* ── Overlay oscuro sobre el fondo ── */
 .background-overlay {
     position: fixed;
     inset: 0;
@@ -37,6 +43,7 @@ body {
     z-index: 0;
 }
 
+/* ── Tarjeta central ── */
 .login-card {
     position: relative;
     z-index: 1;
@@ -48,12 +55,13 @@ body {
     box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4);
 }
 
+/* ── Encabezado: logo + título ── */
 .card-header {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    margin-bottom: 32px;
+    margin-bottom: 28px;
 }
 
 .logo-wrapper { display: block; }
@@ -63,18 +71,20 @@ body {
 .brand-title {
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 28px;
-    letter-spacing: 4px;
+    font-size: 22px;          /* ligeramente menor para que quepa en una línea */
+    letter-spacing: 2px;
     color: var(--color-text-primary);
+    line-height: 1.2;
 }
 
+/* ── Formulario ── */
 .login-form { display: flex; flex-direction: column; }
 
 .form-group {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    margin-bottom: 16px;
+    margin-bottom: 14px;
     width: 100%;
 }
 
@@ -95,16 +105,56 @@ body {
 .form-input::placeholder { color: var(--color-text-muted); }
 .form-input:focus { border-color: var(--color-brand-green); }
 
+/* ── Botón principal ── */
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background-color: var(--color-brand-green);
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn-primary:hover  { background-color: #43a047; }
+.btn-primary:active { transform: scale(0.98); }
+
+/* ── Enlace inferior ── */
+.secondary-links {
+    display: flex;
+    justify-content: center;
+    margin-top: 22px;
+}
+
+.link-login {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.link-login:hover { color: var(--color-text-primary); }
+.link-login strong,
+.link-login span   { color: var(--color-brand-green); }
+
 /* ── Wrapper input + botón ojo ── */
 .input-toggle-wrapper {
     position: relative;
     width: 100%;
 }
 
+/* Padding derecho para no solaparse con el ícono */
 .input-toggle-wrapper .form-input {
     padding-right: 44px;
 }
 
+/* Botón de mostrar/ocultar contraseña */
 .toggle-visibility {
     position: absolute;
     right: 12px;
@@ -140,65 +190,8 @@ body {
     text-align: left;
 }
 
-.forgot-password {
-    align-self: flex-end;
-    margin-top: 8px;
-    font-family: var(--font-body);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-.forgot-password:hover { color: var(--color-text-primary); }
-
-.btn-primary {
-    width: 100%;
-    padding: 14px;
-    margin-top: 8px;
-    background-color: var(--color-brand-green);
-    color: var(--color-text-primary);
-    border: none;
-    border-radius: var(--btn-radius);
-    font-family: var(--font-body);
-    font-size: 16px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.1s ease;
-}
-.btn-primary:hover { background-color: #43a047; }
-.btn-primary:active { transform: scale(0.98); }
-
-.secondary-links {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 14px;
-    margin-top: 24px;
-}
-
-.link-register {
-    font-family: var(--font-body);
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--color-brand-green);
-    text-decoration: none;
-    transition: opacity 0.2s ease;
-}
-.link-register:hover { opacity: 0.8; }
-
-.link-guest {
-    font-family: var(--font-body);
-    font-size: 14px;
-    font-weight: 400;
-    color: var(--color-text-primary);
-    text-decoration: none;
-    transition: opacity 0.2s ease;
-}
-.link-guest:hover { opacity: 0.7; }
-
+/* ── Responsive ── */
 @media (max-width: 420px) {
-    .login-card { width: calc(100% - 32px); padding: 32px 24px; }
-    .brand-title { font-size: 24px; }
+    .login-card  { width: calc(100% - 32px); padding: 32px 24px; }
+    .brand-title { font-size: 18px; letter-spacing: 1px; }
 }

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Crear Cuenta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/styles/registro.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card">
+
+        <header class="card-header">
+            <picture class="logo-wrapper">
+                <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
+                <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
+            </picture>
+            <h1 class="brand-title">CREÁ TU CUENTA</h1>
+        </header>
+
+        <form class="login-form" id="register-form" action="#" method="POST" novalidate>
+
+            <!-- Correo electrónico -->
+            <div class="form-group">
+                <input
+                    class="form-input"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Correo electrónico"
+                    autocomplete="email"
+                    required
+                >
+                <!-- Error de validación de correo (oculto por defecto) -->
+                <p class="field-error" id="email-error" aria-live="polite" hidden>
+                    Ingresá un correo válido.
+                </p>
+            </div>
+
+            <!-- Usuario -->
+            <div class="form-group">
+                <input
+                    class="form-input"
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Usuario"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <!-- Contraseña -->
+            <div class="form-group">
+                <div class="input-toggle-wrapper">
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Contraseña"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button type="button" class="toggle-visibility" aria-label="Mostrar contraseña" data-target="password">
+                        <!-- Un único SVG; el JS muta su innerHTML al hacer clic -->
+                        <svg class="eye-icon" id="eye-password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Confirmar Contraseña -->
+            <div class="form-group">
+                <div class="input-toggle-wrapper">
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="confirm-password"
+                        name="confirm-password"
+                        placeholder="Confirmar Contraseña"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button type="button" class="toggle-visibility" aria-label="Mostrar contraseña" data-target="confirm-password">
+                        <!-- Un único SVG; el JS muta su innerHTML al hacer clic -->
+                        <svg class="eye-icon" id="eye-confirm-password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Mensaje de error: oculto por defecto, aparece si las contraseñas no coinciden -->
+                <p class="field-error" id="password-mismatch-error" aria-live="polite" hidden>
+                    Las contraseñas no coinciden.
+                </p>
+            </div>
+
+            <button type="submit" class="btn-primary">Registrarse</button>
+        </form>
+
+        <nav class="secondary-links">
+            <a href="login.html" class="link-login">¿Ya tenés cuenta? Iniciá sesión</a>
+        </nav>
+
+    </main>
+
+    <script>
+        /* ================================================================
+           PATHS SVG reutilizables
+           EYE_CLOSED → ojo tachado con línea diagonal (contraseña oculta)
+           EYE_OPEN   → ojo abierto con pupila       (contraseña visible)
+        ================================================================ */
+        const EYE_CLOSED = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>`;
+
+        const EYE_OPEN = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>`;
+
+        /* ================================================================
+           Toggle mostrar / ocultar contraseña
+           Un único SVG por botón; muta su innerHTML según el estado.
+        ================================================================ */
+        document.querySelectorAll('.toggle-visibility').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input   = document.getElementById(btn.dataset.target);
+                const svgId   = `eye-${btn.dataset.target}`;   // ej. "eye-password"
+                const svg     = document.getElementById(svgId);
+                const showing = input.type === 'text';          // ¿ya está visible?
+
+                // Alterna el tipo del input
+                input.type = showing ? 'password' : 'text';
+
+                // Muta el dibujo del SVG
+                svg.innerHTML = showing ? EYE_CLOSED : EYE_OPEN;
+
+                // Actualiza el aria-label para lectores de pantalla
+                btn.setAttribute(
+                    'aria-label',
+                    showing ? 'Mostrar contraseña' : 'Ocultar contraseña'
+                );
+            });
+        });
+
+        /* ================================================================
+           Regex de validación de correo electrónico
+           Exige: caracteres locales @ dominio . extensión (2-8 letras)
+        ================================================================ */
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,8}$/;
+
+        /* ================================================================
+           Validación en submit:
+             1. Regex de correo
+             2. Contraseñas coincidentes
+             3. Redirección a correo-enviado.html si todo pasa
+        ================================================================ */
+        document.getElementById('register-form').addEventListener('submit', (e) => {
+            e.preventDefault();   // Siempre prevenimos; redirigimos manualmente si pasa
+
+            const email           = document.getElementById('email').value.trim();
+            const password        = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            const emailError    = document.getElementById('email-error');
+            const mismatchError = document.getElementById('password-mismatch-error');
+
+            let isValid = true;
+
+            // ── 1. Validación regex de correo ──
+            if (!EMAIL_REGEX.test(email)) {
+                emailError.hidden = false;
+                document.getElementById('email').focus();
+                isValid = false;
+            } else {
+                emailError.hidden = true;
+            }
+
+            // ── 2. Validación de contraseñas coincidentes ──
+            if (password !== confirmPassword) {
+                mismatchError.hidden = false;
+                if (isValid) document.getElementById('confirm-password').focus();
+                isValid = false;
+            } else {
+                mismatchError.hidden = true;
+            }
+
+            // ── 3. Redirección de éxito ──
+            if (isValid) {
+                window.location.href = 'correo-enviado.html';
+            }
+        });
+
+        /* ── Limpieza en tiempo real ── */
+
+        // Correo: borra el error cuando el usuario escribe algo válido
+        document.getElementById('email').addEventListener('input', () => {
+            const emailError = document.getElementById('email-error');
+            if (!emailError.hidden && EMAIL_REGEX.test(document.getElementById('email').value.trim())) {
+                emailError.hidden = true;
+            }
+        });
+
+        // Confirmación: borra el error cuando las contraseñas ya coinciden
+        document.getElementById('confirm-password').addEventListener('input', () => {
+            const mismatchError = document.getElementById('password-mismatch-error');
+            if (!mismatchError.hidden) {
+                const pwd     = document.getElementById('password').value;
+                const confirm = document.getElementById('confirm-password').value;
+                if (pwd === confirm) mismatchError.hidden = true;
+            }
+        });
+    </script>
+
+</body>
+</html>

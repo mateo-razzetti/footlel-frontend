@@ -1,0 +1,86 @@
+/* =========================================================
+   verificar.css — Pantalla de Verificación OTP | Footlel
+   Solo componentes nuevos sobre login.css + recuperar.css.
+   Variables :root heredadas de login.css.
+   ========================================================= */
+
+/* ── Contenedor de 6 casilleros OTP ── */
+.otp-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    width: 100%;
+    margin-bottom: 24px;
+}
+
+/* ── Casillero individual ── */
+.otp-input {
+    flex: 1;
+    aspect-ratio: 1 / 1;       /* siempre cuadrado */
+    min-width: 0;               /* evita overflow en viewports angostos */
+    background-color: var(--color-surface-input);   /* #1A1A1A */
+    border: 1px solid var(--color-border-input);    /* gris sutil */
+    border-radius: var(--input-radius);             /* 8px */
+    color: var(--color-text-primary);
+    font-family: var(--font-heading);               /* Montserrat — más impacto */
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    caret-color: var(--color-brand-green);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    /* Elimina las flechas de número en navegadores */
+    -moz-appearance: textfield;
+}
+.otp-input::-webkit-outer-spin-button,
+.otp-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+/* Estado focus: borde verde + sutil resplandor */
+.otp-input:focus {
+    border-color: var(--color-brand-green);
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+}
+
+/* Casillero relleno: borde ligeramente más visible */
+.otp-input:not(:placeholder-shown) {
+    border-color: rgba(158, 158, 158, 0.6);
+}
+
+/* ── Texto inferior de reenvío ── */
+.resend-text {
+    margin-top: 20px;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+/* "Reenviar en 00:30" agrupa countdown */
+.resend-action {
+    display: inline;
+    white-space: nowrap;
+}
+
+/* El número del countdown en blanco para destacar */
+.resend-countdown {
+    color: var(--color-text-primary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;  /* evita salto visual al cambiar dígitos */
+}
+
+/* Cuando el countdown termina aparece este link */
+.resend-link {
+    color: var(--color-brand-green);
+    font-weight: 600;
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+.resend-link:hover { opacity: 0.8; }
+
+/* ── Responsive ── */
+@media (max-width: 420px) {
+    .otp-container { gap: 7px; }
+    .otp-input     { font-size: 17px; }
+}
