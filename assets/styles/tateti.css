@@ -1,0 +1,296 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Juego Principal (Tateti)
+   assets/styles/tateti.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Header Específico del Juego ─────────────────────────────── */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.timer-display {
+    font-family: var(--font-heading);
+    font-size: 32px;
+    font-weight: 700;
+    color: #FFFFFF;
+    background: #111111;
+    padding: 10px 28px;
+    border-radius: 30px;
+    border: 1px solid #333333;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5);
+    text-shadow: 0 0 8px rgba(255,255,255,0.4);
+}
+
+.turn-indicator {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-brand-green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── Tablero ─────────────────────────────────────────────────── */
+.board-section {
+    display: flex;
+    justify-content: center;
+    padding: 32px 16px;
+    position: relative;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: 110px repeat(3, 130px);
+    grid-template-rows: 110px repeat(3, 130px);
+    gap: 12px;
+}
+
+.empty-corner {
+    /* Celda superior izquierda vacía */
+    background: transparent;
+}
+
+/* Tarjetas de Condición (Clubes / Superior) */
+.cond-top {
+    background: #FFFFFF;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    color: #1A1A1A;
+    text-align: center;
+}
+
+/* Tarjetas de Condición (Selecciones / Izquierda) */
+.cond-left {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    color: var(--color-text-primary);
+    text-align: center;
+}
+
+.cond-img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    margin-bottom: 8px;
+}
+
+.cond-text {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Casilleros Jugables */
+.playable-cell {
+    background: #1E1E1E;
+    border: 2px solid #333333;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playable-cell:hover {
+    background: #242424;
+    border-color: var(--color-brand-green);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3), inset 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.playable-cell.active-selection {
+    border-color: var(--color-brand-green);
+    background: rgba(76, 175, 80, 0.1);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+/* Estados Conquistados */
+.conquered-p1 {
+    background: rgba(76, 175, 80, 0.2) !important;
+    border: 2px solid var(--color-brand-green) !important;
+    box-shadow: inset 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.conquered-p2 {
+    /* Usamos un color distinto para el P2 para diferenciar en Tateti, ej: Azul o Naranja.
+       Como pediste verde, haremos un verde diferente o usaremos una clase que se distinga visualmente.
+       Para MVP: usaremos un borde azulado para P2 para mantener la logica del juego. */
+    background: rgba(33, 150, 243, 0.2) !important;
+    border: 2px solid #2196F3 !important;
+    box-shadow: inset 0 0 20px rgba(33, 150, 243, 0.3);
+}
+
+/* ── Buscador Inferior ───────────────────────────────────────── */
+.search-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    padding: 0 32px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.search-input {
+    flex: 1;
+    background: #2A2A2A;
+    border: 1px solid #444444;
+    color: var(--color-text-primary);
+    padding: 20px 28px;
+    border-radius: 30px;
+    font-family: var(--font-body);
+    font-size: 18px;
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: var(--color-brand-green);
+    background: #333333;
+}
+
+.btn-confirm {
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+    padding: 20px 36px;
+    border-radius: 30px;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background: var(--color-brand-green-dk);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-confirm:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-confirm:disabled {
+    background: var(--color-border-subtle);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Footer / Marcador ───────────────────────────────────────── */
+.game-footer {
+    text-align: center;
+    padding: 24px;
+    background: var(--color-surface-card);
+    border-top: 1px solid var(--color-border-subtle);
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+}
+
+/* ── Pop-ups de Reacción ─────────────────────────────────────── */
+.reaction-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: var(--color-surface-card);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reaction-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.reaction-popup.success { border: 2px solid var(--color-brand-green); }
+.reaction-popup.error   { border: 2px solid #F44336; }
+
+.reaction-img {
+    height: 180px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.reaction-text {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.reaction-popup.success .reaction-text { color: var(--color-brand-green); }
+.reaction-popup.error .reaction-text   { color: #F44336; }
+
+/* ── Modales de Fin de Partida ───────────────────────────────── */
+.endgame-points {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 16px 0 24px;
+}
+
+.points-green { color: var(--color-brand-green); }
+.points-gray  { color: var(--color-text-muted); }
+
+.score-display {
+    font-family: var(--font-heading);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 16px 0;
+    letter-spacing: 4px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .game-board {
+        grid-template-columns: 80px repeat(3, 1fr);
+        grid-template-rows: 80px repeat(3, 100px);
+        gap: 8px;
+    }
+    .cond-img { width: 35px; height: 35px; }
+    .cond-text { font-size: 9px; }
+    .search-section { flex-direction: column; padding: 0 16px 32px; }
+    .search-input, .btn-confirm { width: 100%; }
+}

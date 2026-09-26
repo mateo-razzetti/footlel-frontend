@@ -8,16 +8,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/styles/registro.css">
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
     <div class="background-overlay"></div>
     <main class="login-card">
 
         <header class="card-header">
-            <picture class="logo-wrapper">
-                <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
-                <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
-            </picture>
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
             <h1 class="brand-title">CREÁ TU CUENTA</h1>
         </header>
 
@@ -157,43 +158,92 @@
 
         /* ================================================================
            Validación en submit:
+             0. Campos vacíos — secuencial con mensaje específico por campo
              1. Regex de correo
              2. Contraseñas coincidentes
-             3. Redirección a correo-enviado.html si todo pasa
+             3. Fetch a la API → redirige a correo-enviado.html solo si response.ok
         ================================================================ */
-        document.getElementById('register-form').addEventListener('submit', (e) => {
-            e.preventDefault();   // Siempre prevenimos; redirigimos manualmente si pasa
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
 
             const email           = document.getElementById('email').value.trim();
+            const user_name       = document.getElementById('username').value.trim();
             const password        = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
-            const emailError    = document.getElementById('email-error');
-            const mismatchError = document.getElementById('password-mismatch-error');
+            // ── Error reutilizable (se crea una sola vez) ──
+            let generalError = document.getElementById('general-error');
+            if (!generalError) {
+                generalError = document.createElement('p');
+                generalError.id = 'general-error';
+                generalError.className = 'field-error';
+                generalError.style.marginBottom = '12px';
+                document.getElementById('register-form').prepend(generalError);
+            }
 
-            let isValid = true;
+            function showError(msg, focusId) {
+                generalError.textContent = msg;
+                generalError.hidden = false;
+                if (focusId) document.getElementById(focusId).focus();
+            }
+
+            // ── 0. Validación secuencial de campos vacíos ──
+            if (!email) {
+                showError('Falta ingresar el correo.', 'email');
+                return;
+            }
+            if (!user_name) {
+                showError('Falta crear un usuario.', 'username');
+                return;
+            }
+            if (!password) {
+                showError('Falta ingresar la contraseña.', 'password');
+                return;
+            }
+            if (!confirmPassword) {
+                showError('Falta confirmar la contraseña.', 'confirm-password');
+                return;
+            }
 
             // ── 1. Validación regex de correo ──
             if (!EMAIL_REGEX.test(email)) {
-                emailError.hidden = false;
-                document.getElementById('email').focus();
-                isValid = false;
-            } else {
-                emailError.hidden = true;
+                showError('Ingresá un correo electrónico válido.', 'email');
+                return;
             }
 
             // ── 2. Validación de contraseñas coincidentes ──
             if (password !== confirmPassword) {
-                mismatchError.hidden = false;
-                if (isValid) document.getElementById('confirm-password').focus();
-                isValid = false;
-            } else {
-                mismatchError.hidden = true;
+                showError('Las contraseñas no coinciden.', 'confirm-password');
+                return;
             }
 
-            // ── 3. Redirección de éxito ──
-            if (isValid) {
-                window.location.href = 'correo-enviado.html';
+            generalError.hidden = true;
+
+            // ── 3. Fetch y redirección solo si response.ok ──
+            const datos = {
+                user_name: user_name,
+                user_email: email,
+                user_password: password
+            };
+
+            try {
+                const response = await fetch("https://footlel-backend.onrender.com/auth/user-register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(datos)
+                });
+
+                if (response.ok) {
+                    window.location.href = 'correo-enviado.html';
+                } else {
+                    const data = await response.json();
+                    generalError.textContent = data.detail || data.message || 'Ocurrió un error. Intentá de nuevo.';
+                    generalError.hidden = false;
+                }
+            } catch (error) {
+                console.error(error);
+                generalError.textContent = 'No se pudo conectar con el servidor. Intentá más tarde.';
+                generalError.hidden = false;
             }
         });
 

@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- global-preferences.js va PRIMERO, igual que en menu.html, para leer las prefs antes del render -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Confirmá tus cambios</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Preferencias globales de modo (oscuro / claro) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+    <style>
+        /* ── Design Tokens ── */
+        :root {
+            --color-brand-green:    #4CAF50;
+            --color-brand-green-dk: #43a047;
+            --color-surface-bg:     #1A1A1A;
+            --color-surface-card:   #292929;
+            --color-surface-input:  #1A1A1A;
+            --color-text-primary:   #FFFFFF;
+            --color-text-muted:     #9E9E9E;
+            --color-border-subtle:  rgba(158, 158, 158, 0.18);
+            --color-border-input:   rgba(158, 158, 158, 0.35);
+            --font-heading: 'Montserrat', sans-serif;
+            --font-body:    'Poppins', sans-serif;
+            --card-radius:  14px;
+            --input-radius: 8px;
+            --btn-radius:   8px;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* Fondo desde variable — global-preferences.css lo sobreescribe con .light-mode */
+        body {
+            font-family: var(--font-body);
+            color: var(--color-text-primary);
+            background-color: var(--color-surface-bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Tarjeta modal */
+        .verify-card {
+            width: 360px;
+            background-color: var(--color-surface-card);
+            border-radius: var(--card-radius);
+            border: 1px solid var(--color-border-subtle);
+            padding: 40px 36px;
+            text-align: center;
+            box-shadow: 0 4px 28px rgba(0, 0, 0, 0.55);
+        }
+
+        /* Header */
+        .card-header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+        .logo-img { width: 64px; height: auto; display: block; }
+        .card-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--color-text-primary);
+            letter-spacing: 0.3px;
+        }
+        .card-subtitle {
+            font-family: var(--font-body);
+            font-size: 13px;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+        }
+
+        /* OTP */
+        .otp-form { display: flex; flex-direction: column; gap: 20px; }
+        .otp-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .otp-input {
+            flex: 1;
+            aspect-ratio: 1 / 1;
+            min-width: 0;
+            background-color: var(--color-surface-input);
+            border: 1px solid var(--color-border-input);
+            border-radius: var(--input-radius);
+            color: var(--color-text-primary);
+            font-family: var(--font-heading);
+            font-size: 20px;
+            font-weight: 700;
+            text-align: center;
+            outline: none;
+            caret-color: var(--color-brand-green);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            -moz-appearance: textfield;
+        }
+        .otp-input::-webkit-outer-spin-button,
+        .otp-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .otp-input:focus {
+            border-color: var(--color-brand-green);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+        }
+        .otp-input:not(:placeholder-shown) { border-color: rgba(158, 158, 158, 0.6); }
+
+        /* Botón */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--color-brand-green);
+            color: #fff;
+            border: none;
+            border-radius: var(--btn-radius);
+            font-family: var(--font-body);
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        .btn-primary:hover  { background-color: var(--color-brand-green-dk); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        /* Reenvío */
+        .resend-text {
+            margin-top: 20px;
+            font-family: var(--font-body);
+            font-size: 13px;
+            color: var(--color-text-muted);
+            line-height: 1.5;
+        }
+        .resend-countdown { color: var(--color-text-primary); font-weight: 600; }
+        .resend-link { color: var(--color-brand-green); font-weight: 600; text-decoration: none; }
+        .resend-link:hover { opacity: 0.8; }
+
+        @media (max-width: 420px) {
+            .verify-card { width: calc(100% - 32px); padding: 32px 20px; }
+            .otp-container { gap: 7px; }
+            .otp-input { font-size: 17px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="verify-card">
+
+        <header class="card-header">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <h1 class="card-title">Confirmá tus cambios</h1>
+            <p class="card-subtitle">
+                Ingresá el código de 6 dígitos que enviamos a tu correo
+                para autorizar la actualización de tu perfil.
+            </p>
+        </header>
+
+        <form class="otp-form" id="verifyEditForm" novalidate>
+            <div class="otp-container" role="group" aria-label="Código de verificación de 6 dígitos">
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" autocomplete="one-time-code" aria-label="Dígito 1" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 2" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 3" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 4" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 5" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 6" required>
+            </div>
+
+            <button type="submit" class="btn-primary">Confirmar Cambios</button>
+        </form>
+
+        <p class="resend-text">
+            ¿No recibiste el código?
+            <span class="resend-action">
+                Reenviar en <span class="resend-countdown" id="countdown">00:30</span>
+            </span>
+        </p>
+
+    </div>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ── OTP: auto-avance, retroceso y pegar ── */
+        const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
+
+        otpInputs.forEach(function (input, index) {
+            input.addEventListener('input', function () {
+                input.value = input.value.replace(/\D/g, '');
+                if (input.value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            input.addEventListener('keydown', function (e) {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            input.addEventListener('paste', function (e) {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData)
+                    .getData('text')
+                    .replace(/\D/g, '')
+                    .slice(0, 6);
+                pasted.split('').forEach(function (char, i) {
+                    if (otpInputs[i]) otpInputs[i].value = char;
+                });
+                const nextEmpty = Math.min(pasted.length, otpInputs.length - 1);
+                otpInputs[nextEmpty].focus();
+            });
+        });
+
+        otpInputs[0].focus();
+
+        /* ── Countdown de reenvío ── */
+        const countdownEl  = document.getElementById('countdown');
+        const resendAction = document.querySelector('.resend-action');
+        let seconds = 30;
+
+        const tick = setInterval(function () {
+            seconds -= 1;
+            if (seconds <= 0) {
+                clearInterval(tick);
+                resendAction.innerHTML = '<a href="#" class="resend-link">Reenviar código</a>';
+                return;
+            }
+            const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const ss = String(seconds % 60).padStart(2, '0');
+            countdownEl.textContent = mm + ':' + ss;
+        }, 1000);
+
+        /* ── Confirmar Cambios: Fetch al backend ── */
+        document.getElementById('verifyEditForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Validación: 6 dígitos completos
+            const otp = otpInputs.map(function (i) { return i.value; }).join('');
+            if (otp.length < 6) {
+                const firstEmpty = otpInputs.find(function (i) { return !i.value; });
+                if (firstEmpty) firstEmpty.focus();
+                return;
+            }
+
+            // Armar el paquete
+            const userId          = Number(localStorage.getItem('footlel_user_id'));
+            const pendingName     = localStorage.getItem('pending_user_name');
+            const pendingEmail    = localStorage.getItem('pending_user_email');
+            const pendingPassword = localStorage.getItem('pending_user_password');
+            const pendingAvatar   = localStorage.getItem('pending_avatar');
+
+            if (pendingName == localStorage.getItem('footlel_username')){
+                pendingName = '';
+            }
+            if (pendingEmail == localStorage.getItem('footlel_email')){
+                pendingEmail = '';
+            }
+
+            try {
+                // Ejecutar el fetch
+                const response = await fetch('https://footlel-backend.onrender.com/user/edit-user-info', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        user_name: pendingName,
+                        user_email: pendingEmail,
+                        user_password: pendingPassword
+                    })
+                });
+
+                if (response.ok) {
+                    // Manejo de Éxito
+                    if (pendingName)   localStorage.setItem('footlel_username', pendingName);
+                    if (pendingAvatar) localStorage.setItem('footlel_avatar', pendingAvatar);
+                    if (pendingEmail)  localStorage.setItem('footlel_email', pendingEmail);
+                    if (pendingPassword) localStorage.setItem('footlel_password', pendingPassword);
+
+                    // Limpiar la basura
+                    localStorage.removeItem('footlel_user_id');
+                    localStorage.removeItem('pending_user_name');
+                    localStorage.removeItem('pending_user_email');
+                    localStorage.removeItem('pending_user_password');
+                    localStorage.removeItem('pending_avatar');
+
+                    // Redirigir al usuario
+                    window.location.href = 'menu.html';
+                } else {
+                    // Manejo de Error
+                    const data = await response.json();
+                    const errorMsg = data.detail || data.message || "Error al actualizar los datos.";
+                    
+                    let errorBox = document.getElementById('error-box');
+                    if (!errorBox) {
+                        errorBox = document.createElement('p');
+                        errorBox.id = 'error-box';
+                        errorBox.style.color = 'red';
+                        errorBox.style.fontWeight = '600';
+                        errorBox.style.marginTop = '15px';
+                        errorBox.style.textAlign = 'center';
+                        // Insertar debajo del formulario
+                        document.getElementById('verifyEditForm').parentNode.insertBefore(errorBox, document.getElementById('verifyEditForm').nextSibling);
+                    }
+                    errorBox.textContent = errorMsg;
+                }
+            } catch (error) {
+                console.error("Error conectando con el backend:", error);
+            }
+        });
+
+    })();
+    </script>
+</body>
+</html>

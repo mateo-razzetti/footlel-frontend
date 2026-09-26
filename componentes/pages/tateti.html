@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Jugando Tateti</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Estilos Globales, Menú y Juego -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css"> <!-- Para tokens y utilidades base -->
+    <link rel="stylesheet" href="../../assets/styles/modalidades.css"> <!-- Reutilización de modales base -->
+    <link rel="stylesheet" href="../../assets/styles/tateti.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+
+    <!-- Script Global (Tema/Animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER DEL JUEGO
+    ═══════════════════════════════════════ -->
+    <header class="game-header">
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+        </a>
+
+        <div class="timer-display" id="timer-display">
+            <span>⏱</span> <span id="time-text">00:60</span>
+        </div>
+
+        <div class="turn-indicator" id="turn-indicator">
+            Turno: Jugador 1
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         TABLERO CENTRAL (GRID 4x4)
+    ═══════════════════════════════════════ -->
+    <main class="main-content">
+        <section class="board-section">
+            <div class="game-board" id="game-board">
+                
+                <!-- Fila 1: Esquina Vacia + 3 Condiciones Superiores -->
+                <div class="empty-corner"></div>
+                <div class="cond-top">
+                    <img src="../../assets/images/Equipos - La Liga/real-madrid-logo-footylogos.png" alt="Real Madrid" class="cond-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23e0e0e0\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23666\'%3EIMG%3C/text%3E%3C/svg%3E'">
+                    <span class="cond-text">Real Madrid</span>
+                </div>
+                <div class="cond-top">
+                    <img src="../../assets/images/Equipos - La Liga/barcelona-logo.png" alt="Barcelona" class="cond-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23e0e0e0\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23666\'%3EIMG%3C/text%3E%3C/svg%3E'">
+                    <span class="cond-text">Barcelona</span>
+                </div>
+                <div class="cond-top">
+                    <img src="../../assets/images/Equipos - La Liga/atletico-madrid-logo.png" alt="Atlético Madrid" class="cond-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23e0e0e0\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23666\'%3EIMG%3C/text%3E%3C/svg%3E'">
+                    <span class="cond-text">Atlético Madrid</span>
+                </div>
+
+                <!-- Fila 2 -->
+                <div class="cond-left">
+                    <img src="../../assets/images/Selecciones/argentina-national-team-logo-footylogos.png" alt="Argentina" class="cond-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23333\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23aaa\'%3EIMG%3C/text%3E%3C/svg%3E'">
+                    <span class="cond-text">Argentina</span>
+                </div>
+                <div class="playable-cell" data-row="0" data-col="0"></div>
+                <div class="playable-cell" data-row="0" data-col="1"></div>
+                <div class="playable-cell" data-row="0" data-col="2"></div>
+
+                <!-- Fila 3 -->
+                <div class="cond-left">
+                    <img src="../../assets/images/Selecciones/brazil-national-team-logo.png" alt="Brasil" class="cond-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23333\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23aaa\'%3EIMG%3C/text%3E%3C/svg%3E'">
+                    <span class="cond-text">Brasil</span>
+                </div>
+                <div class="playable-cell" data-row="1" data-col="0"></div>
+                <div class="playable-cell" data-row="1" data-col="1"></div>
+                <div class="playable-cell" data-row="1" data-col="2"></div>
+
+                <!-- Fila 4 -->
+                <div class="cond-left">
+                    <img src="../../assets/images/Selecciones/france-national-team-logo.png" alt="Francia" class="cond-img" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'%23333\'/%3E%3Ctext x=\'50\' y=\'55\' font-family=\'sans-serif\' font-size=\'14\' text-anchor=\'middle\' fill=\'%23aaa\'%3EIMG%3C/text%3E%3C/svg%3E'">
+                    <span class="cond-text">Francia</span>
+                </div>
+                <div class="playable-cell" data-row="2" data-col="0"></div>
+                <div class="playable-cell" data-row="2" data-col="1"></div>
+                <div class="playable-cell" data-row="2" data-col="2"></div>
+
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════
+             BUSCADOR INFERIOR
+        ═══════════════════════════════════════ -->
+        <section class="search-section">
+            <input type="text" class="search-input" id="player-search" placeholder="Buscar futbolista..." autocomplete="off">
+            <button class="btn-confirm" id="btn-confirm" disabled>Confirmar Jugada</button>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════
+         MARCADOR / FOOTER
+    ═══════════════════════════════════════ -->
+    <footer class="game-footer">
+        <span id="score-p1">Jugador 1: 0/3 Rondas</span> &nbsp;—&nbsp; <span id="score-p2">Jugador 2: 0/3 Rondas</span>
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     POP-UPS DE REACCIÓN (Flotantes)
+═══════════════════════════════════════ -->
+<div class="reaction-popup success" id="popup-success" aria-live="assertive">
+    <img src="../../assets/images/messi festejo de gol.png" alt="Festejo" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Golazo!</span>
+</div>
+
+<div class="reaction-popup error" id="popup-error" aria-live="assertive">
+    <img src="../../assets/images/fabbiani gol errado.png" alt="Gol errado" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">Ta tan tan No Fabiani</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODALES DE FIN DE PARTIDA
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-victoria" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">🏆</div>
+        <h2 class="modal-title">¡Ganaste!</h2>
+        <div class="score-display">3 — 1</div>
+        <p class="endgame-points points-green">+10 Puntos de Ranking</p>
+        <div class="modal-actions">
+            <button class="modal-btn-primary btn-rematch" onclick="location.reload()">Jugar de nuevo</button>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop hidden" id="modal-derrota" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">💔</div>
+        <h2 class="modal-title">¡Perdiste!</h2>
+        <div class="score-display">1 — 3</div>
+        <p class="endgame-points points-gray">+2 Puntos de Ranking</p>
+        <div class="modal-actions">
+            <button class="modal-btn-primary btn-rematch" onclick="location.reload()">Jugar revancha</button>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     LÓGICA DEL JUEGO (Vanilla JS)
+═══════════════════════════════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    'use strict';
+
+    /* ── 1. ESTADO DEL JUEGO Y MVP ── */
+    // Simulación: Cambiar a 'libre' para ver los botones de Jugar de Nuevo.
+    const modoActual = 'diario'; 
+
+    let currentPlayer = 1; 
+    let timeLeft = 60;
+    let timerInterval = null;
+    let selectedCell = null;
+    let roundsPlayed = 0; // Para simular el fin de juego MVP
+
+    /* ── 2. ELEMENTOS DEL DOM ── */
+    const timeText      = document.getElementById('time-text');
+    const turnIndicator = document.getElementById('turn-indicator');
+    const cells         = document.querySelectorAll('.playable-cell');
+    const playerSearch  = document.getElementById('player-search');
+    const btnConfirm    = document.getElementById('btn-confirm');
+    
+    const popupSuccess  = document.getElementById('popup-success');
+    const popupError    = document.getElementById('popup-error');
+    
+    const modalVictoria = document.getElementById('modal-victoria');
+    const modalDerrota  = document.getElementById('modal-derrota');
+
+    /* ── 3. INICIALIZACIÓN ── */
+    initGame();
+
+    function initGame() {
+        // Bloqueo por Desafío Diario
+        if (modoActual === 'diario') {
+            document.querySelectorAll('.btn-rematch').forEach(btn => {
+                btn.style.display = 'none';
+            });
+        }
+        startTimer();
+    }
+
+    /* ── 4. LÓGICA DEL CRONÓMETRO ── */
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = 60;
+        updateTimerDisplay();
+        
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+            
+            if (timeLeft <= 0) {
+                stopTimer();
+                handleTimeout();
+            }
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    function updateTimerDisplay() {
+        timeText.textContent = `00:${timeLeft.toString().padStart(2, '0')}`;
+    }
+
+    function handleTimeout() {
+        // Pierde el turno por tiempo
+        switchTurn();
+    }
+
+    /* ── 5. SELECCIÓN DE CASILLERO Y BUSCADOR ── */
+    cells.forEach(cell => {
+        cell.addEventListener('click', () => {
+            // Ignorar casilleros ya conquistados
+            if (cell.classList.contains('conquered-p1') || cell.classList.contains('conquered-p2')) return;
+            
+            // Limpiar selección previa
+            cells.forEach(c => c.classList.remove('active-selection'));
+            
+            // Marcar nueva selección
+            cell.classList.add('active-selection');
+            selectedCell = cell;
+            
+            checkConfirmState();
+        });
+    });
+
+    playerSearch.addEventListener('input', checkConfirmState);
+
+    function checkConfirmState() {
+        if (selectedCell && playerSearch.value.trim().length > 0) {
+            btnConfirm.disabled = false;
+        } else {
+            btnConfirm.disabled = true;
+        }
+    }
+
+    /* ── 6. VALIDACIÓN SIMULADA (MVP) ── */
+    btnConfirm.addEventListener('click', () => {
+        if (!selectedCell || playerSearch.value.trim().length === 0) return;
+
+        stopTimer();
+        btnConfirm.disabled = true;
+        playerSearch.disabled = true;
+
+        // Simulador de resultado (50% probabilidad de acierto)
+        const isCorrect = Math.random() > 0.5;
+
+        if (isCorrect) {
+            showReaction(popupSuccess);
+            // Pintar casillero
+            selectedCell.classList.remove('active-selection');
+            selectedCell.classList.add(currentPlayer === 1 ? 'conquered-p1' : 'conquered-p2');
+            selectedCell = null;
+        } else {
+            showReaction(popupError);
+        }
+
+        // Simular progreso de partida (para abrir los modales de prueba)
+        roundsPlayed++;
+
+        // Limpiar input y esperar 3s para el cambio de turno
+        playerSearch.value = '';
+        setTimeout(() => {
+            playerSearch.disabled = false;
+            
+            if (roundsPlayed >= 5) {
+                // Terminar juego de forma simulada a las 5 jugadas
+                endGameMVP();
+            } else {
+                switchTurn();
+            }
+        }, 3000);
+    });
+
+    /* ── 7. REACCIONES Y TURNOS ── */
+    function showReaction(popupEl) {
+        popupEl.classList.add('show');
+        setTimeout(() => {
+            popupEl.classList.remove('show');
+        }, 2800); // Ocultar justo antes del cambio de turno
+    }
+
+    function switchTurn() {
+        currentPlayer = currentPlayer === 1 ? 2 : 1;
+        
+        // Actualizar UI
+        turnIndicator.textContent = `Turno: Jugador ${currentPlayer}`;
+        turnIndicator.style.color = currentPlayer === 1 ? 'var(--color-brand-green)' : '#2196F3';
+        
+        // Limpiar estados
+        cells.forEach(c => c.classList.remove('active-selection'));
+        selectedCell = null;
+        playerSearch.value = '';
+        checkConfirmState();
+        
+        // Reiniciar reloj
+        startTimer();
+    }
+
+    /* ── 8. FIN DE PARTIDA SIMULADA ── */
+    function endGameMVP() {
+        // Decisión aleatoria para mostrar Victoria o Derrota (MVP)
+        const won = Math.random() > 0.5;
+        
+        if (won) {
+            document.getElementById('modal-victoria').classList.remove('hidden');
+        } else {
+            document.getElementById('modal-derrota').classList.remove('hidden');
+        }
+        document.body.style.overflow = 'hidden';
+    }
+
+});
+</script>
+
+</body>
+</html>

@@ -10,16 +10,17 @@
     <link rel="stylesheet" href="../../assets/styles/login.css">
     <link rel="stylesheet" href="../../assets/styles/recuperar.css">
     <link rel="stylesheet" href="../../assets/styles/verificar.css">
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
     <div class="background-overlay"></div>
     <main class="login-card">
 
         <header class="card-header recover-header">
-            <picture class="logo-wrapper">
-                <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
-                <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
-            </picture>
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
             <div class="recover-heading">
                 <h1 class="recover-title">Verificá tu identidad</h1>
                 <p class="recover-subtitle">Ingresá el código de 6 dígitos que enviamos a tu correo</p>

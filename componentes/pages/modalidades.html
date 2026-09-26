@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Elegí tu modo</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Estilos: tokens + componentes compartidos -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <!-- Estilos específicos de esta pantalla -->
+    <link rel="stylesheet" href="../../assets/styles/modalidades.css">
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+
+    <!-- Script global (tema + swap logo) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+</head>
+<body>
+
+<!-- Pelotas decorativas de fondo (aria-hidden: solo decoración) -->
+<div class="bg-balls" aria-hidden="true">
+    <span class="bg-ball bg-ball--1">⚽</span>
+    <span class="bg-ball bg-ball--2">⚽</span>
+    <span class="bg-ball bg-ball--3">⚽</span>
+    <span class="bg-ball bg-ball--4">⚽</span>
+</div>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Logo (actúa como Inicio) -->
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel"
+                 class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Perfil + Dropdown -->
+        <div class="profile-wrapper" id="profileWrapper">
+            <button
+                class="profile-btn"
+                id="profileBtn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profileDropdown"
+                type="button"
+            >
+                <img
+                    src="../../assets/images/avatar-default.png"
+                    alt="Avatar de usuario"
+                    class="profile-avatar"
+                    id="profileAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+                <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+
+                <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Configuración
+                </a>
+
+                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Cuenta
+                </a>
+
+                <a href="#" class="dropdown-item" role="menuitem" id="ddFriends">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Mis Amigos
+                </a>
+
+                <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Ayuda
+                </a>
+
+                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span id="ddSessionLabel">Cerrar Sesión</span>
+                </a>
+            </nav>
+        </div><!-- /profile-wrapper -->
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         CONTENIDO PRINCIPAL
+    ═══════════════════════════════════════ -->
+    <main class="main-content" id="mainContent" role="main">
+
+        <!-- Hero -->
+        <section class="hero-modalidades" aria-labelledby="modalidadesTitle">
+            <h1 class="hero-title" id="modalidadesTitle">Elegí tu modo de juego</h1>
+            <p class="hero-subtitle">
+                Demostrá cuánto sabés sobre el fútbol nacional e internacional.
+            </p>
+        </section>
+
+        <!-- Grid de Modos -->
+        <section class="mode-grid" aria-label="Modos de juego disponibles">
+
+            <!-- ── Card 1: Desafío Diario (destacada) ── -->
+            <article class="mode-card featured" aria-labelledby="modoDiarioTitle">
+                <div class="mode-icon" aria-hidden="true">⚽</div>
+                <h2 class="mode-title" id="modoDiarioTitle">Desafío Diario</h2>
+                <p class="mode-desc">
+                    Una partida exclusiva por día. Juga el Tateti del dia,
+                    sumá puntos al ranking global y mantené tu racha activa.
+                </p>
+                <a href="tateti.html" class="btn-mode" id="btn-diario">
+                    <span>INGRESAR</span><span>→</span>
+                </a>
+            </article>
+
+            <!-- ── Card 2: 1v1 Local (liberado para todos) ── -->
+            <article class="mode-card" aria-labelledby="modoLocalTitle">
+                <div class="mode-icon" aria-hidden="true">🕹️</div>
+                <h2 class="mode-title" id="modoLocalTitle">1v1 Local</h2>
+                <p class="mode-desc">
+                    Jugá en el mismo dispositivo con un amigo. Turno a turno,
+                    en el Tateti y demostrá quién sabe más de fútbol.
+                </p>
+                <a href="tateti.html" class="btn-mode" id="btn-local">
+                    <span>INGRESAR</span><span>→</span>
+                </a>
+            </article>
+
+            <!-- ── Card 3: 1v1 Online ── -->
+            <article class="mode-card" aria-labelledby="modoOnlineTitle">
+                <div class="mode-icon" aria-hidden="true">🌐</div>
+                <h2 class="mode-title" id="modoOnlineTitle">1v1 Online</h2>
+                <p class="mode-desc">
+                    Desafiá a un jugador real en cualquier parte del mundo.
+                    Creá o uníte a una sala privada con un código de partida.
+                </p>
+                <button type="button" class="btn-mode" id="btn-online">
+                    <span>INGRESAR</span><span>→</span>
+                </button>
+            </article>
+
+        </section>
+
+        <!-- ── CTA Invitado (oculto para usuarios registrados) ── -->
+        <div class="guest-cta-bar hidden" id="cta-invitado-modalidades" aria-live="polite">
+            <p class="guest-cta-bar__text">
+                Iniciá sesión o registrate gratis para competir online, jugar con amigos y guardar tus estadísticas diarias.
+            </p>
+            <div class="guest-cta-bar__actions">
+                <a href="login.html" class="btn-cta-green">Iniciar Sesión</a>
+                <a href="registro.html" class="btn-cta-ghost">Registrarse</a>
+            </div>
+        </div>
+
+    </main><!-- /main-content -->
+
+    <!-- ═══════════════════════════════════════
+         BARRA DE ESTADÍSTICAS
+    ═══════════════════════════════════════ -->
+    <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
+        <div class="stat-col">
+            <span class="stat-label">Tu Racha</span>
+            <span class="stat-value" id="statStreak">🔥 2 Días</span>
+        </div>
+        <div class="stat-col">
+            <span class="stat-label">Rango Global</span>
+            <span class="stat-value" id="statRank">🏆 Oro I</span>
+        </div>
+        <div class="stat-col">
+            <span class="stat-label">Partidas Ganadas</span>
+            <span class="stat-value" id="statWins">📈 78%</span>
+        </div>
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     MODAL 1: Invitado Restringido
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-invitado"
+     role="dialog" aria-modal="true" aria-labelledby="modal-inv-title">
+    <div class="modal-card">
+        <button class="modal-close" id="close-invitado" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true">🔒</div>
+        <h2 class="modal-title" id="modal-inv-title">¡Sumate a la cancha!</h2>
+        <p class="modal-text">
+            Iniciá sesión o creá tu cuenta gratis para desafiar a otros jugadores
+            y guardar tus estadísticas diarias.
+        </p>
+        <div class="modal-actions">
+            <a href="login.html" class="modal-btn-primary">Iniciar Sesión</a>
+            <a href="registro.html" class="modal-btn-secondary">Registrarse</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODAL 2: Desafío Ya Jugado
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-desafio"
+     role="dialog" aria-modal="true" aria-labelledby="modal-des-title">
+    <div class="modal-card">
+        <button class="modal-close" id="close-desafio" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true">✅</div>
+        <h2 class="modal-title" id="modal-des-title">¡Desafío completado!</h2>
+        <p class="modal-text">
+            Ya jugaste tu partida diaria. Preparate, el próximo desafío se desbloquea en:
+        </p>
+        <p class="modal-clock" id="modal-clock" aria-live="polite">14:35:02</p>
+        <div class="modal-actions">
+            <a href="menu.html" class="modal-btn-primary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ──────────────────────────────────────────
+       HELPERS
+    ────────────────────────────────────────── */
+    function $(id) { return document.getElementById(id); }
+
+    /* ──────────────────────────────────────────
+       1. ESTADO (Invitado vs Registrado)
+       Para probar modo invitado:
+         localStorage.setItem('footlel_guest', 'true')
+    ────────────────────────────────────────── */
+    /* ── Leer estado (localStorage es síncrono — script al final del body) */
+    var isGuest      = localStorage.getItem('footlel_guest') === 'true';
+    var savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
+    var savedAvatar = localStorage.getItem('footlel_avatar');
+    if (savedAvatar) {
+        document.getElementById('profileAvatar').src = savedAvatar;
+    }
+
+    /* ── CTA invitado: revelar / ocultar ANTES del primer paint ─────────
+       Se hace aquí (no en DOMContentLoaded) para que el elemento aparezca
+       en su posición final sin salto visual.                             */
+    var ctaInvitado = $('cta-invitado-modalidades');
+    if (ctaInvitado) {
+        if (isGuest) {
+            ctaInvitado.style.display = 'flex';   /* layout interno correcto */
+            ctaInvitado.classList.remove('hidden');
+        } else {
+            ctaInvitado.style.display = 'none';
+            ctaInvitado.classList.add('hidden');
+        }
+    }
+
+    var GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
+    var LOGIN_ICON_PATHS = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+
+    var profileAvatar   = $('profileAvatar');
+    var profileUser     = $('profileUsername');
+    var ddEditAccount   = $('ddEditAccount');
+    var ddFriends       = $('ddFriends');
+    var ddSessionAction = $('ddSessionAction');
+    var ddSessionLabel  = $('ddSessionLabel');
+    var ddSessionIcon   = $('ddSessionIcon');
+    var statStreak      = $('statStreak');
+    var statRank        = $('statRank');
+    var statWins        = $('statWins');
+
+    if (isGuest) {
+        profileUser.textContent     = 'Invitado';
+        profileAvatar.src           = GUEST_AVATAR;
+        ddEditAccount.style.display = 'none';
+        ddFriends.style.display     = 'none';
+        ddSessionLabel.textContent  = 'Iniciar Sesión';
+        ddSessionAction.classList.remove('item-danger');
+        ddSessionIcon.innerHTML     = LOGIN_ICON_PATHS;
+        statStreak.textContent      = '-----';
+        statRank.textContent        = '-----';
+        statWins.textContent        = '-----';
+    } else {
+        profileUser.textContent = savedUsername;
+    }
+
+    /* ──────────────────────────────────────────
+       2. DROPDOWN DE PERFIL
+    ────────────────────────────────────────── */
+    var profileBtn      = $('profileBtn');
+    var profileDropdown = $('profileDropdown');
+
+    function openDropdown() {
+        profileDropdown.classList.add('is-open');
+        profileBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeDropdown() {
+        profileDropdown.classList.remove('is-open');
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown();
+    });
+    document.addEventListener('click', function (e) {
+        if (!$('profileWrapper').contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeDropdown(); closeAllModals(); }
+    });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', closeDropdown);
+    });
+
+    /* ──────────────────────────────────────────
+       3. CONTROL DE MODALES
+    ────────────────────────────────────────── */
+    var modalInvitado = $('modal-invitado');
+    var modalDesafio  = $('modal-desafio');
+
+    function openModal(el) {
+        el.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        var firstFocusable = el.querySelector('button, a');
+        if (firstFocusable) setTimeout(function () { firstFocusable.focus(); }, 60);
+    }
+    function closeModal(el) {
+        el.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    function closeAllModals() {
+        closeModal(modalInvitado);
+        closeModal(modalDesafio);
+    }
+
+    // Botones X
+    $('close-invitado').addEventListener('click', function () { closeModal(modalInvitado); });
+    $('close-desafio').addEventListener('click',  function () { closeModal(modalDesafio);  });
+
+    // Clic en backdrop cierra
+    modalInvitado.addEventListener('click', function (e) { if (e.target === this) closeModal(this); });
+    modalDesafio.addEventListener('click',  function (e) { if (e.target === this) closeModal(this); });
+
+    /* ──────────────────────────────────────────
+       4. LÓGICA DE BOTONES DE MODO
+       ─ Cambiar a true para probar el modal de
+         desafío completado:
+    ────────────────────────────────────────── */
+    var desafioJugado = false; // ← cambiar a true para probar
+
+    // Desafío Diario
+    $('btn-diario').addEventListener('click', function (e) {
+        if (isGuest) {
+            e.preventDefault();
+            openModal(modalInvitado);
+        } else if (desafioJugado) {
+            e.preventDefault();
+            openModal(modalDesafio);
+            startClock();
+        } else {
+            // Ingreso normal → aquí iría la redirección al juego
+            // window.location.href = 'juego-diario.html';
+        }
+    });
+
+    // 1v1 Online (bloqueado para invitados)
+    $('btn-online').addEventListener('click', function (e) {
+        if (isGuest) {
+            e.preventDefault();
+            openModal(modalInvitado);
+        } else {
+            // window.location.href = 'sala-online.html';
+        }
+    });
+
+    // 1v1 Local → liberado para todos, sin bloqueo
+    // (el <a href="#"> se navega normalmente)
+
+    /* ──────────────────────────────────────────
+       5. RELOJ DE CUENTA REGRESIVA
+          Simula el tiempo restante hasta el
+          próximo desafío diario.
+    ────────────────────────────────────────── */
+    var clockInterval = null;
+
+    function startClock() {
+        // Reiniciar si ya estaba corriendo
+        clearInterval(clockInterval);
+
+        // Tiempo simulado: 14h 35m 02s
+        var totalSeconds = 14 * 3600 + 35 * 60 + 2;
+        var clockEl = $('modal-clock');
+
+        function tick() {
+            if (totalSeconds <= 0) {
+                clearInterval(clockInterval);
+                clockEl.textContent = '00:00:00';
+                return;
+            }
+            var h = Math.floor(totalSeconds / 3600);
+            var m = Math.floor((totalSeconds % 3600) / 60);
+            var s = totalSeconds % 60;
+            clockEl.textContent =
+                String(h).padStart(2, '0') + ':' +
+                String(m).padStart(2, '0') + ':' +
+                String(s).padStart(2, '0');
+            totalSeconds--;
+        }
+
+        tick();
+        clockInterval = setInterval(tick, 1000);
+    }
+
+    // Detener reloj cuando el modal se cierra
+    $('close-desafio').addEventListener('click', function () {
+        clearInterval(clockInterval);
+    });
+    modalDesafio.addEventListener('click', function (e) {
+        if (e.target === this) clearInterval(clockInterval);
+    });
+
+})();
+</script>
+
+</body>
+</html>

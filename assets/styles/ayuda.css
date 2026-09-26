@@ -1,0 +1,170 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Centro de Ayuda
+   assets/styles/ayuda.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Cabecera Central ─────────────────────────────────────────── */
+.help-header {
+    text-align: center;
+    padding: 48px 32px 40px;
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.help-title {
+    font-family: var(--font-heading);
+    font-size: clamp(24px, 3.5vw, 34px);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+}
+
+.help-subtitle {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+/* ── Acordeón ─────────────────────────────────────────────────── */
+.faq-container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 32px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.faq-item {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+    transition: border-color var(--transition-fast);
+}
+
+.faq-item.is-open {
+    border-color: rgba(76, 175, 80, 0.40);
+}
+
+/* ── Botón de pregunta ────────────────────────────────────────── */
+.faq-trigger {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 24px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    transition: color var(--transition-fast);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.faq-trigger:hover {
+    color: var(--color-brand-green);
+}
+
+.faq-item.is-open .faq-trigger {
+    color: var(--color-brand-green);
+}
+
+/* Chevron SVG */
+.faq-chevron {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    color: var(--color-text-muted);
+    transition: transform 0.35s ease, color var(--transition-fast);
+}
+
+.faq-item.is-open .faq-chevron {
+    transform: rotate(180deg);
+    color: var(--color-brand-green);
+}
+
+/* ── Panel de respuesta ───────────────────────────────────────── */
+.faq-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.35s ease;
+}
+
+.faq-item.is-open .faq-panel {
+    grid-template-rows: 1fr;
+}
+
+/* Wrapper interno necesario para grid-template-rows 0fr */
+.faq-panel-inner {
+    overflow: hidden;
+}
+
+.faq-answer {
+    padding: 0 24px 22px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.75;
+    border-top: 1px solid var(--color-border-subtle);
+    padding-top: 16px;
+}
+
+/* ── Separador visual entre trigger y answer (solo cuando abierto) ── */
+.faq-item:not(.is-open) .faq-answer {
+    border-top-color: transparent;
+}
+
+/* ── Link "Volver" en el header ───────────────────────────────── */
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    padding: 6px 10px 6px 4px;
+    border-radius: 6px;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+.back-link:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+.back-link svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* ── Logo + back agrupados ────────────────────────────────────── */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-separator {
+    width: 1px;
+    height: 22px;
+    background: var(--color-border-subtle);
+    flex-shrink: 0;
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .help-header  { padding: 32px 16px 28px; }
+    .faq-container { padding: 0 16px 48px; }
+    .faq-trigger  { padding: 16px 18px; font-size: 14px; }
+    .faq-answer   { padding: 0 18px 18px; padding-top: 14px; }
+}
