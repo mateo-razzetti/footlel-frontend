@@ -1,0 +1,479 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Tabla de Posiciones
+   assets/styles/leaderboard.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Design Tokens ────────────────────────────────────────────── */
+:root {
+    --color-brand-green:    #4CAF50;
+    --color-brand-green-dk: #43a047;
+    --color-surface-bg:     #1A1A1A;
+    --color-surface-card:   #292929;
+    --color-text-primary:   #FFFFFF;
+    --color-text-muted:     #9E9E9E;
+    --color-border-subtle:  rgba(158, 158, 158, 0.18);
+    --color-border-green:   rgba(76, 175, 80, 0.45);
+    --color-danger:         #ef5350;
+    --color-gold:           #FFD700;
+    --color-silver:         #C0C0C0;
+    --color-bronze:         #CD7F32;
+    --font-heading:         'Montserrat', sans-serif;
+    --font-body:            'Poppins', sans-serif;
+    --card-radius:          12px;
+    --btn-radius:           8px;
+    --header-h:             68px;
+    --transition-fast:      0.18s ease;
+    --shadow-card:          0 4px 24px rgba(0, 0, 0, 0.50);
+    --shadow-dropdown:      0 8px 32px rgba(0, 0, 0, 0.65);
+}
+
+/* ── Reset ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+a  { text-decoration: none; color: inherit; }
+ul, ol { list-style: none; }
+button { background: none; border: none; cursor: pointer; font-family: var(--font-body); }
+
+/* ── Base ─────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+body {
+    font-family:      var(--font-body);
+    color:            var(--color-text-primary);
+    background-color: var(--color-surface-bg);
+    min-height: 100vh;
+}
+
+/* ── Layout shell ─────────────────────────────────────────────── */
+.page-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HEADER
+   ════════════════════════════════════════════════════════════════ */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    background-color: rgba(26, 26, 26, 0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* Logo */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.logo-img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+
+.logo-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 5px;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+.logo-text span { color: var(--color-brand-green); }
+
+/* Título central del header */
+.header-page-title {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+/* ── Profile btn ───────────────────────────────────────────────── */
+.profile-wrapper { position: relative; }
+
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px 6px 6px;
+    border-radius: 50px;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-card);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.profile-btn:hover,
+.profile-btn[aria-expanded="true"] {
+    border-color: var(--color-brand-green);
+    background: rgba(76, 175, 80, 0.08);
+}
+
+.profile-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-brand-green);
+    display: block;
+    flex-shrink: 0;
+}
+
+.profile-username {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+.profile-btn[aria-expanded="true"] .profile-chevron { transform: rotate(180deg); }
+
+/* ── Dropdown ──────────────────────────────────────────────────── */
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast);
+    z-index: 200;
+    overflow: hidden;
+}
+.profile-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--transition-fast);
+}
+.dropdown-item:hover   { background: rgba(255,255,255,0.06); }
+.dropdown-item svg     { width: 17px; height: 17px; color: var(--color-text-muted); flex-shrink: 0; }
+.dropdown-item.item-danger     { color: var(--color-danger); }
+.dropdown-item.item-danger svg { color: var(--color-danger); }
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--color-border-subtle);
+    margin: 4px 0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN CONTENT
+   ════════════════════════════════════════════════════════════════ */
+.main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+}
+
+/* ── Header de la tabla (título + tabs) ────────────────────────── */
+.lb-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.lb-title {
+    font-family: var(--font-heading);
+    font-size: clamp(22px, 4vw, 32px);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 0.5px;
+}
+
+/* ── Pestañas ──────────────────────────────────────────────────── */
+.lb-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--color-surface-card);
+    border-radius: 50px;
+    padding: 4px;
+    border: 1px solid var(--color-border-subtle);
+}
+
+.lb-tab {
+    padding: 7px 18px;
+    border-radius: 50px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    transition: background var(--transition-fast), color var(--transition-fast);
+    white-space: nowrap;
+}
+.lb-tab:hover { color: var(--color-text-primary); }
+.lb-tab.is-active {
+    background: var(--color-brand-green);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LISTA DE RANKING
+   ════════════════════════════════════════════════════════════════ */
+.lb-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Fila base */
+.lb-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    padding: 14px 18px;
+    transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+.lb-row:hover {
+    border-color: rgba(158, 158, 158, 0.35);
+    transform: translateX(2px);
+}
+
+/* ── Filas del podio ───────────────────────────────────────────── */
+.lb-row--gold {
+    border-color: rgba(255, 215, 0, 0.45);
+    background: linear-gradient(90deg, rgba(255, 215, 0, 0.07) 0%, var(--color-surface-card) 60%);
+}
+.lb-row--gold:hover { border-color: rgba(255, 215, 0, 0.70); }
+
+.lb-row--silver {
+    border-color: rgba(192, 192, 192, 0.40);
+    background: linear-gradient(90deg, rgba(192, 192, 192, 0.07) 0%, var(--color-surface-card) 60%);
+}
+.lb-row--silver:hover { border-color: rgba(192, 192, 192, 0.65); }
+
+.lb-row--bronze {
+    border-color: rgba(205, 127, 50, 0.40);
+    background: linear-gradient(90deg, rgba(205, 127, 50, 0.07) 0%, var(--color-surface-card) 60%);
+}
+.lb-row--bronze:hover { border-color: rgba(205, 127, 50, 0.65); }
+
+/* ── Rank (número + estrella) ─────────────────────────────────── */
+.lb-rank {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    width: 30px;
+    flex-shrink: 0;
+}
+
+.lb-medal {
+    font-size: 15px;
+    line-height: 1;
+}
+.lb-medal--gold   { color: var(--color-gold);   }
+.lb-medal--silver { color: var(--color-silver); }
+.lb-medal--bronze { color: var(--color-bronze); }
+
+.lb-pos {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    line-height: 1;
+}
+
+/* Número de posición grande para top 3 */
+.lb-row--gold   .lb-pos,
+.lb-row--silver .lb-pos,
+.lb-row--bronze .lb-pos {
+    color: var(--color-text-primary);
+    font-size: 14px;
+}
+
+/* ── Avatar ────────────────────────────────────────────────────── */
+.lb-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-border-subtle);
+    flex-shrink: 0;
+}
+.lb-row--gold   .lb-avatar { border-color: var(--color-gold);   }
+.lb-row--silver .lb-avatar { border-color: var(--color-silver); }
+.lb-row--bronze .lb-avatar { border-color: var(--color-bronze); }
+
+/* ── Username ──────────────────────────────────────────────────── */
+.lb-username {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ── Puntos ────────────────────────────────────────────────────── */
+.lb-points {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.lb-row--gold   .lb-points { color: var(--color-gold);   }
+.lb-row--silver .lb-points { color: var(--color-silver); }
+.lb-row--bronze .lb-points { color: var(--color-bronze); }
+
+/* ════════════════════════════════════════════════════════════════
+   CTA INVITADO
+   ════════════════════════════════════════════════════════════════ */
+.lb-guest-cta {
+    margin-top: 28px;
+    padding: 32px 28px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    text-align: center;
+    box-shadow: var(--shadow-card);
+}
+
+.cta-title {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+}
+
+.cta-desc {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    max-width: 420px;
+    margin: 0 auto 24px;
+}
+
+.cta-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-cta {
+    padding: 11px 28px;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform 0.1s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-cta:active { transform: scale(0.97); }
+
+.btn-cta--primary {
+    background: var(--color-brand-green);
+    color: #fff;
+    border: 2px solid var(--color-brand-green);
+}
+.btn-cta--primary:hover { background: var(--color-brand-green-dk); border-color: var(--color-brand-green-dk); }
+
+.btn-cta--outline {
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 2px solid rgba(158, 158, 158, 0.40);
+}
+.btn-cta--outline:hover { border-color: var(--color-text-muted); }
+
+/* ════════════════════════════════════════════════════════════════
+   FOOTER
+   ════════════════════════════════════════════════════════════════ */
+.lb-footer {
+    padding: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--color-text-muted);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODO CLARO (global-preferences.css override)
+   ════════════════════════════════════════════════════════════════ */
+html.light-mode .lb-row               { background: #FFFFFF; border-color: rgba(0,0,0,0.10); }
+html.light-mode .lb-row--gold         { background: linear-gradient(90deg, rgba(255,215,0,0.10) 0%, #FFFFFF 60%); }
+html.light-mode .lb-row--silver       { background: linear-gradient(90deg, rgba(192,192,192,0.10) 0%, #FFFFFF 60%); }
+html.light-mode .lb-row--bronze       { background: linear-gradient(90deg, rgba(205,127,50,0.10) 0%, #FFFFFF 60%); }
+html.light-mode .lb-tabs              { background: #EEEEEE; }
+html.light-mode .lb-tab               { color: #616161; }
+html.light-mode .lb-tab:hover         { color: #1A1A1A; }
+html.light-mode .lb-guest-cta         { background: #FFFFFF; border-color: rgba(0,0,0,0.10); }
+html.light-mode .lb-username          { color: #1A1A1A; }
+html.light-mode .lb-footer            { color: #616161; border-top-color: rgba(0,0,0,0.08); }
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+    .site-header       { padding: 0 16px; }
+    .header-page-title { display: none; }
+    .profile-username  { display: none; }
+    .main-content      { padding: 28px 14px 48px; }
+    .lb-header         { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .lb-tab            { padding: 6px 13px; font-size: 12px; }
+    .lb-row            { padding: 12px 14px; gap: 10px; }
+    .lb-avatar         { width: 34px; height: 34px; }
+    .lb-points         { font-size: 12px; }
+    .lb-guest-cta      { padding: 24px 16px; }
+    .cta-title         { font-size: 17px; }
+    .btn-cta           { padding: 10px 20px; font-size: 13px; }
+}

@@ -1,0 +1,596 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Dashboard de Amigos
+   assets/styles/amigos.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Design Tokens ────────────────────────────────────────────── */
+:root {
+    --color-brand-green:    #4CAF50;
+    --color-brand-green-dk: #43a047;
+    --color-surface-bg:     #1A1A1A;
+    --color-surface-card:   #292929;
+    --color-surface-input:  #1F1F1F;
+    --color-text-primary:   #FFFFFF;
+    --color-text-muted:     #9E9E9E;
+    --color-border-subtle:  rgba(158, 158, 158, 0.18);
+    --color-online:         #4CAF50;
+    --color-offline:        #9E9E9E;
+    --color-unavailable:    #ef5350;
+    --color-danger:         #ef5350;
+    --font-heading:         'Montserrat', sans-serif;
+    --font-body:            'Poppins', sans-serif;
+    --card-radius:          12px;
+    --btn-radius:           8px;
+    --header-h:             68px;
+    --tab-bar-h:            48px;
+    --transition-fast:      0.18s ease;
+    --shadow-card:          0 4px 24px rgba(0, 0, 0, 0.50);
+    --shadow-dropdown:      0 8px 32px rgba(0, 0, 0, 0.65);
+}
+
+/* ── Reset ────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+a  { text-decoration: none; color: inherit; }
+ul, ol { list-style: none; }
+button { background: none; border: none; cursor: pointer; font-family: var(--font-body); }
+input  { font-family: var(--font-body); }
+
+/* ── Base ─────────────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+body {
+    font-family:      var(--font-body);
+    color:            var(--color-text-primary);
+    background-color: var(--color-surface-bg);
+    min-height: 100vh;
+}
+
+/* ── Layout shell ─────────────────────────────────────────────── */
+.page-shell {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   HEADER
+   ════════════════════════════════════════════════════════════════ */
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: var(--header-h);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    background-color: rgba(26, 26, 26, 0.94);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+/* Logo */
+.logo-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.logo-img {
+    width: 34px;
+    height: 34px;
+    object-fit: contain;
+}
+.logo-text {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 20px;
+    letter-spacing: 5px;
+    color: var(--color-text-primary);
+    line-height: 1;
+}
+.logo-text span { color: var(--color-brand-green); }
+
+/* ── Profile btn ───────────────────────────────────────────────── */
+.profile-wrapper { position: relative; }
+
+.profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px 6px 6px;
+    border-radius: 50px;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-card);
+    cursor: pointer;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.profile-btn:hover,
+.profile-btn[aria-expanded="true"] {
+    border-color: var(--color-brand-green);
+    background: rgba(76, 175, 80, 0.08);
+}
+
+.profile-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-brand-green);
+    display: block;
+    flex-shrink: 0;
+}
+
+.profile-username {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    max-width: 130px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-chevron {
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-muted);
+    flex-shrink: 0;
+    transition: transform var(--transition-fast);
+}
+.profile-btn[aria-expanded="true"] .profile-chevron { transform: rotate(180deg); }
+
+/* ── Dropdown ──────────────────────────────────────────────────── */
+.profile-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-dropdown);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity var(--transition-fast), visibility var(--transition-fast), transform var(--transition-fast);
+    z-index: 200;
+    overflow: hidden;
+}
+.profile-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 13px 18px;
+    font-size: 14px;
+    color: var(--color-text-primary);
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background var(--transition-fast);
+}
+.dropdown-item:hover   { background: rgba(255,255,255,0.06); }
+.dropdown-item svg     { width: 17px; height: 17px; color: var(--color-text-muted); flex-shrink: 0; }
+.dropdown-item.item-danger     { color: var(--color-danger); }
+.dropdown-item.item-danger svg { color: var(--color-danger); }
+
+.dropdown-divider {
+    height: 1px;
+    background: var(--color-border-subtle);
+    margin: 4px 0;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BARRA DE PESTAÑAS
+   ════════════════════════════════════════════════════════════════ */
+.amigos-tabs {
+    position: sticky;
+    top: var(--header-h);
+    z-index: 90;
+    display: flex;
+    align-items: flex-end;
+    gap: 0;
+    padding: 0 32px;
+    background-color: rgba(26, 26, 26, 0.96);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--color-border-subtle);
+    height: var(--tab-bar-h);
+}
+
+.amigos-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    height: 100%;
+    padding: 0 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    transition: color var(--transition-fast), border-color var(--transition-fast);
+    white-space: nowrap;
+    /* align the border-bottom flush with the container's bottom border */
+    margin-bottom: -1px;
+}
+.amigos-tab:hover { color: var(--color-text-primary); }
+.amigos-tab.is-active {
+    color: var(--color-brand-green);
+    font-weight: 600;
+    border-bottom-color: var(--color-brand-green);
+}
+
+/* Badge numérico de solicitudes */
+.tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 50px;
+    background: var(--color-brand-green);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MAIN CONTENT
+   ════════════════════════════════════════════════════════════════ */
+.main-content {
+    flex: 1;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 24px 64px;
+}
+
+/* ── Paneles de pestañas ───────────────────────────────────────── */
+.tab-panel {
+    display: none;
+}
+.tab-panel.is-active {
+    display: block;
+    animation: fadeInPanel 0.18s ease;
+}
+
+@keyframes fadeInPanel {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: translateY(0);   }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BARRA DE BÚSQUEDA
+   ════════════════════════════════════════════════════════════════ */
+.search-bar-wrapper {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    color: var(--color-text-muted);
+    pointer-events: none;
+}
+
+.search-bar {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 50px;
+    color: var(--color-text-primary);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition-fast);
+    appearance: none;
+}
+.search-bar::placeholder { color: var(--color-text-muted); }
+.search-bar:focus        { border-color: var(--color-brand-green); }
+
+/* Variante más grande para el tab Buscar */
+.search-bar-wrapper--buscar .search-bar {
+    padding: 14px 18px 14px 46px;
+    border-radius: var(--card-radius);
+    font-size: 15px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   LISTA DE AMIGOS / FILAS
+   ════════════════════════════════════════════════════════════════ */
+.friend-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.friend-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border-subtle);
+    transition: background var(--transition-fast);
+}
+.friend-row:last-child { border-bottom: none; }
+.friend-row:hover      { background: rgba(255,255,255,0.03); }
+
+/* Fila de jugador no disponible */
+.friend-row--unavailable { opacity: 0.60; }
+
+/* ── Avatar ────────────────────────────────────────────────────── */
+.friend-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--color-border-subtle);
+    flex-shrink: 0;
+}
+.friend-avatar--dim { filter: grayscale(0.6); }
+
+/* ── Info (nombre + estado) ────────────────────────────────────── */
+.friend-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.friend-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.friend-name--dim { color: var(--color-text-muted); }
+
+.friend-status {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    line-height: 1.3;
+}
+.friend-status--online      { color: var(--color-online);      }
+.friend-status--offline     { color: var(--color-offline);     }
+.friend-status--unavailable { color: var(--color-unavailable); }
+
+/* ════════════════════════════════════════════════════════════════
+   BOTONES "DESAFIAR 1V1" (Tab Mis Amigos)
+   ════════════════════════════════════════════════════════════════ */
+.btn-challenge {
+    flex-shrink: 0;
+    padding: 9px 18px;
+    border-radius: var(--btn-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background var(--transition-fast), transform 0.1s ease;
+    white-space: nowrap;
+}
+.btn-challenge:active { transform: scale(0.96); }
+
+.btn-challenge--active {
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+}
+.btn-challenge--active:hover { background: var(--color-brand-green-dk); }
+
+.btn-challenge--disabled {
+    background: rgba(158, 158, 158, 0.18);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    cursor: not-allowed;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   BOTONES DE SOLICITUD (Tab Solicitudes)
+   ════════════════════════════════════════════════════════════════ */
+.req-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.btn-req {
+    padding: 8px 16px;
+    border-radius: var(--btn-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast), transform 0.1s ease;
+}
+.btn-req:active { transform: scale(0.96); }
+
+.btn-req--accept {
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+}
+.btn-req--accept:hover { background: var(--color-brand-green-dk); }
+
+.btn-req--reject {
+    background: rgba(80, 80, 80, 0.55);
+    color: var(--color-text-muted);
+    border: 1px solid rgba(158, 158, 158, 0.25);
+}
+.btn-req--reject:hover {
+    background: rgba(100, 100, 100, 0.65);
+    color: var(--color-text-primary);
+}
+
+.btn-req--disabled {
+    background: rgba(158, 158, 158, 0.15);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    cursor: not-allowed;
+}
+
+/* ── Secciones dentro de Tab Solicitudes ──────────────────────── */
+.requests-section {
+    margin-bottom: 28px;
+}
+.requests-section-title {
+    font-family: var(--font-heading);
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+    padding-left: 4px;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   TAB BUSCAR
+   ════════════════════════════════════════════════════════════════ */
+.buscar-header {
+    margin-bottom: 24px;
+}
+
+.buscar-title {
+    font-family: var(--font-heading);
+    font-size: clamp(22px, 4vw, 30px);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 6px;
+}
+
+.buscar-desc {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+}
+
+/* Label "JUGADORES SUGERIDOS" */
+.suggested-label {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 4px;
+}
+
+/* ── Botón "Agregar" ───────────────────────────────────────────── */
+.btn-add {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    flex-shrink: 0;
+    padding: 9px 18px;
+    border-radius: var(--btn-radius);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast), transform 0.1s ease;
+}
+.btn-add:active { transform: scale(0.96); }
+
+.btn-add svg {
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+}
+
+.btn-add--active {
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+}
+.btn-add--active:hover { background: var(--color-brand-green-dk); }
+
+.btn-add--pending {
+    background: rgba(158, 158, 158, 0.15);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    cursor: default;
+}
+
+/* ── Toast: Solicitud enviada ─────────────────────────────────── */
+.buscar-toast {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 28px auto 0;
+    padding: 12px 28px;
+    width: fit-content;
+    background: var(--color-brand-green);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(76,175,80,0.40);
+    animation: toastIn 0.22s ease;
+}
+.buscar-toast svg {
+    width: 16px;
+    height: 16px;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0)  scale(1);     }
+}
+
+/* ════════════════════════════════════════════════════════════════
+   MODO CLARO (global-preferences.css override)
+   ════════════════════════════════════════════════════════════════ */
+html.light-mode .amigos-tabs          { background-color: rgba(245,245,245,0.96); border-bottom-color: rgba(0,0,0,0.08); }
+html.light-mode .amigos-tab           { color: #616161; }
+html.light-mode .amigos-tab:hover     { color: #1A1A1A; }
+html.light-mode .amigos-tab.is-active { color: var(--color-brand-green); }
+html.light-mode .search-bar           { background-color: #EEEEEE; border-color: rgba(0,0,0,0.12); color: #1A1A1A; }
+html.light-mode .search-bar::placeholder { color: #9E9E9E; }
+html.light-mode .friend-row           { border-bottom-color: rgba(0,0,0,0.08); }
+html.light-mode .friend-row:hover     { background-color: rgba(0,0,0,0.03); }
+html.light-mode .friend-name          { color: #1A1A1A; }
+html.light-mode .btn-req--reject      { background-color: rgba(0,0,0,0.08); color: #616161; border-color: rgba(0,0,0,0.10); }
+html.light-mode .btn-req--reject:hover{ background-color: rgba(0,0,0,0.14); color: #1A1A1A; }
+html.light-mode .btn-challenge--disabled { background-color: rgba(0,0,0,0.08); }
+html.light-mode .btn-add--pending     { background-color: rgba(0,0,0,0.08); }
+html.light-mode .buscar-desc          { color: #616161; }
+html.light-mode .suggested-label      { color: #9E9E9E; }
+html.light-mode .requests-section-title { color: #1A1A1A; }
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ════════════════════════════════════════════════════════════════ */
+@media (max-width: 640px) {
+    .site-header       { padding: 0 16px; }
+    .profile-username  { display: none; }
+    .amigos-tabs       { padding: 0 12px; }
+    .amigos-tab        { padding: 0 13px; font-size: 13px; }
+    .main-content      { padding: 20px 14px 48px; }
+    .friend-avatar     { width: 38px; height: 38px; }
+    .friend-row        { padding: 12px 10px; gap: 10px; }
+    .btn-challenge,
+    .btn-req           { padding: 7px 12px; font-size: 12px; }
+    .btn-add           { padding: 7px 13px; font-size: 12px; }
+    .req-actions       { gap: 6px; }
+    .buscar-title      { font-size: 20px; }
+}

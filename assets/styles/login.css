@@ -1,0 +1,204 @@
+:root {
+    --color-brand-green:   #4CAF50;
+    --color-surface-card:  #292929;
+    --color-surface-input: #1A1A1A;
+    --color-overlay-bg:    rgba(26, 26, 26, 0.85);
+    --color-text-primary:  #FFFFFF;
+    --color-text-muted:    #9E9E9E;
+    --color-border-input:  rgba(158, 158, 158, 0.35);
+    --font-heading: 'Montserrat', sans-serif;
+    --font-body:    'Poppins', sans-serif;
+    --card-radius:  12px;
+    --input-radius: 8px;
+    --btn-radius:   8px;
+    --card-width:   360px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-image: url(../../assets/images/fondo-cancha.jpg);
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.background-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--color-overlay-bg);
+    z-index: 0;
+}
+
+.login-card {
+    position: relative;
+    z-index: 1;
+    width: var(--card-width);
+    background-color: var(--color-surface-card);
+    border-radius: var(--card-radius);
+    padding: 40px 36px;
+    text-align: center;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+}
+
+.logo-wrapper { display: block; }
+
+.logo-image { width: 72px; height: auto; display: block; }
+
+.brand-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: var(--color-text-primary);
+}
+
+.login-form { display: flex; flex-direction: column; }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    width: 100%;
+}
+
+.form-input {
+    width: 100%;
+    padding: 13px 16px;
+    background-color: var(--color-surface-input);
+    border: 1px solid var(--color-border-input);
+    border-radius: var(--input-radius);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 400;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.form-input::placeholder { color: var(--color-text-muted); }
+.form-input:focus { border-color: var(--color-brand-green); }
+
+/* ── Wrapper input + botón ojo ── */
+.input-toggle-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.input-toggle-wrapper .form-input {
+    padding-right: 44px;
+}
+
+.toggle-visibility {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+.toggle-visibility:hover { color: var(--color-text-primary); }
+
+.eye-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* ── Mensaje de error de validación ── */
+.field-error {
+    width: 100%;
+    margin-top: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef5350;
+    text-align: left;
+}
+
+.forgot-password {
+    align-self: flex-end;
+    margin-top: 8px;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.forgot-password:hover { color: var(--color-text-primary); }
+
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    margin-top: 8px;
+    background-color: var(--color-brand-green);
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+.btn-primary:hover { background-color: #43a047; }
+.btn-primary:active { transform: scale(0.98); }
+
+.secondary-links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-top: 24px;
+}
+
+.link-register {
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-brand-green);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+.link-register:hover { opacity: 0.8; }
+
+.link-guest {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    transition: opacity 0.2s ease;
+}
+.link-guest:hover { opacity: 0.7; }
+
+@media (max-width: 420px) {
+    .login-card { width: calc(100% - 32px); padding: 32px 24px; }
+    .brand-title { font-size: 24px; }
+}

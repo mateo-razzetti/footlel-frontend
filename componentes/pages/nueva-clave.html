@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Nueva Contraseña</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/styles/login.css">
+    <link rel="stylesheet" href="../../assets/styles/nueva-clave.css">
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card">
+
+        <header class="card-header">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
+            <h1 class="brand-title new-password-title">Cambiar Contraseña</h1>
+        </header>
+
+        <form class="login-form" id="new-password-form" action="login.html" method="GET" novalidate>
+
+            <div class="form-group">
+                <label class="form-label" for="new-password">Nueva contraseña</label>
+                <div class="input-toggle-wrapper">
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="new-password"
+                        name="new-password"
+                        placeholder="Ingresá tu nueva clave"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button type="button" class="toggle-visibility" aria-label="Mostrar contraseña" data-target="new-password">
+                        <svg class="eye-icon" id="eye-new-password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirm-new-password">Reescriba la contraseña</label>
+                <div class="input-toggle-wrapper">
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="confirm-new-password"
+                        name="confirm-new-password"
+                        placeholder="••••••••"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button type="button" class="toggle-visibility" aria-label="Mostrar contraseña" data-target="confirm-new-password">
+                        <svg class="eye-icon" id="eye-confirm-new-password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Mensaje de error de coincidencia (oculto por defecto) -->
+                <p class="field-error" id="mismatch-error" aria-live="polite" hidden>
+                    Las contraseñas no coinciden.
+                </p>
+            </div>
+
+            <button type="submit" class="btn-primary">Guardar</button>
+        </form>
+
+        <nav class="secondary-links">
+            <a href="login.html" class="link-cancel">Cancelar</a>
+        </nav>
+
+    </main>
+
+    <script>
+        const EYE_CLOSED = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>`;
+
+        const EYE_OPEN = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>`;
+
+        /* ── Toggle ojo: SVG único mutado por innerHTML ── */
+        document.querySelectorAll('.toggle-visibility').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input   = document.getElementById(btn.dataset.target);
+                const svg     = document.getElementById(`eye-${btn.dataset.target}`);
+                const showing = input.type === 'text';
+
+                input.type    = showing ? 'password' : 'text';
+                svg.innerHTML = showing ? EYE_CLOSED : EYE_OPEN;
+                btn.setAttribute('aria-label', showing ? 'Mostrar contraseña' : 'Ocultar contraseña');
+            });
+        });
+
+        /* ── Validación secuencial en submit ── */
+        document.getElementById('new-password-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const pwdVal     = document.getElementById('new-password').value.trim();
+            const confirmVal = document.getElementById('confirm-new-password').value.trim();
+            const error      = document.getElementById('mismatch-error');
+
+            function showError(msg, focusId) {
+                error.textContent = msg;
+                error.hidden = false;
+                document.getElementById(focusId).focus();
+            }
+
+            // ── 1. Nueva contraseña vacía ──
+            if (!pwdVal) {
+                showError('Falta ingresar la nueva contraseña.', 'new-password');
+                return;
+            }
+
+            // ── 2. Confirmar contraseña vacía ──
+            if (!confirmVal) {
+                showError('Falta confirmar la contraseña.', 'confirm-new-password');
+                return;
+            }
+
+            // ── 3. No coinciden ──
+            if (pwdVal !== confirmVal) {
+                showError('Las contraseñas no coinciden.', 'confirm-new-password');
+                return;
+            }
+
+            // ── Todo OK ──
+            error.hidden = true;
+            window.location.href = 'login.html';
+        });
+
+        /* ── Limpieza en tiempo real: oculta el error mientras el usuario escribe ── */
+        ['new-password', 'confirm-new-password'].forEach(function (id) {
+            document.getElementById(id).addEventListener('input', () => {
+                const error = document.getElementById('mismatch-error');
+                if (!error.hidden) error.hidden = true;
+            });
+        });
+    </script>
+</body>
+</html>

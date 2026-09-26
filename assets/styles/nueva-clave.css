@@ -1,0 +1,86 @@
+/* =========================================================
+   nueva-clave.css — Pantalla de Nueva Contraseña | Footlel
+   Overrides mínimos sobre login.css.
+   Variables :root heredadas de login.css.
+   ========================================================= */
+
+/* ── Título centrado, tamaño ajustado para que entre en una línea ── */
+.new-password-title {
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+/* ── Label sobre cada input ── */
+.form-label {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-align: left;
+}
+
+/* ── Wrapper para input + botón ojo ── */
+.input-toggle-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* El input recibe padding-right para no solaparse con el botón ojo */
+.input-toggle-wrapper .form-input {
+    padding-right: 44px;
+}
+
+/* ── Botón de mostrar/ocultar contraseña ── */
+.toggle-visibility {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+.toggle-visibility:hover { color: var(--color-text-primary); }
+
+.eye-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* ── Mensaje de error de coincidencia ── */
+.field-error {
+    width: 100%;
+    margin-top: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef5350;       /* rojo de error, sin agregar variable nueva */
+    text-align: left;
+}
+
+/* ── Enlace "Cancelar" ── */
+.link-cancel {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.link-cancel:hover { color: var(--color-text-primary); }
+
+/* ── Responsive ── */
+@media (max-width: 420px) {
+    .new-password-title { font-size: 18px; }
+}
