@@ -1,0 +1,144 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Preferencias Globales de Usuario
+   assets/styles/global-preferences.css
+
+   Aplica los estilos de Modo Claro y Eliminar Animaciones
+   a TODAS las páginas de la aplicación.
+   Debe cargarse en el <head> de todos los archivos HTML.
+   ═══════════════════════════════════════════════════════════════ */
+
+
+/* ══════════════════════════════════════════════════════════════
+   MODO CLARO — html.light-mode
+   Sobreescribe los tokens del sistema oscuro con valores claros.
+   ══════════════════════════════════════════════════════════════ */
+html.light-mode,
+html.light-mode body {
+    /* Tokens de color invertidos */
+    --color-bg-page:       #F5F5F5;
+    --color-surface-card:  #FFFFFF;
+    --color-surface-input: #EEEEEE;
+    --color-text-primary:  #1A1A1A;
+    --color-text-muted:    #616161;
+    --color-border-subtle: rgba(0, 0, 0, 0.10);
+
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+}
+
+/* ── Hover del dropdown en MODO OSCURO (base) ──────────────────── */
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+}
+
+/* ── Header en modo claro ─────────────────────────────────────── */
+html.light-mode .site-header {
+    background: rgba(245, 245, 245, 0.95);
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+html.light-mode .logo-text,
+html.light-mode .back-link,
+html.light-mode .profile-username,
+html.light-mode .profile-chevron {
+    color: #1A1A1A;
+}
+
+html.light-mode .profile-btn:hover,
+html.light-mode .back-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ── Dropdown en modo claro ───────────────────────────────────── */
+html.light-mode .profile-dropdown {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+html.light-mode .dropdown-item         { color: #1A1A1A; }
+html.light-mode .dropdown-item:hover   { background: rgba(0, 0, 0, 0.05); }
+html.light-mode .dropdown-divider      { background: rgba(0, 0, 0, 0.08); }
+
+/* ── Tarjetas y formularios en modo claro ─────────────────────── */
+html.light-mode .login-card,
+html.light-mode .prefs-card,
+html.light-mode .modal-card,
+html.light-mode .game-card,
+html.light-mode .edit-account-card,
+html.light-mode .verify-card,
+html.light-mode .faq-item,
+html.light-mode #zona-invitado {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+html.light-mode .form-input,
+html.light-mode .modal-input,
+html.light-mode .otp-input {
+    background: #EEEEEE;
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #1A1A1A;
+}
+
+html.light-mode .form-input::placeholder,
+html.light-mode .modal-input::placeholder {
+    color: #9E9E9E;
+}
+
+/* Íconos dentro de inputs (lupas, sobres, candados) */
+html.light-mode .input-icon { color: #616161; }
+
+/* Separador horizontal entre secciones */
+html.light-mode .pref-row    { border-color: rgba(0, 0, 0, 0.08); }
+html.light-mode .pref-section { border-color: rgba(0, 0, 0, 0.08); }
+html.light-mode .section-divider,
+html.light-mode hr            { border-color: rgba(0, 0, 0, 0.08); }
+
+/* ── Stats bar en modo claro (menu.html) ──────────────────────── */
+html.light-mode .stats-bar {
+    background: rgba(245, 245, 245, 0.95);
+    border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+html.light-mode .stat-value { color: #1A1A1A; }
+html.light-mode .stat-label { color: #616161; }
+
+/* ── Toggle track en modo claro ───────────────────────────────── */
+html.light-mode .toggle-track { background: rgba(0, 0, 0, 0.18); }
+
+/* ── Logo: modo claro aplica logo-claro.png via JS (syncLogo).   ─
+   Esta regla oculta el logo-oscuro.png si JS no pudo correr.    ─ */
+html.light-mode #main-logo {
+    content: url('../../assets/images/logo-claro.png');
+}
+
+/* ── Pelotas de fondo (visibles en modo claro) ────────────────── */
+html.light-mode {
+    --ball-opacity: 0.15;
+}
+html.light-mode .bg-ball {
+    filter: grayscale(1) brightness(0);
+}
+
+
+
+
+/* ══════════════════════════════════════════════════════════════
+   ELIMINAR ANIMACIONES — html.disable-animations
+
+   Estructura del toggle en configuracion.html:
+     label.toggle-switch
+       input[type="checkbox"]   ← el checkbox
+       span.toggle-track        ← el fondo del switch
+         ::after                ← el círculo blanco
+
+   El :not() excluye TODOS los elementos del interruptor para
+   que sigan animándose visualmente aunque el modo esté activo.
+   ══════════════════════════════════════════════════════════════ */
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"]),
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::before,
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::after {
+    transition: none !important;
+    animation:  none !important;
+}

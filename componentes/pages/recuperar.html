@@ -11,16 +11,17 @@
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="stylesheet" href="../../assets/styles/login.css">
     <link rel="stylesheet" href="../../assets/styles/recuperar.css">
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
     <div class="background-overlay"></div>
     <main class="login-card">
 
         <header class="card-header recover-header">
-            <picture class="logo-wrapper">
-                <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
-                <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
-            </picture>
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
             <div class="recover-heading">
                 <h1 class="recover-title">Recuperar cuenta</h1>
                 <p class="recover-subtitle">Ingresá tu correo electrónico y te enviaremos un código de seguridad</p>

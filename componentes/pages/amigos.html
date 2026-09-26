@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Mis Amigos</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="../../assets/styles/amigos.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Logo -->
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Perfil + Dropdown -->
+        <div class="profile-wrapper" id="profileWrapper">
+            <button
+                class="profile-btn"
+                id="profileBtn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profileDropdown"
+                type="button"
+            >
+                <img
+                    src="../../assets/images/avatar-default.png"
+                    alt="Avatar de usuario"
+                    class="profile-avatar"
+                    id="profileAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+                <span class="profile-username" id="profileUsername">@nombre_usuario</span>
+                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+                <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Configuración
+                </a>
+                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Cuenta
+                </a>
+                <a href="leaderboard.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                    Tabla de Posiciones
+                </a>
+                <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Ayuda
+                </a>
+                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span id="ddSessionLabel">Cerrar Sesión</span>
+                </a>
+            </nav>
+        </div><!-- /profile-wrapper -->
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         NAVEGACIÓN DE PESTAÑAS
+    ═══════════════════════════════════════ -->
+    <nav class="amigos-tabs" role="tablist" aria-label="Secciones de amigos">
+        <button class="amigos-tab is-active" role="tab" aria-selected="true"  aria-controls="tab-amigos"    data-tab="amigos">Mis Amigos</button>
+        <button class="amigos-tab"           role="tab" aria-selected="false" aria-controls="tab-solicitudes" data-tab="solicitudes">
+            Solicitudes
+            <span class="tab-badge" aria-label="2 solicitudes pendientes">2</span>
+        </button>
+        <button class="amigos-tab"           role="tab" aria-selected="false" aria-controls="tab-buscar"    data-tab="buscar">Buscar</button>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════ -->
+    <main class="main-content" role="main">
+
+        <!-- ────────────────────────────────────
+             TAB 1 — Mis Amigos
+        ──────────────────────────────────── -->
+        <div id="tab-amigos" class="tab-panel is-active" role="tabpanel" aria-label="Mis Amigos">
+
+            <!-- Búsqueda -->
+            <div class="search-bar-wrapper">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" class="search-bar" placeholder="Buscar jugador..." aria-label="Buscar entre tus amigos">
+            </div>
+
+            <!-- Lista de amigos -->
+            <ul class="friend-list" aria-label="Lista de amigos">
+
+                <li class="friend-row">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @Santi_Martinez" class="friend-avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name">@Santi_Martinez</span>
+                        <span class="friend-status friend-status--online">En línea · Libre</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--active" type="button">Desafiar 1v1</button>
+                </li>
+
+                <li class="friend-row">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @FREE_JULIAN_Alvarez" class="friend-avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name">@FREE_JULIAN_Alvarez</span>
+                        <span class="friend-status friend-status--offline">Desconectado</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--active" type="button">Desafiar 1v1</button>
+                </li>
+
+                <li class="friend-row">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @Felix_Rodriguez" class="friend-avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name">@Felix_Rodriguez</span>
+                        <span class="friend-status friend-status--online">En línea · Libre</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--active" type="button">Desafiar 1v1</button>
+                </li>
+
+                <li class="friend-row">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @Mateo_Gomez" class="friend-avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name">@Mateo_Gomez</span>
+                        <span class="friend-status friend-status--offline">Desconectado</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--active" type="button">Desafiar 1v1</button>
+                </li>
+
+                <li class="friend-row friend-row--unavailable">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @DiegoS_FC" class="friend-avatar friend-avatar--dim"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name friend-name--dim">@DiegoS_FC</span>
+                        <span class="friend-status friend-status--unavailable">Jugador no disponible</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--disabled" type="button" disabled aria-disabled="true">Desafiar 1v1</button>
+                </li>
+
+                <li class="friend-row friend-row--unavailable">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @Fran_DT" class="friend-avatar friend-avatar--dim"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name friend-name--dim">@Fran_DT</span>
+                        <span class="friend-status friend-status--unavailable">Jugador no disponible</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--disabled" type="button" disabled aria-disabled="true">Desafiar 1v1</button>
+                </li>
+
+            </ul>
+        </div>
+
+        <!-- ────────────────────────────────────
+             TAB 2 — Solicitudes
+        ──────────────────────────────────── -->
+        <div id="tab-solicitudes" class="tab-panel" role="tabpanel" aria-label="Solicitudes" hidden>
+
+            <!-- Búsqueda (compartida visual) -->
+            <div class="search-bar-wrapper">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" class="search-bar" placeholder="Buscar jugador..." aria-label="Buscar solicitudes">
+            </div>
+
+            <!-- Sección: Solicitudes de Amistad -->
+            <section class="requests-section" aria-labelledby="sectionFriendReqs">
+                <h2 class="requests-section-title" id="sectionFriendReqs">Solicitudes de Amistad</h2>
+
+                <ul class="friend-list" aria-label="Solicitudes de amistad">
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Carlos_Mendez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Carlos_Mendez</span>
+                            <span class="friend-status">Solicitud recibida</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--accept" type="button">Aceptar</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Andres_Lopez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Andres_Lopez</span>
+                            <span class="friend-status">Solicitud recibida</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--accept" type="button">Aceptar</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
+
+                </ul>
+            </section>
+
+            <!-- Sección: Desafíos y Partidos -->
+            <section class="requests-section" aria-labelledby="sectionChallenges">
+                <h2 class="requests-section-title" id="sectionChallenges">Desafíos y Partidos</h2>
+
+                <ul class="friend-list" aria-label="Desafíos y partidos">
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Felix_Rodriguez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Felix_Rodriguez</span>
+                            <span class="friend-status">Te ha desafiado</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--accept" type="button">Aceptar 1v1</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Mateo_Gomez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Mateo_Gomez</span>
+                            <span class="friend-status">Desafío pendiente</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--disabled" type="button" disabled aria-disabled="true">Cancelado</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Santi_Martinez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Santi_Martinez</span>
+                            <span class="friend-status friend-status--online">En vivo</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--accept" type="button">Desafiar 1v1</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
+
+                </ul>
+            </section>
+        </div>
+
+        <!-- ────────────────────────────────────
+             TAB 3 — Buscar
+        ──────────────────────────────────── -->
+        <div id="tab-buscar" class="tab-panel" role="tabpanel" aria-label="Buscar usuarios" hidden>
+
+            <div class="buscar-header">
+                <h1 class="buscar-title">Buscar Usuarios</h1>
+                <p class="buscar-desc">Encontrá a otros fanáticos y amigos para competir en duelos de trivia.</p>
+            </div>
+
+            <!-- Búsqueda principal -->
+            <div class="search-bar-wrapper search-bar-wrapper--buscar">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" class="search-bar" id="buscarInput" placeholder="Ingresá el @usuario..." aria-label="Buscar usuarios por nombre">
+            </div>
+
+            <!-- Jugadores sugeridos -->
+            <section aria-labelledby="suggestedTitle">
+                <h2 class="suggested-label" id="suggestedTitle">JUGADORES SUGERIDOS</h2>
+
+                <ul class="friend-list" aria-label="Jugadores sugeridos">
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @FutbolMaster_10" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@FutbolMaster_10</span>
+                        </div>
+                        <button class="btn-add btn-add--pending" type="button" disabled aria-disabled="true">Solicitud Pendiente</button>
+                    </li>
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @GoalKing_AR" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@GoalKing_AR</span>
+                        </div>
+                        <button class="btn-add btn-add--active" type="button" data-username="GoalKing_AR">
+                            <!-- user-plus icon -->
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <line x1="19" y1="8" x2="19" y2="14"/>
+                                <line x1="22" y1="11" x2="16" y2="11"/>
+                            </svg>
+                            Agregar
+                        </button>
+                    </li>
+
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @TriviaChamp" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@TriviaChamp</span>
+                        </div>
+                        <button class="btn-add btn-add--active" type="button" data-username="TriviaChamp">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <line x1="19" y1="8" x2="19" y2="14"/>
+                                <line x1="22" y1="11" x2="16" y2="11"/>
+                            </svg>
+                            Agregar
+                        </button>
+                    </li>
+
+                </ul>
+            </section>
+
+            <!-- Toast: Solicitud enviada -->
+            <div class="buscar-toast" id="addToast" aria-live="polite" hidden>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="20 6 9 17 4 12"/>
+                </svg>
+                ¡Solicitud Enviada!
+            </div>
+
+        </div><!-- /tab-buscar -->
+
+    </main>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ─────────────────────────────────────────
+       1. HEADER — usuario
+    ───────────────────────────────────────── */
+    var profileUser   = document.getElementById('profileUsername');
+    var savedUser     = localStorage.getItem('footlel_username') || 'nombre_usuario';
+    var savedAvatar = localStorage.getItem('footlel_avatar');
+    if (savedAvatar) {
+        document.getElementById('profileAvatar').src = savedAvatar;
+    }
+    profileUser.textContent = '@' + savedUser;
+
+    /* ─────────────────────────────────────────
+       2. TOGGLE DROPDOWN DE PERFIL
+    ───────────────────────────────────────── */
+    var profileBtn      = document.getElementById('profileBtn');
+    var profileDropdown = document.getElementById('profileDropdown');
+
+    function openDropdown()  { profileDropdown.classList.add('is-open');    profileBtn.setAttribute('aria-expanded', 'true');  }
+    function closeDropdown() { profileDropdown.classList.remove('is-open'); profileBtn.setAttribute('aria-expanded', 'false'); }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown();
+    });
+    document.addEventListener('click', function (e) {
+        if (!document.getElementById('profileWrapper').contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDropdown(); });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
+
+    /* ─────────────────────────────────────────
+       3. SISTEMA DE PESTAÑAS
+    ───────────────────────────────────────── */
+    var tabs   = document.querySelectorAll('.amigos-tab');
+    var panels = document.querySelectorAll('.tab-panel');
+
+    function activateTab(targetTab) {
+        var targetId = 'tab-' + targetTab.dataset.tab;
+
+        // Desactivar todas las pestañas y paneles
+        tabs.forEach(function (t) {
+            t.classList.remove('is-active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(function (p) {
+            p.classList.remove('is-active');
+            p.hidden = true;
+        });
+
+        // Activar la pestaña y panel seleccionados
+        targetTab.classList.add('is-active');
+        targetTab.setAttribute('aria-selected', 'true');
+        var panel = document.getElementById(targetId);
+        if (panel) {
+            panel.classList.add('is-active');
+            panel.hidden = false;
+        }
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            activateTab(tab);
+        });
+    });
+
+    /* ─────────────────────────────────────────
+       4. BOTONES "AGREGAR" EN TAB BUSCAR
+    ───────────────────────────────────────── */
+    var addToast = document.getElementById('addToast');
+    var toastTimer = null;
+
+    document.querySelectorAll('.btn-add--active').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            // Cambiar botón a estado "pendiente"
+            btn.classList.remove('btn-add--active');
+            btn.classList.add('btn-add--pending');
+            btn.disabled = true;
+            btn.setAttribute('aria-disabled', 'true');
+            btn.innerHTML = 'Solicitud Pendiente';
+
+            // Mostrar toast
+            addToast.hidden = false;
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () {
+                addToast.hidden = true;
+            }, 3000);
+
+            console.log('[Footlel Amigos] Solicitud enviada a:', btn.dataset.username);
+        });
+    });
+
+})();
+</script>
+
+</body>
+</html>

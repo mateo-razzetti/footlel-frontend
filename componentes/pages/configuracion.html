@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Configuración</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Estilos: tokens + header compartido, luego específicos -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <link rel="stylesheet" href="../../assets/styles/configuracion.css">
+
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js"></script>
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Izquierda: Logo (actúa como botón de retroceso a menu.html) -->
+        <a href="menu.html" class="logo-link" aria-label="Volver a Footlel">
+            <img
+                src="../../assets/images/logo-oscuro.png"
+                alt="Logo Footlel"
+                class="logo-img"
+                id="main-logo"
+            >
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Derecha: Perfil + Dropdown -->
+        <div class="profile-wrapper" id="profileWrapper">
+            <button
+                class="profile-btn"
+                id="profileBtn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profileDropdown"
+                type="button"
+            >
+                <img
+                    src="../../assets/images/avatar-default.png"
+                    alt="Avatar de usuario"
+                    class="profile-avatar"
+                    id="profileAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+                <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+                <!-- Configuración (activa) -->
+                <a href="configuracion.html" class="dropdown-item" role="menuitem"
+                   style="color: var(--color-brand-green);">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Configuración
+                </a>
+                <!-- Editar Cuenta -->
+                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Cuenta
+                </a>
+                <!-- Mis Amigos -->
+                <a href="buscar-usuarios.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Mis Amigos
+                </a>
+                <!-- Ayuda -->
+                <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Ayuda
+                </a>
+                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span id="ddSessionLabel">Cerrar Sesión</span>
+                </a>
+            </nav>
+        </div>
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         CONTENIDO PRINCIPAL
+    ═══════════════════════════════════════ -->
+    <main role="main">
+
+        <!-- Perfil Central -->
+        <section class="config-profile" aria-label="Perfil de usuario">
+            <div class="config-avatar-wrapper">
+                <img
+                    src="../../assets/images/avatar-default.png"
+                    alt="Avatar de usuario"
+                    class="config-avatar"
+                    id="configAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 90 90%22%3E%3Ccircle cx=%2245%22 cy=%2245%22 r=%2245%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2245%22 cy=%2234%22 r=%2214%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2245%22 cy=%2272%22 rx=%2223%22 ry=%2218%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+            </div>
+            <div class="config-username-row">
+                <span id="config-username">nombre_usuario</span>
+            </div>
+        </section>
+
+        <!-- Contenido scrollable -->
+        <div class="config-main">
+
+            <!-- Tarjeta de Preferencias -->
+            <div class="prefs-card" role="region" aria-label="Preferencias de cuenta">
+                <p class="prefs-card-title">Configuración de Cuenta</p>
+
+                <!-- Fila 1: Eliminar animaciones -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Eliminar animaciones</span>
+                        <span class="pref-desc">Reduce el movimiento para mejorar el rendimiento.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Eliminar animaciones">
+                        <input type="checkbox" id="toggle-animaciones">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Fila 2: Modo Oscuro -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Modo Oscuro</span>
+                        <span class="pref-desc">Activa el tema oscuro en toda la aplicación.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Modo Oscuro">
+                        <input type="checkbox" id="toggle-dark" checked>
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Fila 3: Modo Compatibilidad -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Modo Compatibilidad</span>
+                        <span class="pref-desc">Optimiza Footlel para dispositivos más antiguos.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Modo Compatibilidad">
+                        <input type="checkbox" id="toggle-compat">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+            </div><!-- /prefs-card -->
+
+            <!-- ── Zona Registrado ── -->
+            <div id="zona-registrado">
+                <button type="button" class="link-logout" id="btn-logout">
+                    Cerrar Sesión
+                </button>
+                <button type="button" class="link-delete" id="btn-delete">
+                    Eliminar Cuenta
+                </button>
+            </div>
+
+            <!-- ── Zona Invitado (oculta por defecto) ── -->
+            <div id="zona-invitado" class="hidden" aria-live="polite">
+                <p class="guest-cta-title">Guardá tu progreso y competí</p>
+                <p class="guest-cta-desc">
+                    Creá una cuenta gratuita para guardar tus estadísticas,
+                    subir en el ranking y desafiar amigos.
+                </p>
+                <div class="guest-cta-actions">
+                    <a href="login.html" class="btn-cta-solid">Iniciar Sesión</a>
+                    <a href="registro.html" class="btn-cta-ghost">Registrarse</a>
+                </div>
+            </div>
+
+        </div><!-- /config-main -->
+
+    </main>
+
+</div><!-- /page-shell -->
+
+<!-- ═══════════════════════════════════════
+     MODAL: Eliminar Cuenta
+═══════════════════════════════════════ -->
+<style>
+    /* Estilos específicos para el Modal de Eliminar */
+    #modal-eliminar .modal-card {
+        position: relative;
+        max-width: 450px; /* Hace el pop-up un poco más ancho */
+        padding-top: 40px; /* Espacio para la cruz */
+    }
+    
+    #btn-cerrar-eliminar {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #9e9e9e;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    #btn-cerrar-eliminar:hover {
+        color: #fff;
+    }
+
+    #input-palabra-clave {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 2px solid #444; /* Le da el recuadro que pediste */
+        background: #1a1a1a;
+        color: white;
+        margin-bottom: 10px;
+        outline: none;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    #input-palabra-clave:focus {
+        border-color: #ff4c4c; /* Se pone rojo al hacer clic adentro */
+    }
+
+    #btn-confirmar-eliminar {
+        flex: 1; 
+        background: #ff4c4c; 
+        color: white;
+        border: 2px solid transparent; 
+        transition: all 0.2s ease;
+    }
+    
+    #btn-confirmar-eliminar:hover {
+        background: #e63939; /* Rojo un poco más oscuro */
+        border: 2px solid white; /* Recuadro blanco al pasar el mouse, como pediste */
+    }
+</style>
+
+<div class="modal-backdrop hidden" id="modal-eliminar" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <button class="modal-close" id="btn-cerrar-eliminar" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true" style="font-size: 2.5rem; margin-bottom: 10px;">⚠️</div>
+        <h2 class="modal-title">¿Estás seguro?</h2>
+        <p class="modal-text" style="margin-bottom: 20px;">
+           Escribe la palabra <strong>'eliminar'</strong> para confirmar la destrucción de tu cuenta.
+        </p>
+        
+        <input type="text" id="input-palabra-clave" placeholder="Escribe aquí..." autocomplete="off">
+        <p id="error-palabra" style="color: #ff4c4c; font-size: 0.9rem; margin-bottom: 15px; height: 20px;" hidden>Palabra incorrecta, intenta de nuevo.</p>
+        
+        <div class="botones-modal" style="display: flex; gap: 10px;">
+            <button id="btn-cancelar-eliminar" class="btn-cta-ghost" style="flex: 1;">Cancelar</button>
+            <button id="btn-confirmar-eliminar" class="btn-cta-solid">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL: Verificar Cambios (OTP)
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-verificar" role="dialog"
+     aria-modal="true" aria-labelledby="modal-verificar-title">
+    <div class="modal-card">
+        <h2 class="modal-title" id="modal-verificar-title">Verificá tu identidad</h2>
+        <p class="modal-subtitle">
+            Ingresá el código que enviamos a tu correo para confirmar los cambios.
+        </p>
+        <!-- 6 inputs OTP -->
+        <div class="otp-row" id="otp-row" aria-label="Código de verificación de 6 dígitos">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 1" autocomplete="one-time-code">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 2">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 3">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 4">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 5">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 6">
+        </div>
+        <button type="button" class="modal-btn-primary" id="btn-confirmar-otp">
+            Confirmar
+        </button>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     TOAST
+═══════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ──────────────────────────────────────────
+       HELPERS
+    ────────────────────────────────────────── */
+    function $(id) { return document.getElementById(id); }
+
+    let toastTimer = null;
+    function showToast(msg, duration) {
+        duration = duration || 2800;
+        const toast = $('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            toast.classList.remove('show');
+        }, duration);
+    }
+
+    function openModal(id) {
+        $(id).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        // Foco al primer input si existe
+        const first = $(id).querySelector('input, button');
+        if (first) setTimeout(function () { first.focus(); }, 80);
+    }
+
+    function closeModal(id) {
+        $(id).classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    /* ──────────────────────────────────────────
+       1. ESTADO INVITADO / REGISTRADO
+    ────────────────────────────────────────── */
+    const isGuest = localStorage.getItem('footlel_guest') === 'true';
+    const savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
+    const savedAvatar   = localStorage.getItem('footlel_avatar');
+    if (savedAvatar) {
+        const headerAv = document.getElementById('profileAvatar');
+        if (headerAv) headerAv.src = savedAvatar;
+        const centralAv = document.getElementById('configAvatar');
+        if (centralAv) centralAv.src = savedAvatar;
+    }
+
+    const configUsernameEl = $('config-username');
+    const profileUsernameEl = $('profileUsername');
+    const profileAvatarEl   = $('profileAvatar');
+    const configAvatarEl    = $('configAvatar');
+    const ddEditAccount     = $('ddEditAccount');
+    const ddFriends         = $('ddFriends');
+    const ddSessionAction   = $('ddSessionAction');
+    const ddSessionLabel    = $('ddSessionLabel');
+    const ddSessionIcon     = $('ddSessionIcon');
+    const zonaRegistrado    = $('zona-registrado');
+    const zonaInvitado      = $('zona-invitado');
+
+    const GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
+    const GUEST_AVATAR_LG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 90 90'%3E%3Ccircle cx='45' cy='45' r='45' fill='%23292929'/%3E%3Ccircle cx='45' cy='34' r='14' fill='%239E9E9E'/%3E%3Cellipse cx='45' cy='72' rx='23' ry='18' fill='%239E9E9E'/%3E%3C/svg%3E";
+
+    const LOGIN_ICON_SVG = `
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+    `;
+
+    if (isGuest) {
+        // Nombre
+        configUsernameEl.textContent  = 'Jugador Invitado';
+        profileUsernameEl.textContent = 'Invitado';
+
+        // Avatares
+        profileAvatarEl.src = GUEST_AVATAR;
+        configAvatarEl.src  = GUEST_AVATAR_LG;
+
+        // Dropdown: ocultar opciones de registro
+        ddEditAccount.style.display = 'none';
+        ddFriends.style.display     = 'none';
+
+        // Cambiar "Cerrar sesión" por "Iniciar Sesión"
+        ddSessionLabel.textContent = 'Iniciar Sesión';
+        ddSessionAction.classList.remove('item-danger');
+        ddSessionIcon.innerHTML    = LOGIN_ICON_SVG;
+
+        // Zonas
+        zonaRegistrado.classList.add('hidden');
+        zonaInvitado.classList.remove('hidden');
+
+    } else {
+        // Usuario registrado
+        configUsernameEl.textContent  = savedUsername;
+        profileUsernameEl.textContent = savedUsername;
+    }
+
+    /* ──────────────────────────────────────────
+       2. DROPDOWN DE PERFIL
+    ────────────────────────────────────────── */
+    const profileBtn      = $('profileBtn');
+    const profileDropdown = $('profileDropdown');
+
+    function openDropdown() {
+        profileDropdown.classList.add('is-open');
+        profileBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeDropdown() {
+        profileDropdown.classList.remove('is-open');
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown();
+    });
+    document.addEventListener('click', function (e) {
+        if (!$('profileWrapper').contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeDropdown();
+            closeModal('modal-verificar');
+        }
+    });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', closeDropdown);
+    });
+
+    /* ──────────────────────────────────────────
+       3. CERRAR SESIÓN
+    ────────────────────────────────────────── */
+    const btnLogout = $('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', function () {
+            localStorage.removeItem('footlel_guest');
+            localStorage.removeItem('footlel_username');
+            window.location.href = 'login.html';
+        });
+    }
+
+    /* ──────────────────────────────────────────
+       4. FLUJO DE MODALES
+    ────────────────────────────────────────── */
+
+    // Cerrar modal al clic en el backdrop
+    $('modal-verificar').addEventListener('click', function (e) {
+        if (e.target === this) closeModal('modal-verificar');
+    });
+
+    // 4d. Confirmar OTP
+    let pendingUsername = '';
+
+    $('btn-confirmar-otp').addEventListener('click', function () {
+        // Leer OTP completo
+        const otp = Array.from(document.querySelectorAll('.otp-input'))
+            .map(function (i) { return i.value; })
+            .join('');
+
+        // Validación mínima: los 6 dígitos llenos
+        if (otp.length < 6) {
+            showToast('Ingresá el código completo.');
+            return;
+        }
+
+        // Aplicar cambios al DOM
+        if (pendingUsername) {
+            configUsernameEl.textContent  = pendingUsername;
+            profileUsernameEl.textContent = pendingUsername;
+            localStorage.setItem('footlel_username', pendingUsername);
+        }
+
+        closeModal('modal-verificar');
+        showToast('✓ Cambios guardados correctamente');
+    });
+
+    /* ──────────────────────────────────────────
+       5. COMPORTAMIENTO OTP: auto-avance y retroceso
+    ────────────────────────────────────────── */
+    const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
+
+    otpInputs.forEach(function (inp, idx) {
+        inp.addEventListener('input', function () {
+            // Acepta solo dígitos
+            inp.value = inp.value.replace(/\D/g, '').slice(-1);
+            if (inp.value && idx < otpInputs.length - 1) {
+                otpInputs[idx + 1].focus();
+            }
+        });
+
+        inp.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace' && !inp.value && idx > 0) {
+                otpInputs[idx - 1].focus();
+            }
+        });
+
+        // Pegar código completo
+        inp.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData)
+                .getData('text').replace(/\D/g, '').slice(0, 6);
+            pasted.split('').forEach(function (char, i) {
+                if (otpInputs[i]) otpInputs[i].value = char;
+            });
+            const lastFilled = Math.min(pasted.length, otpInputs.length - 1);
+            otpInputs[lastFilled].focus();
+        });
+    });
+
+    /* ──────────────────────────────────────────
+       6. TOGGLES: MODO OSCURO + ELIMINAR ANIMACIONES
+    ────────────────────────────────────────── */
+
+    const LOGO_DARK  = '../../assets/images/logo-oscuro.png';
+    const LOGO_LIGHT = '../../assets/images/logo-claro.png';
+
+    const toggleDark  = $('toggle-dark');
+    const toggleAnim  = $('toggle-animaciones');
+    const toggleCompat = $('toggle-compat');
+    const mainLogo    = $('main-logo');
+
+    /* — Aplicar modo oscuro/claro — */
+    function applyTheme(isLight) {
+        if (isLight) {
+            document.documentElement.classList.add('light-mode');
+            document.body.classList.add('light-mode');
+            if (mainLogo) mainLogo.src = LOGO_LIGHT;
+        } else {
+            document.documentElement.classList.remove('light-mode');
+            document.body.classList.remove('light-mode');
+            if (mainLogo) mainLogo.src = LOGO_DARK;
+        }
+    }
+
+    /* — Aplicar estado de animaciones — */
+    function applyAnimations(disabled) {
+        if (disabled) {
+            document.documentElement.classList.add('disable-animations');
+            document.body.classList.add('disable-animations');
+        } else {
+            document.documentElement.classList.remove('disable-animations');
+            document.body.classList.remove('disable-animations');
+        }
+    }
+
+    /* ── Inicialización desde localStorage ── */
+    (function initToggles() {
+        // Modo oscuro: por defecto ACTIVO ('dark')
+        const savedTheme = localStorage.getItem('footlel_theme') || 'dark';
+        const isLight    = savedTheme === 'light';
+        if (toggleDark) toggleDark.checked = !isLight;   // checked = dark activo
+        applyTheme(isLight);
+
+        // Eliminar animaciones: por defecto INACTIVO
+        const animDisabled = localStorage.getItem('pref_toggle-animaciones') === 'true';
+        if (toggleAnim) toggleAnim.checked = animDisabled;
+        applyAnimations(animDisabled);
+
+        // Compatibilidad (solo persistencia, sin efecto visual aún)
+        if (toggleCompat) {
+            const saved = localStorage.getItem('pref_toggle-compat');
+            if (saved !== null) toggleCompat.checked = saved === 'true';
+            toggleCompat.addEventListener('change', function () {
+                localStorage.setItem('pref_toggle-compat', String(toggleCompat.checked));
+            });
+        }
+    })();
+
+    /* ── Listener: Modo Oscuro ── */
+    if (toggleDark) {
+        toggleDark.addEventListener('change', function () {
+            // checked = true → modo OSCURO activo
+            const isLight = !toggleDark.checked;
+            applyTheme(isLight);
+            localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
+        });
+    }
+
+    /* ── Listener: Eliminar Animaciones ── */
+    if (toggleAnim) {
+        toggleAnim.addEventListener('change', function () {
+            const disabled = toggleAnim.checked;
+            applyAnimations(disabled);
+            localStorage.setItem('pref_toggle-animaciones', String(disabled));
+        });
+    }
+        /* ──────────────────────────────────────────
+       7. ELIMINAR CUENTA (MODAL Y FETCH)
+    ────────────────────────────────────────── */
+    const modalEliminar = $('modal-eliminar');
+    const btnAbrirModal = $('btn-delete'); // Este es tu botón rojo original
+    const btnCerrarIcono = $('btn-cerrar-eliminar');
+    const btnCancelarEliminar = $('btn-cancelar-eliminar');
+    const btnConfirmarEliminar = $('btn-confirmar-eliminar');
+    const inputPalabra = $('input-palabra-clave');
+    const textoError = $('error-palabra');
+
+    // Función para cerrar y limpiar el modal
+    function cerrarModalEliminar() {
+        modalEliminar.classList.add('hidden');
+        inputPalabra.value = "";
+        textoError.hidden = true;
+    }
+
+    // Abrir
+    if (btnAbrirModal) {
+        btnAbrirModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            modalEliminar.classList.remove('hidden');
+        });
+    }
+
+    // Cerrar (con la X o con el botón cancelar)
+    if (btnCerrarIcono) btnCerrarIcono.addEventListener('click', cerrarModalEliminar);
+    if (btnCancelarEliminar) btnCancelarEliminar.addEventListener('click', cerrarModalEliminar);
+
+    // El Fetch destructor
+    if (btnConfirmarEliminar) {
+        btnConfirmarEliminar.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const palabra = inputPalabra.value.toLowerCase().trim();
+            
+            if (palabra === "eliminar") {
+                const nombreUsuario = localStorage.getItem('footlel_username');
+                
+                try {
+                    // PASO 1: Obtener la info del usuario usando el endpoint que dijeron los chicos
+                    const infoResponse = await fetch('https://footlel-backend.onrender.com/user/get-user-info', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_name: nombreUsuario })
+                    });
+
+                    if (!infoResponse.ok) {
+                        textoError.textContent = 'Error al verificar la información del usuario.';
+                        textoError.hidden = false;
+                        return; // Cortamos la ejecución aquí si falla
+                    }
+
+                    const userInfo = await infoResponse.json();
+                    
+                    // Extraemos el ID (por si el backend usa "user_id" o "id")
+                    const idVal = Number(userInfo.user_id || userInfo.id);
+
+                    if (!idVal) {
+                        textoError.textContent = 'El servidor no devolvió tu ID. Contacta a soporte.';
+                        textoError.hidden = false;
+                        return;
+                    }
+
+                    // PASO 2: Ahora sí, con el ID numérico en mano, eliminamos la cuenta
+                    const response = await fetch('https://footlel-backend.onrender.com/user/eliminate-user', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: idVal })
+                    });
+
+                    if (response.ok) {
+                        // Mostramos el mensaje de éxito en verde
+                        textoError.style.color = '#4ade80';
+                        textoError.textContent = 'Cuenta eliminada con éxito. Redirigiendo...';
+                        textoError.hidden = false;
+                        
+                        localStorage.clear();
+                        
+                        // Esperamos 2 segundos antes de redirigir
+                        setTimeout(function() {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        const data = await response.json();
+                        textoError.style.color = '#ff4c4c'; // Volvemos a rojo por si acaso
+                        textoError.textContent = data.detail || 'Error al eliminar la cuenta.';
+                        textoError.hidden = false;
+                    }
+                } catch (error) {
+                    textoError.style.color = '#ff4c4c';
+                    textoError.textContent = 'No se pudo conectar con el servidor.';
+                    textoError.hidden = false;
+                }
+            } else {
+                textoError.textContent = "Palabra incorrecta, escribe 'eliminar'.";
+                textoError.hidden = false;
+            }
+        });
+    }
+})();
+
+</script>
+
+</body>
+</html>

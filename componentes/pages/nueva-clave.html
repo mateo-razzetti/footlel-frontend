@@ -9,16 +9,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/styles/login.css">
     <link rel="stylesheet" href="../../assets/styles/nueva-clave.css">
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
     <div class="background-overlay"></div>
     <main class="login-card">
 
         <header class="card-header">
-            <picture class="logo-wrapper">
-                <source srcset="../../assets/images/logo-oscuro.png" media="(prefers-color-scheme: dark)">
-                <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image">
-            </picture>
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
             <h1 class="brand-title new-password-title">Cambiar Contraseña</h1>
         </header>
 
@@ -101,31 +102,49 @@
             });
         });
 
-        /* ── Validación de coincidencia en submit ── */
+        /* ── Validación secuencial en submit ── */
         document.getElementById('new-password-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const pwd     = document.getElementById('new-password').value;
-            const confirm = document.getElementById('confirm-new-password').value;
-            const error   = document.getElementById('mismatch-error');
+            const pwdVal     = document.getElementById('new-password').value.trim();
+            const confirmVal = document.getElementById('confirm-new-password').value.trim();
+            const error      = document.getElementById('mismatch-error');
 
-            if (pwd !== confirm) {
+            function showError(msg, focusId) {
+                error.textContent = msg;
                 error.hidden = false;
-                document.getElementById('confirm-new-password').focus();
-            } else {
-                error.hidden = true;
-                window.location.href = 'login.html';
+                document.getElementById(focusId).focus();
             }
+
+            // ── 1. Nueva contraseña vacía ──
+            if (!pwdVal) {
+                showError('Falta ingresar la nueva contraseña.', 'new-password');
+                return;
+            }
+
+            // ── 2. Confirmar contraseña vacía ──
+            if (!confirmVal) {
+                showError('Falta confirmar la contraseña.', 'confirm-new-password');
+                return;
+            }
+
+            // ── 3. No coinciden ──
+            if (pwdVal !== confirmVal) {
+                showError('Las contraseñas no coinciden.', 'confirm-new-password');
+                return;
+            }
+
+            // ── Todo OK ──
+            error.hidden = true;
+            window.location.href = 'login.html';
         });
 
-        /* ── Limpieza en tiempo real ── */
-        document.getElementById('confirm-new-password').addEventListener('input', () => {
-            const error = document.getElementById('mismatch-error');
-            if (!error.hidden) {
-                const pwd     = document.getElementById('new-password').value;
-                const confirm = document.getElementById('confirm-new-password').value;
-                if (pwd === confirm) error.hidden = true;
-            }
+        /* ── Limpieza en tiempo real: oculta el error mientras el usuario escribe ── */
+        ['new-password', 'confirm-new-password'].forEach(function (id) {
+            document.getElementById(id).addEventListener('input', () => {
+                const error = document.getElementById('mismatch-error');
+                if (!error.hidden) error.hidden = true;
+            });
         });
     </script>
 </body>

@@ -1,0 +1,487 @@
+/* ── Header left: Volver + separador + Logo ───────────────────── */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-separator {
+    width: 1px;
+    height: 22px;
+    background: var(--color-border-subtle);
+    flex-shrink: 0;
+}
+
+/* Nota: body.light-mode y body.disable-animations están en
+   assets/styles/global-preferences.css                         */
+
+
+/* ── Perfil Central ───────────────────────────────────────────── */
+.config-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 32px 32px;
+    gap: 12px;
+}
+
+.config-avatar-wrapper {
+    position: relative;
+    width: 90px;
+    height: 90px;
+}
+
+.config-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-brand-green);
+    display: block;
+}
+
+.config-username-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#config-username {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 0.5px;
+}
+
+/* Botón lápiz */
+.btn-edit-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-subtle);
+    background: var(--color-surface-card);
+    cursor: pointer;
+    color: var(--color-text-muted);
+    transition: color var(--transition-fast), border-color var(--transition-fast),
+                background var(--transition-fast);
+    flex-shrink: 0;
+}
+.btn-edit-icon:hover {
+    color: var(--color-brand-green);
+    border-color: var(--color-brand-green);
+    background: rgba(76, 175, 80, 0.08);
+}
+.btn-edit-icon svg { width: 14px; height: 14px; }
+
+/* ── Contenido principal ──────────────────────────────────────── */
+.config-main {
+    max-width: 540px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 24px 64px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Tarjeta de preferencias ──────────────────────────────────── */
+.prefs-card {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    overflow: hidden;
+}
+
+.prefs-card-title {
+    font-family: var(--font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    padding: 18px 20px 10px;
+}
+
+/* Fila de preferencia */
+.pref-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 20px;
+    border-top: 1px solid var(--color-border-subtle);
+    transition: background var(--transition-fast);
+}
+.pref-row:hover { background: rgba(255, 255, 255, 0.03); }
+
+.pref-info { flex: 1; }
+
+.pref-label {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    display: block;
+    margin-bottom: 2px;
+}
+
+.pref-desc {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.4;
+}
+
+/* ── Toggle Switch ────────────────────────────────────────────── */
+.toggle-switch {
+    position: relative;
+    flex-shrink: 0;
+    width: 44px;
+    height: 24px;
+}
+
+.toggle-switch input[type="checkbox"] {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-track {
+    position: absolute;
+    inset: 0;
+    border-radius: 24px;
+    background: rgba(158, 158, 158, 0.25);
+    cursor: pointer;
+    transition: background 0.25s ease;
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.25s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.toggle-switch input:checked + .toggle-track {
+    background: var(--color-brand-green);
+}
+
+.toggle-switch input:checked + .toggle-track::after {
+    transform: translateX(20px);
+}
+
+.toggle-switch input:focus-visible + .toggle-track {
+    outline: 2px solid var(--color-brand-green);
+    outline-offset: 2px;
+}
+
+/* ── Zona registrado ──────────────────────────────────────────── */
+#zona-registrado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0;
+}
+
+.link-logout {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+.link-logout:hover { color: var(--color-text-primary); }
+
+.link-delete {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: #ef5350;
+    text-decoration: none;
+    transition: opacity var(--transition-fast);
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+.link-delete:hover { opacity: 0.75; }
+
+/* ── Zona invitado ────────────────────────────────────────────── */
+#zona-invitado {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    padding: 28px 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.guest-cta-title {
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.guest-cta-desc {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: 6px;
+}
+
+.guest-cta-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Botón verde sólido (CTA invitado login) */
+.btn-cta-solid {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--color-brand-green);
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background var(--transition-fast), transform 0.1s ease;
+}
+.btn-cta-solid:hover  { background: var(--color-brand-green-dk); }
+.btn-cta-solid:active { transform: scale(0.98); }
+
+/* Botón borde gris (CTA invitado registro) */
+.btn-cta-ghost {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.btn-cta-ghost:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+}
+
+/* ── Utilidad .hidden ─────────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   MODALES
+   ══════════════════════════════════════════════════════════════ */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(10, 10, 10, 0.78);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    /* Animación de entrada */
+    animation: backdropIn 0.2s ease forwards;
+}
+
+@keyframes backdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-card {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    padding: 32px 28px;
+    width: 100%;
+    max-width: 380px;
+    animation: cardIn 0.25s ease forwards;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0)   scale(1);    }
+}
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+}
+
+.modal-subtitle {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+/* Inputs del modal editar */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.modal-input {
+    width: 100%;
+    padding: 13px 14px;
+    background: var(--color-surface-input);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--input-radius, 8px);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border-color var(--transition-fast);
+}
+.modal-input::placeholder { color: var(--color-text-muted); }
+.modal-input:focus { border-color: var(--color-brand-green); }
+
+/* Botón primario del modal */
+.modal-btn-primary {
+    display: block;
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--color-brand-green);
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background var(--transition-fast), transform 0.1s ease;
+    margin-bottom: 12px;
+}
+.modal-btn-primary:hover  { background: var(--color-brand-green-dk); }
+.modal-btn-primary:active { transform: scale(0.98); }
+
+/* Enlace cancelar */
+.modal-link-cancel {
+    display: block;
+    text-align: center;
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    transition: color var(--transition-fast);
+}
+.modal-link-cancel:hover { color: var(--color-text-primary); }
+
+/* Error de modal */
+.modal-error {
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef5350;
+    margin-bottom: 10px;
+    min-height: 16px;
+}
+
+/* ── OTP inputs ───────────────────────────────────────────────── */
+.otp-row {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 22px;
+}
+
+.otp-input {
+    width: 46px;
+    height: 52px;
+    text-align: center;
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    background: var(--color-surface-input);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 8px;
+    outline: none;
+    caret-color: var(--color-brand-green);
+    transition: border-color var(--transition-fast);
+}
+.otp-input:focus { border-color: var(--color-brand-green); }
+
+/* ══════════════════════════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════════════════════════ */
+#toast {
+    position: fixed;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%) translateY(12px);
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-brand-green);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    padding: 12px 22px;
+    border-radius: 50px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 1000;
+    white-space: nowrap;
+}
+#toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* ── Responsive ───────────────────────────────────────────────── */
+@media (max-width: 600px) {
+    .config-main { padding: 0 16px 48px; }
+    .modal-card  { padding: 24px 20px; }
+    .otp-input   { width: 38px; height: 44px; font-size: 17px; }
+}
