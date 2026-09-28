@@ -11,27 +11,57 @@
     padding: 16px 32px;
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border-subtle);
+    position: relative;
 }
 
 .timer-display {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
     font-family: var(--font-heading);
-    font-size: 32px;
+    font-size: 22px;
     font-weight: 700;
-    color: #FFFFFF;
-    background: #111111;
-    padding: 10px 28px;
-    border-radius: 30px;
-    border: 1px solid #333333;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+    color: #EAFBEA;
+    background: linear-gradient(180deg, #171717 0%, #0A0A0A 100%);
+    padding: 8px 22px;
+    border-radius: 24px;
+    border: 1px solid rgba(76, 175, 80, 0.35);
     display: flex;
     align-items: center;
-    gap: 12px;
-    box-shadow: inset 0 2px 8px rgba(0,0,0,0.8), 0 0 10px rgba(0,0,0,0.5);
-    text-shadow: 0 0 8px rgba(255,255,255,0.4);
+    gap: 10px;
+    box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.85),
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 0 16px rgba(76, 175, 80, 0.25);
+    text-shadow: 0 0 10px rgba(76, 175, 80, 0.55);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timer-display span:first-child {
+    font-size: 15px;
+    opacity: 0.75;
+}
+
+.timer-display.time-low {
+    border-color: rgba(244, 67, 54, 0.55);
+    box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.85),
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 0 18px rgba(244, 67, 54, 0.45);
+    text-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
+    animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50%      { transform: translateX(-50%) scale(1.05); }
 }
 
 .turn-indicator {
     font-family: var(--font-heading);
-    font-size: 18px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--color-brand-green);
     text-transform: uppercase;
@@ -39,22 +69,37 @@
 }
 
 /* ── Tablero ─────────────────────────────────────────────────── */
+/* ── Centrado general del contenido de juego ────────────────────
+   Todo el bloque (tablero + buscador) queda centrado tanto vertical
+   como horizontalmente dentro del espacio disponible entre el
+   header y el footer. */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 4px;
+}
+
 .board-section {
     display: flex;
     justify-content: center;
-    padding: 32px 16px;
+    padding: 8px 16px;
     position: relative;
 }
 
 .game-board {
     display: grid;
-    grid-template-columns: 110px repeat(3, 130px);
-    grid-template-rows: 110px repeat(3, 130px);
-    gap: 12px;
+    grid-template-columns: repeat(4, 124px); /* Zoom-out: antes 160px */
+    grid-template-rows: repeat(4, 124px);
+    gap: 12px; /* Zoom-out: antes 16px */
+    /* Offset para centrar visualmente el 3x3 respecto a la columna del medio:
+       mitad de una columna + gap = (124 + 12) / 2 = 68px. */
+    transform: translateX(-68px);
 }
 
 .empty-corner {
-    /* Celda superior izquierda vacía */
     background: transparent;
 }
 
@@ -88,18 +133,10 @@
 }
 
 .cond-img {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     object-fit: contain;
-    margin-bottom: 8px;
-}
-
-.cond-text {
-    font-family: var(--font-body);
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+    margin: 0;
 }
 
 /* Casilleros Jugables */
@@ -144,26 +181,129 @@
     box-shadow: inset 0 0 20px rgba(33, 150, 243, 0.3);
 }
 
+/* ── Marcas del Tablero (X / O) ──────────────────────────────── */
+.cell-mark {
+    font-family: var(--font-heading);
+    font-size: 48px; /* Zoom-out: antes 64px, en línea con la celda de 124px */
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 1px;
+    user-select: none;
+    animation: mark-pop 0.25s ease-out;
+}
+
+@keyframes mark-pop {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.mark-x {
+    color: #4CAF50;
+    text-shadow:
+        0 0 10px rgba(76, 175, 80, 0.85),
+        0 0 24px rgba(76, 175, 80, 0.45),
+        0 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+.mark-o {
+    color: #FFFFFF;
+    text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.7),
+        0 0 24px rgba(33, 150, 243, 0.5),
+        0 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .cell-mark { font-size: 36px; }
+}
+
 /* ── Buscador Inferior ───────────────────────────────────────── */
 .search-section {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 16px;
-    padding: 0 32px 40px;
-    max-width: 700px;
+    gap: 14px;
+    padding: 0 0 32px;
+    width: 532px; /* Ancho exacto de las 4 columnas del tablero: 124x4 + 12x3 */
+    max-width: 100%;
     margin: 0 auto;
+    transform: translateX(-68px); /* Mismo desplazamiento que el tablero para alinearlos */
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1; /* Absorbe el espacio flexible que antes tenía el input directo */
+    display: flex;
+}
+
+.autocomplete-results {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 100%;
+    background: rgba(32, 32, 32, 0.98);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    max-height: 240px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 8px;
+    margin: 0;
+    display: none;
+    z-index: 1000;
+    border: 1px solid rgba(76, 175, 80, 0.25);
+    animation: dropdown-reveal 0.15s ease-out;
+}
+
+@keyframes dropdown-reveal {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.autocomplete-results li {
+    padding: 12px 16px;
+    color: #FFFFFF;
+    font-family: var(--font-body);
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 10px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.autocomplete-results li:hover,
+.autocomplete-results li:focus-visible {
+    background: rgba(76, 175, 80, 0.14);
+    border-left-color: var(--color-brand-green);
+}
+
+.autocomplete-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.autocomplete-results::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.autocomplete-results::-webkit-scrollbar-thumb {
+    background: rgba(76, 175, 80, 0.35);
+    border-radius: 8px;
+}
+
+.autocomplete-results::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 175, 80, 0.55);
 }
 
 .search-input {
-    flex: 1;
+    width: 100%; /* El input ahora toma el 100% de su wrapper */
     background: #2A2A2A;
     border: 1px solid #444444;
     color: var(--color-text-primary);
-    padding: 20px 28px;
-    border-radius: 30px;
+    padding: 15px 22px; /* Zoom-out: antes 20px 28px */
+    border-radius: 26px;
     font-family: var(--font-body);
-    font-size: 18px;
+    font-size: 15px; /* Zoom-out: antes 18px */
     outline: none;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -177,10 +317,10 @@
     background: var(--color-brand-green);
     color: #fff;
     border: none;
-    padding: 20px 36px;
-    border-radius: 30px;
+    padding: 15px 28px; /* Zoom-out: antes 20px 36px */
+    border-radius: 26px;
     font-family: var(--font-heading);
-    font-size: 16px;
+    font-size: 14px; /* Zoom-out: antes 16px */
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -216,6 +356,35 @@
     font-weight: 600;
     color: var(--color-text-muted);
     letter-spacing: 1px;
+}
+
+/* Marcador cabeza a cabeza (1v1 Local) — reemplaza el viejo "Jugador X:
+   N/3 Rondas" (confundía: el partido se gana con 2 rondas, no con 3). */
+.score-board {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+
+.score-team {
+    opacity: 0.8;
+}
+
+.score-tally {
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--color-text-primary);
+}
+
+.score-caption {
+    margin-top: 6px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: var(--color-text-muted);
+    opacity: 0.65;
 }
 
 /* ── Pop-ups de Reacción ─────────────────────────────────────── */
@@ -289,8 +458,7 @@
         grid-template-rows: 80px repeat(3, 100px);
         gap: 8px;
     }
-    .cond-img { width: 35px; height: 35px; }
-    .cond-text { font-size: 9px; }
+    .cond-img { width: 38px; height: 38px; }
     .search-section { flex-direction: column; padding: 0 16px 32px; }
     .search-input, .btn-confirm { width: 100%; }
 }

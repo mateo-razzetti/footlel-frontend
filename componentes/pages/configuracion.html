@@ -87,7 +87,7 @@
                     Editar Cuenta
                 </a>
                 <!-- Mis Amigos -->
-                <a href="buscar-usuarios.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
                          stroke-linejoin="round" aria-hidden="true">
@@ -359,6 +359,22 @@
         }, duration);
     }
 
+    /* Helper: obtener el user_id (via get-user-info) */
+    async function getUserId() {
+        var nombre = localStorage.getItem('footlel_username');
+        if (!nombre) return null;
+        try {
+            var resp = await fetch('https://footlel-backend.onrender.com/user/get-user-info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_name: nombre })
+            });
+            if (!resp.ok) return null;
+            var info = await resp.json();
+            return Number(info.user_id || info.id) || null;
+        } catch (e) { return null; }
+    }
+
     function openModal(id) {
         $(id).classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -607,20 +623,48 @@
 
     /* ── Listener: Modo Oscuro ── */
     if (toggleDark) {
-        toggleDark.addEventListener('change', function () {
+        toggleDark.addEventListener('change', async function () {
             // checked = true → modo OSCURO activo
             const isLight = !toggleDark.checked;
             applyTheme(isLight);
             localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
+
+            // Sincronizar con el backend
+            const uid = await getUserId();
+            if (uid) {
+                try {
+                    await fetch('https://footlel-backend.onrender.com/stat/set-user-dark-mode-state', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: uid, boolean: toggleDark.checked })
+                    });
+                } catch (e) {
+                    showToast('No se pudo sincronizar el modo oscuro.');
+                }
+            }
         });
     }
 
     /* ── Listener: Eliminar Animaciones ── */
     if (toggleAnim) {
-        toggleAnim.addEventListener('change', function () {
+        toggleAnim.addEventListener('change', async function () {
             const disabled = toggleAnim.checked;
             applyAnimations(disabled);
             localStorage.setItem('pref_toggle-animaciones', String(disabled));
+
+            // Sincronizar con el backend
+            const uid = await getUserId();
+            if (uid) {
+                try {
+                    await fetch('https://footlel-backend.onrender.com/stat/set-user-animation-state', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: uid, boolean: disabled })
+                    });
+                } catch (e) {
+                    showToast('No se pudo sincronizar las animaciones.');
+                }
+            }
         });
     }
         /* ──────────────────────────────────────────

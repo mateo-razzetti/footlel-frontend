@@ -255,17 +255,10 @@
 
             // Armar el paquete
             const userId          = Number(localStorage.getItem('footlel_user_id'));
-            const pendingName     = localStorage.getItem('pending_user_name');
-            const pendingEmail    = localStorage.getItem('pending_user_email');
-            const pendingPassword = localStorage.getItem('pending_user_password');
+            let   pendingName     = localStorage.getItem('pending_user_name')     || '';
+            let   pendingEmail    = localStorage.getItem('pending_user_email')    || '';
+            const pendingPassword = localStorage.getItem('pending_user_password') || '';
             const pendingAvatar   = localStorage.getItem('pending_avatar');
-
-            if (pendingName == localStorage.getItem('footlel_username')){
-                pendingName = '';
-            }
-            if (pendingEmail == localStorage.getItem('footlel_email')){
-                pendingEmail = '';
-            }
 
             try {
                 // Ejecutar el fetch

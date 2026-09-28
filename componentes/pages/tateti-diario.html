@@ -1,0 +1,1212 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Tateti (Desafío Diario)</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Estilos Globales, Menú y Juego -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <link rel="stylesheet" href="../../assets/styles/modalidades.css">
+    <link rel="stylesheet" href="../../assets/styles/tateti.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+
+    <!-- Script Global (Tema/Animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER DEL JUEGO
+    ═══════════════════════════════════════ -->
+    <header class="game-header">
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <div class="timer-display" id="timer-display">
+            <span aria-hidden="true">⏱</span> <span id="time-text">00:60</span>
+        </div>
+
+        <div class="turn-indicator" id="turn-indicator">
+            Turno: Jugador 1
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         TABLERO CENTRAL (GRID 4x4)
+         Las condiciones (cond-top / cond-left) arrancan vacías:
+         GameBoard.renderConditions() las completa en runtime
+         con lo que devuelva GET /game/start (o, en su defecto,
+         con una selección aleatoria del catálogo local).
+    ═══════════════════════════════════════ -->
+    <main class="main-content">
+        <section class="board-section">
+            <div class="game-board" id="game-board">
+
+                <!-- Fila 1: esquina vacía + 3 condiciones de club (columnas) -->
+                <div class="empty-corner"></div>
+                <div class="cond-top" id="cond-top-0" data-condition-slot="club">
+                    <img class="cond-img" alt="" onerror="this.style.display='none'">
+                </div>
+                <div class="cond-top" id="cond-top-1" data-condition-slot="club">
+                    <img class="cond-img" alt="" onerror="this.style.display='none'">
+                </div>
+                <div class="cond-top" id="cond-top-2" data-condition-slot="club">
+                    <img class="cond-img" alt="" onerror="this.style.display='none'">
+                </div>
+
+                <!-- Fila 2: condición de selección (fila) + 3 celdas jugables -->
+                <div class="cond-left" id="cond-left-0" data-condition-slot="nation">
+                    <img class="cond-img" alt="" onerror="this.style.display='none'">
+                </div>
+                <div class="playable-cell" data-row="0" data-col="0" data-index="0"></div>
+                <div class="playable-cell" data-row="0" data-col="1" data-index="1"></div>
+                <div class="playable-cell" data-row="0" data-col="2" data-index="2"></div>
+
+                <!-- Fila 3 -->
+                <div class="cond-left" id="cond-left-1" data-condition-slot="nation">
+                    <img class="cond-img" alt="" onerror="this.style.display='none'">
+                </div>
+                <div class="playable-cell" data-row="1" data-col="0" data-index="3"></div>
+                <div class="playable-cell" data-row="1" data-col="1" data-index="4"></div>
+                <div class="playable-cell" data-row="1" data-col="2" data-index="5"></div>
+
+                <!-- Fila 4 -->
+                <div class="cond-left" id="cond-left-2" data-condition-slot="nation">
+                    <img class="cond-img" alt="" onerror="this.style.display='none'">
+                </div>
+                <div class="playable-cell" data-row="2" data-col="0" data-index="6"></div>
+                <div class="playable-cell" data-row="2" data-col="1" data-index="7"></div>
+                <div class="playable-cell" data-row="2" data-col="2" data-index="8"></div>
+
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════
+             BUSCADOR INFERIOR
+        ═══════════════════════════════════════ -->
+        <section class="search-section">
+            <div class="search-wrapper">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="player-search"
+                    placeholder="Buscar futbolista..."
+                    autocomplete="off"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-autocomplete="list"
+                    aria-controls="autocomplete-results">
+                <ul class="autocomplete-results" id="autocomplete-results" role="listbox"></ul>
+            </div>
+            <button class="btn-confirm" id="btn-confirm" type="button">Confirmar Jugada</button>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════
+         MARCADOR / FOOTER
+    ═══════════════════════════════════════ -->
+    <footer class="game-footer">
+        <div class="score-board">
+            <span class="score-team">Jugador 1</span>
+            <span class="score-tally"><span id="score-value-p1">0</span>&nbsp;—&nbsp;<span id="score-value-p2">0</span></span>
+            <span class="score-team">Jugador 2</span>
+        </div>
+        <div class="score-caption">Mejor de 3 · gana quien llegue primero a 2 rondas</div>
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     POP-UPS DE REACCIÓN (Flotantes)
+═══════════════════════════════════════ -->
+<div class="reaction-popup success" id="popup-success" aria-live="assertive">
+    <img src="../../assets/images/messi festejo de gol.png" alt="Festejo" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Golazo!</span>
+</div>
+
+<div class="reaction-popup error" id="popup-error" aria-live="assertive">
+    <img src="../../assets/images/fabbiani gol errado.png" alt="Gol errado" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">Ta tan tan No Fabiani</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     MODALES DE FIN DE PARTIDA
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-victoria" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">🏆</div>
+        <h2 class="modal-title">¡Ganaste!</h2>
+        <div class="score-display">0 — 0</div>
+        <p class="endgame-points points-green">+10 Puntos de Ranking</p>
+        <div class="modal-actions">
+            <button class="modal-btn-primary btn-rematch" type="button" onclick="location.reload()">Jugar de nuevo</button>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop hidden" id="modal-derrota" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">💔</div>
+        <h2 class="modal-title">¡Perdiste!</h2>
+        <div class="score-display">0 — 0</div>
+        <p class="endgame-points points-gray">+2 Puntos de Ranking</p>
+        <div class="modal-actions">
+            <button class="modal-btn-primary btn-rematch" type="button" onclick="location.reload()">Jugar revancha</button>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     LÓGICA DEL JUEGO (Vanilla JS)
+═══════════════════════════════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
+
+    /* ─────────────────────────────────────────────
+       1. CONFIGURATION CONSTANTS
+    ───────────────────────────────────────────── */
+    const TURN_DURATION_SECONDS = 60;
+    const MAX_ROUNDS = 3;
+    // "Mejor de 3" se gana con MAYORÍA (2 rondas), no barriendo las 3.
+    const ROUNDS_TO_WIN = Math.ceil(MAX_ROUNDS / 2);
+    const RESULT_DISPLAY_DELAY_MS = 3000;
+    const REACTION_POPUP_DURATION_MS = 2800;
+    const BUTTON_ERROR_DURATION_MS = 2000;
+    const AUTOCOMPLETE_MIN_CHARS = 3;
+    const AUTOCOMPLETE_MAX_RESULTS = 50;
+    const AUTOCOMPLETE_DEBOUNCE_MS = 200;
+    const DAILY_MODE_STORAGE_KEY = 'footlel_diario_jugado';
+    const PLAYERS_CSV_PATH = '../../assets/data/data-jugadores.txt';
+    const IMAGES_BASE_PATH = '../../assets/images';
+    const FALLBACK_SHIELD_IMG = `${IMAGES_BASE_PATH}/logo-oscuro.png`;
+    // Carpetas reales de liga (game_manager.py: leagues_name = ["premier",
+    // "bundesliga", "serie_a", "la_liga"]). El backend elige el equipo de un
+    // pool más amplio que nuestro catálogo local de 17 clubes, así que un
+    // equipo fuera de esa lista necesita probar en qué carpeta de liga está
+    // su escudo en vez de asumir una sola ruta (ver resolveSingleCondition).
+    // OJO: la carpeta real de Bundesliga es "Equipo - Bundesliga" (singular),
+    // a diferencia de las otras tres que son plural ("Equipos - X") — un typo
+    // real en el nombre de carpeta que rompía las 3 imágenes de Bundesliga.
+    const CLUB_LEAGUE_FOLDERS = ['Equipos - Premier League', 'Equipo - Bundesliga', 'Equipos - La Liga', 'Equipos - Serie A'];
+
+    const GAME_MODE = {
+        LOCAL: 'local',
+        DAILY: 'diario'
+    };
+
+    const API_BASE_URL = 'https://footlel-backend.onrender.com';
+    const API_ENDPOINTS = {
+        START_GAME: `${API_BASE_URL}/game/start`,
+        PLAYER_ONE_GUESS: `${API_BASE_URL}/game/player-guess`,
+        PLAYER_TWO_GUESS: `${API_BASE_URL}/game/player2-guess`,
+        AI_GUESS: `${API_BASE_URL}/game/ai-guess`
+    };
+
+    /* ─────────────────────────────────────────────
+       2. CONDITION CATALOG
+       Local fallback used when /game/start doesn't
+       return explicit conditions (e.g. during offline
+       development). The backend response, when present,
+       always takes priority — see fetchGameStartData().
+    ───────────────────────────────────────────── */
+    const CLUB_CATALOG = [
+        { id: 'bayer-leverkusen', name: 'Bayer Leverkusen', img: `${IMAGES_BASE_PATH}/Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png` },
+        { id: 'bayern-munich', name: 'Bayern Munich', img: `${IMAGES_BASE_PATH}/Equipo - Bundesliga/bayern-munich-logo-footylogos.png` },
+        { id: 'borussia-dortmund', name: 'Borussia Dortmund', img: `${IMAGES_BASE_PATH}/Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png` },
+        { id: 'atletico-madrid', name: 'Atlético Madrid', img: `${IMAGES_BASE_PATH}/Equipos - La Liga/atletico-madrid-logo-footylogos.png` },
+        { id: 'fc-barcelona', name: 'FC Barcelona', img: `${IMAGES_BASE_PATH}/Equipos - La Liga/fc-barcelona-logo-footylogos.png` },
+        { id: 'real-madrid', name: 'Real Madrid', img: `${IMAGES_BASE_PATH}/Equipos - La Liga/real-madrid-logo-footylogos.png` },
+        { id: 'arsenal', name: 'Arsenal', img: `${IMAGES_BASE_PATH}/Equipos - Premier League/arsenal-logo-footylogos.png` },
+        { id: 'chelsea', name: 'Chelsea', img: `${IMAGES_BASE_PATH}/Equipos - Premier League/chelsea-logo-footylogos.png` },
+        { id: 'liverpool-fc', name: 'Liverpool FC', img: `${IMAGES_BASE_PATH}/Equipos - Premier League/liverpool-fc-logo-footylogos.png` },
+        { id: 'manchester-city', name: 'Manchester City', img: `${IMAGES_BASE_PATH}/Equipos - Premier League/manchester-city-logo-footylogos.png` },
+        { id: 'manchester-united', name: 'Manchester United', img: `${IMAGES_BASE_PATH}/Equipos - Premier League/manchester-united-logo-footylogos.png` },
+        { id: 'tottenham-hotspur', name: 'Tottenham Hotspur', img: `${IMAGES_BASE_PATH}/Equipos - Premier League/tottenham-hotspur-logo-footylogos.png` },
+        { id: 'ac-milan', name: 'AC Milan', img: `${IMAGES_BASE_PATH}/Equipos - Serie A/ac-milan-logo-footylogos.png` },
+        { id: 'inter-milan', name: 'Inter Milan', img: `${IMAGES_BASE_PATH}/Equipos - Serie A/inter-milan-logo-footylogos.png` },
+        { id: 'juventus', name: 'Juventus', img: `${IMAGES_BASE_PATH}/Equipos - Serie A/juventus-logo-footylogos.png` },
+        { id: 'lazio', name: 'Lazio', img: `${IMAGES_BASE_PATH}/Equipos - Serie A/lazio-logo-footylogos.png` },
+        { id: 'roma', name: 'Roma', img: `${IMAGES_BASE_PATH}/Equipos - Serie A/roma-logo-footylogos.png` }
+    ];
+
+    const NATION_CATALOG = [
+        { id: 'argentina', name: 'Argentina', img: `${IMAGES_BASE_PATH}/Selecciones/argentina-national-team-logo-footylogos.png` },
+        { id: 'england', name: 'Inglaterra', img: `${IMAGES_BASE_PATH}/Selecciones/england-national-team-logo-footylogos.png` },
+        { id: 'france', name: 'Francia', img: `${IMAGES_BASE_PATH}/Selecciones/france-national-team-logo-footylogos.png` },
+        { id: 'italy', name: 'Italia', img: `${IMAGES_BASE_PATH}/Selecciones/italy-national-team-logo-footylogos.png` },
+        { id: 'spain', name: 'España', img: `${IMAGES_BASE_PATH}/Selecciones/spain-national-team-logo-footylogos.png` }
+    ];
+
+    /* ─────────────────────────────────────────────
+       3. GAME STATE
+    ───────────────────────────────────────────── */
+    // Bug crítico #3 (mezcla de modos): la detección dinámica del modo vía
+    // localStorage seguía fallando porque dependía de que la pantalla de
+    // selección de modalidad escribiera esa clave correctamente antes de
+    // navegar acá, algo fuera del control de este archivo. Se elimina esa
+    // ambigüedad: este archivo es SIEMPRE modo Diario (Humano vs Bot).
+    // La contraparte "Humano vs Humano" vive en tateti-local.html.
+    const gameState = {
+        currentMode: GAME_MODE.DAILY,
+        currentPlayer: 1,
+        timeLeft: TURN_DURATION_SECONDS,
+        timerIntervalId: null,
+        scoreP1: 0,
+        scoreP2: 0,
+        isGameOver: false,
+        board: [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    };
+
+    /* ─────────────────────────────────────────────
+       4. DOM REFERENCES
+    ───────────────────────────────────────────── */
+    const dom = {
+        timeText: document.getElementById('time-text'),
+        turnIndicator: document.getElementById('turn-indicator'),
+        cells: document.querySelectorAll('.playable-cell'),
+        playerSearch: document.getElementById('player-search'),
+        btnConfirm: document.getElementById('btn-confirm'),
+        popupSuccess: document.getElementById('popup-success'),
+        popupError: document.getElementById('popup-error'),
+        modalVictoria: document.getElementById('modal-victoria'),
+        modalDerrota: document.getElementById('modal-derrota'),
+        scoreValueP1El: document.getElementById('score-value-p1'),
+        scoreValueP2El: document.getElementById('score-value-p2'),
+        autocompleteList: document.getElementById('autocomplete-results'),
+        condTopSlots: [
+            document.getElementById('cond-top-0'),
+            document.getElementById('cond-top-1'),
+            document.getElementById('cond-top-2')
+        ],
+        condLeftSlots: [
+            document.getElementById('cond-left-0'),
+            document.getElementById('cond-left-1'),
+            document.getElementById('cond-left-2')
+        ]
+    };
+
+    let availablePlayers = [];
+    let autocompleteDebounceId = null;
+
+    /* ─────────────────────────────────────────────
+       5. INITIALIZATION
+    ───────────────────────────────────────────── */
+    // Declaradas ANTES de initGame() a propósito: initGame() llama a
+    // fetchGameStartData() de forma síncrona hasta el primer `await`, y
+    // esa función las referencia ya en la condición del `for`. Si el
+    // `const` queda más abajo en el archivo, es un ReferenceError de
+    // temporal dead zone ("Cannot access before initialization").
+    const START_GAME_MAX_ATTEMPTS = 3;
+    const START_GAME_RETRY_DELAY_MS = 1500;
+
+    initGame();
+
+    function warnIfRunningFromFileProtocol() {
+        // Bajo file:// (doble clic en el HTML desde el explorador), Chrome
+        // bloquea CUALQUIER fetch() a recursos locales ("origin 'null'
+        // blocked by CORS policy") — no es un bug del código ni del
+        // archivo de datos, es el navegador negándose a leer disco vía
+        // fetch. Esto rompe data-jugadores.txt (autocomplete) y cualquier
+        // otro fetch relativo. Solución: servir la carpeta con un server
+        // local (VS Code Live Server, `python -m http.server`, etc.) en
+        // vez de abrir el .html directo.
+        if (window.location.protocol === 'file:') {
+            console.warn(
+                'Esta página se abrió con file:// (doble clic desde el explorador). ' +
+                'Chrome bloquea fetch() a archivos locales en ese modo — el autocomplete ' +
+                'y cualquier otro fetch relativo van a fallar con un error de CORS confuso. ' +
+                'Servir la carpeta con un servidor local (VS Code Live Server, ' +
+                '"python -m http.server", "npx serve", etc.) y abrir vía http://.'
+            );
+        }
+    }
+
+    async function initGame() {
+        warnIfRunningFromFileProtocol();
+        const loaded = await loadFreshGameBoard();
+        if (!loaded) return;
+
+        await loadPlayerRoster();
+        bindEventListeners();
+
+        if (gameState.currentMode === GAME_MODE.DAILY) {
+            document.querySelectorAll('.btn-rematch').forEach(btn => { btn.style.display = 'none'; });
+        }
+
+        renderTurnIndicator();
+        updateScoreDisplay();
+
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer === 2) {
+            triggerAiTurn();
+        } else {
+            startRoundTimer();
+        }
+    }
+
+    // Pide un /game/start nuevo y pinta el tablero con esa respuesta.
+    // Devuelve true si salió bien, false si hubo que rendirse (ver
+    // showFatalStartError). Se usa tanto al arrancar la partida (initGame)
+    // como al pasar de ronda (resetBoardState) — ver el porqué de esto
+    // último en el comentario de resetBoardState.
+    async function loadFreshGameBoard() {
+        const startData = await fetchGameStartData();
+
+        // Sin `startData` real, el tablero que se dibuje sería 100% inventado
+        // del lado del cliente (pickRandomConditions) y NO tendría ninguna
+        // relación con el player_names_matrix que el backend generó de
+        // verdad -> cualquier guess parecería "random". Antes esto se
+        // jugaba igual en silencio; ahora se bloquea con un aviso claro.
+        if (!startData) {
+            showFatalStartError();
+            return false;
+        }
+
+        // Antes esto era "fire and forget": el timer arrancaba mientras los
+        // escudos todavía se estaban pintando (cold start del servidor).
+        // Ahora se espera a que la promesa de applyBoardConditions resuelva
+        // (todos los <img> ya cargaron o fallaron) antes de seguir.
+        await applyBoardConditions(startData);
+        return true;
+    }
+
+    async function fetchGameStartData() {
+        // Reintentamos porque en Render es normal un cold-start / hiccup de
+        // CORS puntual en el primer request. Si NINGÚN intento trae un
+        // tablero real, es mejor frenar el juego (ver showFatalStartError)
+        // que dejarlo arrancar con un catálogo inventado sin avisar.
+        for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
+            try {
+                // El swagger de /game/start exige POST con body { user_id }.
+                const response = await fetch(API_ENDPOINTS.START_GAME, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: getCurrentUserId() })
+                });
+                if (!response.ok) {
+                    throw new Error(`Unexpected status ${response.status}`);
+                }
+                // Expected shape: { row_headers, column_headers, local_player_turn }
+                const startData = await response.json();
+                if (typeof startData.local_player_turn === 'boolean') {
+                    gameState.currentPlayer = startData.local_player_turn ? 1 : 2;
+                }
+                return startData;
+            } catch (error) {
+                console.error(`fetchGameStartData intento ${attempt}/${START_GAME_MAX_ATTEMPTS} falló:`, error);
+                if (attempt < START_GAME_MAX_ATTEMPTS) {
+                    await new Promise(resolve => setTimeout(resolve, START_GAME_RETRY_DELAY_MS));
+                }
+            }
+        }
+        return null;
+    }
+
+    // Bloquea el juego con un aviso claro en vez de dejar jugar con un
+    // tablero inventado del lado del cliente (que nunca va a coincidir con
+    // el player_names_matrix real del backend).
+    function showFatalStartError() {
+        stopRoundTimer();
+        const main = document.querySelector('.main-content') || document.body;
+        const notice = document.createElement('div');
+        notice.style.cssText = 'margin:40px auto;max-width:480px;text-align:center;color:#fff;font-family:var(--font-body, sans-serif);';
+        notice.innerHTML = `
+            <p style="font-size:20px;font-weight:700;color:#F44336;margin-bottom:12px;">No pudimos conectar con el servidor</p>
+            <p style="opacity:0.8;margin-bottom:20px;">Probá recargar la página en unos segundos.</p>
+            <button onclick="location.reload()" style="background:var(--color-brand-green, #4CAF50);color:#fff;border:none;padding:14px 28px;border-radius:26px;font-weight:700;cursor:pointer;">Reintentar</button>
+        `;
+        main.prepend(notice);
+    }
+
+    function getCurrentUserId() {
+        // Placeholder hasta que exista una sesión real: el swagger acepta
+        // cualquier entero. Ajustar cuando el equipo de Python confirme
+        // de dónde sale el user_id real (login, localStorage, etc).
+        return 0;
+    }
+
+    /* ─────────────────────────────────────────────
+       6. BOARD CONDITIONS (clubs / nations)
+    ───────────────────────────────────────────── */
+    function applyBoardConditions(startData) {
+        // BUG CRÍTICO: /game/start responde `row_headers` (los 3 clubes que
+        // el backend eligió) y `column_headers` (las 3 selecciones), no
+        // `topConditions`/`leftConditions`. Como esos campos nunca existían,
+        // esto siempre caía en pickRandomConditions() — un catálogo random
+        // del lado del cliente, sin relación con el player_names_matrix real
+        // del servidor. Por eso NINGÚN nombre matcheaba jamás: la UI mostraba
+        // un tablero, el backend esperaba nombres de otro completamente distinto.
+        const topConditions = resolveConditions(startData?.row_headers, CLUB_CATALOG);
+        const leftConditions = resolveConditions(startData?.column_headers, NATION_CATALOG);
+
+        const shieldLoadPromises = [
+            ...topConditions.map((condition, columnIndex) => renderConditionSlot(dom.condTopSlots[columnIndex], condition)),
+            ...leftConditions.map((condition, rowIndex) => renderConditionSlot(dom.condLeftSlots[rowIndex], condition))
+        ];
+
+        // Tag each playable cell with the club/nation it represents so the
+        // guess payload can carry that context without re-reading the DOM text.
+        dom.cells.forEach(cell => {
+            const row = parseInt(cell.getAttribute('data-row'), 10);
+            const col = parseInt(cell.getAttribute('data-col'), 10);
+            cell.dataset.clubId = topConditions[col].id;
+            cell.dataset.nationId = leftConditions[row].id;
+        });
+
+        // El caller (initGame) espera esta promesa antes de arrancar el
+        // reloj: así el timer de 60s no corre mientras los escudos todavía
+        // se están dibujando por el cold start del servidor.
+        return Promise.all(shieldLoadPromises);
+    }
+
+    // Bug #4: normaliza cualquier nombre devuelto por el backend a la
+    // convención de archivo esperada ("Real Madrid" -> "real-madrid"):
+    // minúsculas, sin acentos y espacios reemplazados por guiones.
+    function slugifyName(rawName) {
+        return String(rawName)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-');
+    }
+
+    function resolveConditions(idsFromServer, catalog) {
+        if (Array.isArray(idsFromServer) && idsFromServer.length === 3) {
+            const matched = idsFromServer.map(raw => resolveSingleCondition(raw, catalog));
+            if (matched.every(Boolean)) return matched;
+        }
+        return pickRandomConditions(catalog, 3);
+    }
+
+    // Intenta matchear el id tal cual, o su slug, contra el catálogo local.
+    // Si el backend menciona un club/selección que no está en el catálogo,
+    // igual armamos la condición al vuelo con el nombre normalizado como
+    // slug de archivo, en vez de perder el dato o mostrar un ícono roto
+    // (el onerror del <img> ya cubre el caso de que el archivo no exista).
+    // Normaliza para comparar nombres "sueltos": sin acentos, minúsculas,
+    // sin la palabra de enlace "de" (backend manda "Atlético de Madrid" /
+    // "Inter de Milán", el catálogo y los archivos usan "Atlético Madrid" /
+    // "Inter Milan" — sin el "de"), y SIN números sueltos (backend manda
+    // "Bayer 04 Leverkusen", el catálogo/archivo usan "Bayer Leverkusen" —
+    // sin el "04". Sin esto, el "04" corta la cadena y "bayer leverkusen"
+    // deja de ser substring contiguo de "bayer 04 leverkusen" → nunca
+    // matcheaba, caía al armado de ruta al vuelo con el slug
+    // "bayer-04-leverkusen", que no existe en ningún archivo real → escudo
+    // roto → fallback genérico). Los espacios múltiples se colapsan.
+    function normalizeForMatch(str) {
+        return String(str)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\bde\b/g, ' ')
+            .replace(/\b\d+\b/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    // Dos nombres "matchean" si son iguales una vez normalizados, o si uno
+    // contiene al otro (cubre "Tottenham" ⊂ "Tottenham Hotspur",
+    // "Liverpool" ⊂ "Liverpool FC", "AS Roma" ⊃ "Roma").
+    function namesLooselyMatch(a, b) {
+        const na = normalizeForMatch(a);
+        const nb = normalizeForMatch(b);
+        if (!na || !nb) return false;
+        return na === nb || na.includes(nb) || nb.includes(na);
+    }
+
+    function resolveSingleCondition(raw, catalog) {
+        if (!raw) return null;
+        const slug = slugifyName(raw);
+
+        // 1) match exacto de id/slug (rápido, cubre el caso feliz).
+        const byId = catalog.find(entry => entry.id === raw || entry.id === slug);
+        if (byId) return byId;
+
+        // 2) BUG DE IMÁGENES: el backend manda nombres "oficiales" en
+        // español y con variantes ("Atlético de Madrid", "Inglaterra",
+        // "AS Roma") que nunca coinciden con el slug adivinado a partir del
+        // nombre de archivo real ("atletico-madrid", "england", "roma").
+        // Buscamos por NOMBRE contra el catálogo, con match flexible, antes
+        // de rendirnos y adivinar una ruta al vuelo.
+        const byName = catalog.find(entry => namesLooselyMatch(entry.name, raw));
+        if (byName) return byName;
+
+        // 3) Último recurso: el club/selección no está en nuestro catálogo
+        // curado — armamos rutas candidatas por si el archivo existe con
+        // ese slug exacto en alguna carpeta de liga, en vez de una única
+        // ruta plana que jamás iba a coincidir con la estructura real de
+        // carpetas. renderConditionSlot las va probando en orden.
+        const isClub = catalog === CLUB_CATALOG;
+        const imgCandidates = isClub
+            ? CLUB_LEAGUE_FOLDERS.map(folder => `${IMAGES_BASE_PATH}/${folder}/${slug}-logo-footylogos.png`)
+            : [`${IMAGES_BASE_PATH}/Selecciones/${slug}-national-team-logo-footylogos.png`];
+
+        return {
+            id: slug,
+            name: String(raw),
+            img: imgCandidates[0],
+            imgCandidates
+        };
+    }
+
+    function pickRandomConditions(catalog, count) {
+        const shuffled = [...catalog].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
+    }
+
+    // Devuelve una promesa que resuelve cuando el escudo terminó de cargar
+    // (onload) o falló (onerror) — nunca queda colgada: si por lo que sea
+    // ninguno de los dos eventos llega, un timeout de seguridad la resuelve
+    // igual para no trabar el arranque del juego.
+    // Devuelve una promesa que resuelve cuando el escudo terminó de cargar
+    // (onload) o se agotaron todos los candidatos posibles (onerror en
+    // cadena) — nunca queda colgada: si por lo que sea ningún evento llega,
+    // un timeout de seguridad la resuelve igual para no trabar el arranque.
+    function renderConditionSlot(slotElement, condition) {
+        if (!slotElement) return Promise.resolve();
+        const img = slotElement.querySelector('.cond-img');
+        const candidates = Array.isArray(condition.imgCandidates) && condition.imgCandidates.length > 0
+            ? condition.imgCandidates
+            : [condition.img];
+
+        return new Promise(resolve => {
+            const finish = () => resolve();
+            let nextCandidateIndex = 0;
+
+            const tryNextCandidate = () => {
+                if (nextCandidateIndex >= candidates.length) {
+                    // Fix del escudo en blanco: esconder el <img>
+                    // (display:none) dejaba a la vista el cuadrado
+                    // blanco/gris de fondo de .cond-top / .cond-left. Recién
+                    // acá, agotados TODOS los candidatos, se reemplaza por
+                    // el logo genérico de Footlel y se resuelve la promesa.
+                    img.onerror = null; // evita loop infinito si el propio fallback también fallara
+                    img.src = FALLBACK_SHIELD_IMG;
+                    img.style.opacity = '0.55'; // distingue visualmente que es un placeholder
+                    finish();
+                    return;
+                }
+                img.src = candidates[nextCandidateIndex];
+                nextCandidateIndex += 1;
+            };
+
+            img.onload = finish;
+            img.onerror = tryNextCandidate;
+            setTimeout(finish, 4000); // salvavidas por si ningún evento dispara
+            img.alt = condition.name; // El nombre queda en el alt por accesibilidad, ya no se muestra como texto.
+            tryNextCandidate();
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       7. TIMER
+    ───────────────────────────────────────────── */
+    // Reinicio COMPLETO a 60s. Único disparador legítimo: un cambio de
+    // turno real (switchActivePlayer, llamado por acierto/derrota de ronda
+    // o por el propio timeout de 00:00). NUNCA llamar esto por una falla
+    // de conexión o mientras el usuario escribe.
+    function startRoundTimer() {
+        stopRoundTimer();
+        gameState.timeLeft = TURN_DURATION_SECONDS;
+        renderTimerDisplay();
+        resumeRoundTimer();
+    }
+
+    // Retoma la cuenta regresiva SIN tocar timeLeft. Se usa cuando el
+    // reloj se pausó para esperar al backend y la jugada NO cambió de
+    // turno (p. ej. "Error de conexión, reintentá").
+    function resumeRoundTimer() {
+        stopRoundTimer();
+        gameState.timerIntervalId = setInterval(() => {
+            gameState.timeLeft -= 1;
+            renderTimerDisplay();
+
+            if (gameState.timeLeft <= 0) {
+                stopRoundTimer();
+                switchActivePlayer(); // Turn lost due to timeout
+            }
+        }, 1000);
+    }
+
+    function stopRoundTimer() {
+        if (gameState.timerIntervalId !== null) {
+            clearInterval(gameState.timerIntervalId);
+            gameState.timerIntervalId = null;
+        }
+    }
+
+    function renderTimerDisplay() {
+        dom.timeText.textContent = `00:${String(gameState.timeLeft).padStart(2, '0')}`;
+    }
+
+    /* ─────────────────────────────────────────────
+       8. BOARD LOGIC
+    ───────────────────────────────────────────── */
+    function checkWinCondition(player) {
+        const board = gameState.board;
+        for (let row = 0; row < 3; row++) {
+            if (board[row][0] === player && board[row][1] === player && board[row][2] === player) return true;
+        }
+        for (let col = 0; col < 3; col++) {
+            if (board[0][col] === player && board[1][col] === player && board[2][col] === player) return true;
+        }
+        if (board[0][0] === player && board[1][1] === player && board[2][2] === player) return true;
+        if (board[0][2] === player && board[1][1] === player && board[2][0] === player) return true;
+        return false;
+    }
+
+    function checkDrawCondition() {
+        return gameState.board.flat().every(cell => cell !== 0);
+    }
+
+    // BUG CRÍTICO (500 al jugar la Ronda 2): el backend guarda el estado de
+    // la partida en variables globales del lado del servidor y la CIERRA
+    // por completo apenas alguien gana una ronda — game_manager.py llama a
+    // stop_game_board() dentro de player_guessed()/player2_guessed()/
+    // ai_guessed() en cuanto detecta un ganador, lo que pone is_playing en
+    // False. Antes, esta función solo limpiaba el tablero DE ESTE LADO y
+    // seguía mandando guesses contra esa partida ya cerrada — de ahí el 500
+    // apenas se confirmaba la primera jugada de la Ronda 2. Ahora se pide un
+    // /game/start nuevo (misma función que usa initGame) antes de continuar.
+    async function resetBoardState() {
+        stopRoundTimer();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+
+        gameState.board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        dom.cells.forEach(cell => {
+            cell.classList.remove('conquered-p1', 'conquered-p2');
+            cell.querySelectorAll('.cell-mark').forEach(mark => mark.remove());
+        });
+        dom.playerSearch.value = '';
+
+        const loaded = await loadFreshGameBoard();
+        if (!loaded) return;
+
+        dom.btnConfirm.disabled = false;
+        dom.playerSearch.disabled = false;
+
+        // El turno de la ronda nueva lo define el backend (local_player_turn,
+        // ya aplicado dentro de fetchGameStartData) — no lo alternamos a mano
+        // como antes, porque podría contradecir lo que el servidor decidió
+        // para esta nueva partida.
+        renderTurnIndicator();
+
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer === 2) {
+            triggerAiTurn();
+        } else {
+            startRoundTimer();
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       9. TURN & SCORE
+    ───────────────────────────────────────────── */
+    function switchActivePlayer() {
+        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+        renderTurnIndicator();
+        dom.playerSearch.value = '';
+
+        // En Desafío Diario el turno del Bot es 100% automático: no depende
+        // de que nadie escriba en el buscador ni haga click en "Confirmar".
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer === 2 && !gameState.isGameOver) {
+            triggerAiTurn();
+            return;
+        }
+
+        startRoundTimer();
+    }
+
+    function renderTurnIndicator() {
+        dom.turnIndicator.textContent = `Turno: Jugador ${gameState.currentPlayer}`;
+        dom.turnIndicator.style.color = gameState.currentPlayer === 1
+            ? 'var(--color-brand-green)'
+            : '#2196F3';
+    }
+
+    function updateScoreDisplay() {
+        dom.scoreValueP1El.textContent = gameState.scoreP1;
+        dom.scoreValueP2El.textContent = gameState.scoreP2;
+    }
+
+    function endGameMatch(winner) {
+        gameState.isGameOver = true;
+        stopRoundTimer();
+        document.body.style.overflow = 'hidden';
+
+        if (winner === 1) {
+            dom.modalVictoria.classList.remove('hidden');
+            dom.modalVictoria.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+        } else {
+            dom.modalDerrota.classList.remove('hidden');
+            dom.modalDerrota.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+            dom.modalDerrota.querySelector('.modal-title').textContent = '¡Ganó el Jugador 2!';
+        }
+
+        if (gameState.currentMode === GAME_MODE.DAILY) {
+            try {
+                localStorage.setItem(DAILY_MODE_STORAGE_KEY, 'true');
+            } catch (error) {
+                console.error('Could not persist daily mode flag to localStorage:', error);
+            }
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       10. API / GUESS SUBMISSION
+    ───────────────────────────────────────────── */
+    function resolveGuessEndpoint() {
+        // El Bot NO pasa por acá — su jugada se resuelve aparte, en requestAiMove().
+        // En Desafío Diario el humano es siempre "Jugador 1", así que su guess
+        // va al mismo endpoint que el Jugador 1 del modo local.
+        if (gameState.currentMode === GAME_MODE.DAILY) {
+            return API_ENDPOINTS.PLAYER_ONE_GUESS;
+        }
+        return gameState.currentPlayer === 1
+            ? API_ENDPOINTS.PLAYER_ONE_GUESS
+            : API_ENDPOINTS.PLAYER_TWO_GUESS;
+    }
+
+    async function submitPlayerGuess(playerName) {
+        const endpoint = resolveGuessEndpoint();
+        // Trim defensivo: aunque handleConfirmClick ya llega con el valor
+        // trimeado, esta función puede llamarse desde otros lugares a futuro
+        // (ej. reintentos), así que nunca debe salir un player_guess con
+        // espacios en blanco que rompan la validación exacta del backend.
+        const trimmedGuess = playerName.trim();
+        console.warn('📤 ENVIANDO AL BACKEND:', trimmedGuess);
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Ya no se pre-selecciona celda: el Backend recibe solo el nombre
+                // y decide en qué casillero encaja (ver resolveTargetCellFromResponse).
+                body: JSON.stringify({ player_guess: trimmedGuess })
+            });
+
+            // El body se lee UNA sola vez acá (safeParseJson ya tiene su
+            // propio try/catch) y ese mismo `data` se reutiliza para todo lo
+            // que sigue. Nunca se vuelve a llamar response.json(): eso
+            // rompería con "body stream already read".
+            const data = await safeParseJson(response);
+            console.warn(`📥 RESPUESTA DEL BACKEND (Status ${response.status}):`, data);
+
+            if (!response.ok) {
+                if (response.status === 400 || response.status === 422) {
+                    return { isCorrect: false, data };
+                }
+                throw new Error(`Unexpected server status: ${response.status}`);
+            }
+
+            // El backend real (visto en consola) responde SIEMPRE 200 cuando
+            // pudo procesar la jugada, y usa el campo `correct_answer` para
+            // avisar si el nombre estaba bien o mal — el status HTTP solo,
+            // por sí solo, ya no alcanza para saber si acertó.
+            const isCorrect = data && typeof data.correct_answer === 'boolean'
+                ? data.correct_answer
+                : true; // Fallback por compatibilidad si el campo no viniera.
+
+            return { isCorrect, data };
+        } catch (networkOrServerError) {
+            console.error('Guess submission failed:', networkOrServerError);
+            // Falla técnica real (red, CORS, 5xx): NO es un "guess incorrecto".
+            return { isCorrect: false, data: null, isNetworkError: true };
+        }
+    }
+
+    async function safeParseJson(response) {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    // El endpoint del Bot no recibe body (ver swagger: "No parameters",
+    // sin Request body) — solo se dispara la jugada y se lee la respuesta.
+    async function requestAiMove() {
+        try {
+            const response = await fetch(API_ENDPOINTS.AI_GUESS, { method: 'POST' });
+            if (!response.ok) {
+                throw new Error(`Unexpected server status: ${response.status}`);
+            }
+            return { data: await safeParseJson(response) };
+        } catch (error) {
+            console.error('AI move request failed:', error);
+            return { data: null, isNetworkError: true };
+        }
+    }
+
+    // Orquesta el turno del Bot en Desafío Diario: se dispara solo, sin
+    // esperar ninguna interacción del usuario en el buscador.
+    async function triggerAiTurn() {
+        if (gameState.isGameOver) return;
+
+        stopRoundTimer();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+
+        const aiResult = await requestAiMove();
+
+        if (aiResult.isNetworkError) {
+            // No dejamos la partida trabada: reintentamos la jugada del Bot solo,
+            // sin tocar el cronómetro (no hubo cambio de turno real).
+            showButtonError('Reintentando jugada del Bot...');
+            setTimeout(triggerAiTurn, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        const targetCell = resolveTargetCellFromResponse(aiResult.data, 2);
+
+        if (!targetCell) {
+            // Igual que con el jugador humano: esto no es un cambio de turno
+            // legítimo, es una respuesta sin celda utilizable. Reintentamos
+            // la jugada del Bot sin tocar el reloj ni el turno.
+            console.error('El Bot no devolvió una celda válida (ni cell_index ni board):', aiResult.data);
+            setTimeout(triggerAiTurn, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        // Bug #3: el turno del Bot es silencioso — nunca muestra el pop-up
+        // de "Golazo" ni el de error (esos son exclusivos del jugador
+        // humano). Solo se inyecta la "O" y, si el backend informa qué
+        // jugador usó, se deja constancia discreta en consola.
+        if (aiResult.data && aiResult.data.player_guess) {
+            console.log('Bot jugó:', aiResult.data.player_guess);
+        }
+        setTimeout(() => resolveTurnOutcome(), RESULT_DISPLAY_DELAY_MS);
+    }
+
+    /* ─────────────────────────────────────────────
+       10.1 MAPEO RESPUESTA BACKEND → CELDA DEL DOM
+       Bug visual crítico: el backend no siempre usa el mismo nombre de
+       campo para indicar dónde cayó la jugada. Se prueban, en orden,
+       `cell_index`, `position` y `celda` (los 3 contratos vistos en
+       respuestas reales), y se selecciona la celda por su data-index
+       (0 a 8, orden fila por fila) en vez de por data-row/data-col.
+       Si ninguno de los tres viene, se cae al sync contra `board` como
+       último recurso.
+    ───────────────────────────────────────────── */
+    function resolveTargetCellFromResponse(data, player) {
+        if (!data) return null;
+
+        const backendIndex = [data.cell_index, data.position, data.celda]
+            .find(value => typeof value === 'number');
+
+        if (typeof backendIndex === 'number') {
+            return placePlayerMarkByIndex(backendIndex, player);
+        }
+
+        if (Array.isArray(data.board)) {
+            return syncBoardFromServer(data.board);
+        }
+
+        return null;
+    }
+
+    // Selecciona la celda exacta por data-index e inyecta la marca ahí.
+    // Es el punto de escritura principal del tablero (bug visual #4).
+    function placePlayerMarkByIndex(index, player) {
+        const cell = document.querySelector(`[data-index="${index}"]`);
+        if (!cell) {
+            console.error(`No se encontró ninguna celda con data-index="${index}"`);
+            return null;
+        }
+
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        gameState.board[row][col] = player;
+        renderPlayerMark(cell, player);
+        cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
+        return cell;
+    }
+
+    // Compara el tablero que manda el backend contra nuestro estado local
+    // y pinta en el DOM la(s) celda(s) que aparecieron recién ocupadas.
+    //
+    // Bug de posicionamiento: nuestro DOM arma la matriz como
+    // [fila = selección (cond-left)][columna = club (cond-top)] (ver
+    // applyBoardConditions). El backend, en cambio, arma su `board` en el
+    // eje contrario: [club][selección]. Al leerlo con nuestra misma
+    // convención [row][col] estábamos tomando la celda transpuesta, por
+    // eso una jugada correcta terminaba dibujándose en un cruce
+    // Club×Selección que no era el suyo. Se lee invertido para compensar.
+    function syncBoardFromServer(serverBoard) {
+        let changedCell = null;
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                const serverValue = normalizeServerCellValue(serverBoard?.[col]?.[row]);
+                if (serverValue !== 0 && gameState.board[row][col] === 0) {
+                    changedCell = placePlayerMarkAt(row, col, serverValue) || changedCell;
+                }
+            }
+        }
+        return changedCell;
+    }
+
+    // Acepta 1/2, "1"/"2" o "X"/"O" para no atarnos a un único formato
+    // hasta que el equipo de Python confirme el tipo exacto de `board`.
+    // Encoding real confirmado por el equipo de Python:
+    // 0 = vacía · 1 = adivinada por el Jugador local (Jugador 1) ·
+    // -1 = adivinada por la IA o el Jugador 2 (1v1 Local).
+    function normalizeServerCellValue(value) {
+        if (value === 1) return 1;
+        if (value === -1) return 2;
+        return 0;
+    }
+
+    // Único punto de escritura del tablero: actualiza el estado, inyecta
+    // la marca correcta (X para Jugador 1, O para Jugador 2 / Bot) y
+    // agrega la clase de "conquistada". Fix del bug visual #4.
+    function placePlayerMarkAt(row, col, player) {
+        const cell = document.querySelector(`.playable-cell[data-row="${row}"][data-col="${col}"]`);
+        if (!cell) return null;
+
+        gameState.board[row][col] = player;
+        renderPlayerMark(cell, player);
+        cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
+        return cell;
+    }
+
+    /* ─────────────────────────────────────────────
+       11. UI FEEDBACK
+    ───────────────────────────────────────────── */
+    function showReactionPopup(popupElement) {
+        popupElement.classList.add('show');
+        setTimeout(() => popupElement.classList.remove('show'), REACTION_POPUP_DURATION_MS);
+    }
+
+    function showButtonError(message) {
+        const originalText = dom.btnConfirm.textContent;
+        dom.btnConfirm.textContent = message;
+        dom.btnConfirm.style.backgroundColor = '#F44336';
+        dom.btnConfirm.style.transform = 'scale(1.05)';
+
+        setTimeout(() => {
+            dom.btnConfirm.textContent = originalText;
+            dom.btnConfirm.style.backgroundColor = '';
+            dom.btnConfirm.style.transform = '';
+        }, BUTTON_ERROR_DURATION_MS);
+    }
+
+    function renderPlayerMark(cell, player) {
+        // Injects the visible "X" / "O" mark into the conquered cell.
+        // .playable-cell already centers its content (see tateti.css),
+        // so no extra positioning is needed here.
+        const mark = document.createElement('span');
+        mark.className = `cell-mark ${player === 1 ? 'mark-x' : 'mark-o'}`;
+        mark.textContent = player === 1 ? 'X' : 'O';
+        cell.appendChild(mark);
+    }
+
+    /* ─────────────────────────────────────────────
+       12. EVENT HANDLERS
+    ───────────────────────────────────────────── */
+    function bindEventListeners() {
+        // Las celdas ya no se seleccionan manualmente: el Backend indica
+        // en qué casillero cae la jugada al confirmar (ver handleConfirmClick).
+        dom.btnConfirm.addEventListener('click', handleConfirmClick);
+        dom.playerSearch.addEventListener('input', handleSearchInput);
+        document.addEventListener('click', handleOutsideAutocompleteClick);
+    }
+
+    async function handleConfirmClick() {
+        if (gameState.isGameOver) return;
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer !== 1) return;
+
+        // Bug #1 (falso negativo a partir del 2º intento): se captura el
+        // valor en una variable local YA trimeada y se limpia el input de
+        // inmediato, antes de esperar la respuesta del backend. Así ningún
+        // intento puede arrastrar o reutilizar el valor del anterior.
+        const playerName = dom.playerSearch.value.trim();
+        if (playerName.length === 0) {
+            showButtonError('¡Escribí un jugador!');
+            dom.playerSearch.focus();
+            return;
+        }
+
+        stopRoundTimer();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+        dom.playerSearch.value = '';
+
+        const guessResult = await submitPlayerGuess(playerName);
+
+        if (guessResult.isNetworkError) {
+            // Falla técnica (backend caído, CORS, status inesperado): NO es
+            // un guess incorrecto y NO hay cambio de turno, así que el
+            // cronómetro se RETOMA (resumeRoundTimer) en vez de reiniciarse
+            // a 60. Antes acá se llamaba a startRoundTimer() por error.
+            dom.btnConfirm.disabled = false;
+            dom.playerSearch.disabled = false;
+            showButtonError('Error de conexión, reintentá');
+            resumeRoundTimer();
+            return;
+        }
+
+        const { isCorrect, data } = guessResult;
+
+        if (!isCorrect) {
+            // Regla estricta: un jugador incorrecto NUNCA cambia el turno ni
+            // reinicia/detiene el reloj. Solo mostramos el pop-up de fallo,
+            // y al cerrarse retomamos la cuenta regresiva EXACTAMENTE donde
+            // estaba (resumeRoundTimer, no startRoundTimer) para que el
+            // mismo jugador pueda seguir intentando.
+            showReactionPopup(dom.popupError);
+            setTimeout(() => {
+                dom.playerSearch.disabled = false;
+                dom.btnConfirm.disabled = false;
+                dom.playerSearch.value = '';
+                dom.playerSearch.focus();
+                resumeRoundTimer();
+            }, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        const targetCell = resolveTargetCellFromResponse(data, gameState.currentPlayer);
+
+        if (!targetCell) {
+            // Tampoco esto es un cambio de turno real: retomamos el reloj.
+            console.error('El Backend no indicó una celda válida (ni cell_index ni board):', data);
+            dom.btnConfirm.disabled = false;
+            dom.playerSearch.disabled = false;
+            showButtonError('Error del servidor');
+            resumeRoundTimer();
+            return;
+        }
+
+        showReactionPopup(dom.popupSuccess);
+        setTimeout(() => resolveTurnOutcome(), RESULT_DISPLAY_DELAY_MS);
+    }
+
+    // A partir de ahora SOLO se llama tras un acierto real (200 OK con
+    // celda válida) o tras un timeout a 00:00 (ver resumeRoundTimer). Un
+    // guess incorrecto ya no pasa por acá — ver handleConfirmClick.
+    function resolveTurnOutcome() {
+        dom.playerSearch.disabled = false;
+        dom.btnConfirm.disabled = false;
+        dom.playerSearch.value = '';
+
+        const winningPlayer = gameState.currentPlayer;
+
+        if (checkWinCondition(winningPlayer)) {
+            if (winningPlayer === 1) gameState.scoreP1 += 1; else gameState.scoreP2 += 1;
+            updateScoreDisplay();
+
+            if (gameState.scoreP1 >= ROUNDS_TO_WIN || gameState.scoreP2 >= ROUNDS_TO_WIN) {
+                endGameMatch(winningPlayer);
+            } else {
+                alert(`¡Tateti! El Jugador ${winningPlayer} ganó esta ronda.`);
+                resetBoardState();
+            }
+        } else if (checkDrawCondition()) {
+            alert('¡Empate! Tablero lleno sin ganador. Reiniciando ronda...');
+            resetBoardState();
+        } else {
+            switchActivePlayer();
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       13. AUTOCOMPLETE (PLAYER SEARCH)
+    ───────────────────────────────────────────── */
+    async function loadPlayerRoster() {
+        try {
+            const response = await fetch(PLAYERS_CSV_PATH);
+            if (!response.ok) {
+                console.error(`No se pudo cargar el listado de jugadores (${PLAYERS_CSV_PATH}): status ${response.status}. El autocomplete va a quedar vacío.`);
+                return;
+            }
+            const csvText = await response.text();
+
+            availablePlayers = csvText
+                .split(/\r?\n/)
+                .map(name => name.trim().replace(/^"|"$/g, ''))
+                .filter(name => name.length > 0);
+
+            console.info(`Listado de jugadores cargado: ${availablePlayers.length} nombres desde ${PLAYERS_CSV_PATH}.`);
+            if (availablePlayers.length === 0) {
+                console.warn(`${PLAYERS_CSV_PATH} respondió 200 pero no se extrajo ningún nombre. Revisar el formato del archivo.`);
+            }
+        } catch (error) {
+            console.error(`Error de red cargando el listado de jugadores (${PLAYERS_CSV_PATH}):`, error);
+        }
+    }
+
+    function handleSearchInput() {
+        clearTimeout(autocompleteDebounceId);
+        autocompleteDebounceId = setTimeout(renderAutocompleteResults, AUTOCOMPLETE_DEBOUNCE_MS);
+    }
+
+    function renderAutocompleteResults() {
+        const query = dom.playerSearch.value.trim().toLowerCase();
+        dom.autocompleteList.innerHTML = '';
+
+        if (query.length < AUTOCOMPLETE_MIN_CHARS) {
+            closeAutocompleteList();
+            return;
+        }
+
+        const matches = availablePlayers.filter(name => name.toLowerCase().includes(query));
+
+        if (matches.length === 0) {
+            closeAutocompleteList();
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        matches.slice(0, AUTOCOMPLETE_MAX_RESULTS).forEach(playerName => {
+            const listItem = document.createElement('li');
+            listItem.textContent = playerName; // textContent avoids HTML/XSS injection
+            listItem.setAttribute('role', 'option');
+            listItem.addEventListener('click', () => selectAutocompleteResult(playerName));
+            fragment.appendChild(listItem);
+        });
+
+        dom.autocompleteList.appendChild(fragment);
+        dom.autocompleteList.style.display = 'block';
+        dom.playerSearch.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeAutocompleteList() {
+        dom.autocompleteList.style.display = 'none';
+        dom.playerSearch.setAttribute('aria-expanded', 'false');
+    }
+
+    function selectAutocompleteResult(playerName) {
+        dom.playerSearch.value = playerName;
+        closeAutocompleteList();
+        dom.btnConfirm.focus();
+    }
+
+    function handleOutsideAutocompleteClick(event) {
+        const clickedInsideSearch = dom.playerSearch.contains(event.target);
+        const clickedInsideResults = dom.autocompleteList.contains(event.target);
+        if (!clickedInsideSearch && !clickedInsideResults) {
+            closeAutocompleteList();
+        }
+    }
+});
+</script>
+</body>
+</html>

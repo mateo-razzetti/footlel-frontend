@@ -25,6 +25,19 @@
     /* Aplicar al <html> inmediatamente (siempre existe, incluso desde el <head>)
        para que el CSS tipo html.light-mode body {...} también pueda funcionar */
     document.documentElement.classList.toggle('light-mode', isLight);
+
+    /* ── 2. ANIMACIONES ────────────────────────────────────────────
+       Clave : 'pref_toggle-animaciones'   Valores: 'true' | 'false' (defecto)
+       (confirmado contra configuracion.html → initToggles() / listener
+       de toggleAnim, que es quien escribe esta clave)
+       → Aplica/quita body.disable-animations en TODAS las páginas.
+       Esta sección faltaba por completo en el archivo (saltaba del
+       bloque "1" directo al "3"), por eso `animDisabled` no estaba
+       definida en ningún lado y tiraba ReferenceError apenas se llamaba
+       a applyGlobalPreferences().
+    ─────────────────────────────────────────────────────────────── */
+    var animDisabled = localStorage.getItem('pref_toggle-animaciones') === 'true';
+
     document.documentElement.classList.toggle('disable-animations', animDisabled);
 
     /* ── 3. Función utilitaria: swap del logo ─────────────────────
@@ -53,4 +66,3 @@
     });
 
 })();
-
