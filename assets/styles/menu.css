@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Menú Principal (Dashboard)
+   FOOTLEL — Main Menu (Dashboard)
    assets/styles/menu.css
    ═══════════════════════════════════════════════════════════════ */
 
@@ -214,7 +214,7 @@ body {
     margin: 0 auto;
 }
 
-/* ── Hero / Bienvenida ─────────────────────────────────────────── */
+/* ── Hero / Welcome Section ─────────────────────────────────────────── */
 .hero {
     text-align: center;
     margin-bottom: 48px;
@@ -294,7 +294,7 @@ body {
     flex: 1;
 }
 
-/* ── Ghost button (cards del menú) ───────────────────────────── */
+/* ── Ghost button (menu cards) ───────────────────────────── */
 .btn-outline {
     display: flex;
     justify-content: space-between;
@@ -320,7 +320,7 @@ body {
 }
 .btn-outline:active { transform: scale(0.98); }
 
-/* ── Botón sólido (uso general fuera de las cards) ───────────── */
+/* ── Solid button (general usage outside cards) ───────────── */
 .btn-primary {
     display: block;
     width: 100%;
@@ -402,7 +402,7 @@ body {
     .cards-grid {
         grid-template-columns: 1fr 1fr;
     }
-    /* La primera card ocupa ancho completo en 2-col */
+    /* First card spans full width in 2-column layout */
     .cards-grid .game-card:first-child {
         grid-column: 1 / -1;
     }
@@ -423,7 +423,7 @@ body {
 
 
 /* ======================================================================
-   PELOTAS DECORATIVAS DE FONDO
+   DECORATIVE BACKGROUND FOOTBALLS
    ====================================================================== */
 @keyframes ballFloat {
     0%   { transform: translateX(-120px) rotate(0deg);   opacity: 0;   }
@@ -454,7 +454,7 @@ body {
 .bg-ball--3 { top: 72%; animation-duration: 32s; animation-delay: -20s; font-size:  60px; }
 .bg-ball--4 { top: 28%; animation-duration: 44s; animation-delay:  -6s; font-size: 110px; }
 
-/* Suprimir cuando el usuario activo 'Eliminar animaciones' */
+/* Suppressed when user activates 'Disable animations' */
 html.disable-animations .bg-balls {
     display: none !important;
 }

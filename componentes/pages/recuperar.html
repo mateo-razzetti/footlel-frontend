@@ -7,13 +7,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Ícono de sobre via Phosphor Icons (ligero, sin dependencias pesadas) -->
+    <!-- Envelope icon via Phosphor Icons (lightweight, no heavy dependencies) -->
     <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
     <link rel="stylesheet" href="../../assets/styles/login.css">
     <link rel="stylesheet" href="../../assets/styles/recuperar.css">
-    <!-- Preferencias globales (tema + animaciones) -->
+    <!-- Global preferences (theme + animations) -->
     <script src="../../assets/scripts/global-preferences.js" defer></script>
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
@@ -42,7 +42,7 @@
                         required
                     >
                 </div>
-                <!-- Error de validación de correo (oculto por defecto) -->
+                <!-- Email validation error (hidden by default) -->
                 <p class="field-error" id="email-error" aria-live="polite" hidden>
                     Ingresá un correo válido.
                 </p>
@@ -59,7 +59,7 @@
     <script>
         const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,8}$/;
 
-        /* ── Validación de email en submit ── */
+        /* ── Email validation on submit ── */
         document.getElementById('recover-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -75,7 +75,7 @@
             }
         });
 
-        /* ── Limpieza en tiempo real ── */
+        /* ── Real-time cleanup ── */
         document.getElementById('recovery-email').addEventListener('input', () => {
             const emailError = document.getElementById('email-error');
             if (!emailError.hidden && EMAIL_REGEX.test(document.getElementById('recovery-email').value.trim())) {

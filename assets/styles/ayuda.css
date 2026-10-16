@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Centro de Ayuda
+   FOOTLEL — Help Center
    assets/styles/ayuda.css
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Cabecera Central ─────────────────────────────────────────── */
+/* ── Central Header ─────────────────────────────────────────── */
 .help-header {
     text-align: center;
     padding: 48px 32px 40px;
@@ -28,7 +28,7 @@
     line-height: 1.6;
 }
 
-/* ── Acordeón ─────────────────────────────────────────────────── */
+/* ── Accordion ─────────────────────────────────────────────────── */
 .faq-container {
     max-width: 720px;
     margin: 0 auto;
@@ -50,7 +50,7 @@
     border-color: rgba(76, 175, 80, 0.40);
 }
 
-/* ── Botón de pregunta ────────────────────────────────────────── */
+/* ── Question button ────────────────────────────────────────── */
 .faq-trigger {
     width: 100%;
     display: flex;
@@ -92,7 +92,7 @@
     color: var(--color-brand-green);
 }
 
-/* ── Panel de respuesta ───────────────────────────────────────── */
+/* ── Answer panel ───────────────────────────────────────── */
 .faq-panel {
     display: grid;
     grid-template-rows: 0fr;
@@ -103,7 +103,7 @@
     grid-template-rows: 1fr;
 }
 
-/* Wrapper interno necesario para grid-template-rows 0fr */
+/* Inner wrapper required for grid-template-rows 0fr */
 .faq-panel-inner {
     overflow: hidden;
 }
@@ -119,12 +119,12 @@
     padding-top: 16px;
 }
 
-/* ── Separador visual entre trigger y answer (solo cuando abierto) ── */
+/* ── Visual separator between trigger and answer (when open only) ── */
 .faq-item:not(.is-open) .faq-answer {
     border-top-color: transparent;
 }
 
-/* ── Link "Volver" en el header ───────────────────────────────── */
+/* ── "Back" link in header ───────────────────────────────── */
 .back-link {
     display: inline-flex;
     align-items: center;
@@ -147,7 +147,7 @@
     height: 15px;
 }
 
-/* ── Logo + back agrupados ────────────────────────────────────── */
+/* ── Grouped logo + back ────────────────────────────────────── */
 .header-left {
     display: flex;
     align-items: center;

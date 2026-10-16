@@ -10,19 +10,19 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Estilos: tokens + componentes compartidos -->
+    <!-- Styles: tokens + shared components -->
     <link rel="stylesheet" href="../../assets/styles/menu.css">
-    <!-- Estilos específicos de esta pantalla -->
+    <!-- Styles specific to this screen -->
     <link rel="stylesheet" href="../../assets/styles/modalidades.css">
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 
-    <!-- Script global (tema + swap logo) -->
+    <!-- Global script (theme + logo swap) -->
     <script src="../../assets/scripts/global-preferences.js" defer></script>
 </head>
 <body>
 
-<!-- Pelotas decorativas de fondo (aria-hidden: solo decoración) -->
+<!-- Decorative background balls (aria-hidden: decoration only) -->
 <div class="bg-balls" aria-hidden="true">
     <span class="bg-ball bg-ball--1">⚽</span>
     <span class="bg-ball bg-ball--2">⚽</span>
@@ -37,14 +37,14 @@
     ═══════════════════════════════════════ -->
     <header class="site-header" role="banner">
 
-        <!-- Logo (actúa como Inicio) -->
+        <!-- Logo (acts as Home) -->
         <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
             <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel"
                  class="logo-img" id="main-logo">
             <span class="logo-text">FOOT<span>LEL</span></span>
         </a>
 
-        <!-- Perfil + Dropdown -->
+        <!-- Profile + Dropdown -->
         <div class="profile-wrapper" id="profileWrapper">
             <button
                 class="profile-btn"
@@ -92,7 +92,7 @@
                     Editar Cuenta
                 </a>
 
-                <a href="#" class="dropdown-item" role="menuitem" id="ddFriends">
+                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
                          stroke-linejoin="round" aria-hidden="true">
@@ -133,7 +133,7 @@
     </header>
 
     <!-- ═══════════════════════════════════════
-         CONTENIDO PRINCIPAL
+         MAIN CONTENT
     ═══════════════════════════════════════ -->
     <main class="main-content" id="mainContent" role="main">
 
@@ -145,10 +145,10 @@
             </p>
         </section>
 
-        <!-- Grid de Modos -->
+        <!-- Modes grid -->
         <section class="mode-grid" aria-label="Modos de juego disponibles">
 
-            <!-- ── Card 1: Desafío Diario (destacada) ── -->
+            <!-- ── Card 1: Daily Challenge (featured) ── -->
             <article class="mode-card featured" aria-labelledby="modoDiarioTitle">
                 <div class="mode-icon" aria-hidden="true">⚽</div>
                 <h2 class="mode-title" id="modoDiarioTitle">Desafío Diario</h2>
@@ -156,12 +156,12 @@
                     Una partida exclusiva por día. Juga el Tateti del dia,
                     sumá puntos al ranking global y mantené tu racha activa.
                 </p>
-                <a href="tateti.html" class="btn-mode" id="btn-diario">
+                <a href="tateti-diario.html" class="btn-mode" id="btn-diario">
                     <span>INGRESAR</span><span>→</span>
                 </a>
             </article>
 
-            <!-- ── Card 2: 1v1 Local (liberado para todos) ── -->
+            <!-- ── Card 2: 1v1 Local (unlocked for everyone) ── -->
             <article class="mode-card" aria-labelledby="modoLocalTitle">
                 <div class="mode-icon" aria-hidden="true">🕹️</div>
                 <h2 class="mode-title" id="modoLocalTitle">1v1 Local</h2>
@@ -169,7 +169,7 @@
                     Jugá en el mismo dispositivo con un amigo. Turno a turno,
                     en el Tateti y demostrá quién sabe más de fútbol.
                 </p>
-                <a href="tateti.html" class="btn-mode" id="btn-local">
+                <a href="tateti-local.html" class="btn-mode" id="btn-local">
                     <span>INGRESAR</span><span>→</span>
                 </a>
             </article>
@@ -189,7 +189,7 @@
 
         </section>
 
-        <!-- ── CTA Invitado (oculto para usuarios registrados) ── -->
+        <!-- ── Guest CTA (hidden for registered users) ── -->
         <div class="guest-cta-bar hidden" id="cta-invitado-modalidades" aria-live="polite">
             <p class="guest-cta-bar__text">
                 Iniciá sesión o registrate gratis para competir online, jugar con amigos y guardar tus estadísticas diarias.
@@ -203,7 +203,7 @@
     </main><!-- /main-content -->
 
     <!-- ═══════════════════════════════════════
-         BARRA DE ESTADÍSTICAS
+         STATS BAR
     ═══════════════════════════════════════ -->
     <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
         <div class="stat-col">
@@ -245,7 +245,7 @@
 
 
 <!-- ═══════════════════════════════════════
-     MODAL 2: Desafío Ya Jugado
+     MODAL 2: Challenge Already Played
 ═══════════════════════════════════════ -->
 <div class="modal-backdrop hidden" id="modal-desafio"
      role="dialog" aria-modal="true" aria-labelledby="modal-des-title">
@@ -277,11 +277,11 @@
     function $(id) { return document.getElementById(id); }
 
     /* ──────────────────────────────────────────
-       1. ESTADO (Invitado vs Registrado)
-       Para probar modo invitado:
+       1. STATE (Guest vs Registered)
+       To test guest mode:
          localStorage.setItem('footlel_guest', 'true')
     ────────────────────────────────────────── */
-    /* ── Leer estado (localStorage es síncrono — script al final del body) */
+    /* ── Read state (localStorage is synchronous — script at the end of the body) */
     var isGuest      = localStorage.getItem('footlel_guest') === 'true';
     var savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
     var savedAvatar = localStorage.getItem('footlel_avatar');
@@ -289,17 +289,17 @@
         document.getElementById('profileAvatar').src = savedAvatar;
     }
 
-    /* ── CTA invitado: revelar / ocultar ANTES del primer paint ─────────
-       Se hace aquí (no en DOMContentLoaded) para que el elemento aparezca
-       en su posición final sin salto visual.                             */
-    var ctaInvitado = $('cta-invitado-modalidades');
-    if (ctaInvitado) {
+    /* ── Guest CTA: show / hide BEFORE the first paint ─────────
+       Done here (not in DOMContentLoaded) so the element appears
+       in its final position without a visual jump.                       */
+    var guestCta = $('cta-invitado-modalidades');
+    if (guestCta) {
         if (isGuest) {
-            ctaInvitado.style.display = 'flex';   /* layout interno correcto */
-            ctaInvitado.classList.remove('hidden');
+            guestCta.style.display = 'flex';   /* correct inner layout */
+            guestCta.classList.remove('hidden');
         } else {
-            ctaInvitado.style.display = 'none';
-            ctaInvitado.classList.add('hidden');
+            guestCta.style.display = 'none';
+            guestCta.classList.add('hidden');
         }
     }
 
@@ -333,7 +333,7 @@
     }
 
     /* ──────────────────────────────────────────
-       2. DROPDOWN DE PERFIL
+       2. PROFILE DROPDOWN
     ────────────────────────────────────────── */
     var profileBtn      = $('profileBtn');
     var profileDropdown = $('profileDropdown');
@@ -362,10 +362,10 @@
     });
 
     /* ──────────────────────────────────────────
-       3. CONTROL DE MODALES
+       3. MODAL CONTROL
     ────────────────────────────────────────── */
-    var modalInvitado = $('modal-invitado');
-    var modalDesafio  = $('modal-desafio');
+    var guestModal     = $('modal-invitado');
+    var challengeModal = $('modal-desafio');
 
     function openModal(el) {
         el.classList.remove('hidden');
@@ -378,65 +378,65 @@
         document.body.style.overflow = '';
     }
     function closeAllModals() {
-        closeModal(modalInvitado);
-        closeModal(modalDesafio);
+        closeModal(guestModal);
+        closeModal(challengeModal);
     }
 
-    // Botones X
-    $('close-invitado').addEventListener('click', function () { closeModal(modalInvitado); });
-    $('close-desafio').addEventListener('click',  function () { closeModal(modalDesafio);  });
+    // X buttons
+    $('close-invitado').addEventListener('click', function () { closeModal(guestModal); });
+    $('close-desafio').addEventListener('click',  function () { closeModal(challengeModal);  });
 
-    // Clic en backdrop cierra
-    modalInvitado.addEventListener('click', function (e) { if (e.target === this) closeModal(this); });
-    modalDesafio.addEventListener('click',  function (e) { if (e.target === this) closeModal(this); });
+    // Backdrop click closes
+    guestModal.addEventListener('click', function (e) { if (e.target === this) closeModal(this); });
+    challengeModal.addEventListener('click',  function (e) { if (e.target === this) closeModal(this); });
 
     /* ──────────────────────────────────────────
-       4. LÓGICA DE BOTONES DE MODO
-       ─ Cambiar a true para probar el modal de
-         desafío completado:
+       4. MODE BUTTONS LOGIC
+       ─ Change to true to test the completed
+         challenge modal:
     ────────────────────────────────────────── */
-    var desafioJugado = false; // ← cambiar a true para probar
+    var challengePlayed = false; // ← change to true to test
 
-    // Desafío Diario
+    // Daily Challenge
     $('btn-diario').addEventListener('click', function (e) {
         if (isGuest) {
             e.preventDefault();
-            openModal(modalInvitado);
-        } else if (desafioJugado) {
+            openModal(guestModal);
+        } else if (challengePlayed) {
             e.preventDefault();
-            openModal(modalDesafio);
+            openModal(challengeModal);
             startClock();
         } else {
-            // Ingreso normal → aquí iría la redirección al juego
+            // Normal entry → the redirect to the game would go here
             // window.location.href = 'juego-diario.html';
         }
     });
 
-    // 1v1 Online (bloqueado para invitados)
+    // 1v1 Online (blocked for guests)
     $('btn-online').addEventListener('click', function (e) {
         if (isGuest) {
             e.preventDefault();
-            openModal(modalInvitado);
+            openModal(guestModal);
         } else {
             // window.location.href = 'sala-online.html';
         }
     });
 
-    // 1v1 Local → liberado para todos, sin bloqueo
-    // (el <a href="#"> se navega normalmente)
+    // 1v1 Local → unlocked for everyone, no blocking
+    // (the <a href="#"> navigates normally)
 
     /* ──────────────────────────────────────────
-       5. RELOJ DE CUENTA REGRESIVA
-          Simula el tiempo restante hasta el
-          próximo desafío diario.
+       5. COUNTDOWN CLOCK
+          Simulates the time remaining until the
+          next daily challenge.
     ────────────────────────────────────────── */
     var clockInterval = null;
 
     function startClock() {
-        // Reiniciar si ya estaba corriendo
+        // Restart if it was already running
         clearInterval(clockInterval);
 
-        // Tiempo simulado: 14h 35m 02s
+        // Simulated time: 14h 35m 02s
         var totalSeconds = 14 * 3600 + 35 * 60 + 2;
         var clockEl = $('modal-clock');
 
@@ -460,11 +460,11 @@
         clockInterval = setInterval(tick, 1000);
     }
 
-    // Detener reloj cuando el modal se cierra
+    // Stop the clock when the modal closes
     $('close-desafio').addEventListener('click', function () {
         clearInterval(clockInterval);
     });
-    modalDesafio.addEventListener('click', function (e) {
+    challengeModal.addEventListener('click', function (e) {
         if (e.target === this) clearInterval(clockInterval);
     });
 

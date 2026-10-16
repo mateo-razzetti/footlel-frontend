@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Tateti (Desafío Diario)</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Global Styles, Menu and Game -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <link rel="stylesheet" href="../../assets/styles/modalidades.css">
+    <link rel="stylesheet" href="../../assets/styles/tateti.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+
+    <!-- Global Script (Theme/Animations) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         GAME HEADER
+    ═══════════════════════════════════════ -->
+    <header class="game-header">
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <div class="timer-display" id="timer-display">
+            <span aria-hidden="true">⏱</span> <span id="time-text">00:60</span>
+        </div>
+
+        <div class="turn-indicator" id="turn-indicator">
+            Turno: Jugador 1
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         CENTRAL BOARD (4x4 GRID)
+         Conditions (cond-top / cond-left) start empty:
+         GameBoard.renderConditions() fills them at runtime
+         with what GET /game/start returns (or, alternatively,
+         with a random selection from the local catalog).
+    ═══════════════════════════════════════ -->
+    <main class="main-content">
+        <section class="board-section">
+            <div class="game-board" id="game-board">
+
+                <!-- Row 1: empty corner + 3 club conditions (columns) -->
+                <div class="empty-corner"></div>
+                <div class="cond-top" id="cond-top-0" data-condition-slot="club">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="cond-top" id="cond-top-1" data-condition-slot="club">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="cond-top" id="cond-top-2" data-condition-slot="club">
+                    <img class="cond-img" alt="">
+                </div>
+
+                <!-- Row 2: national team condition (row) + 3 playable cells -->
+                <div class="cond-left" id="cond-left-0" data-condition-slot="nation">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="playable-cell" data-row="0" data-col="0" data-index="0"></div>
+                <div class="playable-cell" data-row="0" data-col="1" data-index="1"></div>
+                <div class="playable-cell" data-row="0" data-col="2" data-index="2"></div>
+
+                <!-- Row 3 -->
+                <div class="cond-left" id="cond-left-1" data-condition-slot="nation">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="playable-cell" data-row="1" data-col="0" data-index="3"></div>
+                <div class="playable-cell" data-row="1" data-col="1" data-index="4"></div>
+                <div class="playable-cell" data-row="1" data-col="2" data-index="5"></div>
+
+                <!-- Row 4 -->
+                <div class="cond-left" id="cond-left-2" data-condition-slot="nation">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="playable-cell" data-row="2" data-col="0" data-index="6"></div>
+                <div class="playable-cell" data-row="2" data-col="1" data-index="7"></div>
+                <div class="playable-cell" data-row="2" data-col="2" data-index="8"></div>
+
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════
+             BUSCADOR INFERIOR
+        ═══════════════════════════════════════ -->
+        <section class="search-section">
+            <div class="search-wrapper">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="player-search"
+                    placeholder="Buscar futbolista..."
+                    autocomplete="off"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-autocomplete="list"
+                    aria-controls="autocomplete-results">
+                <ul class="autocomplete-results" id="autocomplete-results" role="listbox"></ul>
+            </div>
+            <button class="btn-confirm" id="btn-confirm" type="button">Confirmar Jugada</button>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════
+         MARCADOR / FOOTER
+    ═══════════════════════════════════════ -->
+    <footer class="game-footer">
+        <div class="score-board">
+            <span class="score-team">Jugador 1</span>
+            <span class="score-tally"><span id="score-value-p1">0</span>&nbsp;—&nbsp;<span id="score-value-p2">0</span></span>
+            <span class="score-team">Jugador 2</span>
+        </div>
+        <div class="score-caption">Mejor de 3 · gana quien llegue primero a 2 rondas</div>
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     REACTION POP-UPS (Floating)
+═══════════════════════════════════════ -->
+<div class="reaction-popup success" id="popup-success" aria-live="assertive">
+    <img src="../../assets/images/messi festejo de gol.png" alt="Festejo" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Golazo!</span>
+</div>
+
+<div class="reaction-popup error" id="popup-error" aria-live="assertive">
+    <img src="../../assets/images/fabbiani gol errado.png" alt="Gol errado" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">Ta tan tan No Fabiani</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     END-GAME MODALS
+═══════════════════════════════════════ -->
+<!-- Round-end modal (replaces native alert) -->
+<div class="modal-backdrop hidden" id="modal-ronda" role="dialog" aria-modal="true" aria-labelledby="round-modal-title">
+    <div class="modal-card round-modal-card">
+        <div class="modal-icon" aria-hidden="true">⚽</div>
+        <h2 class="modal-title" id="round-modal-title">¡Jugador 1 ganó la ronda!</h2>
+        <div class="round-score">Jugador 1  0 - 0  Jugador 2</div>
+        <div class="modal-actions">
+            <button class="modal-btn-primary" id="btn-next-round" type="button">Siguiente Ronda</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop hidden" id="modal-victoria" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">🏆</div>
+        <h2 class="modal-title">¡Ganaste!</h2>
+        <p class="endgame-label">Resultado final</p>
+        <div class="score-display">0 — 0</div>
+        <p class="endgame-points points-green">+10 Puntos de Ranking</p>
+        <div class="modal-actions">
+            <button class="modal-btn-primary btn-rematch" type="button" onclick="location.reload()">Jugar de nuevo</button>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop hidden" id="modal-derrota" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">💔</div>
+        <h2 class="modal-title">¡Perdiste!</h2>
+        <p class="endgame-label">Resultado final</p>
+        <div class="score-display">0 — 0</div>
+        <p class="endgame-points points-gray">+2 Puntos de Ranking</p>
+        <div class="modal-actions">
+            <button class="modal-btn-primary btn-rematch" type="button" onclick="location.reload()">Jugar revancha</button>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     GAME LOGIC (Vanilla JS)
+═══════════════════════════════════════ -->
+<script type="module">
+import { API_BASE_URL } from '../../services/apiConfig.js';
+
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
+
+    /* ─────────────────────────────────────────────
+       1. CONFIGURATION CONSTANTS
+    ───────────────────────────────────────────── */
+    const TURN_DURATION_SECONDS = 60;
+    const MAX_ROUNDS = 3;
+    // "Best of 3" is won with MAJORITY (2 rounds), not by sweeping all 3.
+    const ROUNDS_TO_WIN = Math.ceil(MAX_ROUNDS / 2);
+    const RESULT_DISPLAY_DELAY_MS = 3000;
+    const REACTION_POPUP_DURATION_MS = 2800;
+    const BUTTON_ERROR_DURATION_MS = 2000;
+    const AUTOCOMPLETE_MIN_CHARS = 3;
+    const AUTOCOMPLETE_MAX_RESULTS = 50;
+    const AUTOCOMPLETE_DEBOUNCE_MS = 200;
+    const DAILY_MODE_STORAGE_KEY = 'footlel_diario_jugado';
+    const PLAYERS_CSV_URL = new URL('../../assets/data/data-jugadores.txt', import.meta.url).href;
+    const PLAYERS_CSV_PATH = '../../assets/data/data-jugadores.txt';
+    const IMAGES_BASE_PATH = '../../assets/images';
+    const FALLBACK_SHIELD_IMG = new URL('../../assets/images/logo-oscuro.png', import.meta.url).href;
+    // Real league folders (game_manager.py: leagues_name = ["premier",
+    // "bundesliga", "serie_a", "la_liga"]). The backend chooses a team from a
+    // broader pool than our local 17-club catalog, so a team outside that list
+    // needs to test which league folder contains its crest instead of assuming
+    // a single path (see resolveSingleCondition).
+    // NOTE: the real Bundesliga folder is "Equipo - Bundesliga" (singular),
+    // unlike the other three which are plural ("Equipos - X") — a real typo
+    // in the folder name that broke the 3 Bundesliga images.
+    const CLUB_LEAGUE_FOLDERS = ['Equipos - Premier League', 'Equipo - Bundesliga', 'Equipos - La Liga', 'Equipos - Serie A'];
+
+    const GAME_MODE = {
+        LOCAL: 'local',
+        DAILY: 'diario'
+    };
+
+    const API_ENDPOINTS = {
+        START_GAME: `${API_BASE_URL}/game/start-game`,
+        START_GAME_LEGACY: `${API_BASE_URL}/game/start`,
+        PLAYER_ONE_GUESS: `${API_BASE_URL}/game/player-guess`,
+        PLAYER_TWO_GUESS: `${API_BASE_URL}/game/player2-guess`,
+        AI_GUESS: `${API_BASE_URL}/game/ai-guess`
+    };
+
+    /* ─────────────────────────────────────────────
+       2. CONDITION CATALOG
+       Uses static `new URL('...', import.meta.url).href` so Vite bundles
+       every crest/flag in production builds (Netlify) while also working
+       in Live Server without a bundler.
+    ───────────────────────────────────────────── */
+    const CLUB_CATALOG = [
+        {
+            id: 'bayer-leverkusen',
+            name: 'Bayer Leverkusen',
+            aliases: ['Bayer Leverkusen', 'Bayer 04 Leverkusen', 'Leverkusen'],
+            relPath: 'Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'bayern-munich',
+            name: 'Bayern Munich',
+            aliases: ['Bayern Múnich', 'Bayern Munich', 'FC Bayern Munich', 'FC Bayern München', 'Bayern'],
+            relPath: 'Equipo - Bundesliga/bayern-munich-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipo - Bundesliga/bayern-munich-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'borussia-dortmund',
+            name: 'Borussia Dortmund',
+            aliases: ['Borussia Dortmund', 'Dortmund', 'BVB'],
+            relPath: 'Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'atletico-madrid',
+            name: 'Atlético Madrid',
+            aliases: ['Atlético de Madrid', 'Atlético Madrid', 'Atletico de Madrid', 'Atletico Madrid'],
+            relPath: 'Equipos - La Liga/atletico-madrid-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - La Liga/atletico-madrid-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'fc-barcelona',
+            name: 'FC Barcelona',
+            aliases: ['FC Barcelona', 'Barcelona', 'Barça'],
+            relPath: 'Equipos - La Liga/fc-barcelona-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - La Liga/fc-barcelona-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'real-madrid',
+            name: 'Real Madrid',
+            aliases: ['Real Madrid', 'Real Madrid CF'],
+            relPath: 'Equipos - La Liga/real-madrid-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - La Liga/real-madrid-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'arsenal',
+            name: 'Arsenal',
+            aliases: ['Arsenal', 'Arsenal FC'],
+            relPath: 'Equipos - Premier League/arsenal-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Premier League/arsenal-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'chelsea',
+            name: 'Chelsea',
+            aliases: ['Chelsea', 'Chelsea FC'],
+            relPath: 'Equipos - Premier League/chelsea-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Premier League/chelsea-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'liverpool-fc',
+            name: 'Liverpool FC',
+            aliases: ['Liverpool', 'Liverpool FC'],
+            relPath: 'Equipos - Premier League/liverpool-fc-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Premier League/liverpool-fc-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'manchester-city',
+            name: 'Manchester City',
+            aliases: ['Manchester City', 'Man City'],
+            relPath: 'Equipos - Premier League/manchester-city-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Premier League/manchester-city-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'manchester-united',
+            name: 'Manchester United',
+            aliases: ['Manchester United', 'Man United', 'Man Utd'],
+            relPath: 'Equipos - Premier League/manchester-united-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Premier League/manchester-united-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'tottenham-hotspur',
+            name: 'Tottenham Hotspur',
+            aliases: ['Tottenham', 'Tottenham Hotspur', 'Spurs'],
+            relPath: 'Equipos - Premier League/tottenham-hotspur-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Premier League/tottenham-hotspur-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'ac-milan',
+            name: 'AC Milan',
+            aliases: ['AC Milan', 'Milan'],
+            relPath: 'Equipos - Serie A/ac-milan-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Serie A/ac-milan-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'inter-milan',
+            name: 'Inter Milan',
+            aliases: ['Inter de Milán', 'Inter de Milan', 'Inter Milan', 'Inter', 'Internazionale'],
+            relPath: 'Equipos - Serie A/inter-milan-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Serie A/inter-milan-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'juventus',
+            name: 'Juventus',
+            aliases: ['Juventus', 'Juventus FC'],
+            relPath: 'Equipos - Serie A/juventus-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Serie A/juventus-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'lazio',
+            name: 'Lazio',
+            aliases: ['Lazio', 'SS Lazio'],
+            relPath: 'Equipos - Serie A/lazio-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Serie A/lazio-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'roma',
+            name: 'Roma',
+            aliases: ['AS Roma', 'Roma'],
+            relPath: 'Equipos - Serie A/roma-logo-footylogos.png',
+            img: new URL('../../assets/images/Equipos - Serie A/roma-logo-footylogos.png', import.meta.url).href
+        }
+    ];
+
+    const NATION_CATALOG = [
+        {
+            id: 'argentina',
+            name: 'Argentina',
+            aliases: ['Argentina'],
+            relPath: 'Selecciones/argentina-national-team-logo-footylogos.png',
+            img: new URL('../../assets/images/Selecciones/argentina-national-team-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'england',
+            name: 'Inglaterra',
+            aliases: ['Inglaterra', 'England'],
+            relPath: 'Selecciones/england-national-team-logo-footylogos.png',
+            img: new URL('../../assets/images/Selecciones/england-national-team-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'france',
+            name: 'Francia',
+            aliases: ['Francia', 'France'],
+            relPath: 'Selecciones/france-national-team-logo-footylogos.png',
+            img: new URL('../../assets/images/Selecciones/france-national-team-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'italy',
+            name: 'Italia',
+            aliases: ['Italia', 'Italy'],
+            relPath: 'Selecciones/italy-national-team-logo-footylogos.png',
+            img: new URL('../../assets/images/Selecciones/italy-national-team-logo-footylogos.png', import.meta.url).href
+        },
+        {
+            id: 'spain',
+            name: 'España',
+            aliases: ['España', 'Espana', 'Spain'],
+            relPath: 'Selecciones/spain-national-team-logo-footylogos.png',
+            img: new URL('../../assets/images/Selecciones/spain-national-team-logo-footylogos.png', import.meta.url).href
+        }
+    ];
+
+    /* ─────────────────────────────────────────────
+       3. GAME STATE
+    ───────────────────────────────────────────── */
+    // Critical Bug #3 (mode mix-up): dynamic mode detection via localStorage
+    // kept failing because it depended on the mode selection screen writing
+    // that key properly before navigating here, outside this file's control.
+    // This ambiguity is eliminated: this file is ALWAYS Daily mode (Human vs Bot).
+    // The "Human vs Human" counterpart lives in tateti-local.html.
+    const gameState = {
+        currentMode: GAME_MODE.DAILY,
+        currentPlayer: 1,
+        timeLeft: TURN_DURATION_SECONDS,
+        timerIntervalId: null,
+        scoreP1: 0,
+        scoreP2: 0,
+        isGameOver: false,
+        board: [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    };
+
+    /* ─────────────────────────────────────────────
+       4. DOM REFERENCES
+    ───────────────────────────────────────────── */
+    const dom = {
+        timeText: document.getElementById('time-text'),
+        turnIndicator: document.getElementById('turn-indicator'),
+        cells: document.querySelectorAll('.playable-cell'),
+        playerSearch: document.getElementById('player-search'),
+        btnConfirm: document.getElementById('btn-confirm'),
+        popupSuccess: document.getElementById('popup-success'),
+        popupError: document.getElementById('popup-error'),
+        victoryModal: document.getElementById('modal-victoria'),
+        defeatModal: document.getElementById('modal-derrota'),
+        scoreValueP1El: document.getElementById('score-value-p1'),
+        scoreValueP2El: document.getElementById('score-value-p2'),
+        autocompleteList: document.getElementById('autocomplete-results'),
+        condTopSlots: [
+            document.getElementById('cond-top-0'),
+            document.getElementById('cond-top-1'),
+            document.getElementById('cond-top-2')
+        ],
+        condLeftSlots: [
+            document.getElementById('cond-left-0'),
+            document.getElementById('cond-left-1'),
+            document.getElementById('cond-left-2')
+        ]
+    };
+
+    let availablePlayers = [];
+    let autocompleteDebounceId = null;
+
+    /* ─────────────────────────────────────────────
+       5. INITIALIZATION
+    ───────────────────────────────────────────── */
+    // Declared BEFORE initGame() on purpose: initGame() calls
+    // fetchGameStartData() synchronously up to the first `await`, and
+    // that function references them in the `for` loop condition. If the
+    // `const` were placed lower in the file, it causes a temporal dead zone
+    // ReferenceError ("Cannot access before initialization").
+    const START_GAME_MAX_ATTEMPTS = 3;
+    const START_GAME_RETRY_DELAY_MS = 1500;
+
+    initGame();
+
+    function warnIfRunningFromFileProtocol() {
+        // Under file:// (double-clicking HTML from the explorer), Chrome
+        // blocks ANY fetch() to local resources ("origin 'null' blocked by
+        // CORS policy") — this is not a bug in code or data file, it is the
+        // browser refusing to read disk via fetch. This breaks data-jugadores.txt
+        // (autocomplete) and any relative fetch. Solution: serve folder with
+        // local server (VS Code Live Server, `python -m http.server`, etc.).
+        if (window.location.protocol === 'file:') {
+            console.warn(
+                'This page was opened with file:// (double click from file explorer). ' +
+                'Chrome blocks fetch() to local files in this mode — el autocomplete ' +
+                'and any other relative fetch will fail with a confusing CORS error. ' +
+                'Serve the folder with a local server (VS Code Live Server, ' +
+                '"python -m http.server", "npx serve", etc.) and open via http://.'
+            );
+        }
+    }
+
+    async function initGame() {
+        warnIfRunningFromFileProtocol();
+        bindEventListeners();
+        await loadPlayerRoster();
+
+        const loaded = await loadFreshGameBoard();
+        if (!loaded) return;
+
+        if (gameState.currentMode === GAME_MODE.DAILY) {
+            document.querySelectorAll('.btn-rematch').forEach(btn => { btn.style.display = 'none'; });
+        }
+
+        renderTurnIndicator();
+        updateScoreDisplay();
+
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer === 2) {
+            triggerAiTurn();
+        } else {
+            startRoundTimer();
+        }
+    }
+
+    // Requests a new /game/start and renders the board with that response.
+    // Returns true on success, false if aborted (see showFatalStartError).
+    // Used both at game start (initGame) and when advancing rounds
+    // (resetBoardState) — see rationale in resetBoardState comment.
+    async function loadFreshGameBoard() {
+        const startData = await fetchGameStartData();
+
+        // Without real `startData`, the rendered board would be 100% mocked on
+        // client side (pickRandomConditions) with NO relation to the real
+        // player_names_matrix generated by the backend -> any guess would seem
+        // "random". Previously this failed silently; now blocked with a clear notice.
+        if (!startData) {
+            showFatalStartError();
+            return false;
+        }
+
+        // Previously this was fire-and-forget: the timer started while crests
+        // were still rendering (server cold start). Now we wait for the
+        // applyBoardConditions promise to resolve (all <img> loaded or failed)
+        // before continuing.
+        await applyBoardConditions(startData);
+        return true;
+    }
+
+    // POST /game/start-game; if the deploy has not landed yet (404), fall back
+    // automatically to the legacy POST /game/start.
+    async function postStartGame(options) {
+        const response = await fetch(API_ENDPOINTS.START_GAME, options);
+        if (response.status === 404) {
+            console.warn('/game/start-game returned 404, falling back to /game/start');
+            return fetch(API_ENDPOINTS.START_GAME_LEGACY, options);
+        }
+        return response;
+    }
+
+    async function fetchGameStartData() {
+        // Retry because on Render cold-starts / CORS hiccups are common on
+        // the first request. If NO attempt fetches a real board, it is better
+        // to pause the game (see showFatalStartError) than to run with a mocked
+        // catalog without warning.
+        for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
+            try {
+                // The swagger for /game/start-game requires POST with body { user_id }.
+                const response = await postStartGame({
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: getCurrentUserId() })
+                });
+                if (!response.ok) {
+                    throw new Error(`Unexpected status ${response.status}`);
+                }
+                // Expected shape: { row_headers, column_headers, local_player_turn }
+                const startData = await response.json();
+                if (typeof startData.local_player_turn === 'boolean') {
+                    gameState.currentPlayer = startData.local_player_turn ? 1 : 2;
+                }
+                return startData;
+            } catch (error) {
+                console.error(`fetchGameStartData intento ${attempt}/${START_GAME_MAX_ATTEMPTS} falló:`, error);
+                if (attempt < START_GAME_MAX_ATTEMPTS) {
+                    await new Promise(resolve => setTimeout(resolve, START_GAME_RETRY_DELAY_MS));
+                }
+            }
+        }
+        return null;
+    }
+
+    // Blocks the game with a clear notice instead of allowing play with a
+    // client-mocked board (which would never match the backend's real player_names_matrix).
+    function showFatalStartError() {
+        stopRoundTimer();
+        const main = document.querySelector('.main-content') || document.body;
+        const notice = document.createElement('div');
+        notice.className = 'connection-error-notice';
+        notice.innerHTML = `
+            <p class="connection-error-title">No pudimos conectar con el servidor</p>
+            <p class="connection-error-subtitle">Probá recargar la página en unos segundos.</p>
+            <button type="button" class="connection-error-btn" onclick="location.reload()">Reintentar</button>
+        `;
+        main.prepend(notice);
+    }
+
+    function getCurrentUserId() {
+        // Reads footlel_user_id (stored in login.html) and parses as integer.
+        // Only if guest / no stored ID, the default ID (0) is used.
+        const GUEST_DEFAULT_USER_ID = 0;
+        const storedId = parseInt(localStorage.getItem('footlel_user_id'), 10);
+        return Number.isNaN(storedId) ? GUEST_DEFAULT_USER_ID : storedId;
+    }
+
+    /* ─────────────────────────────────────────────
+       6. BOARD CONDITIONS (clubs / nations)
+    ───────────────────────────────────────────── */
+    function applyBoardConditions(startData) {
+        // CRITICAL BUG: /game/start returns `row_headers` (the 3 clubs chosen
+        // by the backend) and `column_headers` (the 3 national teams), not
+        // `topConditions`/`leftConditions`. Since those fields did not exist,
+        // this always fell back to pickRandomConditions() — a random catalog on
+        // client side, unrelated to the server's real player_names_matrix.
+        // That's why NO name ever matched: UI showed one board, backend expected another.
+        const topConditions = resolveConditions(startData?.row_headers, CLUB_CATALOG);
+        const leftConditions = resolveConditions(startData?.column_headers, NATION_CATALOG);
+
+        const shieldLoadPromises = [
+            ...topConditions.map((condition, columnIndex) => renderConditionSlot(dom.condTopSlots[columnIndex], condition)),
+            ...leftConditions.map((condition, rowIndex) => renderConditionSlot(dom.condLeftSlots[rowIndex], condition))
+        ];
+
+        // Tag each playable cell with the club/nation it represents so the
+        // guess payload can carry that context without re-reading the DOM text.
+        dom.cells.forEach(cell => {
+            const row = parseInt(cell.getAttribute('data-row'), 10);
+            const col = parseInt(cell.getAttribute('data-col'), 10);
+            cell.dataset.clubId = topConditions[col].id;
+            cell.dataset.nationId = leftConditions[row].id;
+        });
+
+        // Caller (initGame) awaits this promise before starting the clock:
+        // prevents the 60s timer from running while crests are still rendering.
+        return Promise.all(shieldLoadPromises);
+    }
+
+    // Bug #4: normalizes any name returned by backend to expected filename
+    // convention ("Real Madrid" -> "real-madrid"): lowercase, accents stripped,
+    // and spaces replaced by hyphens.
+    function slugifyName(rawName) {
+        return String(rawName)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-');
+    }
+
+    function resolveConditions(idsFromServer, catalog) {
+        if (Array.isArray(idsFromServer) && idsFromServer.length === 3) {
+            const matched = idsFromServer.map(raw => resolveSingleCondition(raw, catalog));
+            if (matched.every(Boolean)) return matched;
+        }
+        return pickRandomConditions(catalog, 3);
+    }
+
+    // Attempts to match the id as-is, or its slug, against local catalog.
+    // If backend mentions a club/nation not in catalog,
+    // build condition on the fly with normalized name as
+    // file slug, instead of losing data or showing broken icon
+    // (<img> onerror handles non-existent file fallback).
+    // Normalizes to compare loose names: lowercase, accents stripped,
+    // without linking word "de" (backend sends "Atlético de Madrid" /
+    // "Inter de Milán", catalog uses "Atlético Madrid" /
+    // "Inter Milan" — without "de"), and WITHOUT loose numbers (backend sends
+    // "Bayer 04 Leverkusen", catalog uses "Bayer Leverkusen" —
+    // without "04"). Without this, "04" breaks string match
+    // and "bayer leverkusen" stops being a contiguous substring of "bayer 04 leverkusen",
+    // causing it to fall back to dynamic slug path creation
+    // with "bayer-04-leverkusen", which does not exist → broken crest
+    // → generic fallback). Collapses multiple spaces.
+    function normalizeForMatch(str) {
+        return String(str)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\bde\b/g, ' ')
+            .replace(/\b\d+\b/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    // Two names match if equal when normalized, or if one contains the other
+    // (covers "Tottenham" ⊂ "Tottenham Hotspur", "Liverpool" ⊂ "Liverpool FC",
+    // "AS Roma" ⊃ "Roma").
+    function namesLooselyMatch(a, b) {
+        const na = normalizeForMatch(a);
+        const nb = normalizeForMatch(b);
+        if (!na || !nb) return false;
+        return na === nb || na.includes(nb) || nb.includes(na);
+    }
+
+    function buildCatalogEntryCandidates(entry) {
+        const candidates = [entry.img];
+        if (entry.relPath) {
+            candidates.push(`${IMAGES_BASE_PATH}/${entry.relPath}`);
+            candidates.push(`/assets/images/${entry.relPath}`);
+        }
+        return [...new Set(candidates.filter(Boolean))];
+    }
+
+    function resolveSingleCondition(raw, catalog) {
+        if (!raw) return null;
+        const slug = slugifyName(raw);
+
+        // 1) Exact match of id/slug (fast, covers happy path).
+        const byId = catalog.find(entry => entry.id === raw || entry.id === slug);
+        if (byId) {
+            return { ...byId, imgCandidates: buildCatalogEntryCandidates(byId) };
+        }
+
+        // 2) Match against entry name or any known alias (Spanish/English/DB variants).
+        const byNameOrAlias = catalog.find(entry => {
+            if (namesLooselyMatch(entry.name, raw)) return true;
+            if (Array.isArray(entry.aliases)) {
+                return entry.aliases.some(alias => namesLooselyMatch(alias, raw));
+            }
+            return false;
+        });
+        if (byNameOrAlias) {
+            return { ...byNameOrAlias, imgCandidates: buildCatalogEntryCandidates(byNameOrAlias) };
+        }
+
+        // 3) Last resort: club/nation is not in curated catalog — build candidate
+        // paths in case file exists with that exact slug in a league folder.
+        const isClub = catalog === CLUB_CATALOG;
+        const imgCandidates = isClub
+            ? CLUB_LEAGUE_FOLDERS.flatMap(folder => [
+                `${IMAGES_BASE_PATH}/${folder}/${slug}-logo-footylogos.png`,
+                `/assets/images/${folder}/${slug}-logo-footylogos.png`
+            ])
+            : [
+                `${IMAGES_BASE_PATH}/Selecciones/${slug}-national-team-logo-footylogos.png`,
+                `/assets/images/Selecciones/${slug}-national-team-logo-footylogos.png`
+            ];
+
+        return {
+            id: slug,
+            name: String(raw),
+            img: imgCandidates[0],
+            imgCandidates
+        };
+    }
+
+    function pickRandomConditions(catalog, count) {
+        const shuffled = [...catalog].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count).map(entry => ({
+            ...entry,
+            imgCandidates: buildCatalogEntryCandidates(entry)
+        }));
+    }
+
+    // Returns a promise that resolves when crest finishes loading (onload) or
+    // all candidates are exhausted (chained onerror) — never hangs: if no event
+    // fires, a safety timeout resolves it anyway to avoid stalling startup.
+    function renderConditionSlot(slotElement, condition) {
+        if (!slotElement || !condition) return Promise.resolve();
+        const img = slotElement.querySelector('.cond-img');
+        if (!img) return Promise.resolve();
+
+        const candidates = Array.isArray(condition.imgCandidates) && condition.imgCandidates.length > 0
+            ? condition.imgCandidates
+            : [condition.img];
+
+        img.removeAttribute('onerror');
+        img.style.display = 'block';
+        img.style.opacity = '1';
+        img.alt = '';
+
+        return new Promise(resolve => {
+            let settled = false;
+            const finish = () => {
+                if (settled) return;
+                settled = true;
+                resolve();
+            };
+            let nextCandidateIndex = 0;
+
+            const tryNextCandidate = () => {
+                if (nextCandidateIndex >= candidates.length) {
+                    img.onerror = null;
+                    img.alt = '';
+                    img.src = FALLBACK_SHIELD_IMG;
+                    img.style.opacity = '0.55';
+                    finish();
+                    return;
+                }
+                img.src = candidates[nextCandidateIndex];
+                nextCandidateIndex += 1;
+            };
+
+            img.onload = () => {
+                img.alt = condition.name || '';
+                finish();
+            };
+            img.onerror = tryNextCandidate;
+            setTimeout(finish, 4000);
+            tryNextCandidate();
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       7. TIMER
+    ───────────────────────────────────────────── */
+    // FULL reset to 60s. Only legitimate trigger: a real turn change
+    // (switchActivePlayer, called on round win/loss or 00:00 timeout).
+    // NEVER call this on connection failure or while user types.
+    function startRoundTimer() {
+        stopRoundTimer();
+        gameState.timeLeft = TURN_DURATION_SECONDS;
+        renderTimerDisplay();
+        resumeRoundTimer();
+    }
+
+    // Resumes countdown WITHOUT resetting timeLeft. Used when clock paused
+    // to await backend and move did NOT change turn (e.g. connection error).
+    function resumeRoundTimer() {
+        stopRoundTimer();
+        gameState.timerIntervalId = setInterval(() => {
+            gameState.timeLeft -= 1;
+            renderTimerDisplay();
+
+            if (gameState.timeLeft <= 0) {
+                stopRoundTimer();
+                switchActivePlayer(); // Turn lost due to timeout
+            }
+        }, 1000);
+    }
+
+    function stopRoundTimer() {
+        if (gameState.timerIntervalId !== null) {
+            clearInterval(gameState.timerIntervalId);
+            gameState.timerIntervalId = null;
+        }
+    }
+
+    function renderTimerDisplay() {
+        dom.timeText.textContent = `00:${String(gameState.timeLeft).padStart(2, '0')}`;
+    }
+
+    /* ─────────────────────────────────────────────
+       8. BOARD LOGIC
+    ───────────────────────────────────────────── */
+    function checkWinCondition(player) {
+        const board = gameState.board;
+        for (let row = 0; row < 3; row++) {
+            if (board[row][0] === player && board[row][1] === player && board[row][2] === player) return true;
+        }
+        for (let col = 0; col < 3; col++) {
+            if (board[0][col] === player && board[1][col] === player && board[2][col] === player) return true;
+        }
+        if (board[0][0] === player && board[1][1] === player && board[2][2] === player) return true;
+        if (board[0][2] === player && board[1][1] === player && board[2][0] === player) return true;
+        return false;
+    }
+
+    function checkDrawCondition() {
+        return gameState.board.flat().every(cell => cell !== 0);
+    }
+
+    // CRITICAL BUG (500 when playing Round 2): backend stores match state in
+    // server-side global variables and CLOSES it as soon as someone wins a round
+    // — game_manager.py calls stop_game_board() inside player_guessed()/...
+    // setting is_playing to False. Previously, this function only cleared board
+    // on client side and kept sending guesses against closed match — causing 500.
+    // Now requests a new /game/start before continuing.
+    async function resetBoardState() {
+        stopRoundTimer();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+
+        gameState.board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]];
+        dom.cells.forEach(cell => {
+            cell.classList.remove('conquered-p1', 'conquered-p2');
+            cell.querySelectorAll('.cell-mark').forEach(mark => mark.remove());
+        });
+        dom.playerSearch.value = '';
+
+        const loaded = await loadFreshGameBoard();
+        if (!loaded) return;
+
+        dom.btnConfirm.disabled = false;
+        dom.playerSearch.disabled = false;
+
+        // Turn for the new round is defined by backend (local_player_turn,
+        // applied within fetchGameStartData) — not alternated manually.
+        renderTurnIndicator();
+
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer === 2) {
+            triggerAiTurn();
+        } else {
+            startRoundTimer();
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       9. TURN & SCORE
+    ───────────────────────────────────────────── */
+    function switchActivePlayer() {
+        gameState.currentPlayer = gameState.currentPlayer === 1 ? 2 : 1;
+        renderTurnIndicator();
+        dom.playerSearch.value = '';
+
+        // In Daily Challenge, Bot turn is 100% automatic: does not depend
+        // on typing in search or clicking "Confirm".
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer === 2 && !gameState.isGameOver) {
+            triggerAiTurn();
+            return;
+        }
+
+        startRoundTimer();
+    }
+
+    function renderTurnIndicator() {
+        dom.turnIndicator.textContent = `Turno: Jugador ${gameState.currentPlayer}`;
+        dom.turnIndicator.style.color = gameState.currentPlayer === 1
+            ? 'var(--color-brand-green)'
+            : '#2196F3';
+    }
+
+    function updateScoreDisplay() {
+        dom.scoreValueP1El.textContent = gameState.scoreP1;
+        dom.scoreValueP2El.textContent = gameState.scoreP2;
+    }
+
+    function endGameMatch(winner) {
+        gameState.isGameOver = true;
+        stopRoundTimer();
+        document.body.style.overflow = 'hidden';
+
+        if (winner === 1) {
+            dom.victoryModal.classList.remove('hidden');
+            dom.victoryModal.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+        } else {
+            dom.defeatModal.classList.remove('hidden');
+            dom.defeatModal.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+            dom.defeatModal.querySelector('.modal-title').textContent = '¡Ganó el Jugador 2!';
+        }
+
+        if (gameState.currentMode === GAME_MODE.DAILY) {
+            try {
+                localStorage.setItem(DAILY_MODE_STORAGE_KEY, 'true');
+            } catch (error) {
+                console.error('Could not persist daily mode flag to localStorage:', error);
+            }
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       10. API / GUESS SUBMISSION
+    ───────────────────────────────────────────── */
+    function resolveGuessEndpoint() {
+        // Bot does NOT go through here — its move resolves in requestAiMove().
+        // In Daily Challenge human is always "Player 1", so guess routes to
+        // same endpoint as Player 1 in local mode.
+        if (gameState.currentMode === GAME_MODE.DAILY) {
+            return API_ENDPOINTS.PLAYER_ONE_GUESS;
+        }
+        return gameState.currentPlayer === 1
+            ? API_ENDPOINTS.PLAYER_ONE_GUESS
+            : API_ENDPOINTS.PLAYER_TWO_GUESS;
+    }
+
+    async function submitPlayerGuess(playerName) {
+        const endpoint = resolveGuessEndpoint();
+        // Defensive trim: ensure player_guess never has leading/trailing
+        // whitespace that could break backend validation.
+        const trimmedGuess = playerName.trim();
+        console.warn('📤 ENVIANDO AL BACKEND:', trimmedGuess);
+
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Cell is no longer pre-selected: Backend receives player name
+                // only and determines matching slot (see resolveTargetCellFromResponse).
+                body: JSON.stringify({ user_id: getCurrentUserId(), player_guess: trimmedGuess })
+            });
+
+            // Body read ONCE here (safeParseJson includes try/catch) and reused;
+            // prevents "body stream already read" error.
+            const data = await safeParseJson(response);
+            console.warn(`📥 RESPUESTA DEL BACKEND (Status ${response.status}):`, data);
+
+            if (!response.ok) {
+                if (response.status === 400 || response.status === 422) {
+                    return { isCorrect: false, data };
+                }
+                throw new Error(`Unexpected server status: ${response.status}`);
+            }
+
+            // Backend responds 200 when move is processed, using `correct_answer`
+            // to indicate right or wrong — HTTP status alone is not sufficient.
+            const isCorrect = data && typeof data.correct_answer === 'boolean'
+                ? data.correct_answer
+                : true; // Fallback for compatibility if the field is missing.
+
+            return { isCorrect, data };
+        } catch (networkOrServerError) {
+            console.error('Guess submission failed:', networkOrServerError);
+            // Technical failure (network, CORS, 5xx): NOT an incorrect guess.
+            return { isCorrect: false, data: null, isNetworkError: true };
+        }
+    }
+
+    async function safeParseJson(response) {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    // Bot endpoint requires body { user_id } (per swagger).
+    async function requestAiMove() {
+        try {
+            const response = await fetch(API_ENDPOINTS.AI_GUESS, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: getCurrentUserId() })
+            });
+            if (!response.ok) {
+                throw new Error(`Unexpected server status: ${response.status}`);
+            }
+            return { data: await safeParseJson(response) };
+        } catch (error) {
+            console.error('AI move request failed:', error);
+            return { data: null, isNetworkError: true };
+        }
+    }
+
+    // Orchestrates Bot turn in Daily Challenge: triggers automatically without
+    // waiting for user input.
+    async function triggerAiTurn() {
+        if (gameState.isGameOver) return;
+
+        stopRoundTimer();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+
+        const aiResult = await requestAiMove();
+
+        if (aiResult.isNetworkError) {
+            // Avoid stuck state: retry Bot move alone without modifying clock
+            // (no actual turn change occurred).
+            showButtonError('Reintentando jugada del Bot...');
+            setTimeout(triggerAiTurn, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        const targetCell = resolveTargetCellFromResponse(aiResult.data, 2);
+
+        if (!targetCell) {
+            // Response without usable cell: retry Bot move without touching clock or turn.
+            console.error('El Bot no devolvió una celda válida (ni cell_index ni board):', aiResult.data);
+            setTimeout(triggerAiTurn, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        // Bug #3: Bot turn is silent — never shows goal/error popup (exclusive
+        // to human player). Injects "O" and logs played player to console.
+        if (aiResult.data && aiResult.data.player_guess) {
+            console.log('Bot jugó:', aiResult.data.player_guess);
+        }
+        setTimeout(() => resolveTurnOutcome(), RESULT_DISPLAY_DELAY_MS);
+    }
+
+    /* ─────────────────────────────────────────────
+       10.1 BACKEND RESPONSE MAPPING → DOM CELL
+       Visual bug fix: backend doesn't always use the same field name
+       for position. Tries `cell_index`, `position`, and `celda` in order,
+       selecting cell by data-index (0 to 8, row by row). Falls back to
+       sync against `board` as last resort.
+    ───────────────────────────────────────────── */
+    function resolveTargetCellFromResponse(data, player) {
+        if (!data) return null;
+
+        const backendIndex = [data.cell_index, data.position, data.celda]
+            .find(value => typeof value === 'number');
+
+        if (typeof backendIndex === 'number') {
+            return placePlayerMarkByIndex(backendIndex, player);
+        }
+
+        if (Array.isArray(data.board)) {
+            return syncBoardFromServer(data.board);
+        }
+
+        return null;
+    }
+
+    // Selects exact cell by data-index and injects mark (main board write point).
+    function placePlayerMarkByIndex(index, player) {
+        const cell = document.querySelector(`[data-index="${index}"]`);
+        if (!cell) {
+            console.error(`No se encontró ninguna celda con data-index="${index}"`);
+            return null;
+        }
+
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        gameState.board[row][col] = player;
+        renderPlayerMark(cell, player);
+        cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
+        return cell;
+    }
+
+    // Compares backend board against local state
+    // and renders newly occupied cell(s) in DOM.
+    //
+    // Positioning bug: DOM builds matrix as
+    // [row = nation (cond-left)][column = club (cond-top)] (see
+    // applyBoardConditions). Backend builds board in transposed
+    // orientation: [club][nation]. Reading it with DOM
+    // [row][col] convention took transposed cell, causing
+    // a valid move to render in the wrong cell.
+    // Read inverted to compensate.
+    function syncBoardFromServer(serverBoard) {
+        let changedCell = null;
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                const serverValue = normalizeServerCellValue(serverBoard?.[col]?.[row]);
+                if (serverValue !== 0 && gameState.board[row][col] === 0) {
+                    changedCell = placePlayerMarkAt(row, col, serverValue) || changedCell;
+                }
+            }
+        }
+        return changedCell;
+    }
+
+    // Accepts 1/2, "1"/"2", or "X"/"O" for type robustness
+    // until backend finalizes board type.
+    // Real encoding confirmed by backend:
+    // 0 = empty · 1 = guessed by local Player (Player 1) ·
+    // -1 = guessed by AI or Player 2 (1v1 Local).
+    function normalizeServerCellValue(value) {
+        if (value === 1) return 1;
+        if (value === -1) return 2;
+        return 0;
+    }
+
+    // Single board write point: updates state, injects mark (X for P1, O for P2/Bot)
+    // and adds "conquered" class.
+    function placePlayerMarkAt(row, col, player) {
+        const cell = document.querySelector(`.playable-cell[data-row="${row}"][data-col="${col}"]`);
+        if (!cell) return null;
+
+        gameState.board[row][col] = player;
+        renderPlayerMark(cell, player);
+        cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
+        return cell;
+    }
+
+    /* ─────────────────────────────────────────────
+       11. UI FEEDBACK
+    ───────────────────────────────────────────── */
+    function showReactionPopup(popupElement) {
+        popupElement.classList.add('show');
+        setTimeout(() => popupElement.classList.remove('show'), REACTION_POPUP_DURATION_MS);
+    }
+
+    function showButtonError(message) {
+        const originalText = dom.btnConfirm.textContent;
+        dom.btnConfirm.textContent = message;
+        dom.btnConfirm.style.backgroundColor = '#F44336';
+        dom.btnConfirm.style.transform = 'scale(1.05)';
+
+        setTimeout(() => {
+            dom.btnConfirm.textContent = originalText;
+            dom.btnConfirm.style.backgroundColor = '';
+            dom.btnConfirm.style.transform = '';
+        }, BUTTON_ERROR_DURATION_MS);
+    }
+
+    function renderPlayerMark(cell, player) {
+        // Injects the visible "X" / "O" mark into the conquered cell.
+        // .playable-cell already centers its content (see tateti.css),
+        // so no extra positioning is needed here.
+        const mark = document.createElement('span');
+        mark.className = `cell-mark ${player === 1 ? 'mark-x' : 'mark-o'}`;
+        mark.textContent = player === 1 ? 'X' : 'O';
+        cell.appendChild(mark);
+    }
+
+    /* ─────────────────────────────────────────────
+       12. EVENT HANDLERS
+    ───────────────────────────────────────────── */
+    function bindEventListeners() {
+        // Cells no longer selected manually: Backend indicates matching cell
+        // upon confirmation (see handleConfirmClick).
+        dom.btnConfirm.addEventListener('click', handleConfirmClick);
+        dom.playerSearch.addEventListener('input', handleSearchInput);
+        document.addEventListener('click', handleOutsideAutocompleteClick);
+    }
+
+    let isGuessInFlight = false;
+
+    async function handleConfirmClick() {
+        if (isGuessInFlight || dom.btnConfirm.disabled) return;
+        if (gameState.isGameOver) return;
+        if (gameState.currentMode === GAME_MODE.DAILY && gameState.currentPlayer !== 1) return;
+
+        // Bug #1 (false negative on 2nd attempt): captures value in local trimmed
+        // variable and immediately clears input before awaiting backend response.
+        // Prevents lingering values from previous attempts.
+        const playerName = dom.playerSearch.value.trim();
+        if (playerName.length === 0) {
+            showButtonError('¡Escribí un jugador!');
+            dom.playerSearch.focus();
+            return;
+        }
+
+        stopRoundTimer();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+        dom.playerSearch.value = '';
+
+        isGuessInFlight = true;
+        let guessResult;
+        try {
+            guessResult = await submitPlayerGuess(playerName);
+        } finally {
+            // Button disabled during fetch; re-enabled based on outcome (see below).
+            isGuessInFlight = false;
+        }
+
+        if (guessResult.isNetworkError) {
+            // Technical failure (backend down, CORS, unexpected status): NOT an
+            // incorrect guess and NO turn change, so timer RESUMES (resumeRoundTimer)
+            // instead of resetting to 60.
+            dom.btnConfirm.disabled = false;
+            dom.playerSearch.disabled = false;
+            showButtonError('Error de conexión, reintentá');
+            resumeRoundTimer();
+            return;
+        }
+
+        const { isCorrect, data } = guessResult;
+
+        if (!isCorrect) {
+            // Strict rule: wrong player NEVER changes turn or resets clock. Shows
+            // error popup, and upon closing resumes countdown EXACTLY where it was
+            // (resumeRoundTimer, not startRoundTimer) so player can keep trying.
+            showReactionPopup(dom.popupError);
+            setTimeout(() => {
+                dom.playerSearch.disabled = false;
+                dom.btnConfirm.disabled = false;
+                dom.playerSearch.value = '';
+                dom.playerSearch.focus();
+                resumeRoundTimer();
+            }, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        const targetCell = resolveTargetCellFromResponse(data, gameState.currentPlayer);
+
+        if (!targetCell) {
+            // Not a real turn change: resume clock.
+            console.error('El Backend no indicó una celda válida (ni cell_index ni board):', data);
+            dom.btnConfirm.disabled = false;
+            dom.playerSearch.disabled = false;
+            showButtonError('Error del servidor');
+            resumeRoundTimer();
+            return;
+        }
+
+        showReactionPopup(dom.popupSuccess);
+        setTimeout(() => resolveTurnOutcome(), RESULT_DISPLAY_DELAY_MS);
+    }
+
+    // ONLY called after a valid hit (200 OK with valid cell) or 00:00 timeout
+    // (see resumeRoundTimer). Incorrect guesses no longer route here.
+    function resolveTurnOutcome() {
+        dom.playerSearch.disabled = false;
+        dom.btnConfirm.disabled = false;
+        dom.playerSearch.value = '';
+
+        const winningPlayer = gameState.currentPlayer;
+
+        if (checkWinCondition(winningPlayer)) {
+            if (winningPlayer === 1) gameState.scoreP1 += 1; else gameState.scoreP2 += 1;
+            updateScoreDisplay();
+
+            if (gameState.scoreP1 >= ROUNDS_TO_WIN || gameState.scoreP2 >= ROUNDS_TO_WIN) {
+                endGameMatch(winningPlayer);
+            } else {
+                showRoundModal(winningPlayer, resetBoardState);
+            }
+        } else if (checkDrawCondition()) {
+            showRoundModal(null, resetBoardState);
+        } else {
+            switchActivePlayer();
+        }
+    }
+
+    // Custom end-of-round modal (replaces native alert()). `winner` is 1, 2
+    // or null (draw). `onNext` runs when the user presses "Siguiente Ronda".
+    function showRoundModal(winner, onNext) {
+        stopRoundTimer();
+        const modal = document.getElementById('modal-ronda');
+        modal.querySelector('.modal-title').textContent = winner
+            ? `¡Jugador ${winner} ganó la ronda!`
+            : '¡Empate en la ronda!';
+        modal.querySelector('.modal-icon').textContent = winner ? '⚽' : '🤝';
+        modal.querySelector('.round-score').textContent =
+            `Jugador 1  ${gameState.scoreP1} - ${gameState.scoreP2}  Jugador 2`;
+        const btn = document.getElementById('btn-next-round');
+        btn.onclick = function () {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+            onNext();
+        };
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        btn.focus();
+    }
+
+    /* ─────────────────────────────────────────────
+       13. AUTOCOMPLETE (PLAYER SEARCH)
+    ───────────────────────────────────────────── */
+    const FALLBACK_PLAYERS_ROSTER = [
+        'Fernando Torres', 'Hernán Crespo', 'Frank Lampard', 'Gianfranco Zola', 'Claude Makélélé',
+        'David Silva', 'Sergio Agüero', 'Joe Hart', 'Mario Balotelli', 'Bacary Sagna',
+        'Rodri', 'Nicolás Otamendi', 'Gianluigi Donnarumma', 'Benjamin Mendy', 'Juan Mata',
+        'Juan Sebastián Verón', 'Wayne Rooney', 'Matteo Darmian', 'Patrice Evra', 'Javier Mascherano',
+        'Pepe Reina', 'Steven Gerrard', 'Andrea Dossena', 'Djibril Cissé', 'José Antonio Reyes',
+        'Emiliano Martínez', 'Ian Wright', 'Riccardo Calafiori', 'Thierry Henry', 'Cesc Fàbregas',
+        'Tony Adams', 'Patrick Vieira', 'Roberto Soldado', 'Osvaldo Ardiles', 'Gary Lineker',
+        'Guglielmo Vicario', 'David Ginola', 'Xavi Hernández', 'Lionel Messi', 'Marcus Rashford',
+        'Demetrio Albertini', 'Samuel Umtiti', 'Sergio Ramos', 'Ángel Di María', 'David Beckham',
+        'Fabio Cannavaro', 'Karim Benzema', 'Koke', 'Ángel Correa', 'Kieran Trippier',
+        'Giacomo Raspadori', 'Antoine Griezmann', 'Josep Martínez', 'Javier Zanetti', 'Ashley Young',
+        'Nicolò Barella', 'Marcus Thuram', 'Samu Castillejo', 'Lucas Biglia', 'Alessandro Nesta',
+        'Mathieu Flamini', 'Kyle Walker', 'Álvaro Morata', 'Paulo Dybala', 'Gianluigi Buffon',
+        'Paul Pogba', 'Iago Falque', 'Erik Lamela', 'Chris Smalling', 'Francesco Totti',
+        'Steven Nzonzi', 'Mario Gila', 'Valentín "Taty" Castellanos', 'Paul Gascoigne', 'Ciro Immobile',
+        'Matteo Guendouzi', 'Javi Martínez', 'Martín Demichelis', 'Owen Hargreaves', 'Luca Toni',
+        'Franck Ribéry', 'Paco Alcácer', 'Leonardo Balerdi', 'Jude Bellingham', 'Luca Reggiani',
+        'Ousmane Dembélé', 'Álex Grimaldo', 'Exequiel Palacios', 'Jarell Quansah', 'Andrea Natali',
+        'Martin Terrier'
+    ];
+
+    function normalizeSearchText(str) {
+        return String(str)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    async function loadPlayerRoster() {
+        availablePlayers = [...FALLBACK_PLAYERS_ROSTER];
+        const candidateUrls = [...new Set([
+            PLAYERS_CSV_URL,
+            PLAYERS_CSV_PATH,
+            '/assets/data/data-jugadores.txt'
+        ])];
+
+        for (const url of candidateUrls) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) continue;
+
+                const csvText = await response.text();
+                if (csvText.trim().startsWith('<')) continue; // Avoid HTML 404/SPA fallback
+
+                const parsed = csvText
+                    .split(/\r?\n/)
+                    .map(name => name.trim().replace(/^"|"$/g, '').trim())
+                    .filter(name => name.length > 0 && !name.toLowerCase().startsWith('player_name'));
+
+                if (parsed.length > 0) {
+                    availablePlayers = parsed;
+                    console.info(`Listado de jugadores cargado: ${availablePlayers.length} nombres desde ${url}.`);
+                    return;
+                }
+            } catch (error) {
+                console.warn(`Intento de carga de jugadores falló para ${url}:`, error);
+            }
+        }
+        console.info(`Usando catálogo embebido de respaldo (${availablePlayers.length} jugadores).`);
+    }
+
+    function handleSearchInput() {
+        clearTimeout(autocompleteDebounceId);
+        autocompleteDebounceId = setTimeout(renderAutocompleteResults, AUTOCOMPLETE_DEBOUNCE_MS);
+    }
+
+    function renderAutocompleteResults() {
+        const rawQuery = dom.playerSearch.value.trim();
+        const normalizedQuery = normalizeSearchText(rawQuery);
+        dom.autocompleteList.innerHTML = '';
+
+        if (normalizedQuery.length < AUTOCOMPLETE_MIN_CHARS) {
+            closeAutocompleteList();
+            return;
+        }
+
+        const matches = availablePlayers.filter(name => normalizeSearchText(name).includes(normalizedQuery));
+
+        if (matches.length === 0) {
+            closeAutocompleteList();
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        matches.slice(0, AUTOCOMPLETE_MAX_RESULTS).forEach(playerName => {
+            const listItem = document.createElement('li');
+            listItem.textContent = playerName; // textContent avoids HTML/XSS injection
+            listItem.setAttribute('role', 'option');
+            listItem.addEventListener('click', () => selectAutocompleteResult(playerName));
+            fragment.appendChild(listItem);
+        });
+
+        dom.autocompleteList.appendChild(fragment);
+        dom.autocompleteList.style.display = 'block';
+        dom.playerSearch.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeAutocompleteList() {
+        dom.autocompleteList.style.display = 'none';
+        dom.playerSearch.setAttribute('aria-expanded', 'false');
+    }
+
+    function selectAutocompleteResult(playerName) {
+        dom.playerSearch.value = playerName;
+        closeAutocompleteList();
+        dom.btnConfirm.focus();
+    }
+
+    function handleOutsideAutocompleteClick(event) {
+        const clickedInsideSearch = dom.playerSearch.contains(event.target);
+        const clickedInsideResults = dom.autocompleteList.contains(event.target);
+        if (!clickedInsideSearch && !clickedInsideResults) {
+            closeAutocompleteList();
+        }
+    }
+});
+</script>
+</body>
+</html>

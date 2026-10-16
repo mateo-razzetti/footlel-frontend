@@ -1,0 +1,92 @@
+"player_name","nationality","premier","la_liga","serie_a","bundesliga"
+"Fernando Torres","España","Chelsea",NULL,NULL,NULL
+"Hernán Crespo","Argentina","Chelsea",NULL,NULL,NULL
+"Frank Lampard","Inglaterra","Chelsea",NULL,NULL,NULL
+"Gianfranco Zola","Italia","Chelsea",NULL,NULL,NULL
+"Claude Makélélé","Francia","Chelsea",NULL,NULL,NULL
+"David Silva","España","Manchester City",NULL,NULL,NULL
+"Sergio Agüero","Argentina","Manchester City",NULL,NULL,NULL
+"Joe Hart","Inglaterra","Manchester City",NULL,NULL,NULL
+"Mario Balotelli","Italia","Manchester City",NULL,NULL,NULL
+"Bacary Sagna","Francia","Manchester City",NULL,NULL,NULL
+"Rodri","España","Manchester City",NULL,NULL,NULL
+"Nicolás Otamendi","Argentina","Manchester City",NULL,NULL,NULL
+"Gianluigi Donnarumma","Italia","Manchester City",NULL,NULL,NULL
+"Benjamin Mendy","Francia","Manchester City",NULL,NULL,NULL
+"Juan Mata","España","Manchester United",NULL,NULL,NULL
+"Juan Sebastián Verón","Argentina","Manchester United",NULL,NULL,NULL
+"Wayne Rooney","Inglaterra","Manchester United",NULL,NULL,NULL
+"Matteo Darmian","Italia","Manchester United",NULL,NULL,NULL
+"Patrice Evra","Francia","Manchester United",NULL,NULL,NULL
+"Javier Mascherano","Argentina","Liverpool",NULL,NULL,NULL
+" Pepe Reina","España","Liverpool",NULL,NULL,NULL
+"Steven Gerrard","Inglaterra","Liverpool",NULL,NULL,NULL
+"Andrea Dossena","Italia","Liverpool",NULL,NULL,NULL
+"Djibril Cissé","Francia","Liverpool",NULL,NULL,NULL
+"José Antonio Reyes","España","Arsenal",NULL,NULL,NULL
+"Emiliano Martínez","Argentina","Arsenal",NULL,NULL,NULL
+"Ian Wright","Inglaterra","Arsenal",NULL,NULL,NULL
+"Riccardo Calafiori","Italia","Arsenal",NULL,NULL,NULL
+"Thierry Henry","Francia","Arsenal",NULL,NULL,NULL
+"Cesc Fàbregas","España","Arsenal",NULL,NULL,NULL
+"Tony Adams","Inglaterra","Arsenal",NULL,NULL,NULL
+"Patrick Vieira","Francia","Arsenal",NULL,NULL,NULL
+"Roberto Soldado","España","Tottenham",NULL,NULL,NULL
+"Osvaldo Ardiles","Argentina","Tottenham",NULL,NULL,NULL
+"Gary Lineker","Inglaterra","Tottenham",NULL,NULL,NULL
+"Guglielmo Vicario","Italia","Tottenham",NULL,NULL,NULL
+"David Ginola","Francia","Tottenham",NULL,NULL,NULL
+"Xavi Hernández","España",NULL,"FC Barcelona",NULL,NULL
+"Lionel Messi","Argentina",NULL,"FC Barcelona",NULL,NULL
+"Marcus Rashford","Inglaterra",NULL,"FC Barcelona",NULL,NULL
+"Demetrio Albertini","Italia",NULL,"FC Barcelona",NULL,NULL
+"Samuel Umtiti","Francia",NULL,"FC Barcelona",NULL,NULL
+"Sergio Ramos","España",NULL,"Real Madrid",NULL,NULL
+"Ángel Di María","Argentina",NULL,"Real Madrid",NULL,NULL
+"David Beckham","Inglaterra",NULL,"Real Madrid",NULL,NULL
+"Fabio Cannavaro","Italia",NULL,"Real Madrid",NULL,NULL
+"Karim Benzema","Francia",NULL,"Real Madrid",NULL,NULL
+"Koke","España",NULL,"Atlético de Madrid",NULL,NULL
+"Ángel Correa","Argentina",NULL,"Atlético de Madrid",NULL,NULL
+"Kieran Trippier","Inglaterra",NULL,"Atlético de Madrid",NULL,NULL
+"Giacomo Raspadori","Italia",NULL,"Atlético de Madrid",NULL,NULL
+"Antoine Griezmann","Francia",NULL,"Atlético de Madrid",NULL,NULL
+"Josep Martínez","España",NULL,NULL,"Inter de Milán",NULL
+"Javier Zanetti","Argentina",NULL,NULL,"Inter de Milán",NULL
+"Ashley Young","Inglaterra",NULL,NULL,"Inter de Milán",NULL
+"Nicolò Barella","Italia",NULL,NULL,"Inter de Milán",NULL
+"Marcus Thuram","Francia",NULL,NULL,"Inter de Milán",NULL
+"Samu Castillejo","España",NULL,NULL,"AC Milan",NULL
+"Lucas Biglia","Argentina",NULL,NULL,"AC Milan",NULL
+"Alessandro Nesta","Italia",NULL,NULL,"AC Milan",NULL
+"Mathieu Flamini","Francia",NULL,NULL,"AC Milan",NULL
+"Kyle Walker","Inglaterra",NULL,NULL,"AC Milan",NULL
+"Álvaro Morata","España",NULL,NULL,"Juventus",NULL
+"Paulo Dybala","Argentina",NULL,NULL,"Juventus",NULL
+"Gianluigi Buffon","Italia",NULL,NULL,"Juventus",NULL
+"Paul Pogba","Francia",NULL,NULL,"Juventus",NULL
+"Iago Falque","España",NULL,NULL,"AS Roma",NULL
+"Erik Lamela","Argentina",NULL,NULL,"AS Roma",NULL
+"Chris Smalling","Inglaterra",NULL,NULL,"AS Roma",NULL
+"Francesco Totti","Italia",NULL,NULL,"AS Roma",NULL
+"Steven Nzonzi","Francia",NULL,NULL,"AS Roma",NULL
+"Mario Gila","España",NULL,NULL,"Lazio",NULL
+"Valentín ""Taty"" Castellanos","Argentina",NULL,NULL,"Lazio",NULL
+"Paul Gascoigne","Inglaterra",NULL,NULL,"Lazio",NULL
+"Ciro Immobile","Italia",NULL,NULL,"Lazio",NULL
+"Matteo Guendouzi","Francia",NULL,NULL,"Lazio",NULL
+"Javi Martínez","España",NULL,NULL,NULL,"Bayern Múnich"
+"Martín Demichelis","Argentina",NULL,NULL,NULL,"Bayern Múnich"
+"Owen Hargreaves","Inglaterra",NULL,NULL,NULL,"Bayern Múnich"
+"Luca Toni","Italia",NULL,NULL,NULL,"Bayern Múnich"
+"Franck Ribéry","Francia",NULL,NULL,NULL,"Bayern Múnich"
+"Paco Alcácer","España",NULL,NULL,NULL,"Borussia Dortmund"
+"Leonardo Balerdi","Argentina",NULL,NULL,NULL,"Borussia Dortmund"
+"Jude Bellingham","Inglaterra",NULL,NULL,NULL,"Borussia Dortmund"
+"Luca Reggiani","Italia",NULL,NULL,NULL,"Borussia Dortmund"
+"Ousmane Dembélé","Francia",NULL,NULL,NULL,"Borussia Dortmund"
+"Álex Grimaldo","España",NULL,NULL,NULL,"Bayer Leverkusen"
+"Exequiel Palacios","Argentina",NULL,NULL,NULL,"Bayer Leverkusen"
+"Jarell Quansah","Inglaterra",NULL,NULL,NULL,"Bayer Leverkusen"
+"Andrea Natali","Italia",NULL,NULL,NULL,"Bayer Leverkusen"
+"Martin Terrier","Francia",NULL,NULL,NULL,"Bayer Leverkusen"

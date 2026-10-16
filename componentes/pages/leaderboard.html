@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Estilos -->
+    <!-- Styles -->
     <link rel="stylesheet" href="../../assets/styles/leaderboard.css">
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
@@ -30,10 +30,10 @@
             <span class="logo-text">FOOT<span>LEL</span></span>
         </a>
 
-        <!-- Título central -->
+        <!-- Central title -->
         <span class="header-page-title">Tabla de Posiciones</span>
 
-        <!-- Perfil + Dropdown -->
+        <!-- Profile + Dropdown -->
         <div class="profile-wrapper" id="profileWrapper">
             <button
                 class="profile-btn"
@@ -115,7 +115,7 @@
     ═══════════════════════════════════════ -->
     <main class="main-content" role="main">
 
-        <!-- Encabezado + Pestañas -->
+        <!-- Heading + Tabs -->
         <div class="lb-header">
             <h1 class="lb-title">Tabla de Posiciones</h1>
 
@@ -126,10 +126,10 @@
             </nav>
         </div>
 
-        <!-- Tabla de Posiciones -->
+        <!-- Standings table -->
         <section class="lb-list" aria-label="Ranking de jugadores">
 
-            <!-- Top 3 — destacados -->
+            <!-- Top 3 — highlighted -->
             <div class="lb-row lb-row--gold" data-rank="1">
                 <div class="lb-rank">
                     <span class="lb-medal lb-medal--gold" aria-label="Primer lugar">★</span>
@@ -163,7 +163,7 @@
                 <span class="lb-points">2,980 pts</span>
             </div>
 
-            <!-- Posiciones 4–10 -->
+            <!-- Positions 4–10 -->
             <div class="lb-row" data-rank="4">
                 <div class="lb-rank"><span class="lb-pos">4</span></div>
                 <img src="../../assets/images/avatar-default.png" alt="Avatar Crack_Del_Gol" class="lb-avatar"
@@ -180,7 +180,7 @@
                 <span class="lb-points">2,420 pts</span>
             </div>
 
-            <!-- Filas 6-10: ocultas para invitados con JS -->
+            <!-- Rows 6-10: hidden for guests via JS -->
             <div class="lb-row lb-row--logged" data-rank="6">
                 <div class="lb-rank"><span class="lb-pos">6</span></div>
                 <img src="../../assets/images/avatar-default.png" alt="Avatar Messi_Fan_99" class="lb-avatar"
@@ -223,7 +223,7 @@
 
         </section><!-- /lb-list -->
 
-        <!-- CTA Invitado (oculto por defecto, se muestra con JS) -->
+        <!-- Guest CTA (hidden by default, shown via JS) -->
         <div class="lb-guest-cta" id="guestCta" aria-hidden="true" hidden>
             <h2 class="cta-title">Guardá tu progreso y competí</h2>
             <p class="cta-desc">Registrate gratis para guardar tus estadísticas, rachas y subir en el ranking mundial.</p>
@@ -251,14 +251,14 @@
     'use strict';
 
     /* ─────────────────────────────────────────
-       1. DETECCIÓN DE ESTADO (Invitado vs Logueado)
+       1. STATE DETECTION (Guest vs Logged in)
     ───────────────────────────────────────── */
     var isGuest = localStorage.getItem('footlel_guest') === 'true';
 
     var GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
 
     /* ─────────────────────────────────────────
-       2. HEADER — usuario / avatar
+       2. HEADER — user / avatar
     ───────────────────────────────────────── */
     var profileUser   = document.getElementById('profileUsername');
     var profileAvatar = document.getElementById('profileAvatar');
@@ -288,24 +288,24 @@
     }
 
     /* ─────────────────────────────────────────
-       3. ESTADO INVITADO — mostrar CTA, ocultar filas 6-10
+       3. GUEST STATE — show CTA, hide rows 6-10
     ───────────────────────────────────────── */
     var guestCta    = document.getElementById('guestCta');
     var loggedRows  = document.querySelectorAll('.lb-row--logged');
 
     if (isGuest) {
-        // Mostrar bloque CTA
+        // Show CTA block
         guestCta.hidden = false;
         guestCta.removeAttribute('aria-hidden');
 
-        // Ocultar filas 6–10
+        // Hide rows 6–10
         loggedRows.forEach(function (row) {
             row.style.display = 'none';
         });
     }
 
     /* ─────────────────────────────────────────
-       4. TOGGLE DROPDOWN DE PERFIL
+       4. PROFILE DROPDOWN TOGGLE
     ───────────────────────────────────────── */
     var profileBtn      = document.getElementById('profileBtn');
     var profileDropdown = document.getElementById('profileDropdown');
@@ -319,7 +319,7 @@
     profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
 
     /* ─────────────────────────────────────────
-       5. PESTAÑAS DEL RANKING
+       5. RANKING TABS
     ───────────────────────────────────────── */
     var tabs = document.querySelectorAll('.lb-tab');
     tabs.forEach(function (tab) {
@@ -330,7 +330,7 @@
             });
             tab.classList.add('is-active');
             tab.setAttribute('aria-selected', 'true');
-            // TODO: cargar datos según tab.dataset.tab
+            // TODO: load data according to tab.dataset.tab
             console.log('[Footlel Leaderboard] Tab activa:', tab.dataset.tab);
         });
     });

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Estilos -->
+    <!-- Styles -->
     <link rel="stylesheet" href="../../assets/styles/amigos.css">
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
@@ -30,7 +30,7 @@
             <span class="logo-text">FOOT<span>LEL</span></span>
         </a>
 
-        <!-- Perfil + Dropdown -->
+        <!-- Profile + Dropdown -->
         <div class="profile-wrapper" id="profileWrapper">
             <button
                 class="profile-btn"
@@ -105,7 +105,7 @@
     </header>
 
     <!-- ═══════════════════════════════════════
-         NAVEGACIÓN DE PESTAÑAS
+         TAB NAVIGATION
     ═══════════════════════════════════════ -->
     <nav class="amigos-tabs" role="tablist" aria-label="Secciones de amigos">
         <button class="amigos-tab is-active" role="tab" aria-selected="true"  aria-controls="tab-amigos"    data-tab="amigos">Mis Amigos</button>
@@ -122,11 +122,11 @@
     <main class="main-content" role="main">
 
         <!-- ────────────────────────────────────
-             TAB 1 — Mis Amigos
+             TAB 1 — My Friends
         ──────────────────────────────────── -->
         <div id="tab-amigos" class="tab-panel is-active" role="tabpanel" aria-label="Mis Amigos">
 
-            <!-- Búsqueda -->
+            <!-- Search -->
             <div class="search-bar-wrapper">
                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -135,7 +135,7 @@
                 <input type="search" class="search-bar" placeholder="Buscar jugador..." aria-label="Buscar entre tus amigos">
             </div>
 
-            <!-- Lista de amigos -->
+            <!-- Friends list -->
             <ul class="friend-list" aria-label="Lista de amigos">
 
                 <li class="friend-row">
@@ -202,11 +202,11 @@
         </div>
 
         <!-- ────────────────────────────────────
-             TAB 2 — Solicitudes
+             TAB 2 — Requests
         ──────────────────────────────────── -->
         <div id="tab-solicitudes" class="tab-panel" role="tabpanel" aria-label="Solicitudes" hidden>
 
-            <!-- Búsqueda (compartida visual) -->
+            <!-- Search (visually shared) -->
             <div class="search-bar-wrapper">
                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -215,7 +215,7 @@
                 <input type="search" class="search-bar" placeholder="Buscar jugador..." aria-label="Buscar solicitudes">
             </div>
 
-            <!-- Sección: Solicitudes de Amistad -->
+            <!-- Section: Friend Requests -->
             <section class="requests-section" aria-labelledby="sectionFriendReqs">
                 <h2 class="requests-section-title" id="sectionFriendReqs">Solicitudes de Amistad</h2>
 
@@ -250,7 +250,7 @@
                 </ul>
             </section>
 
-            <!-- Sección: Desafíos y Partidos -->
+            <!-- Section: Challenges and Matches -->
             <section class="requests-section" aria-labelledby="sectionChallenges">
                 <h2 class="requests-section-title" id="sectionChallenges">Desafíos y Partidos</h2>
 
@@ -300,7 +300,7 @@
         </div>
 
         <!-- ────────────────────────────────────
-             TAB 3 — Buscar
+             TAB 3 — Search
         ──────────────────────────────────── -->
         <div id="tab-buscar" class="tab-panel" role="tabpanel" aria-label="Buscar usuarios" hidden>
 
@@ -309,7 +309,7 @@
                 <p class="buscar-desc">Encontrá a otros fanáticos y amigos para competir en duelos de trivia.</p>
             </div>
 
-            <!-- Búsqueda principal -->
+            <!-- Main search -->
             <div class="search-bar-wrapper search-bar-wrapper--buscar">
                 <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -318,7 +318,7 @@
                 <input type="search" class="search-bar" id="buscarInput" placeholder="Ingresá el @usuario..." aria-label="Buscar usuarios por nombre">
             </div>
 
-            <!-- Jugadores sugeridos -->
+            <!-- Suggested players -->
             <section aria-labelledby="suggestedTitle">
                 <h2 class="suggested-label" id="suggestedTitle">JUGADORES SUGERIDOS</h2>
 
@@ -373,7 +373,7 @@
                 </ul>
             </section>
 
-            <!-- Toast: Solicitud enviada -->
+            <!-- Toast: Request sent -->
             <div class="buscar-toast" id="addToast" aria-live="polite" hidden>
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -382,7 +382,7 @@
                 ¡Solicitud Enviada!
             </div>
 
-        </div><!-- /tab-buscar -->
+        </div><!-- /tab-search -->
 
     </main>
 
@@ -397,7 +397,7 @@
     'use strict';
 
     /* ─────────────────────────────────────────
-       1. HEADER — usuario
+       1. HEADER — user
     ───────────────────────────────────────── */
     var profileUser   = document.getElementById('profileUsername');
     var savedUser     = localStorage.getItem('footlel_username') || 'nombre_usuario';
@@ -408,7 +408,7 @@
     profileUser.textContent = '@' + savedUser;
 
     /* ─────────────────────────────────────────
-       2. TOGGLE DROPDOWN DE PERFIL
+       2. PROFILE DROPDOWN TOGGLE
     ───────────────────────────────────────── */
     var profileBtn      = document.getElementById('profileBtn');
     var profileDropdown = document.getElementById('profileDropdown');
@@ -427,7 +427,7 @@
     profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
 
     /* ─────────────────────────────────────────
-       3. SISTEMA DE PESTAÑAS
+       3. TAB SYSTEM
     ───────────────────────────────────────── */
     var tabs   = document.querySelectorAll('.amigos-tab');
     var panels = document.querySelectorAll('.tab-panel');
@@ -435,7 +435,7 @@
     function activateTab(targetTab) {
         var targetId = 'tab-' + targetTab.dataset.tab;
 
-        // Desactivar todas las pestañas y paneles
+        // Deactivate all tabs and panels
         tabs.forEach(function (t) {
             t.classList.remove('is-active');
             t.setAttribute('aria-selected', 'false');
@@ -445,7 +445,7 @@
             p.hidden = true;
         });
 
-        // Activar la pestaña y panel seleccionados
+        // Activate the selected tab and panel
         targetTab.classList.add('is-active');
         targetTab.setAttribute('aria-selected', 'true');
         var panel = document.getElementById(targetId);
@@ -462,21 +462,21 @@
     });
 
     /* ─────────────────────────────────────────
-       4. BOTONES "AGREGAR" EN TAB BUSCAR
+       4. "AGREGAR" (ADD) BUTTONS IN SEARCH TAB
     ───────────────────────────────────────── */
     var addToast = document.getElementById('addToast');
     var toastTimer = null;
 
     document.querySelectorAll('.btn-add--active').forEach(function (btn) {
         btn.addEventListener('click', function () {
-            // Cambiar botón a estado "pendiente"
+            // Switch the button to the "pending" state
             btn.classList.remove('btn-add--active');
             btn.classList.add('btn-add--pending');
             btn.disabled = true;
             btn.setAttribute('aria-disabled', 'true');
             btn.innerHTML = 'Solicitud Pendiente';
 
-            // Mostrar toast
+            // Show toast
             addToast.hidden = false;
             clearTimeout(toastTimer);
             toastTimer = setTimeout(function () {

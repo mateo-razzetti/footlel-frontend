@@ -10,13 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Estilos: base del menú (tokens + header + dropdown) + específicos de ayuda -->
+    <!-- Styles: menu base (tokens + header + dropdown) + help-specific -->
     <link rel="stylesheet" href="../../assets/styles/menu.css">
     <link rel="stylesheet" href="../../assets/styles/ayuda.css">
 
-    <!-- Preferencias globales (tema + animaciones) -->
+    <!-- Global preferences (theme + animations) -->
     <script src="../../assets/scripts/global-preferences.js"></script>
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
     ═══════════════════════════════════════ -->
     <header class="site-header" role="banner">
 
-        <!-- Izquierda: Logo (actúa como botón de retroceso a menu.html) -->
+        <!-- Left: Logo (acts as a back button to menu.html) -->
         <a href="menu.html" class="logo-link" aria-label="Volver a Footlel">
             <img
                 src="../../assets/images/logo-oscuro.png"
@@ -39,7 +39,7 @@
             <span class="logo-text">FOOT<span>LEL</span></span>
         </a>
 
-        <!-- Derecha: Perfil + Dropdown -->
+        <!-- Right: Profile + Dropdown -->
         <div class="profile-wrapper" id="profileWrapper">
 
             <button
@@ -65,10 +65,10 @@
                 </svg>
             </button>
 
-            <!-- Dropdown flotante -->
+            <!-- Floating dropdown -->
             <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
 
-                <!-- Configuración -->
+                <!-- Settings -->
                 <a href="configuracion.html" class="dropdown-item" role="menuitem">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -79,7 +79,7 @@
                     Configuración
                 </a>
 
-                <!-- Editar Cuenta -->
+                <!-- Edit Account -->
                 <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -90,8 +90,8 @@
                     Editar Cuenta
                 </a>
 
-                <!-- Mis Amigos -->
-                <a href="buscar-usuarios.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                <!-- My Friends -->
+                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
                          stroke-linejoin="round" aria-hidden="true">
@@ -103,7 +103,7 @@
                     Mis Amigos
                 </a>
 
-                <!-- Ayuda (activa) -->
+                <!-- Help (active) -->
                 <a href="ayuda.html" class="dropdown-item" role="menuitem" style="color: var(--color-brand-green);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -117,7 +117,7 @@
 
                 <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
 
-                <!-- Cerrar / Iniciar Sesión -->
+                <!-- Log out / Log in -->
                 <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -134,20 +134,20 @@
     </header>
 
     <!-- ═══════════════════════════════════════
-         CONTENIDO PRINCIPAL
+         MAIN CONTENT
     ═══════════════════════════════════════ -->
     <main role="main">
 
-        <!-- Cabecera central -->
+        <!-- Central header -->
         <section class="help-header" aria-labelledby="helpTitle">
             <h1 class="help-title" id="helpTitle">Centro de Ayuda</h1>
             <p class="help-subtitle">Resolvemos tus dudas sobre las reglas y tu cuenta.</p>
         </section>
 
-        <!-- Acordeón FAQ -->
+        <!-- FAQ accordion -->
         <section class="faq-container" aria-label="Preguntas frecuentes">
 
-            <!-- ── Fila 1: ABIERTA por defecto ── -->
+            <!-- ── Row 1: OPEN by default ── -->
             <div class="faq-item is-open" id="faq-1">
                 <button
                     class="faq-trigger"
@@ -172,7 +172,7 @@
                 </div>
             </div>
 
-            <!-- ── Fila 2 ── -->
+            <!-- ── Row 2 ── -->
             <div class="faq-item" id="faq-2">
                 <button
                     class="faq-trigger"
@@ -198,7 +198,7 @@
                 </div>
             </div>
 
-            <!-- ── Fila 3 ── -->
+            <!-- ── Row 3 ── -->
             <div class="faq-item" id="faq-3">
                 <button
                     class="faq-trigger"
@@ -224,7 +224,7 @@
                 </div>
             </div>
 
-            <!-- ── Fila 4 ── -->
+            <!-- ── Row 4 ── -->
             <div class="faq-item" id="faq-4">
                 <button
                     class="faq-trigger"
@@ -250,7 +250,7 @@
                 </div>
             </div>
 
-            <!-- ── Fila 5 ── -->
+            <!-- ── Row 5 ── -->
             <div class="faq-item" id="faq-5">
                 <button
                     class="faq-trigger"
@@ -290,7 +290,7 @@
     'use strict';
 
     /* ──────────────────────────────────────────
-       1. ACORDEÓN
+       1. ACCORDION
     ────────────────────────────────────────── */
     const faqItems = document.querySelectorAll('.faq-item');
 
@@ -300,7 +300,7 @@
         trigger.addEventListener('click', function () {
             const isOpen = item.classList.contains('is-open');
 
-            // Cierra todos los demás (comportamiento acordeón clásico)
+            // Close all the others (classic accordion behavior)
             faqItems.forEach(function (other) {
                 if (other !== item) {
                     other.classList.remove('is-open');
@@ -308,14 +308,14 @@
                 }
             });
 
-            // Alterna el ítem actual
+            // Toggle the current item
             item.classList.toggle('is-open', !isOpen);
             trigger.setAttribute('aria-expanded', String(!isOpen));
         });
     });
 
     /* ──────────────────────────────────────────
-       2. DROPDOWN DE PERFIL
+       2. PROFILE DROPDOWN
     ────────────────────────────────────────── */
     const profileBtn      = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
@@ -347,7 +347,7 @@
     });
 
     /* ──────────────────────────────────────────
-       3. ESTADO INVITADO / REGISTRADO
+       3. GUEST / REGISTERED STATE
     ────────────────────────────────────────── */
     const isGuest      = localStorage.getItem('footlel_guest') === 'true';
     const profileUser  = document.getElementById('profileUsername');
