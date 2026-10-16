@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Juego Principal (Tateti)
+   FOOTLEL — Main Game (Tic-Tac-Toe)
    assets/styles/tateti.css
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Header Específico del Juego ─────────────────────────────── */
+/* ── Game Header ─────────────────────────────── */
 .game-header {
     display: flex;
     justify-content: space-between;
@@ -68,11 +68,10 @@
     letter-spacing: 1px;
 }
 
-/* ── Tablero ─────────────────────────────────────────────────── */
-/* ── Centrado general del contenido de juego ────────────────────
-   Todo el bloque (tablero + buscador) queda centrado tanto vertical
-   como horizontalmente dentro del espacio disponible entre el
-   header y el footer. */
+/* ── Board ─────────────────────────────────────────────────── */
+/* ── General centering of game content ────────────────────
+   The entire block (board + search) is centered vertically
+   and horizontally in the space between header and footer. */
 .main-content {
     display: flex;
     flex-direction: column;
@@ -80,6 +79,44 @@
     justify-content: center;
     flex: 1;
     gap: 4px;
+    padding-top: 12px;
+}
+
+/* ── Connection Error Notice ─────────────────────────────────── */
+.connection-error-notice {
+    margin: 4px auto 12px;
+    max-width: 480px;
+    text-align: center;
+    color: #FFFFFF;
+    font-family: var(--font-body, sans-serif);
+}
+
+.connection-error-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #F44336;
+    margin-bottom: 6px;
+}
+
+.connection-error-subtitle {
+    opacity: 0.8;
+    margin-bottom: 14px;
+    color: #FFFFFF;
+}
+
+body.light-mode .connection-error-notice,
+body.light-mode .connection-error-subtitle {
+    color: #1A1A1A;
+}
+
+.connection-error-btn {
+    background: var(--color-brand-green, #4CAF50);
+    color: #FFFFFF;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 26px;
+    font-weight: 700;
+    cursor: pointer;
 }
 
 .board-section {
@@ -91,11 +128,11 @@
 
 .game-board {
     display: grid;
-    grid-template-columns: repeat(4, 124px); /* Zoom-out: antes 160px */
+    grid-template-columns: repeat(4, 124px); /* Zoom-out: previously 160px */
     grid-template-rows: repeat(4, 124px);
-    gap: 12px; /* Zoom-out: antes 16px */
-    /* Offset para centrar visualmente el 3x3 respecto a la columna del medio:
-       mitad de una columna + gap = (124 + 12) / 2 = 68px. */
+    gap: 12px; /* Zoom-out: previously 16px */
+    /* Offset to visually center 3x3 relative to middle column:
+       half a column + gap = (124 + 12) / 2 = 68px. */
     transform: translateX(-68px);
 }
 
@@ -103,7 +140,7 @@
     background: transparent;
 }
 
-/* Tarjetas de Condición (Clubes / Superior) */
+/* Condition Cards (Clubs / Top) */
 .cond-top {
     background: #FFFFFF;
     border-radius: 12px;
@@ -117,7 +154,7 @@
     text-align: center;
 }
 
-/* Tarjetas de Condición (Selecciones / Izquierda) */
+/* Condition Cards (National Teams / Left) */
 .cond-left {
     background: var(--color-surface-card);
     border: 1px solid var(--color-border-subtle);
@@ -133,13 +170,14 @@
 }
 
 .cond-img {
+    display: block;
     width: 60px;
     height: 60px;
     object-fit: contain;
     margin: 0;
 }
 
-/* Casilleros Jugables */
+/* Playable Cells */
 .playable-cell {
     background: #1E1E1E;
     border: 2px solid #333333;
@@ -165,7 +203,7 @@
     box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
 }
 
-/* Estados Conquistados */
+/* Conquered States */
 .conquered-p1 {
     background: rgba(76, 175, 80, 0.2) !important;
     border: 2px solid var(--color-brand-green) !important;
@@ -173,18 +211,16 @@
 }
 
 .conquered-p2 {
-    /* Usamos un color distinto para el P2 para diferenciar en Tateti, ej: Azul o Naranja.
-       Como pediste verde, haremos un verde diferente o usaremos una clase que se distinga visualmente.
-       Para MVP: usaremos un borde azulado para P2 para mantener la logica del juego. */
+    /* Distinct color for P2 to differentiate in Tic-Tac-Toe (bluish border for P2). */
     background: rgba(33, 150, 243, 0.2) !important;
     border: 2px solid #2196F3 !important;
     box-shadow: inset 0 0 20px rgba(33, 150, 243, 0.3);
 }
 
-/* ── Marcas del Tablero (X / O) ──────────────────────────────── */
+/* ── Board Marks (X / O) ─────────────────────────────────────── */
 .cell-mark {
     font-family: var(--font-heading);
-    font-size: 48px; /* Zoom-out: antes 64px, en línea con la celda de 124px */
+    font-size: 48px; /* Zoom-out: previously 64px, aligned with 124px cell */
     font-weight: 700;
     line-height: 1;
     letter-spacing: 1px;
@@ -217,22 +253,22 @@
     .cell-mark { font-size: 36px; }
 }
 
-/* ── Buscador Inferior ───────────────────────────────────────── */
+/* ── Bottom Search Bar ───────────────────────────────────────── */
 .search-section {
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 14px;
     padding: 0 0 32px;
-    width: 532px; /* Ancho exacto de las 4 columnas del tablero: 124x4 + 12x3 */
+    width: 532px; /* Exact width of 4 board columns: 124x4 + 12x3 */
     max-width: 100%;
     margin: 0 auto;
-    transform: translateX(-68px); /* Mismo desplazamiento que el tablero para alinearlos */
+    transform: translateX(-68px); /* Same offset as board for alignment */
 }
 
 .search-wrapper {
     position: relative;
-    flex: 1; /* Absorbe el espacio flexible que antes tenía el input directo */
+    flex: 1; /* Absorbs flexible space previously on direct input */
     display: flex;
 }
 
@@ -296,14 +332,14 @@
 }
 
 .search-input {
-    width: 100%; /* El input ahora toma el 100% de su wrapper */
+    width: 100%; /* Input takes 100% of wrapper */
     background: #2A2A2A;
     border: 1px solid #444444;
     color: var(--color-text-primary);
-    padding: 15px 22px; /* Zoom-out: antes 20px 28px */
+    padding: 15px 22px; /* Zoom-out: previously 20px 28px */
     border-radius: 26px;
     font-family: var(--font-body);
-    font-size: 15px; /* Zoom-out: antes 18px */
+    font-size: 15px; /* Zoom-out: previously 18px */
     outline: none;
     transition: border-color 0.2s ease, background 0.2s ease;
 }
@@ -317,10 +353,10 @@
     background: var(--color-brand-green);
     color: #fff;
     border: none;
-    padding: 15px 28px; /* Zoom-out: antes 20px 36px */
+    padding: 15px 28px; /* Zoom-out: previously 20px 36px */
     border-radius: 26px;
     font-family: var(--font-heading);
-    font-size: 14px; /* Zoom-out: antes 16px */
+    font-size: 14px; /* Zoom-out: previously 16px */
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 1px;
@@ -345,7 +381,7 @@
     transform: none;
 }
 
-/* ── Footer / Marcador ───────────────────────────────────────── */
+/* ── Footer / Scoreboard ───────────────────────────────────────── */
 .game-footer {
     text-align: center;
     padding: 24px;
@@ -358,8 +394,7 @@
     letter-spacing: 1px;
 }
 
-/* Marcador cabeza a cabeza (1v1 Local) — reemplaza el viejo "Jugador X:
-   N/3 Rondas" (confundía: el partido se gana con 2 rondas, no con 3). */
+/* Head-to-head scoreboard (1v1 Local) — match won by 2 rounds, not 3. */
 .score-board {
     display: flex;
     align-items: center;
@@ -387,7 +422,7 @@
     opacity: 0.65;
 }
 
-/* ── Pop-ups de Reacción ─────────────────────────────────────── */
+/* ── Reaction Pop-ups ─────────────────────────────────────── */
 .reaction-popup {
     position: fixed;
     top: 50%;
@@ -431,7 +466,7 @@
 .reaction-popup.success .reaction-text { color: var(--color-brand-green); }
 .reaction-popup.error .reaction-text   { color: #F44336; }
 
-/* ── Modales de Fin de Partida ───────────────────────────────── */
+/* ── End-Game Modals ───────────────────────────────── */
 .endgame-points {
     font-family: var(--font-heading);
     font-size: 20px;
@@ -449,6 +484,79 @@
     color: var(--color-text-primary);
     margin: 16px 0;
     letter-spacing: 4px;
+}
+
+/* ── Round / End-game modals: centered, Footlel look ─────────── */
+#modal-ronda,
+#modal-victoria,
+#modal-derrota {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+#modal-ronda.hidden,
+#modal-victoria.hidden,
+#modal-derrota.hidden { display: none !important; }
+
+#modal-ronda .modal-card,
+#modal-victoria .modal-card,
+#modal-derrota .modal-card {
+    background: #292929;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    margin: auto;
+    max-width: 380px;
+    text-align: center;
+}
+
+#modal-ronda .modal-title,
+#modal-victoria .modal-title,
+#modal-derrota .modal-title {
+    color: #F5F5F5;
+    font-size: 22px;
+}
+
+.round-score {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: #F5F5F5;
+    white-space: pre-wrap;
+    margin: 14px 0 24px;
+}
+
+.endgame-label {
+    font-family: var(--font-body);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--color-text-muted);
+    margin: 4px 0 0;
+}
+
+#modal-victoria .score-display,
+#modal-derrota .score-display { margin: 6px 0 12px; }
+
+/* Light mode */
+body.light-mode #modal-ronda .modal-card,
+body.light-mode #modal-victoria .modal-card,
+body.light-mode #modal-derrota .modal-card {
+    background: #FFFFFF;
+    border-color: #4CAF50;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+body.light-mode #modal-ronda .modal-title,
+body.light-mode #modal-victoria .modal-title,
+body.light-mode #modal-derrota .modal-title,
+body.light-mode .round-score { color: #1A1A1A; }
+body.light-mode #modal-ronda.modal-backdrop,
+body.light-mode #modal-victoria.modal-backdrop,
+body.light-mode #modal-derrota.modal-backdrop { background: rgba(245, 245, 245, 0.75); }
+body.light-mode #modal-victoria .modal-btn-secondary,
+body.light-mode #modal-derrota .modal-btn-secondary {
+    color: #1A1A1A;
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */

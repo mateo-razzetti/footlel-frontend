@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Selección de Modalidades
+   FOOTLEL — Game Mode Selection
    assets/styles/modalidades.css
    ═══════════════════════════════════════════════════════════════ */
 
@@ -29,7 +29,7 @@
     margin-top: 6px;
 }
 
-/* ── Grid de Cards ────────────────────────────────────────────── */
+/* ── Cards Grid ────────────────────────────────────────────────── */
 .mode-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -39,7 +39,7 @@
     padding: 0 32px 16px;
 }
 
-/* ── Card base — mismas proporciones que .game-card en menu.css ── */
+/* ── Base card — same proportions as .game-card in menu.css ── */
 .mode-card {
     background: var(--color-surface-card);
     border: 1px solid var(--color-border-subtle);
@@ -59,14 +59,14 @@
 
 
 
-/* ── Ícono ────────────────────────────────────────────────────── */
+/* ── Icon ────────────────────────────────────────────────────── */
 .mode-icon {
     font-size: 36px;
     line-height: 1;
     margin-bottom: 4px;
 }
 
-/* ── Textos ───────────────────────────────────────────────────── */
+/* ── Typography ───────────────────────────────────────────────────── */
 .mode-title {
     font-family: var(--font-heading);
     font-size: 18px;
@@ -82,11 +82,11 @@
     font-weight: 400;
     color: var(--color-text-muted);
     line-height: 1.6;
-    flex: 1;   /* empuja el botón al fondo, igual que .card-desc */
+    flex: 1;   /* pushes button to bottom, same as .card-desc */
     margin: 0;
 }
 
-/* ── Botones ghost de card ────────────────────────────────────── */
+/* ── Card ghost buttons ────────────────────────────────────── */
 .btn-mode {
     display: flex;
     justify-content: space-between;
@@ -110,7 +110,7 @@
 .btn-mode:hover  { background: var(--color-brand-green); color: #fff; }
 .btn-mode:active { transform: scale(0.98); }
 
-/* Badge "DIARIO" en card destacada */
+/* "DAILY" badge on featured card */
 .mode-badge {
     display: inline-block;
     font-family: var(--font-body);
@@ -128,7 +128,7 @@
 }
 
 /* ══════════════════════════════════════════════════════════════
-   MODALES
+   MODALS
    ══════════════════════════════════════════════════════════════ */
 .modal-backdrop {
     position: fixed;
@@ -164,7 +164,7 @@
     to   { opacity: 1; transform: translateY(0)    scale(1);    }
 }
 
-/* Botón cerrar (X) */
+/* Close button (X) */
 .modal-close {
     position: absolute;
     top: 14px;
@@ -203,7 +203,7 @@
     margin-bottom: 22px;
 }
 
-/* Reloj del desafío completado */
+/* Completed challenge clock */
 .modal-clock {
     font-family: var(--font-heading);
     font-size: 38px;
@@ -214,7 +214,7 @@
     margin: 0 0 24px;
 }
 
-/* Botones del modal */
+/* Modal buttons */
 .modal-actions {
     display: flex;
     flex-direction: column;
@@ -263,7 +263,7 @@
     color: var(--color-text-primary);
 }
 
-/* ── Utilidad .hidden ─────────────────────────────────────────── */
+/* ── .hidden Utility ─────────────────────────────────────────── */
 .hidden { display: none !important; }
 
 /* ── Responsive ───────────────────────────────────────────────── */
@@ -279,7 +279,7 @@
     }
 }
 
-/* == CTA INVITADO (debajo del grid) =============================== */
+/* == GUEST CTA (below grid) =============================== */
 .guest-cta-bar {
     max-width: 1300px;
     margin: 32px auto 16px;

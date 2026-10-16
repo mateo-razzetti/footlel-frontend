@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Editar Cuenta (Full-Screen Page)
+   FOOTLEL — Edit Account (Full-Screen Page)
    assets/styles/editar-cuenta.css
    ═══════════════════════════════════════════════════════════════ */
 
@@ -8,7 +8,7 @@
     --color-brand-green:    #4CAF50;
     --color-brand-green-dk: #43a047;
     --color-surface-bg:     #1A1A1A;
-    --color-bg-page:        #1A1A1A;   /* alias usado por global-preferences.css */
+    --color-bg-page:        #1A1A1A;   /* alias used by global-preferences.css */
     --color-surface-card:   #292929;
     --color-surface-input:  #1A1A1A;
     --color-overlay-bg:     rgba(26, 26, 26, 0.85);
@@ -39,11 +39,11 @@ body {
     font-family:      var(--font-body);
     color:            var(--color-text-primary);
     min-height:       100vh;
-    /* Usa --color-bg-page: es la variable que global-preferences.css
-       sobreescribe cuando activa el modo claro (#F5F5F5) */
+    /* Uses --color-bg-page: variable overridden by global-preferences.css
+       when light mode is active (#F5F5F5) */
     background-color: var(--color-bg-page);
 }
-/* .background-overlay eliminado — ya no se renderiza la cancha */
+/* .background-overlay removed — pitch is no longer rendered */
 .page-shell {
     position: relative;
     z-index: 1;

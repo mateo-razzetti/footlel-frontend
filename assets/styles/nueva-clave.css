@@ -1,16 +1,16 @@
 /* =========================================================
-   nueva-clave.css — Pantalla de Nueva Contraseña | Footlel
-   Overrides mínimos sobre login.css.
-   Variables :root heredadas de login.css.
+   nueva-clave.css — New Password Screen | Footlel
+   Minimal overrides over login.css.
+   :root variables inherited from login.css.
    ========================================================= */
 
-/* ── Título centrado, tamaño ajustado para que entre en una línea ── */
+/* ── Centered title, adjusted size to fit single line ── */
 .new-password-title {
     font-size: 22px;
     letter-spacing: 1px;
 }
 
-/* ── Label sobre cada input ── */
+/* ── Label above each input ── */
 .form-label {
     display: block;
     width: 100%;
@@ -22,18 +22,18 @@
     text-align: left;
 }
 
-/* ── Wrapper para input + botón ojo ── */
+/* ── Wrapper for input + eye button ── */
 .input-toggle-wrapper {
     position: relative;
     width: 100%;
 }
 
-/* El input recibe padding-right para no solaparse con el botón ojo */
+/* Input gets right padding to avoid overlapping eye button */
 .input-toggle-wrapper .form-input {
     padding-right: 44px;
 }
 
-/* ── Botón de mostrar/ocultar contraseña ── */
+/* ── Show/hide password button ── */
 .toggle-visibility {
     position: absolute;
     right: 12px;
@@ -58,18 +58,18 @@
     display: block;
 }
 
-/* ── Mensaje de error de coincidencia ── */
+/* ── Match error message ── */
 .field-error {
     width: 100%;
     margin-top: 8px;
     font-family: var(--font-body);
     font-size: 12px;
     font-weight: 500;
-    color: #ef5350;       /* rojo de error, sin agregar variable nueva */
+    color: #ef5350;       /* error red, without adding new variable */
     text-align: left;
 }
 
-/* ── Enlace "Cancelar" ── */
+/* ── "Cancel" link ── */
 .link-cancel {
     font-family: var(--font-body);
     font-size: 14px;

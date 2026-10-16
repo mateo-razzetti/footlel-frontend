@@ -1,20 +1,20 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Preferencias Globales de Usuario
+   FOOTLEL — User Global Preferences
    assets/styles/global-preferences.css
 
-   Aplica los estilos de Modo Claro y Eliminar Animaciones
-   a TODAS las páginas de la aplicación.
-   Debe cargarse en el <head> de todos los archivos HTML.
+   Applies Light Mode and Disable Animations styles
+   to ALL pages across the application.
+   Must be loaded in the <head> of every HTML file.
    ═══════════════════════════════════════════════════════════════ */
 
 
 /* ══════════════════════════════════════════════════════════════
-   MODO CLARO — html.light-mode
-   Sobreescribe los tokens del sistema oscuro con valores claros.
+   LIGHT MODE — html.light-mode
+   Overrides dark system tokens with light values.
    ══════════════════════════════════════════════════════════════ */
 html.light-mode,
 html.light-mode body {
-    /* Tokens de color invertidos */
+    /* Inverted color tokens */
     --color-bg-page:       #F5F5F5;
     --color-surface-card:  #FFFFFF;
     --color-surface-input: #EEEEEE;
@@ -26,13 +26,13 @@ html.light-mode body {
     color: var(--color-text-primary);
 }
 
-/* ── Hover del dropdown en MODO OSCURO (base) ──────────────────── */
+/* ── Dropdown hover in DARK MODE (base) ──────────────────── */
 .dropdown-item:hover {
     background: rgba(255, 255, 255, 0.06);
     border-radius: 6px;
 }
 
-/* ── Header en modo claro ─────────────────────────────────────── */
+/* ── Header in light mode ─────────────────────────────────────── */
 html.light-mode .site-header {
     background: rgba(245, 245, 245, 0.95);
     border-bottom-color: rgba(0, 0, 0, 0.08);
@@ -50,7 +50,7 @@ html.light-mode .back-link:hover {
     background: rgba(0, 0, 0, 0.05);
 }
 
-/* ── Dropdown en modo claro ───────────────────────────────────── */
+/* ── Dropdown in light mode ───────────────────────────────────── */
 html.light-mode .profile-dropdown {
     background: #FFFFFF;
     border-color: rgba(0, 0, 0, 0.10);
@@ -60,7 +60,7 @@ html.light-mode .dropdown-item         { color: #1A1A1A; }
 html.light-mode .dropdown-item:hover   { background: rgba(0, 0, 0, 0.05); }
 html.light-mode .dropdown-divider      { background: rgba(0, 0, 0, 0.08); }
 
-/* ── Tarjetas y formularios en modo claro ─────────────────────── */
+/* ── Cards and forms in light mode ─────────────────────── */
 html.light-mode .login-card,
 html.light-mode .prefs-card,
 html.light-mode .modal-card,
@@ -86,16 +86,16 @@ html.light-mode .modal-input::placeholder {
     color: #9E9E9E;
 }
 
-/* Íconos dentro de inputs (lupas, sobres, candados) */
+/* Icons inside inputs (magnifiers, envelopes, locks) */
 html.light-mode .input-icon { color: #616161; }
 
-/* Separador horizontal entre secciones */
+/* Horizontal section divider */
 html.light-mode .pref-row    { border-color: rgba(0, 0, 0, 0.08); }
 html.light-mode .pref-section { border-color: rgba(0, 0, 0, 0.08); }
 html.light-mode .section-divider,
 html.light-mode hr            { border-color: rgba(0, 0, 0, 0.08); }
 
-/* ── Stats bar en modo claro (menu.html) ──────────────────────── */
+/* ── Stats bar in light mode (menu.html) ──────────────────────── */
 html.light-mode .stats-bar {
     background: rgba(245, 245, 245, 0.95);
     border-top-color: rgba(0, 0, 0, 0.08);
@@ -104,16 +104,12 @@ html.light-mode .stats-bar {
 html.light-mode .stat-value { color: #1A1A1A; }
 html.light-mode .stat-label { color: #616161; }
 
-/* ── Toggle track en modo claro ───────────────────────────────── */
+/* ── Toggle track in light mode ───────────────────────────────── */
 html.light-mode .toggle-track { background: rgba(0, 0, 0, 0.18); }
 
-/* ── Logo: modo claro aplica logo-claro.png via JS (syncLogo).   ─
-   Esta regla oculta el logo-oscuro.png si JS no pudo correr.    ─ */
-html.light-mode #main-logo {
-    content: url('../../assets/images/logo-claro.png');
-}
+/* ── Logo: src is managed exclusively by global-preferences.js (syncLogo). ── */
 
-/* ── Pelotas de fondo (visibles en modo claro) ────────────────── */
+/* ── Background footballs (visible in light mode) ────────────────── */
 html.light-mode {
     --ball-opacity: 0.15;
 }
@@ -125,20 +121,35 @@ html.light-mode .bg-ball {
 
 
 /* ══════════════════════════════════════════════════════════════
-   ELIMINAR ANIMACIONES — html.disable-animations
+   DISABLE ANIMATIONS — html.disable-animations
 
-   Estructura del toggle en configuracion.html:
+   Toggle structure in configuracion.html:
      label.toggle-switch
-       input[type="checkbox"]   ← el checkbox
-       span.toggle-track        ← el fondo del switch
-         ::after                ← el círculo blanco
+       input[type="checkbox"]   ← the checkbox
+       span.toggle-track        ← switch background
+         ::after                ← the white knob
 
-   El :not() excluye TODOS los elementos del interruptor para
-   que sigan animándose visualmente aunque el modo esté activo.
+   The :not() selector excludes ALL switch elements so
+   they remain visually animated even when mode is active.
    ══════════════════════════════════════════════════════════════ */
 html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"]),
 html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::before,
-html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::after {
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::after,
+body.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"]),
+body.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::before,
+body.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::after {
     transition: none !important;
     animation:  none !important;
+    animation-delay: 0s !important;
+    scroll-behavior: auto !important;
 }
+
+/* Floating background footballs (menu.html, modalidades.html): fully stopped.
+   !important beats the `animation: ballFloat ... infinite` in menu.css. */
+html.disable-animations .bg-ball,
+body.disable-animations .bg-ball {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+}
+

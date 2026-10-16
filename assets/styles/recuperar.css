@@ -1,22 +1,22 @@
 /* =========================================================
-   recuperar.css — Pantalla de Recuperación de Cuenta | Footlel
-   Solo overrides y componentes nuevos sobre login.css.
-   Las variables :root y los estilos base vienen de login.css.
+   recuperar.css — Account Recovery Screen | Footlel
+   Only overrides and new components over login.css.
+   :root variables and base styles come from login.css.
    ========================================================= */
 
-/* ── Encabezado: logo centrado + bloque de texto a la izquierda ── */
+/* ── Header: centered logo + left-aligned text block ── */
 .recover-header {
-    align-items: flex-start;    /* sobreescribe el align-items:center del login */
+    align-items: flex-start;    /* overrides login align-items:center */
     gap: 16px;
     margin-bottom: 28px;
 }
 
-/* Logo se mantiene centrado respecto a la card */
+/* Logo remains centered relative to card */
 .recover-header .logo-wrapper {
     align-self: center;
 }
 
-/* Bloque de título + subtítulo, texto a la izquierda */
+/* Title + subtitle block, left-aligned text */
 .recover-heading {
     width: 100%;
     display: flex;
@@ -42,7 +42,7 @@
     line-height: 1.5;
 }
 
-/* ── Input con ícono de sobre ── */
+/* ── Input with envelope icon ── */
 .input-icon-wrapper {
     position: relative;
     width: 100%;
@@ -57,21 +57,21 @@
     color: var(--color-text-muted);
     pointer-events: none;
     transition: color 0.2s ease;
-    /* Phosphor Icons usa línea base ligeramente distinta; ajuste fino: */
+    /* Phosphor Icons uses slightly different baseline; fine adjustment: */
     line-height: 1;
 }
 
-/* El input recibe padding-left extra para no solaparse con el ícono */
+/* Input gets extra left padding to avoid overlapping icon */
 .input-with-icon {
     padding-left: 42px;
 }
 
-/* Cuando el input tiene foco, el ícono adopta el color verde */
+/* When input is focused, icon adopts green color */
 .input-icon-wrapper:focus-within .input-icon {
     color: var(--color-brand-green);
 }
 
-/* ── Enlace "Volver al Login" ── */
+/* ── "Back to Login" link ── */
 .link-back-login {
     font-family: var(--font-body);
     font-size: 14px;

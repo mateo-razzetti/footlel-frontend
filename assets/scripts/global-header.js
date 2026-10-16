@@ -6,7 +6,7 @@
         const profileDropdown = document.getElementById('profileDropdown');
         const profileWrapper = document.getElementById('profileWrapper');
 
-        // Validamos que los elementos existan en la página actual
+        // Validate that the elements exist on the current page
         if (!profileBtn || !profileDropdown || !profileWrapper) {
             return;
         }
@@ -26,27 +26,27 @@
             }
         }
 
-        // 1. Toggle al hacer clic en el botón del perfil
+        // 1. Toggle on profile button click
         profileBtn.addEventListener('click', function(e) {
-            e.stopPropagation(); // Evita que el click suba y active el event listener de document
+            e.stopPropagation(); // Prevents the click from bubbling up and triggering the document event listener
             toggleDropdown();
         });
 
-        // 2. Click Outside: cerrar si se hace clic fuera del menú
+        // 2. Click Outside: close if the click is outside the menu
         document.addEventListener('click', function(e) {
             if (!profileWrapper.contains(e.target)) {
                 closeDropdown();
             }
         });
 
-        // 3. (Extra) Cerrar con la tecla Escape por accesibilidad
+        // 3. (Extra) Close with the Escape key for accessibility
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 closeDropdown();
             }
         });
         
-        // 4. Cerrar el menú si se hace click en algún enlace dentro del dropdown
+        // 4. Close the menu when any link inside the dropdown is clicked
         profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
             item.addEventListener('click', closeDropdown);
         });

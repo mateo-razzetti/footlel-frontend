@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   FOOTLEL — Tabla de Posiciones
+   FOOTLEL — Leaderboard
    assets/styles/leaderboard.css
    ═══════════════════════════════════════════════════════════════ */
 
@@ -90,7 +90,7 @@ body {
 }
 .logo-text span { color: var(--color-brand-green); }
 
-/* Título central del header */
+/* Central header title */
 .header-page-title {
     font-family: var(--font-body);
     font-size: 14px;
@@ -211,7 +211,7 @@ body {
     padding: 40px 24px 64px;
 }
 
-/* ── Header de la tabla (título + tabs) ────────────────────────── */
+/* ── Table header (title + tabs) ────────────────────────── */
 .lb-header {
     display: flex;
     align-items: center;
@@ -229,7 +229,7 @@ body {
     letter-spacing: 0.5px;
 }
 
-/* ── Pestañas ──────────────────────────────────────────────────── */
+/* ── Tabs ──────────────────────────────────────────────────── */
 .lb-tabs {
     display: flex;
     gap: 4px;
@@ -258,7 +258,7 @@ body {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   LISTA DE RANKING
+   RANKING LIST
    ════════════════════════════════════════════════════════════════ */
 .lb-list {
     display: flex;
@@ -266,7 +266,7 @@ body {
     gap: 8px;
 }
 
-/* Fila base */
+/* Base row */
 .lb-row {
     display: flex;
     align-items: center;
@@ -282,7 +282,7 @@ body {
     transform: translateX(2px);
 }
 
-/* ── Filas del podio ───────────────────────────────────────────── */
+/* ── Podium rows ───────────────────────────────────────────── */
 .lb-row--gold {
     border-color: rgba(255, 215, 0, 0.45);
     background: linear-gradient(90deg, rgba(255, 215, 0, 0.07) 0%, var(--color-surface-card) 60%);
@@ -301,7 +301,7 @@ body {
 }
 .lb-row--bronze:hover { border-color: rgba(205, 127, 50, 0.65); }
 
-/* ── Rank (número + estrella) ─────────────────────────────────── */
+/* ── Rank (number + star) ─────────────────────────────────── */
 .lb-rank {
     display: flex;
     flex-direction: column;
@@ -327,7 +327,7 @@ body {
     line-height: 1;
 }
 
-/* Número de posición grande para top 3 */
+/* Large position number for top 3 */
 .lb-row--gold   .lb-pos,
 .lb-row--silver .lb-pos,
 .lb-row--bronze .lb-pos {
@@ -373,7 +373,7 @@ body {
 .lb-row--bronze .lb-points { color: var(--color-bronze); }
 
 /* ════════════════════════════════════════════════════════════════
-   CTA INVITADO
+   GUEST CTA
    ════════════════════════════════════════════════════════════════ */
 .lb-guest-cta {
     margin-top: 28px;
@@ -447,7 +447,7 @@ body {
 }
 
 /* ════════════════════════════════════════════════════════════════
-   MODO CLARO (global-preferences.css override)
+   LIGHT MODE (global-preferences.css override)
    ════════════════════════════════════════════════════════════════ */
 html.light-mode .lb-row               { background: #FFFFFF; border-color: rgba(0,0,0,0.10); }
 html.light-mode .lb-row--gold         { background: linear-gradient(90deg, rgba(255,215,0,0.10) 0%, #FFFFFF 60%); }

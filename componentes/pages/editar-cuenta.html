@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/styles/editar-cuenta.css">
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
@@ -113,7 +113,9 @@
     </main>
 </div>
 
-<script>
+<script type="module">
+
+    import { API_BASE_URL } from '../../services/apiConfig.js';
 (function () {
     'use strict';
 
@@ -147,12 +149,16 @@
         }
     });
 
-    /* User Profile Setup (Conexión Backend) */
+    /* Current password (in memory only). Filled from get-user-info; used when
+       the "new password" field is left blank so "" is never sent to the backend. */
+    var currentPassword = "";
+
+    /* User Profile Setup (Backend connection) */
     document.addEventListener('DOMContentLoaded', async function () {
         const savedUsername = localStorage.getItem('footlel_username') || 'Usuario';
         const savedAvatar   = localStorage.getItem('footlel_avatar');
 
-        // Pre-cargar UI básica (Nombre visual y Avatar)
+        // Preload basic UI (display name and avatar)
         const profileUsername = document.getElementById('profileUsername');
         if (profileUsername) profileUsername.textContent = '@' + savedUsername;
 
@@ -163,15 +169,11 @@
             document.getElementById('headerAvatar').src  = savedAvatar;
         }
 
-        // Fetch de la info real del usuario
+        // Fetch the real user info
         try {
             console.log("1. Buscando info para el usuario:", savedUsername);
 
-            const response = await fetch('https://footlel-backend.onrender.com/user/get-user-info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: savedUsername })
-            });
+            const response = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(savedUsername)}`);
 
             console.log("2. Status del servidor:", response.status);
 
@@ -179,14 +181,20 @@
                 const data = await response.json();
                 console.log("3. Paquete exacto recibido del servidor:", data);
                 
-                // Extraer y guardar ID secreto en localStorage
+                // Extract and store the secret ID in localStorage
                 if (data.user_id) {
                     localStorage.setItem('footlel_user_id', data.user_id);
                 }
 
+                // Current password kept in memory only (used when the new-password field is blank)
+                currentPassword = data.user_password || "";
+
                 console.log("4. ¿Existe el casillero de email en el HTML?:", document.getElementById('email'));
 
-                // Rellenar input de email estrictamente con la clave del backend
+                // Fill the inputs strictly with the backend keys
+                if (data.user_name) {
+                    document.getElementById('username').value = data.user_name;
+                }
                 if (data.user_email) {
                     document.getElementById('email').value = data.user_email;
                 }
@@ -206,11 +214,11 @@
 
     uploadBtn.addEventListener('click', function () { fileInput.click(); });
 
-    /* ── Rastreo del avatar seleccionado ──────────────────────────
-       selectedAvatarSrc se actualiza cada vez que el usuario sube
-       una imagen local o elige un robotito base. Al hacer submit
-       se usa esta variable para garantizar que se guarde el src
-       correcto, independientemente de lo que muestre el preview. */
+    /* ── Selected avatar tracking ──────────────────────────
+       selectedAvatarSrc is updated every time the user uploads
+       a local image or picks a base robot. On submit this
+       variable is used to guarantee the correct src is saved,
+       regardless of what the preview shows. */
     var selectedAvatarSrc = null;
 
     fileInput.addEventListener('change', function () {
@@ -219,7 +227,7 @@
             var reader = new FileReader();
             reader.onload = function (evt) {
                 avatarPreview.src = evt.target.result;
-                selectedAvatarSrc = evt.target.result;        // data: URI (imagen local)
+                selectedAvatarSrc = evt.target.result;        // data: URI (local image)
                 baseAvatars.forEach(function (btn) {
                     btn.classList.remove('is-selected');
                 });
@@ -235,7 +243,7 @@
             var img = this.querySelector('img');
             if (img) {
                 avatarPreview.src = img.src;
-                selectedAvatarSrc = img.src;                  // URL de DiceBear (avatar base)
+                selectedAvatarSrc = img.src;                  // DiceBear URL (base avatar)
             }
         });
     });
@@ -260,39 +268,68 @@
         });
     });
 
-    /* Submit — Captura completa & Persist Pending Data */
+    /* Submit — Full capture & Persist Pending Data */
+    var PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+    var PASSWORD_ERROR_MSG = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.';
+
     document.getElementById('editAccountForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
-        // 1. Nombre de usuario (clave esperada por el backend)
+        // 1. Username (key expected by the backend)
         const pendingUsername = document.getElementById('username').value.trim();
-        localStorage.setItem('pending_user_name', pendingUsername);
 
-        // 2. Correo electrónico
+        // 2. Email
         const pendingEmail = document.getElementById('email').value.trim();
-        localStorage.setItem('pending_user_email', pendingEmail);
 
-        // 3. Nueva contraseña (puede estar vacía si el usuario no quiere cambiarla)
-        const pendingPassword = document.getElementById('new-password').value;
+        // 3. New password (empty = user does not want to change it)
+        const typedPassword = document.getElementById('new-password').value;
+
+        // Secure password validation (only when a new password was typed)
+        let passwordError = document.getElementById('password-error');
+        if (!passwordError) {
+            passwordError = document.createElement('p');
+            passwordError.id = 'password-error';
+            passwordError.className = 'field-error';
+            passwordError.setAttribute('aria-live', 'polite');
+            passwordError.style.color = '#ff4d4d';
+            passwordError.hidden = true;
+            document.getElementById('new-password').closest('.form-group').appendChild(passwordError);
+        }
+        if (typedPassword && !PASSWORD_REGEX.test(typedPassword)) {
+            passwordError.textContent = PASSWORD_ERROR_MSG;
+            passwordError.hidden = false;
+            document.getElementById('new-password').focus();
+            return;
+        }
+        passwordError.hidden = true;
+
+        // Blank field -> keep current password so "" never reaches the database.
+        const pendingPassword = typedPassword
+            || currentPassword
+            || localStorage.getItem('footlel_password')
+            || '';
+
+        localStorage.setItem('pending_user_name', pendingUsername);
+        localStorage.setItem('pending_user_email', pendingEmail);
         localStorage.setItem('pending_user_password', pendingPassword);
 
-        // 4. Avatar seleccionado
-        let avatarSeleccionado = null;
+        // 4. Selected avatar
+        let selectedAvatar = null;
 
-        // Prioridad 1: Robotito base con .is-selected
+        // Priority 1: Base robot with .is-selected
         const selectedBase = document.querySelector('.base-avatar-option.is-selected img');
         if (selectedBase) {
-            avatarSeleccionado = selectedBase.src;
+            selectedAvatar = selectedBase.src;
         } else if (selectedAvatarSrc) {
-            // Prioridad 2: Imagen subida localmente (data: URI del FileReader)
-            avatarSeleccionado = selectedAvatarSrc;
+            // Priority 2: Locally uploaded image (FileReader data: URI)
+            selectedAvatar = selectedAvatarSrc;
         }
 
-        if (avatarSeleccionado) {
-            localStorage.setItem('pending_avatar', avatarSeleccionado);
+        if (selectedAvatar) {
+            localStorage.setItem('pending_avatar', selectedAvatar);
         }
 
-        // 5. Redirigir al flujo de verificación de seguridad
+        // 5. Redirect to the security verification flow
         window.location.href = 'verificar-edicion.html';
     });
 })();

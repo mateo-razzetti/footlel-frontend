@@ -9,9 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../../assets/styles/login.css">
     <link rel="stylesheet" href="../../assets/styles/nueva-clave.css">
-    <!-- Preferencias globales (tema + animaciones) -->
+    <!-- Global preferences (theme + animations) -->
     <script src="../../assets/scripts/global-preferences.js" defer></script>
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
@@ -65,7 +65,7 @@
                         </svg>
                     </button>
                 </div>
-                <!-- Mensaje de error de coincidencia (oculto por defecto) -->
+                <!-- Mismatch error message (hidden by default) -->
                 <p class="field-error" id="mismatch-error" aria-live="polite" hidden>
                     Las contraseñas no coinciden.
                 </p>
@@ -89,7 +89,7 @@
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>`;
 
-        /* ── Toggle ojo: SVG único mutado por innerHTML ── */
+        /* ── Eye toggle: single SVG mutated via innerHTML ── */
         document.querySelectorAll('.toggle-visibility').forEach(btn => {
             btn.addEventListener('click', () => {
                 const input   = document.getElementById(btn.dataset.target);
@@ -102,7 +102,10 @@
             });
         });
 
-        /* ── Validación secuencial en submit ── */
+        /* ── Sequential validation on submit ── */
+        const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const PASSWORD_ERROR_MSG = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.';
+
         document.getElementById('new-password-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
@@ -116,30 +119,37 @@
                 document.getElementById(focusId).focus();
             }
 
-            // ── 1. Nueva contraseña vacía ──
+            // ── 1. Empty new password ──
             if (!pwdVal) {
                 showError('Falta ingresar la nueva contraseña.', 'new-password');
                 return;
             }
 
-            // ── 2. Confirmar contraseña vacía ──
+            // ── 2. Empty confirm password ──
             if (!confirmVal) {
                 showError('Falta confirmar la contraseña.', 'confirm-new-password');
                 return;
             }
 
-            // ── 3. No coinciden ──
+            // ── 3. Secure password rule ──
+            if (!PASSWORD_REGEX.test(pwdVal)) {
+                e.preventDefault();
+                showError(PASSWORD_ERROR_MSG, 'new-password');
+                return;
+            }
+
+            // ── 4. Passwords do not match ──
             if (pwdVal !== confirmVal) {
                 showError('Las contraseñas no coinciden.', 'confirm-new-password');
                 return;
             }
 
-            // ── Todo OK ──
+            // ── All OK ──
             error.hidden = true;
             window.location.href = 'login.html';
         });
 
-        /* ── Limpieza en tiempo real: oculta el error mientras el usuario escribe ── */
+        /* ── Real-time cleanup: hides the error while the user types ── */
         ['new-password', 'confirm-new-password'].forEach(function (id) {
             document.getElementById(id).addEventListener('input', () => {
                 const error = document.getElementById('mismatch-error');

@@ -10,13 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Estilos: tokens + header compartido, luego específicos -->
+    <!-- Styles: tokens + shared header, then page-specific -->
     <link rel="stylesheet" href="../../assets/styles/menu.css">
     <link rel="stylesheet" href="../../assets/styles/configuracion.css">
 
     <!-- Preferencias globales (tema + animaciones) -->
     <script src="../../assets/scripts/global-preferences.js"></script>
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
     ═══════════════════════════════════════ -->
     <header class="site-header" role="banner">
 
-        <!-- Izquierda: Logo (actúa como botón de retroceso a menu.html) -->
+        <!-- Left: Logo (acts as a back button to menu.html) -->
         <a href="menu.html" class="logo-link" aria-label="Volver a Footlel">
             <img
                 src="../../assets/images/logo-oscuro.png"
@@ -65,7 +65,7 @@
             </button>
 
             <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
-                <!-- Configuración (activa) -->
+                <!-- Settings (active) -->
                 <a href="configuracion.html" class="dropdown-item" role="menuitem"
                    style="color: var(--color-brand-green);">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
@@ -86,7 +86,7 @@
                     </svg>
                     Editar Cuenta
                 </a>
-                <!-- Mis Amigos -->
+                <!-- My Friends -->
                 <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -149,11 +149,11 @@
         <!-- Contenido scrollable -->
         <div class="config-main">
 
-            <!-- Tarjeta de Preferencias -->
+            <!-- Preferences card -->
             <div class="prefs-card" role="region" aria-label="Preferencias de cuenta">
                 <p class="prefs-card-title">Configuración de Cuenta</p>
 
-                <!-- Fila 1: Eliminar animaciones -->
+                <!-- Row 1: Disable animations -->
                 <div class="pref-row">
                     <div class="pref-info">
                         <span class="pref-label">Eliminar animaciones</span>
@@ -165,7 +165,7 @@
                     </label>
                 </div>
 
-                <!-- Fila 2: Modo Oscuro -->
+                <!-- Row 2: Dark Mode -->
                 <div class="pref-row">
                     <div class="pref-info">
                         <span class="pref-label">Modo Oscuro</span>
@@ -177,7 +177,7 @@
                     </label>
                 </div>
 
-                <!-- Fila 3: Modo Compatibilidad -->
+                <!-- Row 3: Compatibility Mode -->
                 <div class="pref-row">
                     <div class="pref-info">
                         <span class="pref-label">Modo Compatibilidad</span>
@@ -190,7 +190,7 @@
                 </div>
             </div><!-- /prefs-card -->
 
-            <!-- ── Zona Registrado ── -->
+            <!-- ── Registered zone ── -->
             <div id="zona-registrado">
                 <button type="button" class="link-logout" id="btn-logout">
                     Cerrar Sesión
@@ -200,7 +200,7 @@
                 </button>
             </div>
 
-            <!-- ── Zona Invitado (oculta por defecto) ── -->
+            <!-- ── Guest zone (hidden by default) ── -->
             <div id="zona-invitado" class="hidden" aria-live="polite">
                 <p class="guest-cta-title">Guardá tu progreso y competí</p>
                 <p class="guest-cta-desc">
@@ -220,14 +220,14 @@
 </div><!-- /page-shell -->
 
 <!-- ═══════════════════════════════════════
-     MODAL: Eliminar Cuenta
+     MODAL: Delete Account
 ═══════════════════════════════════════ -->
 <style>
-    /* Estilos específicos para el Modal de Eliminar */
+    /* Specific styles for the Delete Modal */
     #modal-eliminar .modal-card {
         position: relative;
-        max-width: 450px; /* Hace el pop-up un poco más ancho */
-        padding-top: 40px; /* Espacio para la cruz */
+        max-width: 450px; /* Makes the pop-up a bit wider */
+        padding-top: 40px; /* Space for the close cross */
     }
     
     #btn-cerrar-eliminar {
@@ -250,7 +250,7 @@
         width: 100%;
         padding: 12px 15px;
         border-radius: 8px;
-        border: 2px solid #444; /* Le da el recuadro que pediste */
+        border: 2px solid #444; /* Gives it the requested box outline */
         background: #1a1a1a;
         color: white;
         margin-bottom: 10px;
@@ -261,7 +261,7 @@
     }
     
     #input-palabra-clave:focus {
-        border-color: #ff4c4c; /* Se pone rojo al hacer clic adentro */
+        border-color: #ff4c4c; /* Turns red when clicked inside */
     }
 
     #btn-confirmar-eliminar {
@@ -273,8 +273,8 @@
     }
     
     #btn-confirmar-eliminar:hover {
-        background: #e63939; /* Rojo un poco más oscuro */
-        border: 2px solid white; /* Recuadro blanco al pasar el mouse, como pediste */
+        background: #e63939; /* Slightly darker red */
+        border: 2px solid white; /* White outline on hover, as requested */
     }
 </style>
 
@@ -338,7 +338,8 @@
 <!-- ═══════════════════════════════════════
      VANILLA JS
 ═══════════════════════════════════════ -->
-<script>
+<script type="module">
+    import { API_BASE_URL } from '../../services/apiConfig.js';
 (function () {
     'use strict';
 
@@ -359,16 +360,12 @@
         }, duration);
     }
 
-    /* Helper: obtener el user_id (via get-user-info) */
+    /* Helper: get the user_id (via get-user-info) */
     async function getUserId() {
         var nombre = localStorage.getItem('footlel_username');
         if (!nombre) return null;
         try {
-            var resp = await fetch('https://footlel-backend.onrender.com/user/get-user-info', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_name: nombre })
-            });
+            var resp = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(nombre)}`);
             if (!resp.ok) return null;
             var info = await resp.json();
             return Number(info.user_id || info.id) || null;
@@ -378,7 +375,7 @@
     function openModal(id) {
         $(id).classList.remove('hidden');
         document.body.style.overflow = 'hidden';
-        // Foco al primer input si existe
+        // Focus the first input if it exists
         const first = $(id).querySelector('input, button');
         if (first) setTimeout(function () { first.focus(); }, 80);
     }
@@ -431,27 +428,27 @@
         profileAvatarEl.src = GUEST_AVATAR;
         configAvatarEl.src  = GUEST_AVATAR_LG;
 
-        // Dropdown: ocultar opciones de registro
+        // Dropdown: hide registration options
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
 
-        // Cambiar "Cerrar sesión" por "Iniciar Sesión"
+        // Replace logout action with login action
         ddSessionLabel.textContent = 'Iniciar Sesión';
         ddSessionAction.classList.remove('item-danger');
         ddSessionIcon.innerHTML    = LOGIN_ICON_SVG;
 
-        // Zonas
+        // Zones
         zonaRegistrado.classList.add('hidden');
         zonaInvitado.classList.remove('hidden');
 
     } else {
-        // Usuario registrado
+        // Registered user
         configUsernameEl.textContent  = savedUsername;
         profileUsernameEl.textContent = savedUsername;
     }
 
     /* ──────────────────────────────────────────
-       2. DROPDOWN DE PERFIL
+       2. PROFILE DROPDOWN
     ────────────────────────────────────────── */
     const profileBtn      = $('profileBtn');
     const profileDropdown = $('profileDropdown');
@@ -483,7 +480,7 @@
     });
 
     /* ──────────────────────────────────────────
-       3. CERRAR SESIÓN
+       3. LOG OUT
     ────────────────────────────────────────── */
     const btnLogout = $('btn-logout');
     if (btnLogout) {
@@ -495,30 +492,30 @@
     }
 
     /* ──────────────────────────────────────────
-       4. FLUJO DE MODALES
+       4. MODALS FLOW
     ────────────────────────────────────────── */
 
-    // Cerrar modal al clic en el backdrop
+    // Close modal on backdrop click
     $('modal-verificar').addEventListener('click', function (e) {
         if (e.target === this) closeModal('modal-verificar');
     });
 
-    // 4d. Confirmar OTP
+    // 4d. Confirm OTP
     let pendingUsername = '';
 
     $('btn-confirmar-otp').addEventListener('click', function () {
-        // Leer OTP completo
+        // Read complete OTP
         const otp = Array.from(document.querySelectorAll('.otp-input'))
             .map(function (i) { return i.value; })
             .join('');
 
-        // Validación mínima: los 6 dígitos llenos
+        // Minimal validation: all 6 digits filled
         if (otp.length < 6) {
             showToast('Ingresá el código completo.');
             return;
         }
 
-        // Aplicar cambios al DOM
+        // Apply changes to the DOM
         if (pendingUsername) {
             configUsernameEl.textContent  = pendingUsername;
             profileUsernameEl.textContent = pendingUsername;
@@ -530,13 +527,13 @@
     });
 
     /* ──────────────────────────────────────────
-       5. COMPORTAMIENTO OTP: auto-avance y retroceso
+       5. OTP BEHAVIOR: auto-advance and backspace
     ────────────────────────────────────────── */
     const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
 
     otpInputs.forEach(function (inp, idx) {
         inp.addEventListener('input', function () {
-            // Acepta solo dígitos
+            // Accept digits only
             inp.value = inp.value.replace(/\D/g, '').slice(-1);
             if (inp.value && idx < otpInputs.length - 1) {
                 otpInputs[idx + 1].focus();
@@ -549,7 +546,7 @@
             }
         });
 
-        // Pegar código completo
+        // Paste the full code
         inp.addEventListener('paste', function (e) {
             e.preventDefault();
             const pasted = (e.clipboardData || window.clipboardData)
@@ -563,55 +560,32 @@
     });
 
     /* ──────────────────────────────────────────
-       6. TOGGLES: MODO OSCURO + ELIMINAR ANIMACIONES
+       6. TOGGLES: DARK MODE + DISABLE ANIMATIONS
     ────────────────────────────────────────── */
-
-    const LOGO_DARK  = '../../assets/images/logo-oscuro.png';
-    const LOGO_LIGHT = '../../assets/images/logo-claro.png';
 
     const toggleDark  = $('toggle-dark');
     const toggleAnim  = $('toggle-animaciones');
     const toggleCompat = $('toggle-compat');
-    const mainLogo    = $('main-logo');
 
-    /* — Aplicar modo oscuro/claro — */
-    function applyTheme(isLight) {
-        if (isLight) {
-            document.documentElement.classList.add('light-mode');
-            document.body.classList.add('light-mode');
-            if (mainLogo) mainLogo.src = LOGO_LIGHT;
-        } else {
-            document.documentElement.classList.remove('light-mode');
-            document.body.classList.remove('light-mode');
-            if (mainLogo) mainLogo.src = LOGO_DARK;
-        }
-    }
+    /* Theme/animations logic (incl. logo src) lives in global-preferences.js
+       so every page uses the exact same code and image paths. */
+    function applyTheme(isLight) { window.FootlelPrefs.applyTheme(isLight); }
+    function applyAnimations(disabled) { window.FootlelPrefs.applyAnimations(disabled); }
 
-    /* — Aplicar estado de animaciones — */
-    function applyAnimations(disabled) {
-        if (disabled) {
-            document.documentElement.classList.add('disable-animations');
-            document.body.classList.add('disable-animations');
-        } else {
-            document.documentElement.classList.remove('disable-animations');
-            document.body.classList.remove('disable-animations');
-        }
-    }
-
-    /* ── Inicialización desde localStorage ── */
+    /* ── Initialization from localStorage ── */
     (function initToggles() {
-        // Modo oscuro: por defecto ACTIVO ('dark')
+        // Dark mode: ACTIVE by default ('dark')
         const savedTheme = localStorage.getItem('footlel_theme') || 'dark';
         const isLight    = savedTheme === 'light';
-        if (toggleDark) toggleDark.checked = !isLight;   // checked = dark activo
+        if (toggleDark) toggleDark.checked = !isLight;   // checked = dark active
         applyTheme(isLight);
 
-        // Eliminar animaciones: por defecto INACTIVO
+        // Disable animations: INACTIVE by default
         const animDisabled = localStorage.getItem('pref_toggle-animaciones') === 'true';
         if (toggleAnim) toggleAnim.checked = animDisabled;
         applyAnimations(animDisabled);
 
-        // Compatibilidad (solo persistencia, sin efecto visual aún)
+        // Compatibility (persistence only, no visual effect yet)
         if (toggleCompat) {
             const saved = localStorage.getItem('pref_toggle-compat');
             if (saved !== null) toggleCompat.checked = saved === 'true';
@@ -621,22 +595,22 @@
         }
     })();
 
-    /* ── Listener: Modo Oscuro ── */
+    /* ── Listener: Dark Mode ── */
     if (toggleDark) {
         toggleDark.addEventListener('change', async function () {
-            // checked = true → modo OSCURO activo
+            // checked = true → dark mode active
             const isLight = !toggleDark.checked;
             applyTheme(isLight);
             localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
 
-            // Sincronizar con el backend
+            // Sync with the backend
             const uid = await getUserId();
             if (uid) {
                 try {
-                    await fetch('https://footlel-backend.onrender.com/stat/set-user-dark-mode-state', {
-                        method: 'POST',
+                    await fetch(`${API_BASE_URL}/stat/set-user-dark-mode-state`, {
+                        method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: uid, boolean: toggleDark.checked })
+                        body: JSON.stringify({ user_id: Number(uid), boolean: Boolean(toggleDark.checked) })
                     });
                 } catch (e) {
                     showToast('No se pudo sincronizar el modo oscuro.');
@@ -645,21 +619,21 @@
         });
     }
 
-    /* ── Listener: Eliminar Animaciones ── */
+    /* ── Listener: Disable Animations ── */
     if (toggleAnim) {
         toggleAnim.addEventListener('change', async function () {
             const disabled = toggleAnim.checked;
             applyAnimations(disabled);
             localStorage.setItem('pref_toggle-animaciones', String(disabled));
 
-            // Sincronizar con el backend
+            // Sync with the backend
             const uid = await getUserId();
             if (uid) {
                 try {
-                    await fetch('https://footlel-backend.onrender.com/stat/set-user-animation-state', {
-                        method: 'POST',
+                    await fetch(`${API_BASE_URL}/stat/set-user-animation-state`, {
+                        method: 'PATCH',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: uid, boolean: disabled })
+                        body: JSON.stringify({ user_id: Number(uid), boolean: Boolean(disabled) })
                     });
                 } catch (e) {
                     showToast('No se pudo sincronizar las animaciones.');
@@ -668,103 +642,97 @@
         });
     }
         /* ──────────────────────────────────────────
-       7. ELIMINAR CUENTA (MODAL Y FETCH)
+       7. DELETE ACCOUNT (MODAL AND FETCH)
     ────────────────────────────────────────── */
-    const modalEliminar = $('modal-eliminar');
-    const btnAbrirModal = $('btn-delete'); // Este es tu botón rojo original
-    const btnCerrarIcono = $('btn-cerrar-eliminar');
-    const btnCancelarEliminar = $('btn-cancelar-eliminar');
-    const btnConfirmarEliminar = $('btn-confirmar-eliminar');
-    const inputPalabra = $('input-palabra-clave');
-    const textoError = $('error-palabra');
+    const deleteModal = $('modal-eliminar');
+    const btnOpenModal = $('btn-delete'); // This is your original red button
+    const btnCloseIcon = $('btn-cerrar-eliminar');
+    const btnCancelDelete = $('btn-cancelar-eliminar');
+    const btnConfirmDelete = $('btn-confirmar-eliminar');
+    const keywordInput = $('input-palabra-clave');
+    const errorText = $('error-palabra');
 
-    // Función para cerrar y limpiar el modal
-    function cerrarModalEliminar() {
-        modalEliminar.classList.add('hidden');
-        inputPalabra.value = "";
-        textoError.hidden = true;
+    // Function to close and clean up the modal
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+        keywordInput.value = "";
+        errorText.hidden = true;
     }
 
-    // Abrir
-    if (btnAbrirModal) {
-        btnAbrirModal.addEventListener('click', function(e) {
+    // Open
+    if (btnOpenModal) {
+        btnOpenModal.addEventListener('click', function(e) {
             e.preventDefault();
-            modalEliminar.classList.remove('hidden');
+            deleteModal.classList.remove('hidden');
         });
     }
 
-    // Cerrar (con la X o con el botón cancelar)
-    if (btnCerrarIcono) btnCerrarIcono.addEventListener('click', cerrarModalEliminar);
-    if (btnCancelarEliminar) btnCancelarEliminar.addEventListener('click', cerrarModalEliminar);
+    // Close (with the X or the cancel button)
+    if (btnCloseIcon) btnCloseIcon.addEventListener('click', closeDeleteModal);
+    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
 
-    // El Fetch destructor
-    if (btnConfirmarEliminar) {
-        btnConfirmarEliminar.addEventListener('click', async function(e) {
+    // The destructive fetch
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', async function(e) {
             e.preventDefault();
             
-            const palabra = inputPalabra.value.toLowerCase().trim();
+            const keyword = keywordInput.value.toLowerCase().trim();
             
-            if (palabra === "eliminar") {
-                const nombreUsuario = localStorage.getItem('footlel_username');
+            if (keyword === "eliminar") {
+                const username = localStorage.getItem('footlel_username');
                 
                 try {
-                    // PASO 1: Obtener la info del usuario usando el endpoint que dijeron los chicos
-                    const infoResponse = await fetch('https://footlel-backend.onrender.com/user/get-user-info', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_name: nombreUsuario })
-                    });
+                    // STEP 1: Get the user info using the endpoint the backend team specified
+                    const infoResponse = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(username)}`);
 
                     if (!infoResponse.ok) {
-                        textoError.textContent = 'Error al verificar la información del usuario.';
-                        textoError.hidden = false;
-                        return; // Cortamos la ejecución aquí si falla
+                        errorText.textContent = 'Error al verificar la información del usuario.';
+                        errorText.hidden = false;
+                        return; // We stop execution here if it fails
                     }
 
                     const userInfo = await infoResponse.json();
                     
-                    // Extraemos el ID (por si el backend usa "user_id" o "id")
+                    // Extract the ID (in case the backend uses "user_id" or "id")
                     const idVal = Number(userInfo.user_id || userInfo.id);
 
                     if (!idVal) {
-                        textoError.textContent = 'El servidor no devolvió tu ID. Contacta a soporte.';
-                        textoError.hidden = false;
+                        errorText.textContent = 'El servidor no devolvió tu ID. Contacta a soporte.';
+                        errorText.hidden = false;
                         return;
                     }
 
-                    // PASO 2: Ahora sí, con el ID numérico en mano, eliminamos la cuenta
-                    const response = await fetch('https://footlel-backend.onrender.com/user/eliminate-user', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: idVal })
+                    // STEP 2: Now, with the numeric ID in hand, we delete the account
+                    const response = await fetch(`${API_BASE_URL}/user/eliminate-user/${Number(idVal)}`, {
+                        method: 'DELETE'
                     });
 
                     if (response.ok) {
-                        // Mostramos el mensaje de éxito en verde
-                        textoError.style.color = '#4ade80';
-                        textoError.textContent = 'Cuenta eliminada con éxito. Redirigiendo...';
-                        textoError.hidden = false;
+                        // We show the success message in green
+                        errorText.style.color = '#4ade80';
+                        errorText.textContent = 'Cuenta eliminada con éxito. Redirigiendo...';
+                        errorText.hidden = false;
                         
                         localStorage.clear();
                         
-                        // Esperamos 2 segundos antes de redirigir
+                        // We wait 2 seconds before redirecting
                         setTimeout(function() {
                             window.location.href = 'login.html';
                         }, 2000);
                     } else {
                         const data = await response.json();
-                        textoError.style.color = '#ff4c4c'; // Volvemos a rojo por si acaso
-                        textoError.textContent = data.detail || 'Error al eliminar la cuenta.';
-                        textoError.hidden = false;
+                        errorText.style.color = '#ff4c4c'; // Back to red just in case
+                        errorText.textContent = data.detail || 'Error al eliminar la cuenta.';
+                        errorText.hidden = false;
                     }
                 } catch (error) {
-                    textoError.style.color = '#ff4c4c';
-                    textoError.textContent = 'No se pudo conectar con el servidor.';
-                    textoError.hidden = false;
+                    errorText.style.color = '#ff4c4c';
+                    errorText.textContent = 'No se pudo conectar con el servidor.';
+                    errorText.hidden = false;
                 }
             } else {
-                textoError.textContent = "Palabra incorrecta, escribe 'eliminar'.";
-                textoError.hidden = false;
+                errorText.textContent = "Palabra incorrecta, escribe 'eliminar'.";
+                errorText.hidden = false;
             }
         });
     }

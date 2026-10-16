@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="../../assets/styles/login.css">
     <link rel="stylesheet" href="../../assets/styles/recuperar.css">
     <link rel="stylesheet" href="../../assets/styles/verificar.css">
-    <!-- Preferencias globales (tema + animaciones) -->
+    <!-- Global preferences (theme + animations) -->
     <script src="../../assets/scripts/global-preferences.js" defer></script>
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
@@ -28,7 +28,7 @@
         </header>
 
         <form class="login-form" action="nueva-clave.html" method="GET" novalidate>
-            <!-- Casilleros OTP -->
+            <!-- OTP input boxes -->
             <div class="otp-container" role="group" aria-label="Código de verificación de 6 dígitos">
                 <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
                        pattern="[0-9]" autocomplete="one-time-code" aria-label="Dígito 1" required>
@@ -62,7 +62,7 @@
         const otpInputs = document.querySelectorAll('.otp-input');
 
         otpInputs.forEach((input, index) => {
-            // Solo permite dígitos numéricos
+            // Only allow numeric digits
             input.addEventListener('input', () => {
                 input.value = input.value.replace(/\D/g, '');
                 if (input.value && index < otpInputs.length - 1) {
@@ -70,14 +70,14 @@
                 }
             });
 
-            // Retrocede al campo anterior al borrar
+            // Move back to the previous field on delete
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !input.value && index > 0) {
                     otpInputs[index - 1].focus();
                 }
             });
 
-            // Pegar código completo desde el portapapeles
+            // Paste the full code from the clipboard
             input.addEventListener('paste', (e) => {
                 e.preventDefault();
                 const pasted = (e.clipboardData || window.clipboardData)
@@ -92,10 +92,10 @@
             });
         });
 
-        // Foco inicial en el primer casillero
+        // Initial focus on the first box
         otpInputs[0].focus();
 
-        /* ── Countdown de reenvío ── */
+        /* ── Resend countdown ── */
         const countdownEl  = document.getElementById('countdown');
         const resendAction = document.querySelector('.resend-action');
         let seconds = 30;

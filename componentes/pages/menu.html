@@ -11,14 +11,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
 
-    <!-- Hoja de estilos del menú -->
+    <!-- Menu stylesheet -->
     <link rel="stylesheet" href="../../assets/styles/menu.css">
-    <!-- Preferencias de usuario (modo claro / animaciones) -->
+    <!-- User preferences (light mode / animations) -->
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 </head>
 <body>
 
-<!-- Pelotas decorativas de fondo (aria-hidden: solo decoración) -->
+<!-- Decorative background balls (aria-hidden: decoration only) -->
 <div class="bg-balls" aria-hidden="true">
     <span class="bg-ball bg-ball--1">⚽</span>
     <span class="bg-ball bg-ball--2">⚽</span>
@@ -27,7 +27,7 @@
 </div>
 
 <!-- ═══════════════════════════════════════
-     SHELL DE PÁGINA
+     PAGE SHELL
 ═══════════════════════════════════════ -->
 <div class="page-shell">
 
@@ -42,10 +42,10 @@
             <span class="logo-text">FOOT<span>LEL</span></span>
         </a>
 
-        <!-- Perfil + Dropdown -->
+        <!-- Profile + Dropdown -->
         <div class="profile-wrapper" id="profileWrapper">
 
-            <!-- Botón trigger -->
+            <!-- Trigger button -->
             <button
                 class="profile-btn"
                 id="profileBtn"
@@ -70,14 +70,14 @@
                 </svg>
             </button>
 
-            <!-- Dropdown flotante -->
+            <!-- Floating dropdown -->
             <nav
                 class="profile-dropdown"
                 id="profileDropdown"
                 role="menu"
                 aria-label="Opciones de cuenta"
             >
-                <!-- Configuración -->
+                <!-- Settings -->
                 <a href="configuracion.html" class="dropdown-item" role="menuitem">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -88,7 +88,7 @@
                     Configuración
                 </a>
 
-                <!-- Editar Cuenta (solo usuarios registrados) -->
+                <!-- Edit Account (registered users only) -->
                 <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -99,7 +99,7 @@
                     Editar Cuenta
                 </a>
 
-                <!-- Mis Amigos (solo usuarios registrados) -->
+                <!-- My Friends (registered users only) -->
                 <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -112,7 +112,7 @@
                     Mis Amigos
                 </a>
 
-                <!-- Ayuda -->
+                <!-- Help -->
                 <a href="ayuda.html" class="dropdown-item" role="menuitem">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -126,7 +126,7 @@
 
                 <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
 
-                <!-- Cerrar Sesión / Iniciar Sesión -->
+                <!-- Log out / Log in -->
                 <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                          stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -143,11 +143,11 @@
     </header>
 
     <!-- ─────────────────────────────────
-         CONTENIDO PRINCIPAL
+         MAIN CONTENT
     ───────────────────────────────── -->
     <main class="main-content" id="mainContent" role="main">
 
-        <!-- Hero / Bienvenida -->
+        <!-- Hero / Welcome -->
         <section class="hero" aria-labelledby="heroTitle">
             <h1 class="hero-title" id="heroTitle">
                 Bienvenido <span class="username-highlight" id="user-display">nombre_usuario</span> ⚽
@@ -157,10 +157,10 @@
             </p>
         </section>
 
-        <!-- Grid de Cards -->
+        <!-- Cards grid -->
         <section class="cards-grid" aria-label="Modos de juego">
 
-            <!-- Card 1: Jugar Tateti -->
+            <!-- Card 1: Play Tateti -->
             <article class="game-card" aria-labelledby="cardTatetiTitle">
                 <div class="card-icon" aria-hidden="true">⚽</div>
                 <h2 class="card-title" id="cardTatetiTitle">Jugar Tateti</h2>
@@ -168,12 +168,12 @@
                     El modo estrella de Footlel. Respondé preguntas de fútbol y conquistá el tablero
                     3×3 antes que tu rival. ¡Estrategia y conocimiento en cada jugada!
                 </p>
-                <a href="modalidades.html" class="btn-outline" id="btnJugar">
+                <a href="modalidades.html" class="btn-outline" id="btnPlay">
                     <span>JUGAR AHORA</span><span>→</span>
                 </a>
             </article>
 
-            <!-- Card 2: Tabla de Ranking -->
+            <!-- Card 2: Ranking Table -->
             <article class="game-card" aria-labelledby="cardRankingTitle">
                 <div class="card-icon" aria-hidden="true">🏆</div>
                 <h2 class="card-title" id="cardRankingTitle">Tabla de Ranking</h2>
@@ -186,7 +186,7 @@
                 </a>
             </article>
 
-            <!-- Card 3: Desafiar Amigos -->
+            <!-- Card 3: Challenge Friends -->
             <article class="game-card" aria-labelledby="cardFriendsTitle">
                 <div class="card-icon" aria-hidden="true">🤝</div>
                 <h2 class="card-title" id="cardFriendsTitle">Desafiar Amigos</h2>
@@ -203,23 +203,23 @@
     </main><!-- /main-content -->
 
     <!-- ─────────────────────────────────
-         BARRA DE ESTADÍSTICAS (FOOTER)
+         STATS BAR (FOOTER)
     ───────────────────────────────── -->
     <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
 
-        <!-- Columna 1: Racha -->
+        <!-- Column 1: Streak -->
         <div class="stat-col">
             <span class="stat-label">Tu Racha</span>
             <span class="stat-value" id="statStreak">🔥 5 Días</span>
         </div>
 
-        <!-- Columna 2: Rango Global -->
+        <!-- Column 2: Global Rank -->
         <div class="stat-col">
             <span class="stat-label">Rango Global</span>
             <span class="stat-value" id="statRank">🏆 Oro II</span>
         </div>
 
-        <!-- Columna 3: Partidas Ganadas -->
+        <!-- Column 3: Games Won -->
         <div class="stat-col">
             <span class="stat-label">Partidas Ganadas</span>
             <span class="stat-value" id="statWins">📈 78%</span>
@@ -238,17 +238,17 @@
     'use strict';
 
     /* ──────────────────────────────────────────
-       1. DETECCIÓN DE MODO (Invitado vs Registrado)
+       1. MODE DETECTION (Guest vs Registered)
     ────────────────────────────────────────── */
 
     /**
-     * Lee la clave 'footlel_guest' de localStorage.
-     * Para probar modo invitado: localStorage.setItem('footlel_guest', 'true')
+     * Reads the 'footlel_guest' key from localStorage.
+     * To test guest mode: localStorage.setItem('footlel_guest', 'true')
      */
     const isGuest = localStorage.getItem('footlel_guest') === 'true';
 
     /* ──────────────────────────────────────────
-       2. REFERENCIAS AL DOM
+       2. DOM REFERENCES
     ────────────────────────────────────────── */
     const heroUsername    = document.getElementById('user-display');
     const profileAvatar  = document.getElementById('profileAvatar');
@@ -262,44 +262,44 @@
     const statRank       = document.getElementById('statRank');
     const statWins       = document.getElementById('statWins');
 
-    /** SVG: ícono de "iniciar sesión" (login) */
+    /** SVG: "log in" (login) icon */
     const LOGIN_ICON_SVG = `
         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
         <polyline points="10 17 15 12 10 7"/>
         <line x1="15" y1="12" x2="3" y2="12"/>
     `;
 
-    /** Avatar genérico en SVG inline (data-URI) para invitados */
+    /** Generic inline SVG avatar (data-URI) for guests */
     const GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
 
     /* ──────────────────────────────────────────
-       3. APLICAR ESTADO DE INTERFAZ
+       3. APPLY UI STATE
     ────────────────────────────────────────── */
     if (isGuest) {
-        /* — Estado invitado — */
+        /* — Guest state — */
         heroUsername.textContent   = 'Jugador Invitado';
         profileUser.textContent   = 'Invitado';
         profileAvatar.src         = GUEST_AVATAR;
         profileAvatar.alt         = 'Avatar genérico de invitado';
 
-        // Ocultar opciones exclusivas de registro
+        // Hide registration-only options
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
 
-        // Cambiar "Cerrar Sesión" → "Iniciar Sesión"
+        // Change logout action to login action (log out → log in)
         ddSessionLabel.textContent = 'Iniciar Sesión';
         ddSessionAction.href       = 'login.html';
         ddSessionAction.classList.remove('item-danger');
         ddSessionIcon.innerHTML    = LOGIN_ICON_SVG;
 
-        // Reemplazar estadísticas por placeholders
+        // Replace stats with placeholders
         [statStreak, statRank, statWins].forEach(function (el) {
             el.textContent = '-----';
             el.classList.add('stat-placeholder');
         });
 
     } else {
-        /* — Estado registrado — */
+        /* — Registered state — */
         const savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
         const savedAvatar = localStorage.getItem('footlel_avatar');
         if (savedAvatar) document.getElementById('profileAvatar').src = savedAvatar;
@@ -308,7 +308,7 @@
     }
 
     /* ──────────────────────────────────────────
-       4. TOGGLE DEL DROPDOWN DE PERFIL
+       4. PROFILE DROPDOWN TOGGLE
     ────────────────────────────────────────── */
     const profileBtn      = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
@@ -328,25 +328,25 @@
         isOpen ? closeDropdown() : openDropdown();
     }
 
-    // Abrir / cerrar al hacer clic en el botón
+    // Open / close on button click
     profileBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleDropdown();
     });
 
-    // Cerrar al hacer clic fuera del dropdown
+    // Close when clicking outside the dropdown
     document.addEventListener('click', function (e) {
         if (!document.getElementById('profileWrapper').contains(e.target)) {
             closeDropdown();
         }
     });
 
-    // Cerrar con la tecla Escape (accesibilidad)
+    // Close with the Escape key (accessibility)
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') closeDropdown();
     });
 
-    // Cerrar el dropdown al hacer clic en cualquier ítem
+    // Close the dropdown when clicking any item
     profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
         item.addEventListener('click', function () {
             closeDropdown();
@@ -354,10 +354,10 @@
     });
 
     /* ──────────────────────────────────────────
-       5. BOTÓN "JUGAR AHORA" (placeholder)
+       5. "JUGAR AHORA" (PLAY NOW) BUTTON (placeholder)
     ────────────────────────────────────────── */
-    document.getElementById('btnJugar').addEventListener('click', function () {
-        // TODO: navegar a la pantalla del juego Tateti
+    document.getElementById('btnPlay').addEventListener('click', function () {
+        // TODO: navigate to the Tateti game screen
         // window.location.href = 'tateti.html';
         console.log('[Footlel] Navegando a Tateti…');
     });

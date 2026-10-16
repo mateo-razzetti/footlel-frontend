@@ -95,7 +95,7 @@ body {
 .form-input::placeholder { color: var(--color-text-muted); }
 .form-input:focus { border-color: var(--color-brand-green); }
 
-/* ── Wrapper input + botón ojo ── */
+/* ── Input wrapper + eye button ── */
 .input-toggle-wrapper {
     position: relative;
     width: 100%;
@@ -129,7 +129,7 @@ body {
     display: block;
 }
 
-/* ── Mensaje de error de validación ── */
+/* ── Validation error message ── */
 .field-error {
     width: 100%;
     margin-top: 8px;

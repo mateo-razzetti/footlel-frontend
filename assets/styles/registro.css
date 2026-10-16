@@ -1,6 +1,6 @@
 /* =========================================================
-   registro.css — Pantalla de Creación de Cuenta | Footlel
-   Extiende el mismo sistema de diseño que login.css.
+   registro.css — Account Registration Screen | Footlel
+   Extends the same design system as login.css.
    ========================================================= */
 
 :root {
@@ -35,7 +35,7 @@ body {
     background-attachment: fixed;
 }
 
-/* ── Overlay oscuro sobre el fondo ── */
+/* ── Dark overlay above background ── */
 .background-overlay {
     position: fixed;
     inset: 0;
@@ -43,7 +43,7 @@ body {
     z-index: 0;
 }
 
-/* ── Tarjeta central ── */
+/* ── Central card ── */
 .login-card {
     position: relative;
     z-index: 1;
@@ -55,7 +55,7 @@ body {
     box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4);
 }
 
-/* ── Encabezado: logo + título ── */
+/* ── Header: logo + title ── */
 .card-header {
     display: flex;
     flex-direction: column;
@@ -71,13 +71,13 @@ body {
 .brand-title {
     font-family: var(--font-heading);
     font-weight: 700;
-    font-size: 22px;          /* ligeramente menor para que quepa en una línea */
+    font-size: 22px;          /* slightly smaller to fit in a single line */
     letter-spacing: 2px;
     color: var(--color-text-primary);
     line-height: 1.2;
 }
 
-/* ── Formulario ── */
+/* ── Form ── */
 .login-form { display: flex; flex-direction: column; }
 
 .form-group {
@@ -105,7 +105,7 @@ body {
 .form-input::placeholder { color: var(--color-text-muted); }
 .form-input:focus { border-color: var(--color-brand-green); }
 
-/* ── Botón principal ── */
+/* ── Primary button ── */
 .btn-primary {
     width: 100%;
     padding: 14px;
@@ -124,7 +124,7 @@ body {
 .btn-primary:hover  { background-color: #43a047; }
 .btn-primary:active { transform: scale(0.98); }
 
-/* ── Enlace inferior ── */
+/* ── Bottom link ── */
 .secondary-links {
     display: flex;
     justify-content: center;
@@ -143,18 +143,18 @@ body {
 .link-login strong,
 .link-login span   { color: var(--color-brand-green); }
 
-/* ── Wrapper input + botón ojo ── */
+/* ── Input wrapper + eye button ── */
 .input-toggle-wrapper {
     position: relative;
     width: 100%;
 }
 
-/* Padding derecho para no solaparse con el ícono */
+/* Right padding to avoid overlapping icon */
 .input-toggle-wrapper .form-input {
     padding-right: 44px;
 }
 
-/* Botón de mostrar/ocultar contraseña */
+/* Show/hide password button */
 .toggle-visibility {
     position: absolute;
     right: 12px;
@@ -179,7 +179,7 @@ body {
     display: block;
 }
 
-/* ── Mensaje de error de validación ── */
+/* ── Validation error message ── */
 .field-error {
     width: 100%;
     margin-top: 8px;
