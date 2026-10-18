@@ -295,19 +295,30 @@
             passwordError.hidden = true;
             document.getElementById('new-password').closest('.form-group').appendChild(passwordError);
         }
-        if (typedPassword && !PASSWORD_REGEX.test(typedPassword)) {
-            passwordError.textContent = PASSWORD_ERROR_MSG;
-            passwordError.hidden = false;
-            document.getElementById('new-password').focus();
-            return;
+        // Current password: session backup first, in-memory value from get-user-info as fallback
+        const storedPassword = localStorage.getItem('footlel_password') || currentPassword || '';
+
+        if (typedPassword) {
+            // New password must differ from the current one
+            if (storedPassword && typedPassword === storedPassword) {
+                e.preventDefault();
+                passwordError.textContent = 'La nueva contraseña no puede ser igual a la contraseña actual.';
+                passwordError.hidden = false;
+                document.getElementById('new-password').focus();
+                return;
+            }
+            if (!PASSWORD_REGEX.test(typedPassword)) {
+                e.preventDefault();
+                passwordError.textContent = PASSWORD_ERROR_MSG;
+                passwordError.hidden = false;
+                document.getElementById('new-password').focus();
+                return;
+            }
         }
         passwordError.hidden = true;
 
-        // Blank field -> keep current password so "" never reaches the database.
-        const pendingPassword = typedPassword
-            || currentPassword
-            || localStorage.getItem('footlel_password')
-            || '';
+        // Blank field -> keep current password (from localStorage) so "" never reaches the database.
+        const pendingPassword = typedPassword || storedPassword;
 
         localStorage.setItem('pending_user_name', pendingUsername);
         localStorage.setItem('pending_user_email', pendingEmail);
