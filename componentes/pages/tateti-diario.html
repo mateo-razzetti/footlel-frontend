@@ -189,11 +189,19 @@
 <!-- ═══════════════════════════════════════
      GAME LOGIC (Vanilla JS)
 ═══════════════════════════════════════ -->
-<script type="module">
-import { API_BASE_URL } from '../../services/apiConfig.js';
-
-document.addEventListener('DOMContentLoaded', () => {
+<script>
+(function () {
     'use strict';
+
+    const runWhenReady = (fn) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            fn();
+        }
+    };
+
+    runWhenReady(() => {
 
     /* ─────────────────────────────────────────────
        1. CONFIGURATION CONSTANTS
@@ -209,10 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUTOCOMPLETE_MAX_RESULTS = 50;
     const AUTOCOMPLETE_DEBOUNCE_MS = 200;
     const DAILY_MODE_STORAGE_KEY = 'footlel_diario_jugado';
-    const PLAYERS_CSV_URL = new URL('../../assets/data/data-jugadores.txt', import.meta.url).href;
     const PLAYERS_CSV_PATH = '../../assets/data/data-jugadores.txt';
+    const PLAYERS_CSV_URL = new URL(PLAYERS_CSV_PATH, window.location.href).href;
     const IMAGES_BASE_PATH = '../../assets/images';
-    const FALLBACK_SHIELD_IMG = new URL('../../assets/images/logo-oscuro.png', import.meta.url).href;
+    const FALLBACK_SHIELD_IMG = new URL('../../assets/images/logo-oscuro.png', window.location.href).href;
     // Real league folders (game_manager.py: leagues_name = ["premier",
     // "bundesliga", "serie_a", "la_liga"]). The backend chooses a team from a
     // broader pool than our local 17-club catalog, so a team outside that list
@@ -228,19 +236,28 @@ document.addEventListener('DOMContentLoaded', () => {
         DAILY: 'diario'
     };
 
+    const API_BASE_URL = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
     const API_ENDPOINTS = {
-        START_GAME: `${API_BASE_URL}/game/start-game`,
-        START_GAME_LEGACY: `${API_BASE_URL}/game/start`,
+        START_GAME: `${API_BASE_URL}/game/start`,
+        START_GAME_ALT: `${API_BASE_URL}/game/start-game`,
         PLAYER_ONE_GUESS: `${API_BASE_URL}/game/player-guess`,
         PLAYER_TWO_GUESS: `${API_BASE_URL}/game/player2-guess`,
         AI_GUESS: `${API_BASE_URL}/game/ai-guess`
     };
 
+    function resolveAssetUrl(relPath) {
+        try {
+            return new URL(`${IMAGES_BASE_PATH}/${relPath}`, window.location.href).href;
+        } catch {
+            return `${IMAGES_BASE_PATH}/${relPath}`;
+        }
+    }
+
     /* ─────────────────────────────────────────────
        2. CONDITION CATALOG
-       Uses static `new URL('...', import.meta.url).href` so Vite bundles
-       every crest/flag in production builds (Netlify) while also working
-       in Live Server without a bundler.
+       Uses relative paths + `new URL(..., window.location.href)` so every
+       crest/flag loads in file://, Live Server, and Vite/Netlify builds.
     ───────────────────────────────────────────── */
     const CLUB_CATALOG = [
         {
@@ -248,119 +265,119 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Bayer Leverkusen',
             aliases: ['Bayer Leverkusen', 'Bayer 04 Leverkusen', 'Leverkusen'],
             relPath: 'Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png')
         },
         {
             id: 'bayern-munich',
             name: 'Bayern Munich',
             aliases: ['Bayern Múnich', 'Bayern Munich', 'FC Bayern Munich', 'FC Bayern München', 'Bayern'],
             relPath: 'Equipo - Bundesliga/bayern-munich-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipo - Bundesliga/bayern-munich-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipo - Bundesliga/bayern-munich-logo-footylogos.png')
         },
         {
             id: 'borussia-dortmund',
             name: 'Borussia Dortmund',
             aliases: ['Borussia Dortmund', 'Dortmund', 'BVB'],
             relPath: 'Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png')
         },
         {
             id: 'atletico-madrid',
             name: 'Atlético Madrid',
             aliases: ['Atlético de Madrid', 'Atlético Madrid', 'Atletico de Madrid', 'Atletico Madrid'],
             relPath: 'Equipos - La Liga/atletico-madrid-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - La Liga/atletico-madrid-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - La Liga/atletico-madrid-logo-footylogos.png')
         },
         {
             id: 'fc-barcelona',
             name: 'FC Barcelona',
             aliases: ['FC Barcelona', 'Barcelona', 'Barça'],
             relPath: 'Equipos - La Liga/fc-barcelona-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - La Liga/fc-barcelona-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - La Liga/fc-barcelona-logo-footylogos.png')
         },
         {
             id: 'real-madrid',
             name: 'Real Madrid',
             aliases: ['Real Madrid', 'Real Madrid CF'],
             relPath: 'Equipos - La Liga/real-madrid-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - La Liga/real-madrid-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - La Liga/real-madrid-logo-footylogos.png')
         },
         {
             id: 'arsenal',
             name: 'Arsenal',
             aliases: ['Arsenal', 'Arsenal FC'],
             relPath: 'Equipos - Premier League/arsenal-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Premier League/arsenal-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Premier League/arsenal-logo-footylogos.png')
         },
         {
             id: 'chelsea',
             name: 'Chelsea',
             aliases: ['Chelsea', 'Chelsea FC'],
             relPath: 'Equipos - Premier League/chelsea-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Premier League/chelsea-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Premier League/chelsea-logo-footylogos.png')
         },
         {
             id: 'liverpool-fc',
             name: 'Liverpool FC',
             aliases: ['Liverpool', 'Liverpool FC'],
             relPath: 'Equipos - Premier League/liverpool-fc-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Premier League/liverpool-fc-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Premier League/liverpool-fc-logo-footylogos.png')
         },
         {
             id: 'manchester-city',
             name: 'Manchester City',
             aliases: ['Manchester City', 'Man City'],
             relPath: 'Equipos - Premier League/manchester-city-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Premier League/manchester-city-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Premier League/manchester-city-logo-footylogos.png')
         },
         {
             id: 'manchester-united',
             name: 'Manchester United',
             aliases: ['Manchester United', 'Man United', 'Man Utd'],
             relPath: 'Equipos - Premier League/manchester-united-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Premier League/manchester-united-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Premier League/manchester-united-logo-footylogos.png')
         },
         {
             id: 'tottenham-hotspur',
             name: 'Tottenham Hotspur',
             aliases: ['Tottenham', 'Tottenham Hotspur', 'Spurs'],
             relPath: 'Equipos - Premier League/tottenham-hotspur-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Premier League/tottenham-hotspur-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Premier League/tottenham-hotspur-logo-footylogos.png')
         },
         {
             id: 'ac-milan',
             name: 'AC Milan',
             aliases: ['AC Milan', 'Milan'],
             relPath: 'Equipos - Serie A/ac-milan-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Serie A/ac-milan-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Serie A/ac-milan-logo-footylogos.png')
         },
         {
             id: 'inter-milan',
             name: 'Inter Milan',
             aliases: ['Inter de Milán', 'Inter de Milan', 'Inter Milan', 'Inter', 'Internazionale'],
             relPath: 'Equipos - Serie A/inter-milan-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Serie A/inter-milan-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Serie A/inter-milan-logo-footylogos.png')
         },
         {
             id: 'juventus',
             name: 'Juventus',
             aliases: ['Juventus', 'Juventus FC'],
             relPath: 'Equipos - Serie A/juventus-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Serie A/juventus-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Serie A/juventus-logo-footylogos.png')
         },
         {
             id: 'lazio',
             name: 'Lazio',
             aliases: ['Lazio', 'SS Lazio'],
             relPath: 'Equipos - Serie A/lazio-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Serie A/lazio-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Serie A/lazio-logo-footylogos.png')
         },
         {
             id: 'roma',
             name: 'Roma',
             aliases: ['AS Roma', 'Roma'],
             relPath: 'Equipos - Serie A/roma-logo-footylogos.png',
-            img: new URL('../../assets/images/Equipos - Serie A/roma-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Equipos - Serie A/roma-logo-footylogos.png')
         }
     ];
 
@@ -370,35 +387,35 @@ document.addEventListener('DOMContentLoaded', () => {
             name: 'Argentina',
             aliases: ['Argentina'],
             relPath: 'Selecciones/argentina-national-team-logo-footylogos.png',
-            img: new URL('../../assets/images/Selecciones/argentina-national-team-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Selecciones/argentina-national-team-logo-footylogos.png')
         },
         {
             id: 'england',
             name: 'Inglaterra',
             aliases: ['Inglaterra', 'England'],
             relPath: 'Selecciones/england-national-team-logo-footylogos.png',
-            img: new URL('../../assets/images/Selecciones/england-national-team-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Selecciones/england-national-team-logo-footylogos.png')
         },
         {
             id: 'france',
             name: 'Francia',
             aliases: ['Francia', 'France'],
             relPath: 'Selecciones/france-national-team-logo-footylogos.png',
-            img: new URL('../../assets/images/Selecciones/france-national-team-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Selecciones/france-national-team-logo-footylogos.png')
         },
         {
             id: 'italy',
             name: 'Italia',
             aliases: ['Italia', 'Italy'],
             relPath: 'Selecciones/italy-national-team-logo-footylogos.png',
-            img: new URL('../../assets/images/Selecciones/italy-national-team-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Selecciones/italy-national-team-logo-footylogos.png')
         },
         {
             id: 'spain',
             name: 'España',
             aliases: ['España', 'Espana', 'Spain'],
             relPath: 'Selecciones/spain-national-team-logo-footylogos.png',
-            img: new URL('../../assets/images/Selecciones/spain-national-team-logo-footylogos.png', import.meta.url).href
+            img: resolveAssetUrl('Selecciones/spain-national-team-logo-footylogos.png')
         }
     ];
 
@@ -479,10 +496,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.location.protocol === 'file:') {
             console.warn(
                 'This page was opened with file:// (double click from file explorer). ' +
-                'Chrome blocks fetch() to local files in this mode — el autocomplete ' +
-                'and any other relative fetch will fail with a confusing CORS error. ' +
-                'Serve the folder with a local server (VS Code Live Server, ' +
-                '"python -m http.server", "npx serve", etc.) and open via http://.'
+                'Chrome blocks fetch() to local files in this mode — using embedded ' +
+                'player catalog and relative image paths.'
             );
         }
     }
@@ -490,9 +505,15 @@ document.addEventListener('DOMContentLoaded', () => {
     async function initGame() {
         warnIfRunningFromFileProtocol();
         bindEventListeners();
-        await loadPlayerRoster();
 
-        const loaded = await loadFreshGameBoard();
+        // Paint initial crests immediately so the board is never blank while
+        // waiting for Render cold-start or if offline.
+        applyBoardConditions(null);
+
+        const [, loaded] = await Promise.all([
+            loadPlayerRoster(),
+            loadFreshGameBoard()
+        ]);
         if (!loaded) return;
 
         if (gameState.currentMode === GAME_MODE.DAILY) {
@@ -533,13 +554,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     }
 
-    // POST /game/start-game; if the deploy has not landed yet (404), fall back
-    // automatically to the legacy POST /game/start.
+    // POST /game/start (active backend route); if 404, fall back to /game/start-game.
     async function postStartGame(options) {
         const response = await fetch(API_ENDPOINTS.START_GAME, options);
         if (response.status === 404) {
-            console.warn('/game/start-game returned 404, falling back to /game/start');
-            return fetch(API_ENDPOINTS.START_GAME_LEGACY, options);
+            console.warn('/game/start returned 404, falling back to /game/start-game');
+            return fetch(API_ENDPOINTS.START_GAME_ALT, options);
         }
         return response;
     }
@@ -551,7 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // catalog without warning.
         for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
             try {
-                // The swagger for /game/start-game requires POST with body { user_id }.
+                // The swagger for /game/start requires POST with body { user_id }.
                 const response = await postStartGame({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -602,15 +622,32 @@ document.addEventListener('DOMContentLoaded', () => {
     /* ─────────────────────────────────────────────
        6. BOARD CONDITIONS (clubs / nations)
     ───────────────────────────────────────────── */
+    function extractHeadersArray(startData, keys) {
+        if (!startData || typeof startData !== 'object') return null;
+        for (const key of keys) {
+            if (Array.isArray(startData[key]) && startData[key].length === 3) {
+                return startData[key];
+            }
+        }
+        if (startData.data && typeof startData.data === 'object') {
+            for (const key of keys) {
+                if (Array.isArray(startData.data[key]) && startData.data[key].length === 3) {
+                    return startData.data[key];
+                }
+            }
+        }
+        return null;
+    }
+
     function applyBoardConditions(startData) {
         // CRITICAL BUG: /game/start returns `row_headers` (the 3 clubs chosen
         // by the backend) and `column_headers` (the 3 national teams), not
-        // `topConditions`/`leftConditions`. Since those fields did not exist,
-        // this always fell back to pickRandomConditions() — a random catalog on
-        // client side, unrelated to the server's real player_names_matrix.
-        // That's why NO name ever matched: UI showed one board, backend expected another.
-        const topConditions = resolveConditions(startData?.row_headers, CLUB_CATALOG);
-        const leftConditions = resolveConditions(startData?.column_headers, NATION_CATALOG);
+        // `topConditions`/`leftConditions`.
+        const rawClubs = extractHeadersArray(startData, ['row_headers', 'clubs', 'teams', 'equipos', 'topConditions']);
+        const rawNations = extractHeadersArray(startData, ['column_headers', 'nations', 'countries', 'paises', 'selecciones', 'leftConditions']);
+
+        const topConditions = resolveConditions(rawClubs, CLUB_CATALOG);
+        const leftConditions = resolveConditions(rawNations, NATION_CATALOG);
 
         const shieldLoadPromises = [
             ...topConditions.map((condition, columnIndex) => renderConditionSlot(dom.condTopSlots[columnIndex], condition)),
@@ -660,11 +697,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // "Inter de Milán", catalog uses "Atlético Madrid" /
     // "Inter Milan" — without "de"), and WITHOUT loose numbers (backend sends
     // "Bayer 04 Leverkusen", catalog uses "Bayer Leverkusen" —
-    // without "04"). Without this, "04" breaks string match
-    // and "bayer leverkusen" stops being a contiguous substring of "bayer 04 leverkusen",
-    // causing it to fall back to dynamic slug path creation
-    // with "bayer-04-leverkusen", which does not exist → broken crest
-    // → generic fallback). Collapses multiple spaces.
+    // without "04"). Collapses multiple spaces.
     function normalizeForMatch(str) {
         return String(str)
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -685,53 +718,75 @@ document.addEventListener('DOMContentLoaded', () => {
         return na === nb || na.includes(nb) || nb.includes(na);
     }
 
-    function buildCatalogEntryCandidates(entry) {
-        const candidates = [entry.img];
+    function buildCatalogEntryCandidates(entry, extraUrl) {
+        const candidates = [];
+        if (extraUrl) candidates.push(extraUrl);
         if (entry.relPath) {
             candidates.push(`${IMAGES_BASE_PATH}/${entry.relPath}`);
+            candidates.push(encodeURI(`${IMAGES_BASE_PATH}/${entry.relPath}`));
+        }
+        if (entry.img) {
+            candidates.push(entry.img);
+        }
+        if (entry.relPath) {
             candidates.push(`/assets/images/${entry.relPath}`);
+            candidates.push(encodeURI(`/assets/images/${entry.relPath}`));
         }
         return [...new Set(candidates.filter(Boolean))];
     }
 
+    function extractConditionInput(raw) {
+        if (raw && typeof raw === 'object') {
+            const rawName = raw.name || raw.nombre || raw.team || raw.equipo || raw.country || raw.pais || raw.title || raw.id || '';
+            const rawImg = raw.img || raw.image || raw.logo || raw.escudo || raw.escudoUrl || raw.escudo_url || raw.bandera || raw.banderaUrl || raw.bandera_url || raw.flag || raw.url || null;
+            return { rawName: String(rawName), rawImg };
+        }
+        return { rawName: String(raw), rawImg: null };
+    }
+
     function resolveSingleCondition(raw, catalog) {
         if (!raw) return null;
-        const slug = slugifyName(raw);
+        const { rawName, rawImg } = extractConditionInput(raw);
+        if (!rawName && !rawImg) return null;
+        const slug = slugifyName(rawName);
 
         // 1) Exact match of id/slug (fast, covers happy path).
-        const byId = catalog.find(entry => entry.id === raw || entry.id === slug);
+        const byId = catalog.find(entry => entry.id === rawName || entry.id === slug);
         if (byId) {
-            return { ...byId, imgCandidates: buildCatalogEntryCandidates(byId) };
+            return { ...byId, imgCandidates: buildCatalogEntryCandidates(byId, rawImg) };
         }
 
         // 2) Match against entry name or any known alias (Spanish/English/DB variants).
         const byNameOrAlias = catalog.find(entry => {
-            if (namesLooselyMatch(entry.name, raw)) return true;
+            if (namesLooselyMatch(entry.name, rawName)) return true;
             if (Array.isArray(entry.aliases)) {
-                return entry.aliases.some(alias => namesLooselyMatch(alias, raw));
+                return entry.aliases.some(alias => namesLooselyMatch(alias, rawName));
             }
             return false;
         });
         if (byNameOrAlias) {
-            return { ...byNameOrAlias, imgCandidates: buildCatalogEntryCandidates(byNameOrAlias) };
+            return { ...byNameOrAlias, imgCandidates: buildCatalogEntryCandidates(byNameOrAlias, rawImg) };
         }
 
         // 3) Last resort: club/nation is not in curated catalog — build candidate
         // paths in case file exists with that exact slug in a league folder.
         const isClub = catalog === CLUB_CATALOG;
-        const imgCandidates = isClub
+        const fallbackCandidates = isClub
             ? CLUB_LEAGUE_FOLDERS.flatMap(folder => [
                 `${IMAGES_BASE_PATH}/${folder}/${slug}-logo-footylogos.png`,
+                encodeURI(`${IMAGES_BASE_PATH}/${folder}/${slug}-logo-footylogos.png`),
                 `/assets/images/${folder}/${slug}-logo-footylogos.png`
             ])
             : [
                 `${IMAGES_BASE_PATH}/Selecciones/${slug}-national-team-logo-footylogos.png`,
+                encodeURI(`${IMAGES_BASE_PATH}/Selecciones/${slug}-national-team-logo-footylogos.png`),
                 `/assets/images/Selecciones/${slug}-national-team-logo-footylogos.png`
             ];
+        const imgCandidates = rawImg ? [rawImg, ...fallbackCandidates] : fallbackCandidates;
 
         return {
             id: slug,
-            name: String(raw),
+            name: rawName,
             img: imgCandidates[0],
             imgCandidates
         };
@@ -760,7 +815,8 @@ document.addEventListener('DOMContentLoaded', () => {
         img.removeAttribute('onerror');
         img.style.display = 'block';
         img.style.opacity = '1';
-        img.alt = '';
+        img.alt = condition.name || '';
+        slotElement.title = condition.name || '';
 
         return new Promise(resolve => {
             let settled = false;
@@ -774,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const tryNextCandidate = () => {
                 if (nextCandidateIndex >= candidates.length) {
                     img.onerror = null;
-                    img.alt = '';
+                    img.alt = condition.name || '';
                     img.src = FALLBACK_SHIELD_IMG;
                     img.style.opacity = '0.55';
                     finish();
@@ -1429,7 +1485,9 @@ document.addEventListener('DOMContentLoaded', () => {
             closeAutocompleteList();
         }
     }
-});
+    });
+})();
 </script>
+<script type="module" src="../../services/apiConfig.js"></script>
 </body>
 </html>
