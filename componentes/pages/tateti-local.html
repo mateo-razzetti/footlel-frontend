@@ -202,12 +202,14 @@
     const RESULT_DISPLAY_DELAY_MS = 3000;
     const REACTION_POPUP_DURATION_MS = 2800;
     const BUTTON_ERROR_DURATION_MS = 2000;
-    const AUTOCOMPLETE_MIN_CHARS = 3;
+    const AUTOCOMPLETE_MIN_CHARS = 2;
     const AUTOCOMPLETE_MAX_RESULTS = 50;
-    const AUTOCOMPLETE_DEBOUNCE_MS = 200;
+    const AUTOCOMPLETE_DEBOUNCE_MS = 100;
     const DAILY_MODE_STORAGE_KEY = 'footlel_diario_jugado';
     const PLAYERS_CSV_PATH = '../../assets/data/data-jugadores.txt';
+    const PLAYERS_CSV_ALT_PATH = '../../assets/data/data-1790367964874.csv';
     const PLAYERS_CSV_URL = new URL(PLAYERS_CSV_PATH, window.location.href).href;
+    const PLAYERS_CSV_ALT_URL = new URL(PLAYERS_CSV_ALT_PATH, window.location.href).href;
     const IMAGES_BASE_PATH = '../../assets/images';
     const FALLBACK_SHIELD_IMG = new URL('../../assets/images/logo-oscuro.png', window.location.href).href;
     // Real league folders (game_manager.py: leagues_name = ["premier",
@@ -458,21 +460,36 @@
         ]
     };
 
-    let availablePlayers = [];
+    const FALLBACK_PLAYERS_ROSTER = [
+        'Fernando Torres', 'Hernán Crespo', 'Frank Lampard', 'Gianfranco Zola', 'Claude Makélélé',
+        'David Silva', 'Sergio Agüero', 'Joe Hart', 'Mario Balotelli', 'Bacary Sagna',
+        'Rodri', 'Nicolás Otamendi', 'Gianluigi Donnarumma', 'Benjamin Mendy', 'Juan Mata',
+        'Juan Sebastián Verón', 'Wayne Rooney', 'Matteo Darmian', 'Patrice Evra', 'Javier Mascherano',
+        'Pepe Reina', 'Steven Gerrard', 'Andrea Dossena', 'Djibril Cissé', 'José Antonio Reyes',
+        'Emiliano Martínez', 'Ian Wright', 'Riccardo Calafiori', 'Thierry Henry', 'Cesc Fàbregas',
+        'Tony Adams', 'Patrick Vieira', 'Roberto Soldado', 'Osvaldo Ardiles', 'Gary Lineker',
+        'Guglielmo Vicario', 'David Ginola', 'Xavi Hernández', 'Lionel Messi', 'Marcus Rashford',
+        'Demetrio Albertini', 'Samuel Umtiti', 'Sergio Ramos', 'Ángel Di María', 'David Beckham',
+        'Fabio Cannavaro', 'Karim Benzema', 'Koke', 'Ángel Correa', 'Kieran Trippier',
+        'Giacomo Raspadori', 'Antoine Griezmann', 'Josep Martínez', 'Javier Zanetti', 'Ashley Young',
+        'Nicolò Barella', 'Marcus Thuram', 'Samu Castillejo', 'Lucas Biglia', 'Alessandro Nesta',
+        'Mathieu Flamini', 'Kyle Walker', 'Álvaro Morata', 'Paulo Dybala', 'Gianluigi Buffon',
+        'Paul Pogba', 'Iago Falque', 'Erik Lamela', 'Chris Smalling', 'Francesco Totti',
+        'Steven Nzonzi', 'Mario Gila', 'Valentín "Taty" Castellanos', 'Paul Gascoigne', 'Ciro Immobile',
+        'Matteo Guendouzi', 'Javi Martínez', 'Martín Demichelis', 'Owen Hargreaves', 'Luca Toni',
+        'Franck Ribéry', 'Paco Alcácer', 'Leonardo Balerdi', 'Jude Bellingham', 'Luca Reggiani',
+        'Ousmane Dembélé', 'Álex Grimaldo', 'Exequiel Palacios', 'Jarell Quansah', 'Andrea Natali',
+        'Martin Terrier'
+    ];
+
+    let availablePlayers = [...FALLBACK_PLAYERS_ROSTER];
     let autocompleteDebounceId = null;
 
     /* ─────────────────────────────────────────────
        5. INITIALIZATION
     ───────────────────────────────────────────── */
-    // Declared BEFORE initGame() on purpose: initGame() calls
-    // fetchGameStartData() synchronously up to the first `await`, and
-    // that function references them in the `for` loop condition. If the
-    // `const` were placed lower in the file, it causes a temporal dead zone
-    // ReferenceError ("Cannot access before initialization").
     const START_GAME_MAX_ATTEMPTS = 3;
     const START_GAME_RETRY_DELAY_MS = 1500;
-
-    initGame();
 
     function warnIfRunningFromFileProtocol() {
         // Under file:// (double-clicking HTML from the explorer), Chrome
@@ -494,14 +511,14 @@
         warnIfRunningFromFileProtocol();
         bindEventListeners();
 
-        // Paint initial crests immediately so the board is never blank while
-        // waiting for Render cold-start or if offline.
-        applyBoardConditions(null);
+        // Keep the 6 header boxes empty (without placeholder images) until
+        // POST /game/start responds with the real teams and countries.
+        clearConditionSlots();
 
-        const [, loaded] = await Promise.all([
-            loadPlayerRoster(),
-            loadFreshGameBoard()
-        ]);
+        // Load player roster in background without blocking board or timer startup.
+        loadPlayerRoster().catch(err => console.warn('Fallback roster active:', err));
+
+        const loaded = await loadFreshGameBoard();
         if (!loaded) return;
 
         if (gameState.currentMode === GAME_MODE.DAILY) {
@@ -534,10 +551,8 @@
             return false;
         }
 
-        // Previously this was fire-and-forget: the timer started while crests
-        // were still rendering (server cold start). Now we wait for the
-        // applyBoardConditions promise to resolve (all <img> loaded or failed)
-        // before continuing.
+        // Wait for applyBoardConditions to render the real crests/flags
+        // before starting the 60s countdown.
         await applyBoardConditions(startData);
         return true;
     }
@@ -601,19 +616,45 @@
     }
 
     function getCurrentUserStrid() {
-        // Builds userStrid reading footlel_user_strid -> footlel_username -> footlel_user_id -> 'guest_user',
-        // ensuring a non-empty string is always sent to /game/* endpoints.
-        const rawStrid =
-            localStorage.getItem('footlel_user_strid') ||
-            localStorage.getItem('footlel_username') ||
-            String(localStorage.getItem('footlel_user_id') || 'guest_user');
-        const trimmed = String(rawStrid).trim();
-        return trimmed.length > 0 ? trimmed : 'guest_user';
+        const isRegistered = localStorage.getItem('footlel_guest') === 'false';
+        let rawStrid;
+        if (isRegistered) {
+            const savedUserId = localStorage.getItem('footlel_user_id');
+            rawStrid =
+                (savedUserId && savedUserId !== 'null' && savedUserId !== 'undefined'
+                    ? String(localStorage.getItem('footlel_user_id'))
+                    : '') ||
+                localStorage.getItem('footlel_user_strid') ||
+                localStorage.getItem('footlel_username') ||
+                '';
+        } else {
+            rawStrid =
+                localStorage.getItem('footlel_user_strid') ||
+                localStorage.getItem('footlel_username') ||
+                'guest_user';
+        }
+        const trimmed = String(rawStrid || '').trim();
+        return trimmed.length > 0 && trimmed !== 'null' && trimmed !== 'undefined' ? trimmed : 'guest_user';
     }
 
     /* ─────────────────────────────────────────────
        6. BOARD CONDITIONS (clubs / nations)
     ───────────────────────────────────────────── */
+    function clearConditionSlots() {
+        [...dom.condTopSlots, ...dom.condLeftSlots].forEach(slot => {
+            if (!slot) return;
+            slot.title = '';
+            const img = slot.querySelector('.cond-img');
+            if (img) {
+                img.onload = null;
+                img.onerror = null;
+                img.removeAttribute('src');
+                img.alt = '';
+                img.style.display = 'none';
+            }
+        });
+    }
+
     function extractHeadersArray(startData, keys) {
         if (!startData || typeof startData !== 'object') return null;
         for (const key of keys) {
@@ -632,6 +673,10 @@
     }
 
     function applyBoardConditions(startData) {
+        if (!startData) {
+            clearConditionSlots();
+            return Promise.resolve();
+        }
         // CRITICAL BUG: /game/start returns `row_headers` (the 3 clubs chosen
         // by the backend) and `column_headers` (the 3 national teams), not
         // `topConditions`/`leftConditions`.
@@ -838,7 +883,7 @@
                 finish();
             };
             img.onerror = tryNextCandidate;
-            setTimeout(finish, 4000);
+            setTimeout(finish, 600);
             tryNextCandidate();
         });
     }
@@ -919,6 +964,7 @@
             cell.querySelectorAll('.cell-mark').forEach(mark => mark.remove());
         });
         dom.playerSearch.value = '';
+        clearConditionSlots();
 
         const loaded = await loadFreshGameBoard();
         if (!loaded) return;
@@ -1222,6 +1268,7 @@
         // upon confirmation (see handleConfirmClick).
         dom.btnConfirm.addEventListener('click', handleConfirmClick);
         dom.playerSearch.addEventListener('input', handleSearchInput);
+        dom.playerSearch.addEventListener('focus', renderAutocompleteResults);
         document.addEventListener('click', handleOutsideAutocompleteClick);
     }
 
@@ -1350,28 +1397,6 @@
     /* ─────────────────────────────────────────────
        13. AUTOCOMPLETE (PLAYER SEARCH)
     ───────────────────────────────────────────── */
-    const FALLBACK_PLAYERS_ROSTER = [
-        'Fernando Torres', 'Hernán Crespo', 'Frank Lampard', 'Gianfranco Zola', 'Claude Makélélé',
-        'David Silva', 'Sergio Agüero', 'Joe Hart', 'Mario Balotelli', 'Bacary Sagna',
-        'Rodri', 'Nicolás Otamendi', 'Gianluigi Donnarumma', 'Benjamin Mendy', 'Juan Mata',
-        'Juan Sebastián Verón', 'Wayne Rooney', 'Matteo Darmian', 'Patrice Evra', 'Javier Mascherano',
-        'Pepe Reina', 'Steven Gerrard', 'Andrea Dossena', 'Djibril Cissé', 'José Antonio Reyes',
-        'Emiliano Martínez', 'Ian Wright', 'Riccardo Calafiori', 'Thierry Henry', 'Cesc Fàbregas',
-        'Tony Adams', 'Patrick Vieira', 'Roberto Soldado', 'Osvaldo Ardiles', 'Gary Lineker',
-        'Guglielmo Vicario', 'David Ginola', 'Xavi Hernández', 'Lionel Messi', 'Marcus Rashford',
-        'Demetrio Albertini', 'Samuel Umtiti', 'Sergio Ramos', 'Ángel Di María', 'David Beckham',
-        'Fabio Cannavaro', 'Karim Benzema', 'Koke', 'Ángel Correa', 'Kieran Trippier',
-        'Giacomo Raspadori', 'Antoine Griezmann', 'Josep Martínez', 'Javier Zanetti', 'Ashley Young',
-        'Nicolò Barella', 'Marcus Thuram', 'Samu Castillejo', 'Lucas Biglia', 'Alessandro Nesta',
-        'Mathieu Flamini', 'Kyle Walker', 'Álvaro Morata', 'Paulo Dybala', 'Gianluigi Buffon',
-        'Paul Pogba', 'Iago Falque', 'Erik Lamela', 'Chris Smalling', 'Francesco Totti',
-        'Steven Nzonzi', 'Mario Gila', 'Valentín "Taty" Castellanos', 'Paul Gascoigne', 'Ciro Immobile',
-        'Matteo Guendouzi', 'Javi Martínez', 'Martín Demichelis', 'Owen Hargreaves', 'Luca Toni',
-        'Franck Ribéry', 'Paco Alcácer', 'Leonardo Balerdi', 'Jude Bellingham', 'Luca Reggiani',
-        'Ousmane Dembélé', 'Álex Grimaldo', 'Exequiel Palacios', 'Jarell Quansah', 'Andrea Natali',
-        'Martin Terrier'
-    ];
-
     function normalizeSearchText(str) {
         return String(str)
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -1379,12 +1404,37 @@
             .trim();
     }
 
+    function parsePlayerRosterText(rawText) {
+        return [...new Set(
+            String(rawText)
+                .split(/\r?\n/)
+                .map(line => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return '';
+                    // Supports both plain-text lines (data-jugadores.txt) and CSV rows (data-*.csv)
+                    const firstCol = trimmedLine.includes(',')
+                        ? trimmedLine.split(',')[0]
+                        : trimmedLine;
+                    return firstCol.trim().replace(/^"|"$/g, '').trim();
+                })
+                .filter(name => name.length > 0 && !name.toLowerCase().startsWith('player_name'))
+        )];
+    }
+
     async function loadPlayerRoster() {
         availablePlayers = [...FALLBACK_PLAYERS_ROSTER];
+        if (window.location.protocol === 'file:') {
+            console.info(`Usando catálogo embebido en memoria (${availablePlayers.length} jugadores).`);
+            return;
+        }
+
         const candidateUrls = [...new Set([
             PLAYERS_CSV_URL,
             PLAYERS_CSV_PATH,
-            '/assets/data/data-jugadores.txt'
+            PLAYERS_CSV_ALT_URL,
+            PLAYERS_CSV_ALT_PATH,
+            '/assets/data/data-jugadores.txt',
+            '/assets/data/data-1790367964874.csv'
         ])];
 
         for (const url of candidateUrls) {
@@ -1395,10 +1445,7 @@
                 const csvText = await response.text();
                 if (csvText.trim().startsWith('<')) continue; // Avoid HTML 404/SPA fallback
 
-                const parsed = csvText
-                    .split(/\r?\n/)
-                    .map(name => name.trim().replace(/^"|"$/g, '').trim())
-                    .filter(name => name.length > 0 && !name.toLowerCase().startsWith('player_name'));
+                const parsed = parsePlayerRosterText(csvText);
 
                 if (parsed.length > 0) {
                     availablePlayers = parsed;
@@ -1427,7 +1474,10 @@
             return;
         }
 
-        const matches = availablePlayers.filter(name => normalizeSearchText(name).includes(normalizedQuery));
+        const roster = Array.isArray(availablePlayers) && availablePlayers.length > 0
+            ? availablePlayers
+            : FALLBACK_PLAYERS_ROSTER;
+        const matches = roster.filter(name => normalizeSearchText(name).includes(normalizedQuery));
 
         if (matches.length === 0) {
             closeAutocompleteList();
@@ -1439,11 +1489,16 @@
             const listItem = document.createElement('li');
             listItem.textContent = playerName; // textContent avoids HTML/XSS injection
             listItem.setAttribute('role', 'option');
+            listItem.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectAutocompleteResult(playerName);
+            });
             listItem.addEventListener('click', () => selectAutocompleteResult(playerName));
             fragment.appendChild(listItem);
         });
 
         dom.autocompleteList.appendChild(fragment);
+        dom.autocompleteList.style.zIndex = '9999';
         dom.autocompleteList.style.display = 'block';
         dom.playerSearch.setAttribute('aria-expanded', 'true');
     }
@@ -1466,6 +1521,8 @@
             closeAutocompleteList();
         }
     }
+
+    initGame();
     });
 })();
 </script>

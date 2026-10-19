@@ -177,6 +177,11 @@ body.light-mode .connection-error-subtitle {
     margin: 0;
 }
 
+.cond-img:not([src]),
+.cond-img[src=""] {
+    display: none !important;
+}
+
 /* Playable Cells */
 .playable-cell {
     background: #1E1E1E;
@@ -264,12 +269,15 @@ body.light-mode .connection-error-subtitle {
     max-width: 100%;
     margin: 0 auto;
     transform: translateX(-68px); /* Same offset as board for alignment */
+    position: relative;
+    z-index: 2000;
 }
 
 .search-wrapper {
     position: relative;
     flex: 1; /* Absorbs flexible space previously on direct input */
     display: flex;
+    z-index: 2001;
 }
 
 .autocomplete-results {
@@ -287,7 +295,7 @@ body.light-mode .connection-error-subtitle {
     padding: 8px;
     margin: 0;
     display: none;
-    z-index: 1000;
+    z-index: 9999;
     border: 1px solid rgba(76, 175, 80, 0.25);
     animation: dropdown-reveal 0.15s ease-out;
 }
