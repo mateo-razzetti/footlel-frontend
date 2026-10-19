@@ -559,11 +559,12 @@
         // catalog without warning.
         for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
             try {
-                // The swagger for /game/start requires POST with body { user_id }.
+                // The swagger for /game/start requires POST with body { user_strid }.
+                const userStrid = getCurrentUserStrid();
                 const response = await postStartGame({
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: getCurrentUserId() })
+                    body: JSON.stringify({ user_strid: String(userStrid) })
                 });
                 if (!response.ok) {
                     throw new Error(`Unexpected status ${response.status}`);
@@ -599,12 +600,15 @@
         main.prepend(notice);
     }
 
-    function getCurrentUserId() {
-        // Reads footlel_user_id (stored in login.html) and parses as integer.
-        // Only if guest / no stored ID, the default ID (0) is used.
-        const GUEST_DEFAULT_USER_ID = 0;
-        const storedId = parseInt(localStorage.getItem('footlel_user_id'), 10);
-        return Number.isNaN(storedId) ? GUEST_DEFAULT_USER_ID : storedId;
+    function getCurrentUserStrid() {
+        // Builds userStrid reading footlel_user_strid -> footlel_username -> footlel_user_id -> 'guest_user',
+        // ensuring a non-empty string is always sent to /game/* endpoints.
+        const rawStrid =
+            localStorage.getItem('footlel_user_strid') ||
+            localStorage.getItem('footlel_username') ||
+            String(localStorage.getItem('footlel_user_id') || 'guest_user');
+        const trimmed = String(rawStrid).trim();
+        return trimmed.length > 0 ? trimmed : 'guest_user';
     }
 
     /* ─────────────────────────────────────────────
@@ -1000,12 +1004,13 @@
         console.warn('📤 ENVIANDO AL BACKEND:', trimmedGuess);
 
         try {
+            const userStrid = getCurrentUserStrid();
             const response = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 // Cell is no longer pre-selected: Backend receives player name
                 // only and determines matching slot (see resolveTargetCellFromResponse).
-                body: JSON.stringify({ user_id: getCurrentUserId(), player_guess: trimmedGuess })
+                body: JSON.stringify({ user_strid: String(userStrid), player_guess: String(trimmedGuess) })
             });
 
             // Body read ONCE here (safeParseJson includes try/catch) and reused;
@@ -1042,13 +1047,14 @@
         }
     }
 
-    // Bot endpoint requires body { user_id } (per swagger).
+    // Bot endpoint requires body { user_strid } (per swagger).
     async function requestAiMove() {
         try {
+            const userStrid = getCurrentUserStrid();
             const response = await fetch(API_ENDPOINTS.AI_GUESS, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id: getCurrentUserId() })
+                body: JSON.stringify({ user_strid: String(userStrid) })
             });
             if (!response.ok) {
                 throw new Error(`Unexpected server status: ${response.status}`);
