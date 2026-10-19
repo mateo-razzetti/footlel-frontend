@@ -368,6 +368,9 @@
             var resp = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(nombre)}`);
             if (!resp.ok) return null;
             var info = await resp.json();
+            if (info.user_strid) {
+                localStorage.setItem('footlel_user_strid', String(info.user_strid));
+            }
             return Number(info.user_id || info.id) || null;
         } catch (e) { return null; }
     }

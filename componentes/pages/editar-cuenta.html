@@ -185,6 +185,9 @@
                 if (data.user_id) {
                     localStorage.setItem('footlel_user_id', data.user_id);
                 }
+                if (data.user_strid) {
+                    localStorage.setItem('footlel_user_strid', String(data.user_strid));
+                }
 
                 // Current password kept in memory only (used when the new-password field is blank)
                 currentPassword = data.user_password || "";

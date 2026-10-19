@@ -120,23 +120,29 @@
                     // fallback if get-user-info does not return user_password.
                     localStorage.setItem('footlel_password', passwordVal);
                     
-                    // We store the ID sent by the backend; if login does not return it,
-                    // we query it with GET /user/get-user-info/{user_name}.
+                    // We store the ID and user_strid sent by the backend; if login does not return them,
+                    // we query them with GET /user/get-user-info/{user_name}.
                     let resolvedUserId = data.user_id || data.id;
-                    if (!resolvedUserId) {
+                    let resolvedUserStrid = data.user_strid || null;
+                    if (!resolvedUserId || !resolvedUserStrid) {
                         try {
                             const infoResponse = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(usernameVal)}`);
                             if (infoResponse.ok) {
                                 const info = await infoResponse.json();
-                                resolvedUserId = info.user_id || info.id;
+                                resolvedUserId = resolvedUserId || info.user_id || info.id;
+                                resolvedUserStrid = resolvedUserStrid || info.user_strid;
                             }
                         } catch (infoError) {
-                            console.error('No se pudo obtener el user_id:', infoError);
+                            console.error('No se pudo obtener el user_id / user_strid:', infoError);
                         }
                     }
                     if (resolvedUserId) {
                         localStorage.setItem('footlel_user_id', String(resolvedUserId));
                     }
+                    localStorage.setItem(
+                        'footlel_user_strid',
+                        String(resolvedUserStrid || usernameVal || resolvedUserId || 'guest_user')
+                    );
 
                     // Restore the redirect
                     window.location.href = 'menu.html';
@@ -154,9 +160,26 @@
 
         /* ── Continue as guest ──────────────────────────────── */
         const guestLink = document.querySelector('.link-guest');
-        guestLink.addEventListener('click', function (e) {
+        guestLink.addEventListener('click', async function (e) {
             e.preventDefault();
             localStorage.setItem('footlel_guest', 'true');
+            try {
+                const guestResponse = await fetch(`${API_BASE_URL}/auth/guest-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (guestResponse.ok) {
+                    const guestData = await guestResponse.json();
+                    const guestStrid = guestData.user_strid || guestData.guest_name || 'guest_user';
+                    localStorage.setItem('footlel_user_strid', String(guestStrid));
+                } else if (!localStorage.getItem('footlel_user_strid')) {
+                    localStorage.setItem('footlel_user_strid', 'guest_user');
+                }
+            } catch (guestError) {
+                if (!localStorage.getItem('footlel_user_strid')) {
+                    localStorage.setItem('footlel_user_strid', 'guest_user');
+                }
+            }
             window.location.href = 'menu.html';
         });
     </script>
