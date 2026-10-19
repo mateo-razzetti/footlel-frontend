@@ -126,6 +126,98 @@ body.light-mode .connection-error-subtitle {
     position: relative;
 }
 
+/* ── Board Loading Overlay ("Generando Tatetí...") ───────────── */
+.board-loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    background: rgba(15, 15, 15, 0.58);
+    backdrop-filter: blur(4px);
+    border-radius: 16px;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+.board-loading-overlay.hidden {
+    display: none !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.board-loading-card {
+    background: linear-gradient(180deg, #242424 0%, #181818 100%);
+    border: 2px solid var(--color-brand-green, #4CAF50);
+    border-radius: 20px;
+    padding: 26px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.7),
+        0 0 24px rgba(76, 175, 80, 0.28);
+    max-width: 320px;
+}
+
+.board-loading-ball {
+    font-size: 42px;
+    line-height: 1;
+    display: inline-block;
+    animation: footlel-ball-spin 1.15s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    filter: drop-shadow(0 4px 10px rgba(76, 175, 80, 0.45));
+}
+
+@keyframes footlel-ball-spin {
+    0%   { transform: translateY(0) rotate(0deg) scale(1); }
+    50%  { transform: translateY(-8px) rotate(180deg) scale(1.08); }
+    100% { transform: translateY(0) rotate(360deg) scale(1); }
+}
+
+.board-loading-title {
+    margin: 4px 0 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.6px;
+}
+
+.board-loading-subtitle {
+    margin: 0;
+    font-family: var(--font-body, 'Poppins', sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+html.light-mode .board-loading-overlay,
+body.light-mode .board-loading-overlay {
+    background: rgba(245, 245, 245, 0.65);
+}
+
+html.light-mode .board-loading-card,
+body.light-mode .board-loading-card {
+    background: #FFFFFF;
+    border-color: var(--color-brand-green, #4CAF50);
+    box-shadow:
+        0 14px 36px rgba(0, 0, 0, 0.16),
+        0 0 20px rgba(76, 175, 80, 0.22);
+}
+
+html.light-mode .board-loading-title,
+body.light-mode .board-loading-title {
+    color: #1A1A1A;
+}
+
+html.light-mode .board-loading-subtitle,
+body.light-mode .board-loading-subtitle {
+    color: #616161;
+}
+
 .game-board {
     display: grid;
     grid-template-columns: repeat(4, 124px); /* Zoom-out: previously 160px */
@@ -343,18 +435,70 @@ body.light-mode .connection-error-subtitle {
     width: 100%; /* Input takes 100% of wrapper */
     background: #2A2A2A;
     border: 1px solid #444444;
-    color: var(--color-text-primary);
+    color: #FFFFFF;
     padding: 15px 22px; /* Zoom-out: previously 20px 28px */
     border-radius: 26px;
     font-family: var(--font-body);
     font-size: 15px; /* Zoom-out: previously 18px */
     outline: none;
-    transition: border-color 0.2s ease, background 0.2s ease;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
 }
 
 .search-input:focus {
     border-color: var(--color-brand-green);
     background: #333333;
+    color: #FFFFFF;
+}
+
+.search-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Search Input & Autocomplete in Light Mode ───────────────── */
+html.light-mode .search-input,
+body.light-mode .search-input {
+    background: #FFFFFF;
+    border: 1.5px solid #CCCCCC;
+    color: #1A1A1A;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+html.light-mode .search-input::placeholder,
+body.light-mode .search-input::placeholder {
+    color: #757575;
+}
+
+html.light-mode .search-input:focus,
+body.light-mode .search-input:focus {
+    background: #FFFFFF;
+    border-color: var(--color-brand-green);
+    color: #1A1A1A;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+}
+
+html.light-mode .autocomplete-results,
+body.light-mode .autocomplete-results {
+    background: #FFFFFF;
+    border: 1px solid rgba(76, 175, 80, 0.45);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+html.light-mode .autocomplete-results li,
+body.light-mode .autocomplete-results li {
+    color: #1A1A1A;
+}
+
+html.light-mode .autocomplete-results li:hover,
+html.light-mode .autocomplete-results li:focus-visible,
+body.light-mode .autocomplete-results li:hover,
+body.light-mode .autocomplete-results li:focus-visible {
+    background: rgba(76, 175, 80, 0.14);
+    color: #1A1A1A;
 }
 
 .btn-confirm {

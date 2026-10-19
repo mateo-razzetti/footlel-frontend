@@ -306,6 +306,64 @@
         if (savedAvatar) document.getElementById('profileAvatar').src = savedAvatar;
         heroUsername.textContent = savedUsername;
         profileUser.textContent  = savedUsername;
+
+        const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+        (async function loadUserFooterStats() {
+            const [infoResult, lbResult] = await Promise.allSettled([
+                fetch(`${apiBaseUrl}/user/get-user-info/${encodeURIComponent(savedUsername)}`).then(r => r.ok ? r.json() : null),
+                fetch(`${apiBaseUrl}/stat/get-leaderboard`).then(r => r.ok ? r.json() : null)
+            ]);
+
+            const userInfo = infoResult.status === 'fulfilled' ? infoResult.value : null;
+            const lbData   = lbResult.status === 'fulfilled' ? lbResult.value : null;
+
+            if (userInfo && typeof userInfo === 'object') {
+                if (userInfo.user_id !== undefined && userInfo.user_id !== null) {
+                    localStorage.setItem('footlel_user_id', String(userInfo.user_id));
+                }
+                const rawStreak = userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak;
+                if (rawStreak !== undefined && rawStreak !== null) {
+                    statStreak.textContent = `🔥 ${rawStreak} ${Number(rawStreak) === 1 ? 'Día' : 'Días'}`;
+                }
+                const rawRank = userInfo.user_rank ?? userInfo.rank ?? userInfo.rango;
+                if (rawRank !== undefined && rawRank !== null && String(rawRank).trim() !== '') {
+                    statRank.textContent = `🏆 ${rawRank}`;
+                }
+                const rawWins = userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas;
+                if (rawWins !== undefined && rawWins !== null) {
+                    statWins.textContent = `📈 ${rawWins}`;
+                }
+            }
+
+            if (lbData && Array.isArray(lbData.leaderboard)) {
+                const normalizedTarget = savedUsername.trim().toLowerCase();
+                const userIndex = lbData.leaderboard.findIndex(entry => {
+                    const entryName = Array.isArray(entry)
+                        ? entry[0]
+                        : (entry && (entry.user_name || entry.username || entry.name));
+                    return String(entryName || '').trim().toLowerCase() === normalizedTarget;
+                });
+
+                if (userIndex !== -1) {
+                    const entry = lbData.leaderboard[userIndex];
+                    const scoreOrWins = Array.isArray(entry)
+                        ? entry[1]
+                        : (entry.wins ?? entry.points ?? entry.score ?? 0);
+                    const position = userIndex + 1;
+
+                    if (!userInfo || (userInfo.user_rank === undefined && userInfo.rank === undefined && userInfo.rango === undefined)) {
+                        statRank.textContent = `🏆 #${position}`;
+                    }
+                    if (!userInfo || (userInfo.user_wins === undefined && userInfo.wins === undefined && userInfo.games_won === undefined && userInfo.partidas_ganadas === undefined)) {
+                        statWins.textContent = `📈 ${scoreOrWins}`;
+                    }
+                    if (Array.isArray(entry) && entry.length > 2 && entry[2] !== undefined && entry[2] !== null) {
+                        statStreak.textContent = `🔥 ${entry[2]} ${Number(entry[2]) === 1 ? 'Día' : 'Días'}`;
+                    }
+                }
+            }
+        })().catch(err => console.warn('No se pudieron actualizar las estadísticas del footer:', err));
     }
 
     /* ──────────────────────────────────────────
