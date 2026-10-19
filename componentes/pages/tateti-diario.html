@@ -1184,9 +1184,15 @@
         const targetCell = resolveTargetCellFromResponse(aiResult.data, 2);
 
         if (!targetCell) {
-            // Response without usable cell: retry Bot move without touching clock or turn.
-            console.error('El Bot no devolvió una celda válida (ni cell_index ni board):', aiResult.data);
-            setTimeout(triggerAiTurn, RESULT_DISPLAY_DELAY_MS);
+            // AI skipped its turn (no adjacent X cells available or board unchanged):
+            // return control immediately to Player 1, re-enable controls, and reset timer to 00:60.
+            console.info('La IA pasó su turno sin colocar ficha:', aiResult.data);
+            gameState.currentPlayer = 1;
+            renderTurnIndicator();
+            dom.playerSearch.disabled = false;
+            dom.btnConfirm.disabled = false;
+            dom.playerSearch.value = '';
+            startRoundTimer();
             return;
         }
 
@@ -1232,6 +1238,9 @@
 
         const row = Math.floor(index / 3);
         const col = index % 3;
+        if (gameState.board[row]?.[col] !== 0) {
+            return null;
+        }
         gameState.board[row][col] = player;
         renderPlayerMark(cell, player);
         cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
