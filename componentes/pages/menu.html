@@ -277,8 +277,9 @@
     ────────────────────────────────────────── */
     if (isGuest) {
         /* — Guest state — */
-        heroUsername.textContent   = 'Jugador Invitado';
-        profileUser.textContent   = 'Invitado';
+        const guestName = localStorage.getItem('footlel_user_strid') || localStorage.getItem('footlel_username') || 'Invitado';
+        heroUsername.textContent   = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
+        profileUser.textContent   = guestName;
         profileAvatar.src         = GUEST_AVATAR;
         profileAvatar.alt         = 'Avatar genérico de invitado';
 

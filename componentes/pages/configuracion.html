@@ -424,8 +424,9 @@
 
     if (isGuest) {
         // Nombre
-        configUsernameEl.textContent  = 'Jugador Invitado';
-        profileUsernameEl.textContent = 'Invitado';
+        const guestName = localStorage.getItem('footlel_user_strid') || localStorage.getItem('footlel_username') || 'Invitado';
+        configUsernameEl.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
+        profileUsernameEl.textContent = guestName;
 
         // Avatares
         profileAvatarEl.src = GUEST_AVATAR;

@@ -318,7 +318,8 @@
     var statWins        = $('statWins');
 
     if (isGuest) {
-        profileUser.textContent     = 'Invitado';
+        var guestName = localStorage.getItem('footlel_user_strid') || localStorage.getItem('footlel_username') || 'Invitado';
+        profileUser.textContent     = guestName;
         profileAvatar.src           = GUEST_AVATAR;
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
