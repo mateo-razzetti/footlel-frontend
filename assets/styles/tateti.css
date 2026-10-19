@@ -127,6 +127,7 @@ body.light-mode .connection-error-subtitle {
 }
 
 /* ── Board Loading Overlay ("Generando Tatetí...") ───────────── */
+#board-loading-overlay,
 .board-loading-overlay {
     position: absolute;
     inset: 0;
@@ -134,12 +135,14 @@ body.light-mode .connection-error-subtitle {
     align-items: center;
     justify-content: center;
     z-index: 1500;
-    background: rgba(15, 15, 15, 0.58);
-    backdrop-filter: blur(4px);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
     border-radius: 16px;
     transition: opacity 0.25s ease, visibility 0.25s ease;
 }
 
+#board-loading-overlay.hidden,
 .board-loading-overlay.hidden {
     display: none !important;
     opacity: 0;
@@ -147,7 +150,8 @@ body.light-mode .connection-error-subtitle {
     pointer-events: none;
 }
 
-.board-loading-card {
+.board-loading-card,
+.loading-card {
     background: linear-gradient(180deg, #242424 0%, #181818 100%);
     border: 2px solid var(--color-brand-green, #4CAF50);
     border-radius: 20px;
@@ -194,13 +198,19 @@ body.light-mode .connection-error-subtitle {
     color: rgba(255, 255, 255, 0.72);
 }
 
+html.light-mode #board-loading-overlay,
+body.light-mode #board-loading-overlay,
 html.light-mode .board-loading-overlay,
 body.light-mode .board-loading-overlay {
-    background: rgba(245, 245, 245, 0.65);
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
 }
 
 html.light-mode .board-loading-card,
-body.light-mode .board-loading-card {
+body.light-mode .board-loading-card,
+html.light-mode .loading-card,
+body.light-mode .loading-card {
     background: #FFFFFF;
     border-color: var(--color-brand-green, #4CAF50);
     box-shadow:
