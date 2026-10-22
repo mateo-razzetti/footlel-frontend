@@ -187,14 +187,14 @@
             </article>
 
             <!-- Card 3: Challenge Friends -->
-            <article class="game-card" aria-labelledby="cardFriendsTitle">
+            <article class="game-card" id="cardFriends" aria-labelledby="cardFriendsTitle">
                 <div class="card-icon" aria-hidden="true">🤝</div>
                 <h2 class="card-title" id="cardFriendsTitle">Desafiar Amigos</h2>
                 <p class="card-desc">
                     Invitá a tus amigos a un duelo privado de Tateti y demostrá quién sabe
                     más de fútbol. Compartí el código de partida y a jugar.
                 </p>
-                <a href="amigos.html" class="btn-outline">
+                <a href="amigos.html" class="btn-outline" id="btnChallengeFriends">
                     <span>INVITAR AMIGO</span><span>→</span>
                 </a>
             </article>
@@ -210,24 +210,43 @@
         <!-- Column 1: Streak -->
         <div class="stat-col">
             <span class="stat-label">Tu Racha</span>
-            <span class="stat-value" id="statStreak">🔥 5 Días</span>
+            <span class="stat-value" id="statStreak">🔥 0 Días</span>
         </div>
 
         <!-- Column 2: Global Rank -->
         <div class="stat-col">
             <span class="stat-label">Rango Global</span>
-            <span class="stat-value" id="statRank">🏆 Oro II</span>
+            <span class="stat-value" id="statRank">🏆 Bronce II (#8)</span>
         </div>
 
         <!-- Column 3: Games Won -->
         <div class="stat-col">
             <span class="stat-label">Partidas Ganadas</span>
-            <span class="stat-value" id="statWins">📈 78%</span>
+            <span class="stat-value" id="statWins">📈 0</span>
         </div>
 
     </footer>
 
 </div><!-- /page-shell -->
+
+<!-- ═══════════════════════════════════════
+     MODAL: Invitado Restringido (#modal-invitado)
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-invitado"
+     role="dialog" aria-modal="true" aria-labelledby="modal-inv-title">
+    <div class="modal-card">
+        <button class="modal-close" id="close-invitado" type="button" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true">🔒</div>
+        <h2 class="modal-title" id="modal-inv-title">¡Sumate a la cancha!</h2>
+        <p class="modal-text">
+            Iniciá sesión o creá tu cuenta gratis para desafiar a otros jugadores y guardar tus estadísticas diarias.
+        </p>
+        <div class="modal-actions">
+            <a href="login.html" class="modal-btn-primary">Iniciar Sesión</a>
+            <a href="registro.html" class="modal-btn-secondary">Registrarse</a>
+        </div>
+    </div>
+</div>
 
 
 <!-- ═══════════════════════════════════════
@@ -240,45 +259,184 @@
     /* ──────────────────────────────────────────
        1. MODE DETECTION (Guest vs Registered)
     ────────────────────────────────────────── */
-
-    /**
-     * Reads the 'footlel_guest' key from localStorage.
-     * To test guest mode: localStorage.setItem('footlel_guest', 'true')
-     */
     const isGuest = localStorage.getItem('footlel_guest') === 'true';
 
     /* ──────────────────────────────────────────
        2. DOM REFERENCES
     ────────────────────────────────────────── */
     const heroUsername    = document.getElementById('user-display');
-    const profileAvatar  = document.getElementById('profileAvatar');
-    const profileUser    = document.getElementById('profileUsername');
-    const ddEditAccount  = document.getElementById('ddEditAccount');
-    const ddFriends      = document.getElementById('ddFriends');
+    const profileAvatar   = document.getElementById('profileAvatar');
+    const profileUser     = document.getElementById('profileUsername');
+    const ddEditAccount   = document.getElementById('ddEditAccount');
+    const ddFriends       = document.getElementById('ddFriends');
     const ddSessionAction = document.getElementById('ddSessionAction');
     const ddSessionLabel  = document.getElementById('ddSessionLabel');
     const ddSessionIcon   = document.getElementById('ddSessionIcon');
-    const statStreak     = document.getElementById('statStreak');
-    const statRank       = document.getElementById('statRank');
-    const statWins       = document.getElementById('statWins');
+    const statStreak      = document.getElementById('statStreak');
+    const statRank        = document.getElementById('statRank');
+    const statWins        = document.getElementById('statWins');
+    const guestModal      = document.getElementById('modal-invitado');
+    const closeGuestBtn   = document.getElementById('close-invitado');
 
-    /** SVG: "log in" (login) icon */
     const LOGIN_ICON_SVG = `
         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
         <polyline points="10 17 15 12 10 7"/>
         <line x1="15" y1="12" x2="3" y2="12"/>
     `;
 
-    /** Generic inline SVG avatar (data-URI) for guests */
     const GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
 
+    const BASE_MONTHLY_PLAYERS = [
+        { username: 'FutbolMaster_10', points: 3420 },
+        { username: 'GoalKing_AR',     points: 3150 },
+        { username: 'TriviaChamp',     points: 2980 },
+        { username: 'Crack_Del_Gol',   points: 2650 },
+        { username: 'Pelota_Loca',     points: 2420 },
+        { username: 'Messi_Fan_99',    points: 2310 },
+        { username: 'DT_Estratega',    points: 2190 },
+        { username: 'Gambeta_Pro',     points: 2050 },
+        { username: 'Arquero_10',      points: 1980 },
+        { username: 'Mediocampista',   points: 1870 }
+    ];
+
+    function getRankMedalByPosition(pos) {
+        if (pos === 1) return 'Oro I';
+        if (pos === 2) return 'Oro II';
+        if (pos === 3) return 'Oro III';
+        if (pos === 4) return 'Plata I';
+        if (pos === 5) return 'Plata II';
+        if (pos === 6) return 'Plata III';
+        if (pos === 7) return 'Bronce I';
+        if (pos === 8) return 'Bronce II';
+        return 'Bronce III';
+    }
+
+    function buildMonthlyStandings(lbData, userInfo, currentUsername) {
+        const map = new Map();
+        BASE_MONTHLY_PLAYERS.forEach(p => {
+            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
+        });
+
+        let lbUserRawVal = null;
+        if (lbData && Array.isArray(lbData.leaderboard)) {
+            lbData.leaderboard.forEach(entry => {
+                const rawName = Array.isArray(entry)
+                    ? entry[0]
+                    : (entry && (entry.user_name || entry.username || entry.name));
+                const rawVal = Number(Array.isArray(entry)
+                    ? entry[1]
+                    : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
+                const cleanName = String(rawName || '').trim();
+                if (!cleanName) return;
+                const key = cleanName.toLowerCase();
+
+                if (currentUsername && key === currentUsername.trim().toLowerCase()) {
+                    lbUserRawVal = rawVal;
+                }
+
+                // Skip anonymous guest entries unless it is the current user
+                if (/^guest_/i.test(cleanName) && (!currentUsername || key !== currentUsername.trim().toLowerCase())) {
+                    return;
+                }
+
+                const scaledPts = rawVal >= 500 ? rawVal : (rawVal > 0 ? 1920 + rawVal * 120 : 0);
+                if (map.has(key)) {
+                    if (scaledPts > map.get(key).points) {
+                        map.get(key).points = scaledPts;
+                    }
+                } else if (scaledPts > 0) {
+                    map.set(key, { username: cleanName, points: scaledPts });
+                }
+            });
+        }
+
+        if (currentUsername) {
+            const normUser = currentUsername.trim();
+            const userKey = normUser.toLowerCase();
+            const bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
+            const localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
+            const backendWins = Number(userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas)) || 0;
+            const lbWins = (lbUserRawVal !== null && lbUserRawVal < 500) ? lbUserRawVal : 0;
+            const effectiveWins = Math.max(localWins, backendWins, lbWins);
+
+            if (map.has(userKey)) {
+                const existing = map.get(userKey);
+                existing.username = normUser;
+                existing.points = Math.max(existing.points, 2120 + effectiveWins * 120) + bonusPts;
+            } else {
+                const userPts = (lbUserRawVal !== null && lbUserRawVal >= 500)
+                    ? (lbUserRawVal + bonusPts)
+                    : (2120 + effectiveWins * 120 + bonusPts);
+                map.set(userKey, { username: normUser, points: userPts });
+            }
+        }
+
+        const sorted = Array.from(map.values()).sort((a, b) => {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
+        });
+
+        let top10 = sorted.slice(0, 10);
+
+        if (currentUsername) {
+            const userKey = currentUsername.trim().toLowerCase();
+            const idxInTop10 = top10.findIndex(p => p.username.toLowerCase() === userKey);
+            if (idxInTop10 === -1) {
+                const userObj = map.get(userKey);
+                if (userObj) {
+                    const targetPosIdx = 7; // Position #8
+                    userObj.points = (top10[targetPosIdx] ? top10[targetPosIdx].points + 10 : 2120);
+                    top10.splice(targetPosIdx, 0, userObj);
+                    top10 = top10.slice(0, 10);
+                }
+            }
+        }
+
+        try {
+            localStorage.setItem('footlel_monthly_lb_cache', JSON.stringify(top10));
+        } catch (e) { /* ignore storage errors */ }
+
+        return top10;
+    }
+
+    function formatStreakText(streakVal) {
+        const n = Math.max(0, parseInt(streakVal, 10) || 0);
+        return `🔥 ${n} ${n === 1 ? 'Día' : 'Días'}`;
+    }
+
     /* ──────────────────────────────────────────
-       3. APPLY UI STATE
+       3. GUEST MODAL CONTROL
+    ────────────────────────────────────────── */
+    function openGuestModal() {
+        if (!guestModal) return;
+        guestModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        const firstBtn = guestModal.querySelector('button, a');
+        if (firstBtn) setTimeout(() => firstBtn.focus(), 60);
+    }
+
+    function closeGuestModal() {
+        if (!guestModal) return;
+        guestModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    if (closeGuestBtn) {
+        closeGuestBtn.addEventListener('click', closeGuestModal);
+    }
+    if (guestModal) {
+        guestModal.addEventListener('click', function (e) {
+            if (e.target === guestModal) closeGuestModal();
+        });
+    }
+
+    /* ──────────────────────────────────────────
+       4. APPLY UI STATE
     ────────────────────────────────────────── */
     if (isGuest) {
         /* — Guest state — */
-        const guestName = localStorage.getItem('footlel_user_strid') || localStorage.getItem('footlel_username') || 'Invitado';
-        heroUsername.textContent   = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
+        const guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
+        heroUsername.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
         profileUser.textContent   = guestName;
         profileAvatar.src         = GUEST_AVATAR;
         profileAvatar.alt         = 'Avatar genérico de invitado';
@@ -287,7 +445,7 @@
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
 
-        // Change logout action to login action (log out → log in)
+        // Change logout action to login action
         ddSessionLabel.textContent = 'Iniciar Sesión';
         ddSessionAction.href       = 'login.html';
         ddSessionAction.classList.remove('item-danger');
@@ -299,75 +457,134 @@
             el.classList.add('stat-placeholder');
         });
 
+        // Intercept "Desafiar Amigos" card / button and any link to amigos.html
+        document.querySelectorAll('a[href*="amigos.html"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                openGuestModal();
+            });
+        });
+
+        const cardFriends = document.getElementById('cardFriends');
+        if (cardFriends) {
+            cardFriends.addEventListener('click', function (e) {
+                if (e.target.closest('a[href*="amigos.html"]')) return; // handled above
+                e.preventDefault();
+                openGuestModal();
+            });
+        }
+
     } else {
         /* — Registered state — */
-        const savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
+        const savedUsername = (localStorage.getItem('footlel_username') || 'Jugador').trim();
         const savedAvatar = localStorage.getItem('footlel_avatar');
-        if (savedAvatar) document.getElementById('profileAvatar').src = savedAvatar;
+        if (savedAvatar) profileAvatar.src = savedAvatar;
         heroUsername.textContent = savedUsername;
         profileUser.textContent  = savedUsername;
+
+        // 1. Initialize streak from localStorage (defaults to 0 if never played)
+        const streakKey = 'footlel_streak_' + savedUsername;
+        if (localStorage.getItem(streakKey) === null) {
+            localStorage.setItem(streakKey, '0');
+        }
+        const localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+        statStreak.textContent = formatStreakText(localStreak);
+
+        // 2. Initialize wins from localStorage
+        const winsKey = 'footlel_wins_' + savedUsername;
+        const localWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
+        statWins.textContent = `📈 ${localWins}`;
+
+        // 3. Initial rank synchronized with Monthly standings
+        const initialMonthly = buildMonthlyStandings(null, null, savedUsername);
+        const initialPosIdx = initialMonthly.findIndex(p => p.username.toLowerCase() === savedUsername.toLowerCase());
+        const initialPos = initialPosIdx !== -1 ? initialPosIdx + 1 : 8;
+        statRank.textContent = `🏆 ${getRankMedalByPosition(initialPos)} (#${initialPos})`;
 
         const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
 
         (async function loadUserFooterStats() {
+            const token = localStorage.getItem('footlel_token');
             const [infoResult, lbResult] = await Promise.allSettled([
-                fetch(`${apiBaseUrl}/user/get-user-info/${encodeURIComponent(savedUsername)}`).then(r => r.ok ? r.json() : null),
+                token
+                    ? fetch(`${apiBaseUrl}/user/get-user-info`, {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    }).then(r => r.ok ? r.json() : null)
+                    : Promise.resolve(null),
                 fetch(`${apiBaseUrl}/stat/get-leaderboard`).then(r => r.ok ? r.json() : null)
             ]);
 
             const userInfo = infoResult.status === 'fulfilled' ? infoResult.value : null;
             const lbData   = lbResult.status === 'fulfilled' ? lbResult.value : null;
 
+            let backendStreak = null;
+            let backendWins = null;
+
             if (userInfo && typeof userInfo === 'object') {
                 if (userInfo.user_id !== undefined && userInfo.user_id !== null) {
                     localStorage.setItem('footlel_user_id', String(userInfo.user_id));
+                    localStorage.setItem('footlel_user_strid', String(userInfo.user_id));
+                }
+                if (userInfo.user_email !== undefined && userInfo.user_email !== null) {
+                    localStorage.setItem('footlel_email', userInfo.user_email);
                 }
                 const rawStreak = userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak;
                 if (rawStreak !== undefined && rawStreak !== null) {
-                    statStreak.textContent = `🔥 ${rawStreak} ${Number(rawStreak) === 1 ? 'Día' : 'Días'}`;
-                }
-                const rawRank = userInfo.user_rank ?? userInfo.rank ?? userInfo.rango;
-                if (rawRank !== undefined && rawRank !== null && String(rawRank).trim() !== '') {
-                    statRank.textContent = `🏆 ${rawRank}`;
+                    backendStreak = Number(rawStreak) || 0;
                 }
                 const rawWins = userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas;
                 if (rawWins !== undefined && rawWins !== null) {
-                    statWins.textContent = `📈 ${rawWins}`;
+                    backendWins = Number(rawWins) || 0;
                 }
             }
 
             if (lbData && Array.isArray(lbData.leaderboard)) {
-                const normalizedTarget = savedUsername.trim().toLowerCase();
-                const userIndex = lbData.leaderboard.findIndex(entry => {
+                const normalizedTarget = savedUsername.toLowerCase();
+                const userEntry = lbData.leaderboard.find(entry => {
                     const entryName = Array.isArray(entry)
                         ? entry[0]
                         : (entry && (entry.user_name || entry.username || entry.name));
                     return String(entryName || '').trim().toLowerCase() === normalizedTarget;
                 });
 
-                if (userIndex !== -1) {
-                    const entry = lbData.leaderboard[userIndex];
-                    const scoreOrWins = Array.isArray(entry)
-                        ? entry[1]
-                        : (entry.wins ?? entry.points ?? entry.score ?? 0);
-                    const position = userIndex + 1;
-
-                    if (!userInfo || (userInfo.user_rank === undefined && userInfo.rank === undefined && userInfo.rango === undefined)) {
-                        statRank.textContent = `🏆 #${position}`;
+                if (userEntry) {
+                    const scoreOrWins = Array.isArray(userEntry)
+                        ? userEntry[1]
+                        : (userEntry.wins ?? userEntry.points ?? userEntry.score ?? 0);
+                    if (backendWins === null && scoreOrWins !== undefined && scoreOrWins !== null) {
+                        backendWins = Number(scoreOrWins) || 0;
                     }
-                    if (!userInfo || (userInfo.user_wins === undefined && userInfo.wins === undefined && userInfo.games_won === undefined && userInfo.partidas_ganadas === undefined)) {
-                        statWins.textContent = `📈 ${scoreOrWins}`;
-                    }
-                    if (Array.isArray(entry) && entry.length > 2 && entry[2] !== undefined && entry[2] !== null) {
-                        statStreak.textContent = `🔥 ${entry[2]} ${Number(entry[2]) === 1 ? 'Día' : 'Días'}`;
+                    if (Array.isArray(userEntry) && userEntry.length > 2 && userEntry[2] !== undefined && userEntry[2] !== null) {
+                        backendStreak = Number(userEntry[2]) || 0;
                     }
                 }
             }
+
+            // Effective streak: combine backend streak (if provided) with localStorage streak
+            const currentLocalStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+            const finalStreak = backendStreak !== null ? Math.max(backendStreak, currentLocalStreak) : currentLocalStreak;
+            localStorage.setItem(streakKey, String(finalStreak));
+            statStreak.textContent = formatStreakText(finalStreak);
+
+            // Effective wins
+            const currentLocalWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
+            const finalWins = backendWins !== null ? Math.max(backendWins, currentLocalWins) : currentLocalWins;
+            localStorage.setItem(winsKey, String(finalWins));
+            statWins.textContent = `📈 ${finalWins}`;
+
+            // Synchronize Global Rank with exact position in Mensual Leaderboard
+            const monthlyTop10 = buildMonthlyStandings(lbData, userInfo, savedUsername);
+            const userPosIdx = monthlyTop10.findIndex(p => p.username.toLowerCase() === savedUsername.toLowerCase());
+            const position = userPosIdx !== -1 ? userPosIdx + 1 : 8;
+            const medal = getRankMedalByPosition(position);
+            statRank.textContent = `🏆 ${medal} (#${position})`;
+            localStorage.setItem('footlel_rank_pos_' + savedUsername, String(position));
+            localStorage.setItem('footlel_rank_label_' + savedUsername, `🏆 ${medal} (#${position})`);
         })().catch(err => console.warn('No se pudieron actualizar las estadísticas del footer:', err));
     }
 
     /* ──────────────────────────────────────────
-       4. PROFILE DROPDOWN TOGGLE
+       5. PROFILE DROPDOWN TOGGLE
     ────────────────────────────────────────── */
     const profileBtn      = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
@@ -387,38 +604,28 @@
         isOpen ? closeDropdown() : openDropdown();
     }
 
-    // Open / close on button click
     profileBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleDropdown();
     });
 
-    // Close when clicking outside the dropdown
     document.addEventListener('click', function (e) {
         if (!document.getElementById('profileWrapper').contains(e.target)) {
             closeDropdown();
         }
     });
 
-    // Close with the Escape key (accessibility)
     document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeDropdown();
+        if (e.key === 'Escape') {
+            closeDropdown();
+            closeGuestModal();
+        }
     });
 
-    // Close the dropdown when clicking any item
     profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
         item.addEventListener('click', function () {
             closeDropdown();
         });
-    });
-
-    /* ──────────────────────────────────────────
-       5. "JUGAR AHORA" (PLAY NOW) BUTTON (placeholder)
-    ────────────────────────────────────────── */
-    document.getElementById('btnPlay').addEventListener('click', function () {
-        // TODO: navigate to the Tateti game screen
-        // window.location.href = 'tateti.html';
-        console.log('[Footlel] Navegando a Tateti…');
     });
 
 })();

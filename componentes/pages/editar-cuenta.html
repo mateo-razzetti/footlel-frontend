@@ -228,13 +228,17 @@
             /* User Profile Setup (Backend connection) */
             document.addEventListener('DOMContentLoaded', async function () {
                 const savedUsername = localStorage.getItem('footlel_username') || 'Usuario';
+                const savedEmail = localStorage.getItem('footlel_email') || '';
                 const savedAvatar = localStorage.getItem('footlel_avatar');
 
-                // Preload basic UI (display name and avatar)
+                // Preload basic UI (display name, email and avatar)
                 const profileUsername = document.getElementById('profileUsername');
                 if (profileUsername) profileUsername.textContent = '@' + savedUsername;
 
                 document.getElementById('username').value = savedUsername;
+                if (savedEmail) {
+                    document.getElementById('email').value = savedEmail;
+                }
 
                 if (savedAvatar) {
                     document.getElementById('avatarPreview').src = savedAvatar;
@@ -243,33 +247,26 @@
 
                 // Fetch the real user info
                 try {
-                    console.log("1. Buscando info para el usuario:", savedUsername);
-
-                    const response = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(savedUsername)}`);
-
-                    console.log("2. Status del servidor:", response.status);
+                    const response = await fetch(`${API_BASE_URL}/user/get-user-info`, {
+                        headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') }
+                    });
 
                     if (response.ok) {
                         const data = await response.json();
-                        console.log("3. Paquete exacto recibido del servidor:", data);
 
-                        // Extract and store the secret ID in localStorage
-                        if (data.user_id) {
-                            localStorage.setItem('footlel_user_id', data.user_id);
+                        if (data.user_id !== undefined && data.user_id !== null) {
+                            localStorage.setItem('footlel_user_id', String(data.user_id));
+                            localStorage.setItem('footlel_user_strid', String(data.user_id));
                         }
-                        if (data.user_strid) {
-                            localStorage.setItem('footlel_user_strid', String(data.user_strid));
+                        if (data.user_email !== undefined && data.user_email !== null) {
+                            localStorage.setItem('footlel_email', data.user_email);
                         }
-
-                        console.log("4. ¿Existe el casillero de email en el HTML?:", document.getElementById('email'));
-
-                        // Fill the inputs strictly with the backend keys
                         if (data.user_name) {
-                            document.getElementById('username').value = data.user_name;
+                            localStorage.setItem('footlel_username', data.user_name);
                         }
-                        if (data.user_email) {
-                            document.getElementById('email').value = data.user_email;
-                        }
+
+                        document.getElementById('username').value = data.user_name || localStorage.getItem('footlel_username') || '';
+                        document.getElementById('email').value = data.user_email || localStorage.getItem('footlel_email') || '';
                     } else {
                         console.warn("No se pudo obtener la info del backend.");
                     }
