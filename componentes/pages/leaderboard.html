@@ -120,107 +120,15 @@
             <h1 class="lb-title">Tabla de Posiciones</h1>
 
             <nav class="lb-tabs" role="tablist" aria-label="Filtros de ranking">
-                <button class="lb-tab" role="tab" aria-selected="false" data-tab="amigos">Amigos</button>
-                <button class="lb-tab is-active" role="tab" aria-selected="true" data-tab="semanal">Semanal</button>
-                <button class="lb-tab" role="tab" aria-selected="false" data-tab="mensual">Mensual</button>
+                <button class="lb-tab" role="tab" aria-selected="false" data-tab="amigos" id="tabAmigos">Amigos</button>
+                <button class="lb-tab is-active" role="tab" aria-selected="true" data-tab="semanal" id="tabSemanal">Semanal</button>
+                <button class="lb-tab" role="tab" aria-selected="false" data-tab="mensual" id="tabMensual">Mensual</button>
             </nav>
         </div>
 
         <!-- Standings table -->
-        <section class="lb-list" aria-label="Ranking de jugadores">
-
-            <!-- Top 3 — highlighted -->
-            <div class="lb-row lb-row--gold" data-rank="1">
-                <div class="lb-rank">
-                    <span class="lb-medal lb-medal--gold" aria-label="Primer lugar">★</span>
-                    <span class="lb-pos">1</span>
-                </div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar FutbolMaster_10" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">FutbolMaster_10</span>
-                <span class="lb-points">3,420 pts</span>
-            </div>
-
-            <div class="lb-row lb-row--silver" data-rank="2">
-                <div class="lb-rank">
-                    <span class="lb-medal lb-medal--silver" aria-label="Segundo lugar">★</span>
-                    <span class="lb-pos">2</span>
-                </div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar GoalKing_AR" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">GoalKing_AR</span>
-                <span class="lb-points">3,150 pts</span>
-            </div>
-
-            <div class="lb-row lb-row--bronze" data-rank="3">
-                <div class="lb-rank">
-                    <span class="lb-medal lb-medal--bronze" aria-label="Tercer lugar">★</span>
-                    <span class="lb-pos">3</span>
-                </div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar TriviaChamp" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">TriviaChamp</span>
-                <span class="lb-points">2,980 pts</span>
-            </div>
-
-            <!-- Positions 4–10 -->
-            <div class="lb-row" data-rank="4">
-                <div class="lb-rank"><span class="lb-pos">4</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar Crack_Del_Gol" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">Crack_Del_Gol</span>
-                <span class="lb-points">2,650 pts</span>
-            </div>
-
-            <div class="lb-row" data-rank="5">
-                <div class="lb-rank"><span class="lb-pos">5</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar Pelota_Loca" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">Pelota_Loca</span>
-                <span class="lb-points">2,420 pts</span>
-            </div>
-
-            <!-- Rows 6-10: hidden for guests via JS -->
-            <div class="lb-row lb-row--logged" data-rank="6">
-                <div class="lb-rank"><span class="lb-pos">6</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar Messi_Fan_99" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">Messi_Fan_99</span>
-                <span class="lb-points">2,310 pts</span>
-            </div>
-
-            <div class="lb-row lb-row--logged" data-rank="7">
-                <div class="lb-rank"><span class="lb-pos">7</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar DT_Estratega" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">DT_Estratega</span>
-                <span class="lb-points">2,190 pts</span>
-            </div>
-
-            <div class="lb-row lb-row--logged" data-rank="8">
-                <div class="lb-rank"><span class="lb-pos">8</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar Gambeta_Pro" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">Gambeta_Pro</span>
-                <span class="lb-points">2,050 pts</span>
-            </div>
-
-            <div class="lb-row lb-row--logged" data-rank="9">
-                <div class="lb-rank"><span class="lb-pos">9</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar Arquero_10" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">Arquero_10</span>
-                <span class="lb-points">1,980 pts</span>
-            </div>
-
-            <div class="lb-row lb-row--logged" data-rank="10">
-                <div class="lb-rank"><span class="lb-pos">10</span></div>
-                <img src="../../assets/images/avatar-default.png" alt="Avatar Mediocampista" class="lb-avatar"
-                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
-                <span class="lb-username">Mediocampista</span>
-                <span class="lb-points">1,870 pts</span>
-            </div>
-
+        <section class="lb-list" id="lbList" aria-label="Ranking de jugadores">
+            <!-- Rendered dynamically via JS -->
         </section><!-- /lb-list -->
 
         <!-- Guest CTA (hidden by default, shown via JS) -->
@@ -258,51 +166,403 @@
     var GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
 
     /* ─────────────────────────────────────────
-       2. HEADER — user / avatar
+       2. HEADER — user / avatar & GUEST TABS
     ───────────────────────────────────────── */
-    var profileUser   = document.getElementById('profileUsername');
-    var profileAvatar = document.getElementById('profileAvatar');
-    var ddEditAccount = document.getElementById('ddEditAccount');
-    var ddFriends     = document.getElementById('ddFriends');
+    var profileUser     = document.getElementById('profileUsername');
+    var profileAvatar   = document.getElementById('profileAvatar');
+    var ddEditAccount   = document.getElementById('ddEditAccount');
+    var ddFriends       = document.getElementById('ddFriends');
     var ddSessionAction = document.getElementById('ddSessionAction');
     var ddSessionLabel  = document.getElementById('ddSessionLabel');
     var ddSessionIcon   = document.getElementById('ddSessionIcon');
+    var tabAmigos       = document.getElementById('tabAmigos');
+    var guestCta        = document.getElementById('guestCta');
+    var lbList          = document.getElementById('lbList');
+
+    var savedUser = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim();
+    var savedAvatar = localStorage.getItem('footlel_avatar');
 
     if (isGuest) {
-        profileUser.textContent   = 'Jugador Invitado';
-        profileAvatar.src         = GUEST_AVATAR;
-        profileAvatar.alt         = 'Avatar invitado';
+        var guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
+        profileUser.textContent     = guestName;
+        profileAvatar.src           = GUEST_AVATAR;
+        profileAvatar.alt           = 'Avatar invitado';
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
         ddSessionLabel.textContent  = 'Iniciar Sesión';
         ddSessionAction.href        = 'login.html';
         ddSessionAction.classList.remove('item-danger');
-        ddSessionIcon.innerHTML = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+        ddSessionIcon.innerHTML     = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+
+        // Hide "Amigos" tab completely for guests
+        if (tabAmigos) {
+            tabAmigos.style.display = 'none';
+            tabAmigos.hidden = true;
+            tabAmigos.setAttribute('aria-hidden', 'true');
+        }
+
+        // Show Guest CTA block
+        if (guestCta) {
+            guestCta.hidden = false;
+            guestCta.removeAttribute('aria-hidden');
+        }
     } else {
-        var savedUser = localStorage.getItem('footlel_username') || 'nombre_usuario';
-        var savedAvatar = localStorage.getItem('footlel_avatar');
         if (savedAvatar) {
-            document.getElementById('profileAvatar').src = savedAvatar;
+            profileAvatar.src = savedAvatar;
         }
         profileUser.textContent = '@' + savedUser;
     }
 
     /* ─────────────────────────────────────────
-       3. GUEST STATE — show CTA, hide rows 6-10
+       3. RANKING DATA & BUILDERS
     ───────────────────────────────────────── */
-    var guestCta    = document.getElementById('guestCta');
-    var loggedRows  = document.querySelectorAll('.lb-row--logged');
+    var BASE_MONTHLY_PLAYERS = [
+        { username: 'FutbolMaster_10', points: 3420 },
+        { username: 'GoalKing_AR',     points: 3150 },
+        { username: 'TriviaChamp',     points: 2980 },
+        { username: 'Crack_Del_Gol',   points: 2650 },
+        { username: 'Pelota_Loca',     points: 2420 },
+        { username: 'Messi_Fan_99',    points: 2310 },
+        { username: 'DT_Estratega',    points: 2190 },
+        { username: 'Gambeta_Pro',     points: 2050 },
+        { username: 'Arquero_10',      points: 1980 },
+        { username: 'Mediocampista',   points: 1870 }
+    ];
 
-    if (isGuest) {
-        // Show CTA block
-        guestCta.hidden = false;
-        guestCta.removeAttribute('aria-hidden');
+    var BASE_WEEKLY_PLAYERS = [
+        { username: 'GoalKing_AR',     points: 680 },
+        { username: 'Crack_Del_Gol',   points: 610 },
+        { username: 'FutbolMaster_10', points: 560 },
+        { username: 'Messi_Fan_99',    points: 490 },
+        { username: 'TriviaChamp',     points: 430 },
+        { username: 'Gambeta_Pro',     points: 370 },
+        { username: 'Pelota_Loca',     points: 310 },
+        { username: 'Arquero_10',      points: 240 },
+        { username: 'DT_Estratega',    points: 185 },
+        { username: 'Mediocampista',   points: 120 }
+    ];
 
-        // Hide rows 6–10
-        loggedRows.forEach(function (row) {
-            row.style.display = 'none';
+    var DEFAULT_INITIAL_FRIENDS = [
+        { username: 'Santi_Martinez',      status: 'En línea · Libre',      statusType: 'online',      available: true,  points: 2540 },
+        { username: 'FREE_JULIAN_Alvarez', status: 'Desconectado',          statusType: 'offline',     available: true,  points: 2280 },
+        { username: 'Felix_Rodriguez',     status: 'En línea · Libre',      statusType: 'online',      available: true,  points: 2150 },
+        { username: 'Mateo_Gomez',         status: 'Desconectado',          statusType: 'offline',     available: true,  points: 1990 },
+        { username: 'DiegoS_FC',           status: 'Jugador no disponible', statusType: 'unavailable', available: false, points: 1840 },
+        { username: 'Fran_DT',             status: 'Jugador no disponible', statusType: 'unavailable', available: false, points: 1720 }
+    ];
+
+    var FRIEND_DEFAULT_POINTS = {
+        'santi_martinez':      2540,
+        'free_julian_alvarez': 2280,
+        'felix_rodriguez':     2150,
+        'mateo_gomez':         1990,
+        'diegos_fc':           1840,
+        'fran_dt':             1720,
+        'carlos_mendez':       2410,
+        'andres_lopez':        2080,
+        'futbolmaster_10':     3420,
+        'goalking_ar':         3150,
+        'triviachamp':         2980
+    };
+
+    var cachedBackendLb   = null;
+    var cachedBackendInfo = null;
+    var activeTab         = 'semanal';
+
+    function getRankMedalByPosition(pos) {
+        if (pos === 1) return 'Oro I';
+        if (pos === 2) return 'Oro II';
+        if (pos === 3) return 'Oro III';
+        if (pos === 4) return 'Plata I';
+        if (pos === 5) return 'Plata II';
+        if (pos === 6) return 'Plata III';
+        if (pos === 7) return 'Bronce I';
+        if (pos === 8) return 'Bronce II';
+        return 'Bronce III';
+    }
+
+    function buildMonthlyStandings(lbData, userInfo, currentUsername) {
+        var map = new Map();
+        BASE_MONTHLY_PLAYERS.forEach(function (p) {
+            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
+        });
+
+        var lbUserRawVal = null;
+        if (lbData && Array.isArray(lbData.leaderboard)) {
+            lbData.leaderboard.forEach(function (entry) {
+                var rawName = Array.isArray(entry)
+                    ? entry[0]
+                    : (entry && (entry.user_name || entry.username || entry.name));
+                var rawVal = Number(Array.isArray(entry)
+                    ? entry[1]
+                    : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
+                var cleanName = String(rawName || '').trim();
+                if (!cleanName) return;
+                var key = cleanName.toLowerCase();
+
+                if (currentUsername && key === currentUsername.trim().toLowerCase()) {
+                    lbUserRawVal = rawVal;
+                }
+
+                if (/^guest_/i.test(cleanName) && (!currentUsername || key !== currentUsername.trim().toLowerCase())) {
+                    return;
+                }
+
+                var scaledPts = rawVal >= 500 ? rawVal : (rawVal > 0 ? 1920 + rawVal * 120 : 0);
+                if (map.has(key)) {
+                    if (scaledPts > map.get(key).points) {
+                        map.get(key).points = scaledPts;
+                    }
+                } else if (scaledPts > 0) {
+                    map.set(key, { username: cleanName, points: scaledPts });
+                }
+            });
+        }
+
+        if (!isGuest && currentUsername) {
+            var normUser = currentUsername.trim();
+            var userKey = normUser.toLowerCase();
+            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
+            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
+            var backendWins = Number(userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas)) || 0;
+            var lbWins = (lbUserRawVal !== null && lbUserRawVal < 500) ? lbUserRawVal : 0;
+            var effectiveWins = Math.max(localWins, backendWins, lbWins);
+
+            if (map.has(userKey)) {
+                var existing = map.get(userKey);
+                existing.username = normUser;
+                existing.points = Math.max(existing.points, 2120 + effectiveWins * 120) + bonusPts;
+            } else {
+                var userPts = (lbUserRawVal !== null && lbUserRawVal >= 500)
+                    ? (lbUserRawVal + bonusPts)
+                    : (2120 + effectiveWins * 120 + bonusPts);
+                map.set(userKey, { username: normUser, points: userPts });
+            }
+        }
+
+        var sorted = Array.from(map.values()).sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
+        });
+
+        var top10 = sorted.slice(0, 10);
+
+        if (!isGuest && currentUsername) {
+            var uKey = currentUsername.trim().toLowerCase();
+            var idxInTop10 = top10.findIndex(function (p) { return p.username.toLowerCase() === uKey; });
+            if (idxInTop10 === -1) {
+                var userObj = map.get(uKey);
+                if (userObj) {
+                    var targetPosIdx = 7;
+                    userObj.points = (top10[targetPosIdx] ? top10[targetPosIdx].points + 10 : 2120);
+                    top10.splice(targetPosIdx, 0, userObj);
+                    top10 = top10.slice(0, 10);
+                }
+            }
+            var finalPosIdx = top10.findIndex(function (p) { return p.username.toLowerCase() === uKey; });
+            if (finalPosIdx !== -1) {
+                var pos = finalPosIdx + 1;
+                var medal = getRankMedalByPosition(pos);
+                localStorage.setItem('footlel_rank_pos_' + currentUsername, String(pos));
+                localStorage.setItem('footlel_rank_label_' + currentUsername, '🏆 ' + medal + ' (#' + pos + ')');
+            }
+        }
+
+        try {
+            localStorage.setItem('footlel_monthly_lb_cache', JSON.stringify(top10));
+        } catch (e) { /* ignore */ }
+
+        return top10;
+    }
+
+    function buildWeeklyStandings(currentUsername) {
+        var map = new Map();
+        BASE_WEEKLY_PLAYERS.forEach(function (p) {
+            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
+        });
+
+        if (!isGuest && currentUsername) {
+            var normUser = currentUsername.trim();
+            var uKey = normUser.toLowerCase();
+            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
+            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
+            var weeklyUserPts = Math.min(675, 340 + localWins * 25 + bonusPts);
+
+            if (map.has(uKey)) {
+                map.get(uKey).username = normUser;
+                map.get(uKey).points = Math.min(680, map.get(uKey).points + bonusPts);
+            } else {
+                map.set(uKey, { username: normUser, points: weeklyUserPts });
+            }
+        }
+
+        var sorted = Array.from(map.values()).sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
+        });
+
+        return sorted.slice(0, 10);
+    }
+
+    function getPersistedFriendsForUser(currentUsername) {
+        var key = 'footlel_friends_' + currentUsername;
+        var raw = localStorage.getItem(key);
+        if (raw) {
+            try {
+                var parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) return parsed;
+            } catch (e) { /* fallback below */ }
+        }
+        try {
+            localStorage.setItem(key, JSON.stringify(DEFAULT_INITIAL_FRIENDS));
+        } catch (e) { /* ignore */ }
+        return DEFAULT_INITIAL_FRIENDS.slice();
+    }
+
+    function computeDeterministicFriendPoints(username) {
+        var clean = String(username || '').replace(/^@/, '').trim();
+        var lower = clean.toLowerCase();
+        if (FRIEND_DEFAULT_POINTS[lower] !== undefined) {
+            return FRIEND_DEFAULT_POINTS[lower];
+        }
+        var hash = 0;
+        for (var i = 0; i < lower.length; i++) {
+            hash = (hash * 31 + lower.charCodeAt(i)) % 900;
+        }
+        return 1650 + hash;
+    }
+
+    function buildFriendsStandings(monthlyList, currentUsername) {
+        var friends = getPersistedFriendsForUser(currentUsername);
+        var map = new Map();
+
+        friends.forEach(function (f) {
+            var cleanName = String(f.username || f.name || '').replace(/^@/, '').trim();
+            if (!cleanName) return;
+            var lower = cleanName.toLowerCase();
+            var pts = Number(f.points) || computeDeterministicFriendPoints(cleanName);
+            map.set(lower, { username: cleanName, points: pts });
+        });
+
+        // Include logged-in user with their monthly points so scores are consistent
+        if (currentUsername) {
+            var normUser = currentUsername.trim();
+            var uKey = normUser.toLowerCase();
+            var monthlyEntry = (monthlyList || []).find(function (m) {
+                return m.username.toLowerCase() === uKey;
+            });
+            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
+            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
+            var userPts = monthlyEntry ? monthlyEntry.points : (2120 + localWins * 120 + bonusPts);
+            map.set(uKey, { username: normUser, points: userPts });
+        }
+
+        return Array.from(map.values()).sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
         });
     }
+
+    function formatPoints(pts) {
+        var n = Math.round(Number(pts) || 0);
+        return n.toLocaleString('en-US') + ' pts';
+    }
+
+    function renderStandingsRows(entries) {
+        lbList.innerHTML = '';
+        var maxRows = isGuest ? Math.min(5, entries.length) : entries.length;
+
+        for (var i = 0; i < maxRows; i++) {
+            var item = entries[i];
+            var rank = i + 1;
+            var isCurrentUser = !isGuest && savedUser && item.username.toLowerCase() === savedUser.toLowerCase();
+
+            var row = document.createElement('div');
+            var classes = ['lb-row'];
+            if (rank === 1) classes.push('lb-row--gold');
+            else if (rank === 2) classes.push('lb-row--silver');
+            else if (rank === 3) classes.push('lb-row--bronze');
+            if (rank >= 6) classes.push('lb-row--logged');
+            row.className = classes.join(' ');
+            row.setAttribute('data-rank', String(rank));
+
+            if (isCurrentUser) {
+                row.style.borderColor = 'var(--color-brand-green)';
+            }
+
+            var rankCol = document.createElement('div');
+            rankCol.className = 'lb-rank';
+            if (rank === 1 || rank === 2 || rank === 3) {
+                var medal = document.createElement('span');
+                medal.className = 'lb-medal ' + (rank === 1 ? 'lb-medal--gold' : rank === 2 ? 'lb-medal--silver' : 'lb-medal--bronze');
+                medal.setAttribute('aria-label', rank === 1 ? 'Primer lugar' : rank === 2 ? 'Segundo lugar' : 'Tercer lugar');
+                medal.textContent = '★';
+                rankCol.appendChild(medal);
+            }
+            var posSpan = document.createElement('span');
+            posSpan.className = 'lb-pos';
+            posSpan.textContent = String(rank);
+            rankCol.appendChild(posSpan);
+
+            var avatarImg = document.createElement('img');
+            avatarImg.className = 'lb-avatar';
+            avatarImg.src = (isCurrentUser && savedAvatar) ? savedAvatar : '../../assets/images/avatar-default.png';
+            avatarImg.alt = 'Avatar ' + item.username;
+            avatarImg.onerror = function () {
+                this.src = GUEST_AVATAR;
+            };
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'lb-username';
+            nameSpan.textContent = item.username;
+
+            var ptsSpan = document.createElement('span');
+            ptsSpan.className = 'lb-points';
+            ptsSpan.textContent = formatPoints(item.points);
+
+            row.appendChild(rankCol);
+            row.appendChild(avatarImg);
+            row.appendChild(nameSpan);
+            row.appendChild(ptsSpan);
+
+            lbList.appendChild(row);
+        }
+    }
+
+    function renderActiveTab() {
+        var monthlyData = buildMonthlyStandings(cachedBackendLb, cachedBackendInfo, isGuest ? null : savedUser);
+        if (activeTab === 'mensual') {
+            renderStandingsRows(monthlyData);
+        } else if (activeTab === 'amigos' && !isGuest) {
+            var friendsData = buildFriendsStandings(monthlyData, savedUser);
+            renderStandingsRows(friendsData);
+        } else {
+            var weeklyData = buildWeeklyStandings(isGuest ? null : savedUser);
+            renderStandingsRows(weeklyData);
+        }
+    }
+
+    // Initial render ("semanal" active by default)
+    renderActiveTab();
+
+    // Fetch real backend leaderboard & user info
+    var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+    (async function fetchBackendLeaderboard() {
+        var promises = [
+            fetch(apiBaseUrl + '/stat/get-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
+        ];
+        if (!isGuest && savedUser) {
+            promises.push(
+                fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') } }).then(function (r) { return r.ok ? r.json() : null; })
+            );
+        }
+        var results = await Promise.allSettled(promises);
+        cachedBackendLb   = results[0] && results[0].status === 'fulfilled' ? results[0].value : null;
+        cachedBackendInfo = results[1] && results[1].status === 'fulfilled' ? results[1].value : null;
+        renderActiveTab();
+    })().catch(function (err) {
+        console.warn('No se pudo obtener el leaderboard del backend:', err);
+    });
 
     /* ─────────────────────────────────────────
        4. PROFILE DROPDOWN TOGGLE
@@ -324,14 +584,15 @@
     var tabs = document.querySelectorAll('.lb-tab');
     tabs.forEach(function (tab) {
         tab.addEventListener('click', function () {
+            if (isGuest && tab.dataset.tab === 'amigos') return;
             tabs.forEach(function (t) {
                 t.classList.remove('is-active');
                 t.setAttribute('aria-selected', 'false');
             });
             tab.classList.add('is-active');
             tab.setAttribute('aria-selected', 'true');
-            // TODO: load data according to tab.dataset.tab
-            console.log('[Footlel Leaderboard] Tab activa:', tab.dataset.tab);
+            activeTab = tab.dataset.tab;
+            renderActiveTab();
         });
     });
 

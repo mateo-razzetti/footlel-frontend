@@ -208,15 +208,15 @@
     <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
         <div class="stat-col">
             <span class="stat-label">Tu Racha</span>
-            <span class="stat-value" id="statStreak">🔥 2 Días</span>
+            <span class="stat-value" id="statStreak">🔥 0 Días</span>
         </div>
         <div class="stat-col">
             <span class="stat-label">Rango Global</span>
-            <span class="stat-value" id="statRank">🏆 Oro I</span>
+            <span class="stat-value" id="statRank">🏆 Bronce II (#8)</span>
         </div>
         <div class="stat-col">
             <span class="stat-label">Partidas Ganadas</span>
-            <span class="stat-value" id="statWins">📈 78%</span>
+            <span class="stat-value" id="statWins">📈 0</span>
         </div>
     </footer>
 
@@ -278,24 +278,18 @@
 
     /* ──────────────────────────────────────────
        1. STATE (Guest vs Registered)
-       To test guest mode:
-         localStorage.setItem('footlel_guest', 'true')
     ────────────────────────────────────────── */
-    /* ── Read state (localStorage is synchronous — script at the end of the body) */
-    var isGuest      = localStorage.getItem('footlel_guest') === 'true';
-    var savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
-    var savedAvatar = localStorage.getItem('footlel_avatar');
+    var isGuest       = localStorage.getItem('footlel_guest') === 'true';
+    var savedUsername = (localStorage.getItem('footlel_username') || 'Jugador').trim();
+    var savedAvatar   = localStorage.getItem('footlel_avatar');
     if (savedAvatar) {
-        document.getElementById('profileAvatar').src = savedAvatar;
+        $('profileAvatar').src = savedAvatar;
     }
 
-    /* ── Guest CTA: show / hide BEFORE the first paint ─────────
-       Done here (not in DOMContentLoaded) so the element appears
-       in its final position without a visual jump.                       */
     var guestCta = $('cta-invitado-modalidades');
     if (guestCta) {
         if (isGuest) {
-            guestCta.style.display = 'flex';   /* correct inner layout */
+            guestCta.style.display = 'flex';
             guestCta.classList.remove('hidden');
         } else {
             guestCta.style.display = 'none';
@@ -305,6 +299,123 @@
 
     var GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
     var LOGIN_ICON_PATHS = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+
+    var BASE_MONTHLY_PLAYERS = [
+        { username: 'FutbolMaster_10', points: 3420 },
+        { username: 'GoalKing_AR',     points: 3150 },
+        { username: 'TriviaChamp',     points: 2980 },
+        { username: 'Crack_Del_Gol',   points: 2650 },
+        { username: 'Pelota_Loca',     points: 2420 },
+        { username: 'Messi_Fan_99',    points: 2310 },
+        { username: 'DT_Estratega',    points: 2190 },
+        { username: 'Gambeta_Pro',     points: 2050 },
+        { username: 'Arquero_10',      points: 1980 },
+        { username: 'Mediocampista',   points: 1870 }
+    ];
+
+    function getRankMedalByPosition(pos) {
+        if (pos === 1) return 'Oro I';
+        if (pos === 2) return 'Oro II';
+        if (pos === 3) return 'Oro III';
+        if (pos === 4) return 'Plata I';
+        if (pos === 5) return 'Plata II';
+        if (pos === 6) return 'Plata III';
+        if (pos === 7) return 'Bronce I';
+        if (pos === 8) return 'Bronce II';
+        return 'Bronce III';
+    }
+
+    function buildMonthlyStandings(lbData, userInfo, currentUsername) {
+        var map = new Map();
+        BASE_MONTHLY_PLAYERS.forEach(function (p) {
+            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
+        });
+
+        var lbUserRawVal = null;
+        if (lbData && Array.isArray(lbData.leaderboard)) {
+            lbData.leaderboard.forEach(function (entry) {
+                var rawName = Array.isArray(entry)
+                    ? entry[0]
+                    : (entry && (entry.user_name || entry.username || entry.name));
+                var rawVal = Number(Array.isArray(entry)
+                    ? entry[1]
+                    : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
+                var cleanName = String(rawName || '').trim();
+                if (!cleanName) return;
+                var key = cleanName.toLowerCase();
+
+                if (currentUsername && key === currentUsername.trim().toLowerCase()) {
+                    lbUserRawVal = rawVal;
+                }
+
+                if (/^guest_/i.test(cleanName) && (!currentUsername || key !== currentUsername.trim().toLowerCase())) {
+                    return;
+                }
+
+                var scaledPts = rawVal >= 500 ? rawVal : (rawVal > 0 ? 1920 + rawVal * 120 : 0);
+                if (map.has(key)) {
+                    if (scaledPts > map.get(key).points) {
+                        map.get(key).points = scaledPts;
+                    }
+                } else if (scaledPts > 0) {
+                    map.set(key, { username: cleanName, points: scaledPts });
+                }
+            });
+        }
+
+        if (currentUsername) {
+            var normUser = currentUsername.trim();
+            var userKey = normUser.toLowerCase();
+            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
+            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
+            var backendWins = Number(userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas)) || 0;
+            var lbWins = (lbUserRawVal !== null && lbUserRawVal < 500) ? lbUserRawVal : 0;
+            var effectiveWins = Math.max(localWins, backendWins, lbWins);
+
+            if (map.has(userKey)) {
+                var existing = map.get(userKey);
+                existing.username = normUser;
+                existing.points = Math.max(existing.points, 2120 + effectiveWins * 120) + bonusPts;
+            } else {
+                var userPts = (lbUserRawVal !== null && lbUserRawVal >= 500)
+                    ? (lbUserRawVal + bonusPts)
+                    : (2120 + effectiveWins * 120 + bonusPts);
+                map.set(userKey, { username: normUser, points: userPts });
+            }
+        }
+
+        var sorted = Array.from(map.values()).sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
+        });
+
+        var top10 = sorted.slice(0, 10);
+
+        if (currentUsername) {
+            var uKey = currentUsername.trim().toLowerCase();
+            var idxInTop10 = top10.findIndex(function (p) { return p.username.toLowerCase() === uKey; });
+            if (idxInTop10 === -1) {
+                var userObj = map.get(uKey);
+                if (userObj) {
+                    var targetPosIdx = 7;
+                    userObj.points = (top10[targetPosIdx] ? top10[targetPosIdx].points + 10 : 2120);
+                    top10.splice(targetPosIdx, 0, userObj);
+                    top10 = top10.slice(0, 10);
+                }
+            }
+        }
+
+        try {
+            localStorage.setItem('footlel_monthly_lb_cache', JSON.stringify(top10));
+        } catch (e) { /* ignore */ }
+
+        return top10;
+    }
+
+    function formatStreakText(streakVal) {
+        var n = Math.max(0, parseInt(streakVal, 10) || 0);
+        return '🔥 ' + n + (n === 1 ? ' Día' : ' Días');
+    }
 
     var profileAvatar   = $('profileAvatar');
     var profileUser     = $('profileUsername');
@@ -318,7 +429,7 @@
     var statWins        = $('statWins');
 
     if (isGuest) {
-        var guestName = localStorage.getItem('footlel_user_strid') || localStorage.getItem('footlel_username') || 'Invitado';
+        var guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
         profileUser.textContent     = guestName;
         profileAvatar.src           = GUEST_AVATAR;
         ddEditAccount.style.display = 'none';
@@ -326,22 +437,42 @@
         ddSessionLabel.textContent  = 'Iniciar Sesión';
         ddSessionAction.classList.remove('item-danger');
         ddSessionIcon.innerHTML     = LOGIN_ICON_PATHS;
-        statStreak.textContent      = '-----';
-        statRank.textContent        = '-----';
-        statWins.textContent        = '-----';
+        [statStreak, statRank, statWins].forEach(function (el) {
+            el.textContent = '-----';
+            el.classList.add('stat-placeholder');
+        });
     } else {
         profileUser.textContent = savedUsername;
+
+        var streakKey = 'footlel_streak_' + savedUsername;
+        if (localStorage.getItem(streakKey) === null) {
+            localStorage.setItem(streakKey, '0');
+        }
+        var localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+        statStreak.textContent = formatStreakText(localStreak);
+
+        var winsKey = 'footlel_wins_' + savedUsername;
+        var localWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
+        statWins.textContent = '📈 ' + localWins;
+
+        var initialMonthly = buildMonthlyStandings(null, null, savedUsername);
+        var initialPosIdx = initialMonthly.findIndex(function (p) { return p.username.toLowerCase() === savedUsername.toLowerCase(); });
+        var initialPos = initialPosIdx !== -1 ? initialPosIdx + 1 : 8;
+        statRank.textContent = '🏆 ' + getRankMedalByPosition(initialPos) + ' (#' + initialPos + ')';
 
         var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
 
         (async function loadUserFooterStats() {
             var results = await Promise.allSettled([
-                fetch(apiBaseUrl + '/user/get-user-info/' + encodeURIComponent(savedUsername)).then(function (r) { return r.ok ? r.json() : null; }),
+                fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') } }).then(function (r) { return r.ok ? r.json() : null; }),
                 fetch(apiBaseUrl + '/stat/get-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
             ]);
 
             var userInfo = results[0].status === 'fulfilled' ? results[0].value : null;
             var lbData   = results[1].status === 'fulfilled' ? results[1].value : null;
+
+            var backendStreak = null;
+            var backendWins   = null;
 
             if (userInfo && typeof userInfo === 'object') {
                 if (userInfo.user_id !== undefined && userInfo.user_id !== null) {
@@ -349,45 +480,53 @@
                 }
                 var rawStreak = userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak;
                 if (rawStreak !== undefined && rawStreak !== null) {
-                    statStreak.textContent = '🔥 ' + rawStreak + (Number(rawStreak) === 1 ? ' Día' : ' Días');
-                }
-                var rawRank = userInfo.user_rank ?? userInfo.rank ?? userInfo.rango;
-                if (rawRank !== undefined && rawRank !== null && String(rawRank).trim() !== '') {
-                    statRank.textContent = '🏆 ' + rawRank;
+                    backendStreak = Number(rawStreak) || 0;
                 }
                 var rawWins = userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas;
                 if (rawWins !== undefined && rawWins !== null) {
-                    statWins.textContent = '📈 ' + rawWins;
+                    backendWins = Number(rawWins) || 0;
                 }
             }
 
             if (lbData && Array.isArray(lbData.leaderboard)) {
-                var normalizedTarget = savedUsername.trim().toLowerCase();
-                var userIndex = lbData.leaderboard.findIndex(function (entry) {
+                var normalizedTarget = savedUsername.toLowerCase();
+                var userEntry = lbData.leaderboard.find(function (entry) {
                     var entryName = Array.isArray(entry)
                         ? entry[0]
                         : (entry && (entry.user_name || entry.username || entry.name));
                     return String(entryName || '').trim().toLowerCase() === normalizedTarget;
                 });
 
-                if (userIndex !== -1) {
-                    var entry = lbData.leaderboard[userIndex];
-                    var scoreOrWins = Array.isArray(entry)
-                        ? entry[1]
-                        : (entry.wins ?? entry.points ?? entry.score ?? 0);
-                    var position = userIndex + 1;
-
-                    if (!userInfo || (userInfo.user_rank === undefined && userInfo.rank === undefined && userInfo.rango === undefined)) {
-                        statRank.textContent = '🏆 #' + position;
+                if (userEntry) {
+                    var scoreOrWins = Array.isArray(userEntry)
+                        ? userEntry[1]
+                        : (userEntry.wins ?? userEntry.points ?? userEntry.score ?? 0);
+                    if (backendWins === null && scoreOrWins !== undefined && scoreOrWins !== null) {
+                        backendWins = Number(scoreOrWins) || 0;
                     }
-                    if (!userInfo || (userInfo.user_wins === undefined && userInfo.wins === undefined && userInfo.games_won === undefined && userInfo.partidas_ganadas === undefined)) {
-                        statWins.textContent = '📈 ' + scoreOrWins;
-                    }
-                    if (Array.isArray(entry) && entry.length > 2 && entry[2] !== undefined && entry[2] !== null) {
-                        statStreak.textContent = '🔥 ' + entry[2] + (Number(entry[2]) === 1 ? ' Día' : ' Días');
+                    if (Array.isArray(userEntry) && userEntry.length > 2 && userEntry[2] !== undefined && userEntry[2] !== null) {
+                        backendStreak = Number(userEntry[2]) || 0;
                     }
                 }
             }
+
+            var currentLocalStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+            var finalStreak = backendStreak !== null ? Math.max(backendStreak, currentLocalStreak) : currentLocalStreak;
+            localStorage.setItem(streakKey, String(finalStreak));
+            statStreak.textContent = formatStreakText(finalStreak);
+
+            var currentLocalWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
+            var finalWins = backendWins !== null ? Math.max(backendWins, currentLocalWins) : currentLocalWins;
+            localStorage.setItem(winsKey, String(finalWins));
+            statWins.textContent = '📈 ' + finalWins;
+
+            var monthlyTop10 = buildMonthlyStandings(lbData, userInfo, savedUsername);
+            var userPosIdx = monthlyTop10.findIndex(function (p) { return p.username.toLowerCase() === savedUsername.toLowerCase(); });
+            var position = userPosIdx !== -1 ? userPosIdx + 1 : 8;
+            var medal = getRankMedalByPosition(position);
+            statRank.textContent = '🏆 ' + medal + ' (#' + position + ')';
+            localStorage.setItem('footlel_rank_pos_' + savedUsername, String(position));
+            localStorage.setItem('footlel_rank_label_' + savedUsername, '🏆 ' + medal + ' (#' + position + ')');
         })().catch(function (err) { console.warn('No se pudieron actualizar las estadísticas del footer:', err); });
     }
 
@@ -441,20 +580,25 @@
         closeModal(challengeModal);
     }
 
-    // X buttons
     $('close-invitado').addEventListener('click', function () { closeModal(guestModal); });
     $('close-desafio').addEventListener('click',  function () { closeModal(challengeModal);  });
 
-    // Backdrop click closes
     guestModal.addEventListener('click', function (e) { if (e.target === this) closeModal(this); });
     challengeModal.addEventListener('click',  function (e) { if (e.target === this) closeModal(this); });
 
+    if (isGuest) {
+        document.querySelectorAll('a[href*="amigos.html"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal(guestModal);
+            });
+        });
+    }
+
     /* ──────────────────────────────────────────
        4. MODE BUTTONS LOGIC
-       ─ Change to true to test the completed
-         challenge modal:
     ────────────────────────────────────────── */
-    var challengePlayed = false; // ← change to true to test
+    var challengePlayed = false;
 
     // Daily Challenge
     $('btn-diario').addEventListener('click', function (e) {
@@ -465,9 +609,6 @@
             e.preventDefault();
             openModal(challengeModal);
             startClock();
-        } else {
-            // Normal entry → the redirect to the game would go here
-            // window.location.href = 'juego-diario.html';
         }
     });
 
@@ -476,26 +617,16 @@
         if (isGuest) {
             e.preventDefault();
             openModal(guestModal);
-        } else {
-            // window.location.href = 'sala-online.html';
         }
     });
 
-    // 1v1 Local → unlocked for everyone, no blocking
-    // (the <a href="#"> navigates normally)
-
     /* ──────────────────────────────────────────
        5. COUNTDOWN CLOCK
-          Simulates the time remaining until the
-          next daily challenge.
     ────────────────────────────────────────── */
     var clockInterval = null;
 
     function startClock() {
-        // Restart if it was already running
         clearInterval(clockInterval);
-
-        // Simulated time: 14h 35m 02s
         var totalSeconds = 14 * 3600 + 35 * 60 + 2;
         var clockEl = $('modal-clock');
 
@@ -519,7 +650,6 @@
         clockInterval = setInterval(tick, 1000);
     }
 
-    // Stop the clock when the modal closes
     $('close-desafio').addEventListener('click', function () {
         clearInterval(clockInterval);
     });

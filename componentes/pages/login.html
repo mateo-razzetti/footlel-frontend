@@ -117,27 +117,37 @@
                     localStorage.setItem('footlel_guest', 'false');
                     localStorage.setItem('footlel_username', usernameVal);
                     localStorage.removeItem('footlel_password');
-                    
-                    // Always query GET /user/get-user-info/{user_name} to ensure footlel_user_id is obtained and saved.
+
+                    const token = data.access_token || data.token || data.jwt || (typeof data === 'string' ? data : null);
+                    if (token) {
+                        localStorage.setItem('footlel_token', token);
+                    }
+
                     let resolvedUserId = data.user_id ?? data.id ?? null;
-                    let resolvedUserStrid = data.user_strid || null;
+                    if (resolvedUserId !== null && resolvedUserId !== undefined) {
+                        localStorage.setItem('footlel_user_id', String(resolvedUserId));
+                        localStorage.setItem('footlel_user_strid', String(resolvedUserId));
+                    }
+
                     try {
-                        const infoResponse = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(usernameVal)}`);
+                        const infoResponse = await fetch(`${API_BASE_URL}/user/get-user-info`, {
+                            headers: { 'Authorization': 'Bearer ' + token }
+                        });
                         if (infoResponse.ok) {
-                            const info = await infoResponse.json();
-                            resolvedUserId = info.user_id ?? info.id ?? resolvedUserId;
-                            resolvedUserStrid = info.user_strid || resolvedUserStrid;
+                            const userInfo = await infoResponse.json();
+                            const finalUserId = userInfo.user_id ?? resolvedUserId;
+                            if (finalUserId !== undefined && finalUserId !== null) {
+                                localStorage.setItem('footlel_user_id', String(finalUserId));
+                                localStorage.setItem('footlel_user_strid', String(finalUserId));
+                            }
+                            localStorage.setItem('footlel_email', userInfo.user_email || '');
+                            if (userInfo.user_name) {
+                                localStorage.setItem('footlel_username', userInfo.user_name);
+                            }
                         }
                     } catch (infoError) {
-                        console.error('No se pudo obtener el user_id desde get-user-info:', infoError);
+                        console.error('No se pudo obtener la info desde get-user-info:', infoError);
                     }
-                    if (resolvedUserId !== null && resolvedUserId !== undefined && String(resolvedUserId).trim() !== '') {
-                        localStorage.setItem('footlel_user_id', String(resolvedUserId));
-                    }
-                    localStorage.setItem(
-                        'footlel_user_strid',
-                        String(resolvedUserId ?? resolvedUserStrid ?? usernameVal)
-                    );
 
                     // Restore the redirect
                     window.location.href = 'menu.html';
@@ -177,6 +187,7 @@
         const guestLink = document.querySelector('.link-guest');
         guestLink.addEventListener('click', async function (e) {
             e.preventDefault();
+            localStorage.removeItem('footlel_token');
             localStorage.setItem('footlel_guest', 'true');
             try {
                 const guestResponse = await fetch(`${API_BASE_URL}/auth/guest-login`, {

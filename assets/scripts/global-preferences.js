@@ -67,17 +67,49 @@
         applyAnimations(isAnimDisabledStored());
     }
 
+    function getApiBaseUrl() {
+        return String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+    }
+
+    function patchUserStatState(endpointPath, state) {
+        var token = readStorage('footlel_token');
+        if (!token) return Promise.resolve(null);
+        return fetch(getApiBaseUrl() + endpointPath, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ boolean: Boolean(state) })
+        });
+    }
+
+    function bindSessionCleanup() {
+        var logoutSelectors = '#ddSessionAction, #btn-logout, a.item-danger[href*="login.html"], .link-guest';
+        document.querySelectorAll(logoutSelectors).forEach(function (el) {
+            el.addEventListener('click', function () {
+                try { localStorage.removeItem('footlel_token'); } catch (e) {}
+            });
+        });
+    }
+
     window.FootlelPrefs = {
         applyTheme: applyTheme,
         applyAnimations: applyAnimations,
-        applyFromStorage: applyFromStorage
+        applyFromStorage: applyFromStorage,
+        setDarkModeState: function (state) { return patchUserStatState('/stat/set-user-dark-mode-state', state); },
+        setAnimationState: function (state) { return patchUserStatState('/stat/set-user-animation-state', state); },
+        setCompatibilityState: function (state) { return patchUserStatState('/stat/set-user-compatibility-state', state); }
     };
 
     /* Immediately (<html> always exists, avoids flash of wrong theme). */
     applyFromStorage();
 
     /* Once <body> exists. */
-    document.addEventListener('DOMContentLoaded', applyFromStorage);
+    document.addEventListener('DOMContentLoaded', function () {
+        applyFromStorage();
+        bindSessionCleanup();
+    });
 
     /* Back/forward cache restores pages without re-running scripts. */
     window.addEventListener('pageshow', applyFromStorage);

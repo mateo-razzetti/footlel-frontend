@@ -1054,12 +1054,62 @@
         dom.scoreValueP2El.textContent = gameState.scoreP2;
     }
 
+    function formatLocalDateYYYYMMDD(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function updateDailyStreakForLoggedUser() {
+        try {
+            const isGuest = localStorage.getItem('footlel_guest') === 'true';
+            const username = (localStorage.getItem('footlel_username') || '').trim();
+            if (isGuest || !username) return;
+
+            const streakKey = `footlel_streak_${username}`;
+            const lastDailyKey = `footlel_last_daily_${username}`;
+            const winsKey = `footlel_wins_${username}`;
+            const bonusKey = `footlel_bonus_pts_${username}`;
+
+            const now = new Date();
+            const todayStr = formatLocalDateYYYYMMDD(now);
+            const yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+            const yesterdayStr = formatLocalDateYYYYMMDD(yesterday);
+
+            const prevDateStr = localStorage.getItem(lastDailyKey);
+            const currentStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+
+            let nextStreak;
+            if (prevDateStr === todayStr) {
+                nextStreak = currentStreak > 0 ? currentStreak : 1;
+            } else if (prevDateStr === yesterdayStr) {
+                nextStreak = currentStreak + 1;
+            } else {
+                nextStreak = 1;
+            }
+
+            localStorage.setItem(streakKey, String(nextStreak));
+            localStorage.setItem(lastDailyKey, todayStr);
+
+            if (prevDateStr !== todayStr) {
+                const prevWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
+                localStorage.setItem(winsKey, String(prevWins + 1));
+                const prevBonus = parseInt(localStorage.getItem(bonusKey) || '0', 10) || 0;
+                localStorage.setItem(bonusKey, String(prevBonus + 10));
+            }
+        } catch (err) {
+            console.error('Error actualizando racha diaria:', err);
+        }
+    }
+
     function endGameMatch(winner) {
         gameState.isGameOver = true;
         stopRoundTimer();
         document.body.style.overflow = 'hidden';
 
         if (winner === 1) {
+            updateDailyStreakForLoggedUser();
             dom.victoryModal.classList.remove('hidden');
             dom.victoryModal.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
         } else {

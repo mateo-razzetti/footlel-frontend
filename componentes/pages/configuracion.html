@@ -362,17 +362,24 @@
 
     /* Helper: get the user_id (via get-user-info) */
     async function getUserId() {
-        var nombre = localStorage.getItem('footlel_username');
-        if (!nombre) return null;
+        var token = localStorage.getItem('footlel_token');
+        if (!token) return Number(localStorage.getItem('footlel_user_id')) || null;
         try {
-            var resp = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(nombre)}`);
-            if (!resp.ok) return null;
+            var resp = await fetch(`${API_BASE_URL}/user/get-user-info`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!resp.ok) return Number(localStorage.getItem('footlel_user_id')) || null;
             var info = await resp.json();
-            if (info.user_strid) {
-                localStorage.setItem('footlel_user_strid', String(info.user_strid));
+            var resolvedId = info.user_id ?? info.id ?? localStorage.getItem('footlel_user_id');
+            if (resolvedId) {
+                localStorage.setItem('footlel_user_id', String(resolvedId));
+                localStorage.setItem('footlel_user_strid', String(resolvedId));
             }
-            return Number(info.user_id || info.id) || null;
-        } catch (e) { return null; }
+            if (info.user_email) {
+                localStorage.setItem('footlel_email', info.user_email);
+            }
+            return Number(resolvedId) || null;
+        } catch (e) { return Number(localStorage.getItem('footlel_user_id')) || null; }
     }
 
     function openModal(id) {
@@ -489,9 +496,15 @@
     const btnLogout = $('btn-logout');
     if (btnLogout) {
         btnLogout.addEventListener('click', function () {
+            localStorage.removeItem('footlel_token');
             localStorage.removeItem('footlel_guest');
             localStorage.removeItem('footlel_username');
             window.location.href = 'login.html';
+        });
+    }
+    if (ddSessionAction) {
+        ddSessionAction.addEventListener('click', function () {
+            localStorage.removeItem('footlel_token');
         });
     }
 
@@ -589,12 +602,28 @@
         if (toggleAnim) toggleAnim.checked = animDisabled;
         applyAnimations(animDisabled);
 
-        // Compatibility (persistence only, no visual effect yet)
+        // Compatibility (persistence + backend sync)
         if (toggleCompat) {
             const saved = localStorage.getItem('pref_toggle-compat');
             if (saved !== null) toggleCompat.checked = saved === 'true';
-            toggleCompat.addEventListener('change', function () {
-                localStorage.setItem('pref_toggle-compat', String(toggleCompat.checked));
+            toggleCompat.addEventListener('change', async function () {
+                const state = toggleCompat.checked;
+                localStorage.setItem('pref_toggle-compat', String(state));
+                const token = localStorage.getItem('footlel_token');
+                if (token) {
+                    try {
+                        await fetch(`${API_BASE_URL}/stat/set-user-compatibility-state`, {
+                            method: 'PATCH',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': 'Bearer ' + token
+                            },
+                            body: JSON.stringify({ boolean: Boolean(state) })
+                        });
+                    } catch (e) {
+                        showToast('No se pudo sincronizar el modo compatibilidad.');
+                    }
+                }
             });
         }
     })();
@@ -608,13 +637,16 @@
             localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
 
             // Sync with the backend
-            const uid = await getUserId();
-            if (uid) {
+            const token = localStorage.getItem('footlel_token');
+            if (token) {
                 try {
                     await fetch(`${API_BASE_URL}/stat/set-user-dark-mode-state`, {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: Number(uid), boolean: Boolean(toggleDark.checked) })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ boolean: Boolean(toggleDark.checked) })
                     });
                 } catch (e) {
                     showToast('No se pudo sincronizar el modo oscuro.');
@@ -631,13 +663,16 @@
             localStorage.setItem('pref_toggle-animaciones', String(disabled));
 
             // Sync with the backend
-            const uid = await getUserId();
-            if (uid) {
+            const token = localStorage.getItem('footlel_token');
+            if (token) {
                 try {
                     await fetch(`${API_BASE_URL}/stat/set-user-animation-state`, {
                         method: 'PATCH',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: Number(uid), boolean: Boolean(disabled) })
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ boolean: Boolean(disabled) })
                     });
                 } catch (e) {
                     showToast('No se pudo sincronizar las animaciones.');
@@ -683,32 +718,14 @@
             const keyword = keywordInput.value.toLowerCase().trim();
             
             if (keyword === "eliminar") {
-                const username = localStorage.getItem('footlel_username');
+                const token = localStorage.getItem('footlel_token');
                 
                 try {
-                    // STEP 1: Get the user info using the endpoint the backend team specified
-                    const infoResponse = await fetch(`${API_BASE_URL}/user/get-user-info/${encodeURIComponent(username)}`);
-
-                    if (!infoResponse.ok) {
-                        errorText.textContent = 'Error al verificar la información del usuario.';
-                        errorText.hidden = false;
-                        return; // We stop execution here if it fails
-                    }
-
-                    const userInfo = await infoResponse.json();
-                    
-                    // Extract the ID (in case the backend uses "user_id" or "id")
-                    const idVal = Number(userInfo.user_id || userInfo.id);
-
-                    if (!idVal) {
-                        errorText.textContent = 'El servidor no devolvió tu ID. Contacta a soporte.';
-                        errorText.hidden = false;
-                        return;
-                    }
-
-                    // STEP 2: Now, with the numeric ID in hand, we delete the account
-                    const response = await fetch(`${API_BASE_URL}/user/eliminate-user/${Number(idVal)}`, {
-                        method: 'DELETE'
+                    const response = await fetch(`${API_BASE_URL}/user/eliminate-user`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
                     });
 
                     if (response.ok) {
