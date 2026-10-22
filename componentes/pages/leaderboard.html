@@ -115,14 +115,13 @@
     ═══════════════════════════════════════ -->
     <main class="main-content" role="main">
 
-        <!-- Heading + Tabs -->
+        <!-- Heading + Tabs (Only "Global" and "Amigos") -->
         <div class="lb-header">
             <h1 class="lb-title">Tabla de Posiciones</h1>
 
             <nav class="lb-tabs" role="tablist" aria-label="Filtros de ranking">
+                <button class="lb-tab is-active" role="tab" aria-selected="true" data-tab="global" id="tabGlobal">Global</button>
                 <button class="lb-tab" role="tab" aria-selected="false" data-tab="amigos" id="tabAmigos">Amigos</button>
-                <button class="lb-tab is-active" role="tab" aria-selected="true" data-tab="semanal" id="tabSemanal">Semanal</button>
-                <button class="lb-tab" role="tab" aria-selected="false" data-tab="mensual" id="tabMensual">Mensual</button>
             </nav>
         </div>
 
@@ -179,7 +178,7 @@
     var guestCta        = document.getElementById('guestCta');
     var lbList          = document.getElementById('lbList');
 
-    var savedUser = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim();
+    var savedUser   = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim();
     var savedAvatar = localStorage.getItem('footlel_avatar');
 
     if (isGuest) {
@@ -214,9 +213,9 @@
     }
 
     /* ─────────────────────────────────────────
-       3. RANKING DATA & BUILDERS
+       3. RANKING DATA & BUILDERS (GLOBAL / AMIGOS)
     ───────────────────────────────────────── */
-    var BASE_MONTHLY_PLAYERS = [
+    var FALLBACK_GLOBAL_PLAYERS = [
         { username: 'FutbolMaster_10', points: 3420 },
         { username: 'GoalKing_AR',     points: 3150 },
         { username: 'TriviaChamp',     points: 2980 },
@@ -229,66 +228,29 @@
         { username: 'Mediocampista',   points: 1870 }
     ];
 
-    var BASE_WEEKLY_PLAYERS = [
-        { username: 'GoalKing_AR',     points: 680 },
-        { username: 'Crack_Del_Gol',   points: 610 },
-        { username: 'FutbolMaster_10', points: 560 },
-        { username: 'Messi_Fan_99',    points: 490 },
-        { username: 'TriviaChamp',     points: 430 },
-        { username: 'Gambeta_Pro',     points: 370 },
-        { username: 'Pelota_Loca',     points: 310 },
-        { username: 'Arquero_10',      points: 240 },
-        { username: 'DT_Estratega',    points: 185 },
-        { username: 'Mediocampista',   points: 120 }
-    ];
-
     var DEFAULT_INITIAL_FRIENDS = [
-        { username: 'Santi_Martinez',      status: 'En línea · Libre',      statusType: 'online',      available: true,  points: 2540 },
-        { username: 'FREE_JULIAN_Alvarez', status: 'Desconectado',          statusType: 'offline',     available: true,  points: 2280 },
-        { username: 'Felix_Rodriguez',     status: 'En línea · Libre',      statusType: 'online',      available: true,  points: 2150 },
-        { username: 'Mateo_Gomez',         status: 'Desconectado',          statusType: 'offline',     available: true,  points: 1990 },
-        { username: 'DiegoS_FC',           status: 'Jugador no disponible', statusType: 'unavailable', available: false, points: 1840 },
-        { username: 'Fran_DT',             status: 'Jugador no disponible', statusType: 'unavailable', available: false, points: 1720 }
+        { username: 'Santi_Martinez',  status: 'En línea · Libre', statusType: 'online',  available: true, points: 2540 },
+        { username: 'Felix_Rodriguez', status: 'Desconectado',     statusType: 'offline', available: true, points: 2150 }
     ];
 
     var FRIEND_DEFAULT_POINTS = {
-        'santi_martinez':      2540,
-        'free_julian_alvarez': 2280,
-        'felix_rodriguez':     2150,
-        'mateo_gomez':         1990,
-        'diegos_fc':           1840,
-        'fran_dt':             1720,
-        'carlos_mendez':       2410,
-        'andres_lopez':        2080,
-        'futbolmaster_10':     3420,
-        'goalking_ar':         3150,
-        'triviachamp':         2980
+        'santi_martinez':  2540,
+        'felix_rodriguez': 2150,
+        'carlos_mendez':   2410,
+        'futbolmaster_10': 3420,
+        'goalking_ar':     3150,
+        'triviachamp':     2980
     };
 
     var cachedBackendLb   = null;
     var cachedBackendInfo = null;
-    var activeTab         = 'semanal';
+    var activeTab         = 'global'; // Global active by default
 
-    function getRankMedalByPosition(pos) {
-        if (pos === 1) return 'Oro I';
-        if (pos === 2) return 'Oro II';
-        if (pos === 3) return 'Oro III';
-        if (pos === 4) return 'Plata I';
-        if (pos === 5) return 'Plata II';
-        if (pos === 6) return 'Plata III';
-        if (pos === 7) return 'Bronce I';
-        if (pos === 8) return 'Bronce II';
-        return 'Bronce III';
-    }
-
-    function buildMonthlyStandings(lbData, userInfo, currentUsername) {
+    function buildGlobalStandings(lbData, userInfo, currentUsername) {
         var map = new Map();
-        BASE_MONTHLY_PLAYERS.forEach(function (p) {
-            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
-        });
 
-        var lbUserRawVal = null;
-        if (lbData && Array.isArray(lbData.leaderboard)) {
+        // 1. Real data from GET /stat/get-leaderboard
+        if (lbData && Array.isArray(lbData.leaderboard) && lbData.leaderboard.length > 0) {
             lbData.leaderboard.forEach(function (entry) {
                 var rawName = Array.isArray(entry)
                     ? entry[0]
@@ -300,99 +262,36 @@
                 if (!cleanName) return;
                 var key = cleanName.toLowerCase();
 
-                if (currentUsername && key === currentUsername.trim().toLowerCase()) {
-                    lbUserRawVal = rawVal;
-                }
-
                 if (/^guest_/i.test(cleanName) && (!currentUsername || key !== currentUsername.trim().toLowerCase())) {
                     return;
                 }
 
-                var scaledPts = rawVal >= 500 ? rawVal : (rawVal > 0 ? 1920 + rawVal * 120 : 0);
-                if (map.has(key)) {
-                    if (scaledPts > map.get(key).points) {
-                        map.get(key).points = scaledPts;
-                    }
-                } else if (scaledPts > 0) {
-                    map.set(key, { username: cleanName, points: scaledPts });
-                }
+                map.set(key, { username: cleanName, points: rawVal });
             });
         }
 
+        // 2. Fallback / supplement if backend did not respond or returned empty
+        if (map.size === 0) {
+            FALLBACK_GLOBAL_PLAYERS.forEach(function (p) {
+                map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
+            });
+        }
+
+        // 3. Ensure logged-in user is reflected with their latest points
         if (!isGuest && currentUsername) {
             var normUser = currentUsername.trim();
-            var userKey = normUser.toLowerCase();
+            var userKey  = normUser.toLowerCase();
             var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
             var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
             var backendWins = Number(userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas)) || 0;
-            var lbWins = (lbUserRawVal !== null && lbUserRawVal < 500) ? lbUserRawVal : 0;
-            var effectiveWins = Math.max(localWins, backendWins, lbWins);
+            var effectiveWins = Math.max(localWins, backendWins);
 
             if (map.has(userKey)) {
                 var existing = map.get(userKey);
                 existing.username = normUser;
-                existing.points = Math.max(existing.points, 2120 + effectiveWins * 120) + bonusPts;
+                existing.points = Math.max(existing.points, effectiveWins) + bonusPts;
             } else {
-                var userPts = (lbUserRawVal !== null && lbUserRawVal >= 500)
-                    ? (lbUserRawVal + bonusPts)
-                    : (2120 + effectiveWins * 120 + bonusPts);
-                map.set(userKey, { username: normUser, points: userPts });
-            }
-        }
-
-        var sorted = Array.from(map.values()).sort(function (a, b) {
-            if (b.points !== a.points) return b.points - a.points;
-            return a.username.localeCompare(b.username);
-        });
-
-        var top10 = sorted.slice(0, 10);
-
-        if (!isGuest && currentUsername) {
-            var uKey = currentUsername.trim().toLowerCase();
-            var idxInTop10 = top10.findIndex(function (p) { return p.username.toLowerCase() === uKey; });
-            if (idxInTop10 === -1) {
-                var userObj = map.get(uKey);
-                if (userObj) {
-                    var targetPosIdx = 7;
-                    userObj.points = (top10[targetPosIdx] ? top10[targetPosIdx].points + 10 : 2120);
-                    top10.splice(targetPosIdx, 0, userObj);
-                    top10 = top10.slice(0, 10);
-                }
-            }
-            var finalPosIdx = top10.findIndex(function (p) { return p.username.toLowerCase() === uKey; });
-            if (finalPosIdx !== -1) {
-                var pos = finalPosIdx + 1;
-                var medal = getRankMedalByPosition(pos);
-                localStorage.setItem('footlel_rank_pos_' + currentUsername, String(pos));
-                localStorage.setItem('footlel_rank_label_' + currentUsername, '🏆 ' + medal + ' (#' + pos + ')');
-            }
-        }
-
-        try {
-            localStorage.setItem('footlel_monthly_lb_cache', JSON.stringify(top10));
-        } catch (e) { /* ignore */ }
-
-        return top10;
-    }
-
-    function buildWeeklyStandings(currentUsername) {
-        var map = new Map();
-        BASE_WEEKLY_PLAYERS.forEach(function (p) {
-            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
-        });
-
-        if (!isGuest && currentUsername) {
-            var normUser = currentUsername.trim();
-            var uKey = normUser.toLowerCase();
-            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
-            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
-            var weeklyUserPts = Math.min(675, 340 + localWins * 25 + bonusPts);
-
-            if (map.has(uKey)) {
-                map.get(uKey).username = normUser;
-                map.get(uKey).points = Math.min(680, map.get(uKey).points + bonusPts);
-            } else {
-                map.set(uKey, { username: normUser, points: weeklyUserPts });
+                map.set(userKey, { username: normUser, points: effectiveWins * 10 + bonusPts });
             }
         }
 
@@ -405,8 +304,8 @@
     }
 
     function getPersistedFriendsForUser(currentUsername) {
-        var key = 'footlel_friends_' + currentUsername;
-        var raw = localStorage.getItem(key);
+        var keyV2 = 'footlel_friends_v2_' + currentUsername;
+        var raw = localStorage.getItem(keyV2);
         if (raw) {
             try {
                 var parsed = JSON.parse(raw);
@@ -414,7 +313,7 @@
             } catch (e) { /* fallback below */ }
         }
         try {
-            localStorage.setItem(key, JSON.stringify(DEFAULT_INITIAL_FRIENDS));
+            localStorage.setItem(keyV2, JSON.stringify(DEFAULT_INITIAL_FRIENDS));
         } catch (e) { /* ignore */ }
         return DEFAULT_INITIAL_FRIENDS.slice();
     }
@@ -429,31 +328,42 @@
         for (var i = 0; i < lower.length; i++) {
             hash = (hash * 31 + lower.charCodeAt(i)) % 900;
         }
-        return 1650 + hash;
+        return 150 + hash;
     }
 
-    function buildFriendsStandings(monthlyList, currentUsername) {
+    function buildFriendsStandings(globalList, currentUsername) {
         var friends = getPersistedFriendsForUser(currentUsername);
         var map = new Map();
+
+        // Map real points from backend leaderboard when a friend exists there
+        var backendPointsByUser = new Map();
+        if (cachedBackendLb && Array.isArray(cachedBackendLb.leaderboard)) {
+            cachedBackendLb.leaderboard.forEach(function (entry) {
+                var rName = Array.isArray(entry) ? entry[0] : (entry && (entry.user_name || entry.username || entry.name));
+                var rVal  = Number(Array.isArray(entry) ? entry[1] : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
+                if (rName) backendPointsByUser.set(String(rName).trim().toLowerCase(), rVal);
+            });
+        }
 
         friends.forEach(function (f) {
             var cleanName = String(f.username || f.name || '').replace(/^@/, '').trim();
             if (!cleanName) return;
             var lower = cleanName.toLowerCase();
-            var pts = Number(f.points) || computeDeterministicFriendPoints(cleanName);
+            var pts = backendPointsByUser.has(lower)
+                ? backendPointsByUser.get(lower)
+                : (Number(f.points) || computeDeterministicFriendPoints(cleanName));
             map.set(lower, { username: cleanName, points: pts });
         });
 
-        // Include logged-in user with their monthly points so scores are consistent
         if (currentUsername) {
             var normUser = currentUsername.trim();
             var uKey = normUser.toLowerCase();
-            var monthlyEntry = (monthlyList || []).find(function (m) {
-                return m.username.toLowerCase() === uKey;
+            var globalEntry = (globalList || []).find(function (g) {
+                return g.username.toLowerCase() === uKey;
             });
             var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
             var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
-            var userPts = monthlyEntry ? monthlyEntry.points : (2120 + localWins * 120 + bonusPts);
+            var userPts = globalEntry ? globalEntry.points : (localWins * 10 + bonusPts);
             map.set(uKey, { username: normUser, points: userPts });
         }
 
@@ -530,19 +440,16 @@
     }
 
     function renderActiveTab() {
-        var monthlyData = buildMonthlyStandings(cachedBackendLb, cachedBackendInfo, isGuest ? null : savedUser);
-        if (activeTab === 'mensual') {
-            renderStandingsRows(monthlyData);
-        } else if (activeTab === 'amigos' && !isGuest) {
-            var friendsData = buildFriendsStandings(monthlyData, savedUser);
+        var globalData = buildGlobalStandings(cachedBackendLb, cachedBackendInfo, isGuest ? null : savedUser);
+        if (activeTab === 'amigos' && !isGuest) {
+            var friendsData = buildFriendsStandings(globalData, savedUser);
             renderStandingsRows(friendsData);
         } else {
-            var weeklyData = buildWeeklyStandings(isGuest ? null : savedUser);
-            renderStandingsRows(weeklyData);
+            renderStandingsRows(globalData);
         }
     }
 
-    // Initial render ("semanal" active by default)
+    // Initial render ("global" active by default)
     renderActiveTab();
 
     // Fetch real backend leaderboard & user info
@@ -553,7 +460,7 @@
         ];
         if (!isGuest && savedUser) {
             promises.push(
-                fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') } }).then(function (r) { return r.ok ? r.json() : null; })
+                fetch(apiBaseUrl + '/user/get-user-info/' + encodeURIComponent(savedUser)).then(function (r) { return r.ok ? r.json() : null; })
             );
         }
         var results = await Promise.allSettled(promises);
@@ -579,7 +486,7 @@
     profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
 
     /* ─────────────────────────────────────────
-       5. RANKING TABS
+       5. RANKING TABS ("Global" and "Amigos")
     ───────────────────────────────────────── */
     var tabs = document.querySelectorAll('.lb-tab');
     tabs.forEach(function (tab) {

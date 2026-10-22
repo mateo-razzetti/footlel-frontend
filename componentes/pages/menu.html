@@ -203,26 +203,56 @@
     </main><!-- /main-content -->
 
     <!-- ─────────────────────────────────
-         STATS BAR (FOOTER)
+         STATS BAR (FOOTER — 4 COLUMNS)
     ───────────────────────────────── -->
     <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
 
-        <!-- Column 1: Streak -->
+        <!-- Column 1: Porcentaje de Aciertos -->
         <div class="stat-col">
-            <span class="stat-label">Tu Racha</span>
+            <div class="stat-label-row">
+                <span class="stat-label">PORCENTAJE DE ACIERTOS</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">
+                    i
+                    <span class="stat-tooltip" role="tooltip">Porcentaje de Aciertos = 5 (cantidad de aciertos) / 20 (cantidad de intentos) x 100% (para convertirlo en porcentaje).</span>
+                </span>
+            </div>
+            <span class="stat-value" id="statAccuracy">🎯 0%</span>
+        </div>
+
+        <!-- Column 2: Tu Racha -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">TU RACHA</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Tu Racha">
+                    i
+                    <span class="stat-tooltip" role="tooltip">Se suma por cada día que ingreses</span>
+                </span>
+            </div>
             <span class="stat-value" id="statStreak">🔥 0 Días</span>
         </div>
 
-        <!-- Column 2: Global Rank -->
+        <!-- Column 3: Puntos Totales -->
         <div class="stat-col">
-            <span class="stat-label">Rango Global</span>
-            <span class="stat-value" id="statRank">🏆 Bronce II (#8)</span>
+            <div class="stat-label-row">
+                <span class="stat-label">PUNTOS TOTALES</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">
+                    i
+                    <span class="stat-tooltip" role="tooltip">Muestra la sumatoria de puntos de todas las partidas</span>
+                </span>
+            </div>
+            <span class="stat-value" id="statPoints">⭐ 0 pts</span>
         </div>
 
-        <!-- Column 3: Games Won -->
+        <!-- Column 4: Porcentaje de Victorias -->
         <div class="stat-col">
-            <span class="stat-label">Partidas Ganadas</span>
-            <span class="stat-value" id="statWins">📈 0</span>
+            <div class="stat-label-row">
+                <span class="stat-label">PORCENTAJE DE VICTORIAS</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">
+                    i
+                    <span class="stat-tooltip" role="tooltip">Porcentaje de Victorias = 5 (cantidad de Partidas ganadas) / 20 (cantidad de partidas) x 100% (para convertirlo en porcentaje).</span>
+                </span>
+            </div>
+            <span class="stat-value" id="statWins">📈 0%</span>
         </div>
 
     </footer>
@@ -272,8 +302,9 @@
     const ddSessionAction = document.getElementById('ddSessionAction');
     const ddSessionLabel  = document.getElementById('ddSessionLabel');
     const ddSessionIcon   = document.getElementById('ddSessionIcon');
+    const statAccuracy    = document.getElementById('statAccuracy');
     const statStreak      = document.getElementById('statStreak');
-    const statRank        = document.getElementById('statRank');
+    const statPoints      = document.getElementById('statPoints');
     const statWins        = document.getElementById('statWins');
     const guestModal      = document.getElementById('modal-invitado');
     const closeGuestBtn   = document.getElementById('close-invitado');
@@ -286,122 +317,19 @@
 
     const GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
 
-    const BASE_MONTHLY_PLAYERS = [
-        { username: 'FutbolMaster_10', points: 3420 },
-        { username: 'GoalKing_AR',     points: 3150 },
-        { username: 'TriviaChamp',     points: 2980 },
-        { username: 'Crack_Del_Gol',   points: 2650 },
-        { username: 'Pelota_Loca',     points: 2420 },
-        { username: 'Messi_Fan_99',    points: 2310 },
-        { username: 'DT_Estratega',    points: 2190 },
-        { username: 'Gambeta_Pro',     points: 2050 },
-        { username: 'Arquero_10',      points: 1980 },
-        { username: 'Mediocampista',   points: 1870 }
-    ];
-
-    function getRankMedalByPosition(pos) {
-        if (pos === 1) return 'Oro I';
-        if (pos === 2) return 'Oro II';
-        if (pos === 3) return 'Oro III';
-        if (pos === 4) return 'Plata I';
-        if (pos === 5) return 'Plata II';
-        if (pos === 6) return 'Plata III';
-        if (pos === 7) return 'Bronce I';
-        if (pos === 8) return 'Bronce II';
-        return 'Bronce III';
-    }
-
-    function buildMonthlyStandings(lbData, userInfo, currentUsername) {
-        const map = new Map();
-        BASE_MONTHLY_PLAYERS.forEach(p => {
-            map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
-        });
-
-        let lbUserRawVal = null;
-        if (lbData && Array.isArray(lbData.leaderboard)) {
-            lbData.leaderboard.forEach(entry => {
-                const rawName = Array.isArray(entry)
-                    ? entry[0]
-                    : (entry && (entry.user_name || entry.username || entry.name));
-                const rawVal = Number(Array.isArray(entry)
-                    ? entry[1]
-                    : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
-                const cleanName = String(rawName || '').trim();
-                if (!cleanName) return;
-                const key = cleanName.toLowerCase();
-
-                if (currentUsername && key === currentUsername.trim().toLowerCase()) {
-                    lbUserRawVal = rawVal;
-                }
-
-                // Skip anonymous guest entries unless it is the current user
-                if (/^guest_/i.test(cleanName) && (!currentUsername || key !== currentUsername.trim().toLowerCase())) {
-                    return;
-                }
-
-                const scaledPts = rawVal >= 500 ? rawVal : (rawVal > 0 ? 1920 + rawVal * 120 : 0);
-                if (map.has(key)) {
-                    if (scaledPts > map.get(key).points) {
-                        map.get(key).points = scaledPts;
-                    }
-                } else if (scaledPts > 0) {
-                    map.set(key, { username: cleanName, points: scaledPts });
-                }
-            });
-        }
-
-        if (currentUsername) {
-            const normUser = currentUsername.trim();
-            const userKey = normUser.toLowerCase();
-            const bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
-            const localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
-            const backendWins = Number(userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas)) || 0;
-            const lbWins = (lbUserRawVal !== null && lbUserRawVal < 500) ? lbUserRawVal : 0;
-            const effectiveWins = Math.max(localWins, backendWins, lbWins);
-
-            if (map.has(userKey)) {
-                const existing = map.get(userKey);
-                existing.username = normUser;
-                existing.points = Math.max(existing.points, 2120 + effectiveWins * 120) + bonusPts;
-            } else {
-                const userPts = (lbUserRawVal !== null && lbUserRawVal >= 500)
-                    ? (lbUserRawVal + bonusPts)
-                    : (2120 + effectiveWins * 120 + bonusPts);
-                map.set(userKey, { username: normUser, points: userPts });
-            }
-        }
-
-        const sorted = Array.from(map.values()).sort((a, b) => {
-            if (b.points !== a.points) return b.points - a.points;
-            return a.username.localeCompare(b.username);
-        });
-
-        let top10 = sorted.slice(0, 10);
-
-        if (currentUsername) {
-            const userKey = currentUsername.trim().toLowerCase();
-            const idxInTop10 = top10.findIndex(p => p.username.toLowerCase() === userKey);
-            if (idxInTop10 === -1) {
-                const userObj = map.get(userKey);
-                if (userObj) {
-                    const targetPosIdx = 7; // Position #8
-                    userObj.points = (top10[targetPosIdx] ? top10[targetPosIdx].points + 10 : 2120);
-                    top10.splice(targetPosIdx, 0, userObj);
-                    top10 = top10.slice(0, 10);
-                }
-            }
-        }
-
-        try {
-            localStorage.setItem('footlel_monthly_lb_cache', JSON.stringify(top10));
-        } catch (e) { /* ignore storage errors */ }
-
-        return top10;
-    }
-
     function formatStreakText(streakVal) {
         const n = Math.max(0, parseInt(streakVal, 10) || 0);
         return `🔥 ${n} ${n === 1 ? 'Día' : 'Días'}`;
+    }
+
+    function formatPercentage(val) {
+        const num = Math.max(0, Math.min(100, Math.round(Number(val) || 0)));
+        return `${num}%`;
+    }
+
+    function formatTotalPoints(pts) {
+        const n = Math.max(0, Math.round(Number(pts) || 0));
+        return `⭐ ${n.toLocaleString('en-US')} pts`;
     }
 
     /* ──────────────────────────────────────────
@@ -431,33 +359,151 @@
     }
 
     /* ──────────────────────────────────────────
-       4. APPLY UI STATE
+       4. PREPARED FETCH: GET /user/get-user-stats
+    ────────────────────────────────────────── */
+    const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    async function fetchUserStatsFromEndpoint(username) {
+        const userId = localStorage.getItem('footlel_user_id') || localStorage.getItem('footlel_user_strid') || username;
+        const candidateUrls = [
+            `${apiBaseUrl}/user/get-user-stats?user_name=${encodeURIComponent(username)}&user_strid=${encodeURIComponent(userId)}`,
+            `${apiBaseUrl}/user/get-user-stats/${encodeURIComponent(username)}`
+        ];
+
+        for (const url of candidateUrls) {
+            try {
+                const res = await fetch(url);
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && typeof data === 'object') {
+                        return data;
+                    }
+                }
+            } catch (e) {
+                // Endpoint not active yet or network error; handled by fallback
+            }
+        }
+        return null;
+    }
+
+    function mapUserStatsPayload(statsPayload, userInfo, lbData, username) {
+        const streakKey = 'footlel_streak_' + username;
+        const winsKey   = 'footlel_wins_'   + username;
+        const bonusKey  = 'footlel_bonus_pts_' + username;
+
+        const localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+        const localWins   = parseInt(localStorage.getItem(winsKey)   || '0', 10) || 0;
+        const localBonus  = parseInt(localStorage.getItem(bonusKey)  || '0', 10) || 0;
+
+        // 1. Porcentaje de Aciertos
+        let accuracyPct = null;
+        if (statsPayload) {
+            if (statsPayload.accuracy_percentage !== undefined) accuracyPct = Number(statsPayload.accuracy_percentage);
+            else if (statsPayload.porcentaje_aciertos !== undefined) accuracyPct = Number(statsPayload.porcentaje_aciertos);
+            else if (statsPayload.accuracy !== undefined) accuracyPct = Number(statsPayload.accuracy);
+            else if (statsPayload.hits !== undefined && statsPayload.attempts) {
+                accuracyPct = (Number(statsPayload.hits) / Number(statsPayload.attempts)) * 100;
+            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos) {
+                accuracyPct = (Number(statsPayload.aciertos) / Number(statsPayload.intentos)) * 100;
+            }
+        }
+        if (accuracyPct === null || Number.isNaN(accuracyPct)) {
+            const savedAcc = localStorage.getItem('footlel_accuracy_' + username);
+            accuracyPct = savedAcc !== null ? Number(savedAcc) : (localWins > 0 ? 75 : 0);
+        }
+
+        // 2. Racha de días
+        let rawStreak = statsPayload && (statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
+        if (rawStreak === undefined || rawStreak === null) {
+            rawStreak = userInfo && (userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
+        }
+        const finalStreak = (rawStreak !== undefined && rawStreak !== null)
+            ? Math.max(Number(rawStreak) || 0, localStreak)
+            : localStreak;
+        localStorage.setItem(streakKey, String(finalStreak));
+
+        // 3. Puntos totales & 4. Porcentaje de Victorias
+        let rawPoints = statsPayload && (statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
+        let rawWins   = statsPayload && (statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
+        let rawTotalGames = statsPayload && (statsPayload.total_games ?? statsPayload.matches_played ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
+        let winPct = statsPayload && (statsPayload.win_percentage ?? statsPayload.porcentaje_victorias ?? statsPayload.win_rate);
+
+        if (rawWins === undefined || rawWins === null) {
+            rawWins = userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
+        }
+
+        if (lbData && Array.isArray(lbData.leaderboard)) {
+            const normalizedTarget = username.toLowerCase();
+            const userEntry = lbData.leaderboard.find(entry => {
+                const entryName = Array.isArray(entry)
+                    ? entry[0]
+                    : (entry && (entry.user_name || entry.username || entry.name));
+                return String(entryName || '').trim().toLowerCase() === normalizedTarget;
+            });
+            if (userEntry) {
+                const val = Array.isArray(userEntry)
+                    ? userEntry[1]
+                    : (userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
+                if (rawPoints === undefined || rawPoints === null) {
+                    rawPoints = Number(val) || 0;
+                }
+                if (rawWins === undefined || rawWins === null) {
+                    rawWins = Number(val) || 0;
+                }
+            }
+        }
+
+        const effectiveWins = Math.max(Number(rawWins) || 0, localWins);
+        localStorage.setItem(winsKey, String(effectiveWins));
+
+        let finalPoints;
+        if (rawPoints !== undefined && rawPoints !== null) {
+            finalPoints = Number(rawPoints) + localBonus;
+        } else {
+            finalPoints = effectiveWins * 10 + localBonus;
+        }
+
+        if (winPct === undefined || winPct === null || Number.isNaN(Number(winPct))) {
+            if (rawTotalGames && Number(rawTotalGames) > 0) {
+                winPct = (effectiveWins / Number(rawTotalGames)) * 100;
+            } else {
+                const savedWinPct = localStorage.getItem('footlel_win_pct_' + username);
+                winPct = savedWinPct !== null ? Number(savedWinPct) : (effectiveWins > 0 ? 100 : 0);
+            }
+        }
+
+        return {
+            accuracy: accuracyPct,
+            streak: finalStreak,
+            totalPoints: finalPoints,
+            winPercentage: winPct
+        };
+    }
+
+    /* ──────────────────────────────────────────
+       5. APPLY UI STATE
     ────────────────────────────────────────── */
     if (isGuest) {
-        /* — Guest state — */
         const guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
         heroUsername.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
         profileUser.textContent   = guestName;
         profileAvatar.src         = GUEST_AVATAR;
         profileAvatar.alt         = 'Avatar genérico de invitado';
 
-        // Hide registration-only options
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
 
-        // Change logout action to login action
         ddSessionLabel.textContent = 'Iniciar Sesión';
         ddSessionAction.href       = 'login.html';
         ddSessionAction.classList.remove('item-danger');
         ddSessionIcon.innerHTML    = LOGIN_ICON_SVG;
 
-        // Replace stats with placeholders
-        [statStreak, statRank, statWins].forEach(function (el) {
+        [statAccuracy, statStreak, statPoints, statWins].forEach(function (el) {
+            if (!el) return;
             el.textContent = '-----';
             el.classList.add('stat-placeholder');
         });
 
-        // Intercept "Desafiar Amigos" card / button and any link to amigos.html
         document.querySelectorAll('a[href*="amigos.html"]').forEach(function (link) {
             link.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -468,123 +514,56 @@
         const cardFriends = document.getElementById('cardFriends');
         if (cardFriends) {
             cardFriends.addEventListener('click', function (e) {
-                if (e.target.closest('a[href*="amigos.html"]')) return; // handled above
+                if (e.target.closest('a[href*="amigos.html"]')) return;
                 e.preventDefault();
                 openGuestModal();
             });
         }
 
     } else {
-        /* — Registered state — */
         const savedUsername = (localStorage.getItem('footlel_username') || 'Jugador').trim();
         const savedAvatar = localStorage.getItem('footlel_avatar');
         if (savedAvatar) profileAvatar.src = savedAvatar;
         heroUsername.textContent = savedUsername;
         profileUser.textContent  = savedUsername;
 
-        // 1. Initialize streak from localStorage (defaults to 0 if never played)
         const streakKey = 'footlel_streak_' + savedUsername;
         if (localStorage.getItem(streakKey) === null) {
             localStorage.setItem(streakKey, '0');
         }
-        const localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
-        statStreak.textContent = formatStreakText(localStreak);
 
-        // 2. Initialize wins from localStorage
-        const winsKey = 'footlel_wins_' + savedUsername;
-        const localWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
-        statWins.textContent = `📈 ${localWins}`;
-
-        // 3. Initial rank synchronized with Monthly standings
-        const initialMonthly = buildMonthlyStandings(null, null, savedUsername);
-        const initialPosIdx = initialMonthly.findIndex(p => p.username.toLowerCase() === savedUsername.toLowerCase());
-        const initialPos = initialPosIdx !== -1 ? initialPosIdx + 1 : 8;
-        statRank.textContent = `🏆 ${getRankMedalByPosition(initialPos)} (#${initialPos})`;
-
-        const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+        // Initial synchronous render from localStorage
+        const initialStats = mapUserStatsPayload(null, null, null, savedUsername);
+        statAccuracy.textContent = `🎯 ${formatPercentage(initialStats.accuracy)}`;
+        statStreak.textContent   = formatStreakText(initialStats.streak);
+        statPoints.textContent   = formatTotalPoints(initialStats.totalPoints);
+        statWins.textContent     = `📈 ${formatPercentage(initialStats.winPercentage)}`;
 
         (async function loadUserFooterStats() {
-            const token = localStorage.getItem('footlel_token');
-            const [infoResult, lbResult] = await Promise.allSettled([
-                token
-                    ? fetch(`${apiBaseUrl}/user/get-user-info`, {
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    }).then(r => r.ok ? r.json() : null)
-                    : Promise.resolve(null),
+            const [statsResult, infoResult, lbResult] = await Promise.allSettled([
+                fetchUserStatsFromEndpoint(savedUsername),
+                fetch(`${apiBaseUrl}/user/get-user-info/${encodeURIComponent(savedUsername)}`).then(r => r.ok ? r.json() : null),
                 fetch(`${apiBaseUrl}/stat/get-leaderboard`).then(r => r.ok ? r.json() : null)
             ]);
 
-            const userInfo = infoResult.status === 'fulfilled' ? infoResult.value : null;
-            const lbData   = lbResult.status === 'fulfilled' ? lbResult.value : null;
+            const statsPayload = statsResult.status === 'fulfilled' ? statsResult.value : null;
+            const userInfo     = infoResult.status === 'fulfilled' ? infoResult.value : null;
+            const lbData       = lbResult.status === 'fulfilled' ? lbResult.value : null;
 
-            let backendStreak = null;
-            let backendWins = null;
-
-            if (userInfo && typeof userInfo === 'object') {
-                if (userInfo.user_id !== undefined && userInfo.user_id !== null) {
-                    localStorage.setItem('footlel_user_id', String(userInfo.user_id));
-                    localStorage.setItem('footlel_user_strid', String(userInfo.user_id));
-                }
-                if (userInfo.user_email !== undefined && userInfo.user_email !== null) {
-                    localStorage.setItem('footlel_email', userInfo.user_email);
-                }
-                const rawStreak = userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak;
-                if (rawStreak !== undefined && rawStreak !== null) {
-                    backendStreak = Number(rawStreak) || 0;
-                }
-                const rawWins = userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas;
-                if (rawWins !== undefined && rawWins !== null) {
-                    backendWins = Number(rawWins) || 0;
-                }
+            if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
+                localStorage.setItem('footlel_user_id', String(userInfo.user_id));
             }
 
-            if (lbData && Array.isArray(lbData.leaderboard)) {
-                const normalizedTarget = savedUsername.toLowerCase();
-                const userEntry = lbData.leaderboard.find(entry => {
-                    const entryName = Array.isArray(entry)
-                        ? entry[0]
-                        : (entry && (entry.user_name || entry.username || entry.name));
-                    return String(entryName || '').trim().toLowerCase() === normalizedTarget;
-                });
-
-                if (userEntry) {
-                    const scoreOrWins = Array.isArray(userEntry)
-                        ? userEntry[1]
-                        : (userEntry.wins ?? userEntry.points ?? userEntry.score ?? 0);
-                    if (backendWins === null && scoreOrWins !== undefined && scoreOrWins !== null) {
-                        backendWins = Number(scoreOrWins) || 0;
-                    }
-                    if (Array.isArray(userEntry) && userEntry.length > 2 && userEntry[2] !== undefined && userEntry[2] !== null) {
-                        backendStreak = Number(userEntry[2]) || 0;
-                    }
-                }
-            }
-
-            // Effective streak: combine backend streak (if provided) with localStorage streak
-            const currentLocalStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
-            const finalStreak = backendStreak !== null ? Math.max(backendStreak, currentLocalStreak) : currentLocalStreak;
-            localStorage.setItem(streakKey, String(finalStreak));
-            statStreak.textContent = formatStreakText(finalStreak);
-
-            // Effective wins
-            const currentLocalWins = parseInt(localStorage.getItem(winsKey) || '0', 10) || 0;
-            const finalWins = backendWins !== null ? Math.max(backendWins, currentLocalWins) : currentLocalWins;
-            localStorage.setItem(winsKey, String(finalWins));
-            statWins.textContent = `📈 ${finalWins}`;
-
-            // Synchronize Global Rank with exact position in Mensual Leaderboard
-            const monthlyTop10 = buildMonthlyStandings(lbData, userInfo, savedUsername);
-            const userPosIdx = monthlyTop10.findIndex(p => p.username.toLowerCase() === savedUsername.toLowerCase());
-            const position = userPosIdx !== -1 ? userPosIdx + 1 : 8;
-            const medal = getRankMedalByPosition(position);
-            statRank.textContent = `🏆 ${medal} (#${position})`;
-            localStorage.setItem('footlel_rank_pos_' + savedUsername, String(position));
-            localStorage.setItem('footlel_rank_label_' + savedUsername, `🏆 ${medal} (#${position})`);
+            const mapped = mapUserStatsPayload(statsPayload, userInfo, lbData, savedUsername);
+            statAccuracy.textContent = `🎯 ${formatPercentage(mapped.accuracy)}`;
+            statStreak.textContent   = formatStreakText(mapped.streak);
+            statPoints.textContent   = formatTotalPoints(mapped.totalPoints);
+            statWins.textContent     = `📈 ${formatPercentage(mapped.winPercentage)}`;
         })().catch(err => console.warn('No se pudieron actualizar las estadísticas del footer:', err));
     }
 
     /* ──────────────────────────────────────────
-       5. PROFILE DROPDOWN TOGGLE
+       6. PROFILE DROPDOWN TOGGLE
     ────────────────────────────────────────── */
     const profileBtn      = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');

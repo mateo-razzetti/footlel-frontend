@@ -594,3 +594,7 @@ html.light-mode .requests-section-title { color: #1A1A1A; }
     .req-actions       { gap: 6px; }
     .buscar-title      { font-size: 20px; }
 }
+
+.buscar-toast[hidden] {
+    display: none !important;
+}

@@ -343,10 +343,8 @@ body {
 .btn-primary:active { transform: scale(0.98); }
 
 
-
-
 /* ════════════════════════════════════════════════════════════════
-   STATS FOOTER BAR
+   STATS FOOTER BAR (4 COLUMNS + PURE CSS TOOLTIPS)
    ════════════════════════════════════════════════════════════════ */
 .stats-bar {
     position: sticky;
@@ -357,27 +355,119 @@ body {
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--color-border-subtle);
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
+    overflow: visible;
 }
 
 .stat-col {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 18px 16px;
-    gap: 4px;
+    padding: 18px 12px;
+    gap: 5px;
     border-right: 1px solid var(--color-border-subtle);
+    overflow: visible;
 }
 .stat-col:last-child { border-right: none; }
+
+.stat-label-row {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+}
 
 .stat-label {
     font-family: var(--font-heading);
     font-size: 9.5px;
     font-weight: 700;
-    letter-spacing: 2px;
+    letter-spacing: 1.8px;
     color: var(--color-text-muted);
     text-transform: uppercase;
+    text-align: center;
+}
+
+/* Info icon (i) + Pure CSS Tooltip */
+.stat-info {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    border: 1px solid var(--color-text-muted);
+    color: var(--color-text-muted);
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    font-style: italic;
+    line-height: 1;
+    cursor: help;
+    flex-shrink: 0;
+    user-select: none;
+    transition: color var(--transition-fast), border-color var(--transition-fast), background-color var(--transition-fast);
+}
+
+.stat-info:hover,
+.stat-info:focus-visible {
+    color: #FFFFFF;
+    border-color: var(--color-brand-green);
+    background-color: var(--color-brand-green);
+    outline: none;
+}
+
+.stat-tooltip {
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    transform: translateX(-50%) translateY(6px);
+    width: max-content;
+    max-width: 240px;
+    padding: 10px 12px;
+    background: #141414;
+    color: #FFFFFF;
+    border: 1px solid var(--color-border-green);
+    border-radius: 8px;
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1.45;
+    letter-spacing: 0;
+    text-transform: none;
+    text-align: center;
+    white-space: normal;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.70);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition:
+        opacity    var(--transition-fast),
+        visibility var(--transition-fast),
+        transform  var(--transition-fast);
+    z-index: 300;
+}
+
+.stat-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: var(--color-border-green) transparent transparent transparent;
+}
+
+.stat-info:hover .stat-tooltip,
+.stat-info:focus-visible .stat-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
 }
 
 .stat-value {
@@ -406,6 +496,16 @@ body {
     .cards-grid .game-card:first-child {
         grid-column: 1 / -1;
     }
+    .stats-bar {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .stat-col:nth-child(2) {
+        border-right: none;
+    }
+    .stat-col:nth-child(1),
+    .stat-col:nth-child(2) {
+        border-bottom: 1px solid var(--color-border-subtle);
+    }
 }
 
 @media (max-width: 600px) {
@@ -419,6 +519,7 @@ body {
     .cards-grid .game-card:first-child { grid-column: auto; }
     .stat-value { font-size: 16px; }
     .stat-label { font-size: 8px; }
+    .stat-tooltip { max-width: 190px; font-size: 10.5px; }
 }
 
 
@@ -458,7 +559,6 @@ body {
 html.disable-animations .bg-balls {
     display: none !important;
 }
-
 
 /* ════════════════════════════════════════════════════════════════
    GUEST MODAL (#modal-invitado)

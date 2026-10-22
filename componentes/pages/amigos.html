@@ -116,7 +116,7 @@
         <button class="amigos-tab is-active" role="tab" aria-selected="true"  aria-controls="tab-amigos"      data-tab="amigos">Mis Amigos</button>
         <button class="amigos-tab"           role="tab" aria-selected="false" aria-controls="tab-solicitudes" data-tab="solicitudes">
             Solicitudes
-            <span class="tab-badge" id="requestsBadge" aria-label="2 solicitudes pendientes">2</span>
+            <span class="tab-badge" id="requestsBadge" aria-label="1 solicitud pendiente">1</span>
         </button>
         <button class="amigos-tab"           role="tab" aria-selected="false" aria-controls="tab-buscar"      data-tab="buscar">Buscar</button>
     </nav>
@@ -127,7 +127,7 @@
     <main class="main-content" role="main">
 
         <!-- ────────────────────────────────────
-             TAB 1 — My Friends
+             TAB 1 — My Friends (Reduced to 2 mocked friends)
         ──────────────────────────────────── -->
         <div id="tab-amigos" class="tab-panel is-active" role="tabpanel" aria-label="Mis Amigos">
 
@@ -142,12 +142,29 @@
 
             <!-- Friends list -->
             <ul class="friend-list" id="friendsListContainer" aria-label="Lista de amigos">
-                <!-- Rendered dynamically from localStorage -->
+                <li class="friend-row">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @Santi_Martinez" class="friend-avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name">@Santi_Martinez</span>
+                        <span class="friend-status friend-status--online">En línea · Libre</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--active" type="button">Desafiar 1v1</button>
+                </li>
+                <li class="friend-row">
+                    <img src="../../assets/images/avatar-default.png" alt="Avatar @Felix_Rodriguez" class="friend-avatar"
+                         onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                    <div class="friend-info">
+                        <span class="friend-name">@Felix_Rodriguez</span>
+                        <span class="friend-status friend-status--offline">Desconectado</span>
+                    </div>
+                    <button class="btn-challenge btn-challenge--active" type="button">Desafiar 1v1</button>
+                </li>
             </ul>
         </div>
 
         <!-- ────────────────────────────────────
-             TAB 2 — Requests
+             TAB 2 — Requests (1 incoming friend req, 1 incoming challenge, + Solicitudes Enviadas)
         ──────────────────────────────────── -->
         <div id="tab-solicitudes" class="tab-panel" role="tabpanel" aria-label="Solicitudes" hidden>
 
@@ -160,25 +177,55 @@
                 <input type="search" class="search-bar" id="searchRequestsInput" placeholder="Buscar jugador..." aria-label="Buscar solicitudes">
             </div>
 
-            <!-- Section: Friend Requests -->
+            <!-- Section 1: Incoming Friend Requests (1 item) -->
             <section class="requests-section" aria-labelledby="sectionFriendReqs">
                 <h2 class="requests-section-title" id="sectionFriendReqs">Solicitudes de Amistad</h2>
                 <ul class="friend-list" id="friendRequestsContainer" aria-label="Solicitudes de amistad">
-                    <!-- Rendered dynamically from localStorage -->
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Carlos_Mendez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Carlos_Mendez</span>
+                            <span class="friend-status">Solicitud recibida</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--accept" type="button">Aceptar</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
                 </ul>
             </section>
 
-            <!-- Section: Challenges and Matches -->
+            <!-- Section 2: Incoming Challenges and Matches (1 item) -->
             <section class="requests-section" aria-labelledby="sectionChallenges">
                 <h2 class="requests-section-title" id="sectionChallenges">Desafíos y Partidos</h2>
                 <ul class="friend-list" id="challengesContainer" aria-label="Desafíos y partidos">
+                    <li class="friend-row">
+                        <img src="../../assets/images/avatar-default.png" alt="Avatar @Santi_Martinez" class="friend-avatar"
+                             onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'">
+                        <div class="friend-info">
+                            <span class="friend-name">@Santi_Martinez</span>
+                            <span class="friend-status">Te ha desafiado</span>
+                        </div>
+                        <div class="req-actions">
+                            <button class="btn-req btn-req--accept" type="button">Aceptar 1v1</button>
+                            <button class="btn-req btn-req--reject" type="button">Rechazar</button>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+
+            <!-- Section 3: Sent Requests ("Solicitudes Enviadas") -->
+            <section class="requests-section" aria-labelledby="sectionSentReqs">
+                <h2 class="requests-section-title" id="sectionSentReqs">Solicitudes Enviadas</h2>
+                <ul class="friend-list" id="sentRequestsContainer" aria-label="Solicitudes enviadas">
                     <!-- Rendered dynamically from localStorage -->
                 </ul>
             </section>
         </div>
 
         <!-- ────────────────────────────────────
-             TAB 3 — Search
+             TAB 3 — Search (All suggested users have green "Agregar" button by default)
         ──────────────────────────────────── -->
         <div id="tab-buscar" class="tab-panel" role="tabpanel" aria-label="Buscar usuarios" hidden>
 
@@ -205,8 +252,8 @@
                 </ul>
             </section>
 
-            <!-- Toast: Request sent -->
-            <div class="buscar-toast" id="addToast" aria-live="polite" hidden>
+            <!-- Toast: Request sent (hidden by default, shown only on click via JS) -->
+            <div class="buscar-toast" id="addToast" aria-live="polite" hidden style="display: none;">
                 ✓ ¡Solicitud Enviada!
             </div>
 
@@ -267,36 +314,33 @@
     profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
 
     /* ─────────────────────────────────────────
-       3. LOCALSTORAGE STATE PER USER
+       3. LOCALSTORAGE STATE PER USER (V2 CLEAN DEFAULTS)
     ───────────────────────────────────────── */
     var KEYS = {
-        FRIENDS:         'footlel_friends_'         + savedUser,
-        FRIEND_REQUESTS: 'footlel_friend_requests_' + savedUser,
-        CHALLENGES:      'footlel_challenges_'      + savedUser,
-        SENT_REQUESTS:   'footlel_sent_requests_'   + savedUser
+        FRIENDS:         'footlel_friends_v2_'         + savedUser,
+        FRIEND_REQUESTS: 'footlel_friend_requests_v2_' + savedUser,
+        CHALLENGES:      'footlel_challenges_v2_'      + savedUser,
+        SENT_REQUESTS:   'footlel_sent_requests_v2_'   + savedUser
     };
 
+    // Only 2 static mocked friends by default
     var DEFAULT_FRIENDS = [
-        { username: 'Santi_Martinez',      status: 'En línea · Libre',      statusType: 'online',      available: true,  points: 2540 },
-        { username: 'FREE_JULIAN_Alvarez', status: 'Desconectado',          statusType: 'offline',     available: true,  points: 2280 },
-        { username: 'Felix_Rodriguez',     status: 'En línea · Libre',      statusType: 'online',      available: true,  points: 2150 },
-        { username: 'Mateo_Gomez',         status: 'Desconectado',          statusType: 'offline',     available: true,  points: 1990 },
-        { username: 'DiegoS_FC',           status: 'Jugador no disponible', statusType: 'unavailable', available: false, points: 1840 },
-        { username: 'Fran_DT',             status: 'Jugador no disponible', statusType: 'unavailable', available: false, points: 1720 }
+        { username: 'Santi_Martinez',  status: 'En línea · Libre', statusType: 'online',  available: true, points: 2540 },
+        { username: 'Felix_Rodriguez', status: 'Desconectado',     statusType: 'offline', available: true, points: 2150 }
     ];
 
+    // Only 1 incoming friend request by default
     var DEFAULT_FRIEND_REQUESTS = [
-        { username: 'Carlos_Mendez', status: 'Solicitud recibida', points: 2410 },
-        { username: 'Andres_Lopez',  status: 'Solicitud recibida', points: 2080 }
+        { username: 'Carlos_Mendez', status: 'Solicitud recibida', points: 2410 }
     ];
 
+    // Only 1 incoming match challenge by default
     var DEFAULT_CHALLENGES = [
-        { id: 'ch_1', username: 'Felix_Rodriguez', status: 'Te ha desafiado',   statusType: 'default', actionLabel: 'Aceptar 1v1',  actionEnabled: true  },
-        { id: 'ch_2', username: 'Mateo_Gomez',     status: 'Desafío pendiente', statusType: 'default', actionLabel: 'Cancelado',    actionEnabled: false },
-        { id: 'ch_3', username: 'Santi_Martinez',  status: 'En vivo',           statusType: 'online',  actionLabel: 'Desafiar 1v1', actionEnabled: true  }
+        { id: 'ch_1', username: 'Santi_Martinez', status: 'Te ha desafiado', statusType: 'default', actionLabel: 'Aceptar 1v1', actionEnabled: true }
     ];
 
-    var DEFAULT_SENT_REQUESTS = ['FutbolMaster_10'];
+    // No hardcoded pending requests by default (all suggested players start with green "Agregar")
+    var DEFAULT_SENT_REQUESTS = [];
 
     var DEFAULT_SUGGESTED_USERS = [
         'FutbolMaster_10',
@@ -320,7 +364,7 @@
             try {
                 var parsed = JSON.parse(raw);
                 if (Array.isArray(parsed)) return parsed;
-            } catch (e) { /* ignore parse error and reset */ }
+            } catch (e) { /* reset below */ }
         }
         var copy = JSON.parse(JSON.stringify(fallbackArray));
         try {
@@ -351,6 +395,7 @@
     var friendsListContainer    = document.getElementById('friendsListContainer');
     var friendRequestsContainer = document.getElementById('friendRequestsContainer');
     var challengesContainer     = document.getElementById('challengesContainer');
+    var sentRequestsContainer   = document.getElementById('sentRequestsContainer');
     var searchUsersContainer    = document.getElementById('searchUsersContainer');
     var requestsBadge           = document.getElementById('requestsBadge');
     var searchFriendsInput      = document.getElementById('searchFriendsInput');
@@ -384,11 +429,14 @@
     }
 
     function showSentRequestToast() {
+        if (!addToast) return;
         addToast.textContent = '✓ ¡Solicitud Enviada!';
         addToast.hidden = false;
+        addToast.style.display = 'flex';
         clearTimeout(toastTimer);
         toastTimer = setTimeout(function () {
             addToast.hidden = true;
+            addToast.style.display = 'none';
         }, 3000);
     }
 
@@ -479,7 +527,7 @@
     }
 
     /* ─────────────────────────────────────────
-       7. RENDER: TAB 2 — SOLICITUDES
+       7. RENDER: TAB 2 — SOLICITUDES (Recibidas, Desafíos, Enviadas)
     ───────────────────────────────────────── */
     function acceptFriendRequest(username) {
         var normTarget = normalizeText(username);
@@ -530,10 +578,20 @@
         renderRequestsTab();
     }
 
+    function cancelSentRequest(username) {
+        var normTarget = normalizeText(username);
+        state.sentRequests = state.sentRequests.filter(function (u) {
+            return normalizeText(u) !== normTarget;
+        });
+        saveStorage(KEYS.SENT_REQUESTS, state.sentRequests);
+        renderRequestsTab();
+        renderSearchUsers();
+    }
+
     function renderRequestsTab() {
         var query = normalizeText(searchRequestsInput ? searchRequestsInput.value : '');
 
-        // 1. Friend Requests
+        // 1. Incoming Friend Requests
         friendRequestsContainer.innerHTML = '';
         var visibleFriendReqs = state.friendRequests.filter(function (req) {
             if (!query) return true;
@@ -598,7 +656,7 @@
             });
         }
 
-        // 2. Challenges and Matches
+        // 2. Incoming Challenges and Matches
         challengesContainer.innerHTML = '';
         var visibleChallenges = state.challenges.filter(function (ch) {
             if (!query) return true;
@@ -668,6 +726,65 @@
                 challengesContainer.appendChild(li);
             });
         }
+
+        // 3. Sent Requests ("Solicitudes Enviadas")
+        if (sentRequestsContainer) {
+            sentRequestsContainer.innerHTML = '';
+            var visibleSent = state.sentRequests.filter(function (sentUser) {
+                if (!query) return true;
+                return normalizeText(sentUser).includes(query);
+            });
+
+            if (visibleSent.length === 0) {
+                var emptySentLi = document.createElement('li');
+                emptySentLi.className = 'friend-row';
+                emptySentLi.style.justifyContent = 'center';
+                emptySentLi.style.color = 'var(--color-text-muted)';
+                emptySentLi.textContent = 'No tenés solicitudes enviadas pendientes.';
+                sentRequestsContainer.appendChild(emptySentLi);
+            } else {
+                visibleSent.forEach(function (sentUsername) {
+                    var clean = cleanUsername(sentUsername);
+                    var li = document.createElement('li');
+                    li.className = 'friend-row';
+
+                    var avatar = createAvatarImg(clean, false);
+
+                    var infoDiv = document.createElement('div');
+                    infoDiv.className = 'friend-info';
+
+                    var nameSpan = document.createElement('span');
+                    nameSpan.className = 'friend-name';
+                    nameSpan.textContent = '@' + clean;
+
+                    var statusSpan = document.createElement('span');
+                    statusSpan.className = 'friend-status';
+                    statusSpan.textContent = 'Solicitud enviada · Pendiente';
+
+                    infoDiv.appendChild(nameSpan);
+                    infoDiv.appendChild(statusSpan);
+
+                    var actionsDiv = document.createElement('div');
+                    actionsDiv.className = 'req-actions';
+
+                    var cancelBtn = document.createElement('button');
+                    cancelBtn.type = 'button';
+                    cancelBtn.className = 'btn-req btn-req--reject';
+                    cancelBtn.textContent = 'Cancelar';
+                    cancelBtn.addEventListener('click', function () {
+                        cancelSentRequest(clean);
+                    });
+
+                    actionsDiv.appendChild(cancelBtn);
+
+                    li.appendChild(avatar);
+                    li.appendChild(infoDiv);
+                    li.appendChild(actionsDiv);
+
+                    sentRequestsContainer.appendChild(li);
+                });
+            }
+        }
     }
 
     /* ─────────────────────────────────────────
@@ -700,6 +817,7 @@
             btnEl.setAttribute('aria-disabled', 'true');
             btnEl.innerHTML = 'Solicitud Pendiente';
         }
+        renderRequestsTab();
         showSentRequestToast();
     }
 
@@ -782,7 +900,7 @@
                 btn.textContent = 'Solicitud Pendiente';
             } else {
                 btn.className = 'btn-add btn-add--active';
-                btn.innerHTML = ADD_USER_ICON_SVG + ' + Agregar';
+                btn.innerHTML = ADD_USER_ICON_SVG + ' Agregar';
                 btn.addEventListener('click', function () {
                     sendFriendRequest(clean, btn);
                 });
@@ -832,7 +950,7 @@
         clearTimeout(remoteLookupDebounce);
         remoteLookupDebounce = setTimeout(async function () {
             try {
-                var r = await fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') } });
+                var r = await fetch(apiBaseUrl + '/user/get-user-info/' + encodeURIComponent(candidate));
                 if (!r.ok) return;
                 var info = await r.json();
                 var foundName = cleanUsername((info && (info.user_name || info.username || info.name)) || candidate);
