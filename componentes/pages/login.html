@@ -116,9 +116,7 @@
                     const data = await response.json();
                     localStorage.setItem('footlel_guest', 'false');
                     localStorage.setItem('footlel_username', usernameVal);
-                    // Backup of the current password, used by editar-cuenta.html as a
-                    // fallback if get-user-info does not return user_password.
-                    localStorage.setItem('footlel_password', passwordVal);
+                    localStorage.removeItem('footlel_password');
                     
                     // Always query GET /user/get-user-info/{user_name} to ensure footlel_user_id is obtained and saved.
                     let resolvedUserId = data.user_id ?? data.id ?? null;

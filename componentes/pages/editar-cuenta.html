@@ -225,10 +225,6 @@
                 }
             });
 
-            /* Current password (in memory only). Filled from get-user-info; used when
-               the "new password" field is left blank so "" is never sent to the backend. */
-            var currentPassword = "";
-
             /* User Profile Setup (Backend connection) */
             document.addEventListener('DOMContentLoaded', async function () {
                 const savedUsername = localStorage.getItem('footlel_username') || 'Usuario';
@@ -264,9 +260,6 @@
                         if (data.user_strid) {
                             localStorage.setItem('footlel_user_strid', String(data.user_strid));
                         }
-
-                        // Current password kept in memory only (used when the new-password field is blank)
-                        currentPassword = data.user_password || "";
 
                         console.log("4. ¿Existe el casillero de email en el HTML?:", document.getElementById('email'));
 
@@ -400,7 +393,7 @@
                 }
 
                 // 3. New password (empty = user does not want to change it)
-                const typedPassword = document.getElementById('new-password').value;
+                const typedPassword = document.getElementById('new-password').value.trim();
 
                 // Secure password validation (only when a new password was typed)
                 let passwordError = document.getElementById('password-error');
@@ -413,18 +406,10 @@
                     passwordError.hidden = true;
                     document.getElementById('new-password').closest('.form-group').appendChild(passwordError);
                 }
-                // Current password: session backup first, in-memory value from get-user-info as fallback
-                const storedPassword = localStorage.getItem('footlel_password') || currentPassword || '';
 
-                if (typedPassword) {
-                    // New password must differ from the current one
-                    if (storedPassword && typedPassword === storedPassword) {
-                        e.preventDefault();
-                        passwordError.textContent = 'La nueva contraseña no puede ser igual a la contraseña actual.';
-                        passwordError.hidden = false;
-                        document.getElementById('new-password').focus();
-                        return;
-                    }
+                if (typedPassword === "") {
+                    localStorage.setItem('pending_user_password', "");
+                } else {
                     if (!PASSWORD_REGEX.test(typedPassword)) {
                         e.preventDefault();
                         passwordError.textContent = PASSWORD_ERROR_MSG;
@@ -432,15 +417,12 @@
                         document.getElementById('new-password').focus();
                         return;
                     }
+                    localStorage.setItem('pending_user_password', typedPassword);
                 }
                 passwordError.hidden = true;
 
-                // Blank field -> keep current password (from localStorage) so "" never reaches the database.
-                const pendingPassword = typedPassword || storedPassword;
-
                 localStorage.setItem('pending_user_name', pendingUsername);
                 localStorage.setItem('pending_user_email', pendingEmail);
-                localStorage.setItem('pending_user_password', pendingPassword);
 
                 // 4. Selected avatar
                 let selectedAvatar = null;
