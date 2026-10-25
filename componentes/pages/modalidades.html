@@ -364,44 +364,60 @@
     function mapUserStatsPayload(statsPayload, userInfo, lbData, username) {
         var streakKey = 'footlel_streak_' + username;
         var winsKey   = 'footlel_wins_'   + username;
-        var bonusKey  = 'footlel_bonus_pts_' + username;
+        var pointsKey = 'footlel_points_' + username;
+        var accKey    = 'footlel_accuracy_' + username;
+        var winPctKey = 'footlel_win_pct_' + username;
 
         var localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
         var localWins   = parseInt(localStorage.getItem(winsKey)   || '0', 10) || 0;
-        var localBonus  = parseInt(localStorage.getItem(bonusKey)  || '0', 10) || 0;
 
+        // 1. Porcentaje de Aciertos (Backend: correct_guesses / guesses_made)
         var accuracyPct = null;
-        if (statsPayload) {
-            if (statsPayload.accuracy_percentage !== undefined) accuracyPct = Number(statsPayload.accuracy_percentage);
-            else if (statsPayload.porcentaje_aciertos !== undefined) accuracyPct = Number(statsPayload.porcentaje_aciertos);
-            else if (statsPayload.accuracy !== undefined) accuracyPct = Number(statsPayload.accuracy);
-            else if (statsPayload.hits !== undefined && statsPayload.attempts) {
-                accuracyPct = (Number(statsPayload.hits) / Number(statsPayload.attempts)) * 100;
-            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos) {
-                accuracyPct = (Number(statsPayload.aciertos) / Number(statsPayload.intentos)) * 100;
+        if (statsPayload && typeof statsPayload === 'object') {
+            if (statsPayload.correct_guesses !== undefined && statsPayload.guesses_made !== undefined) {
+                var made = Number(statsPayload.guesses_made) || 0;
+                var corr = Number(statsPayload.correct_guesses) || 0;
+                accuracyPct = made > 0 ? (corr / made) * 100 : 0;
+            } else if (statsPayload.accuracy_percentage !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy_percentage);
+            } else if (statsPayload.porcentaje_aciertos !== undefined) {
+                accuracyPct = Number(statsPayload.porcentaje_aciertos);
+            } else if (statsPayload.accuracy !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy);
+            } else if (statsPayload.hits !== undefined && statsPayload.attempts !== undefined) {
+                var att = Number(statsPayload.attempts) || 0;
+                accuracyPct = att > 0 ? (Number(statsPayload.hits) / att) * 100 : 0;
+            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos !== undefined) {
+                var intn = Number(statsPayload.intentos) || 0;
+                accuracyPct = intn > 0 ? (Number(statsPayload.aciertos) / intn) * 100 : 0;
+            }
+            if (accuracyPct !== null && !Number.isNaN(accuracyPct)) {
+                localStorage.setItem(accKey, String(accuracyPct));
             }
         }
         if (accuracyPct === null || Number.isNaN(accuracyPct)) {
-            var savedAcc = localStorage.getItem('footlel_accuracy_' + username);
-            accuracyPct = savedAcc !== null ? Number(savedAcc) : (localWins > 0 ? 75 : 0);
+            var savedAcc = localStorage.getItem(accKey);
+            accuracyPct = savedAcc !== null ? Number(savedAcc) : 0;
         }
 
-        var rawStreak = statsPayload && (statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
+        // 2. Racha de días (Backend: win_streak)
+        var rawStreak = statsPayload && (statsPayload.win_streak ?? statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
         if (rawStreak === undefined || rawStreak === null) {
-            rawStreak = userInfo && (userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
+            rawStreak = userInfo && (userInfo.win_streak ?? userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
         }
         var finalStreak = (rawStreak !== undefined && rawStreak !== null)
-            ? Math.max(Number(rawStreak) || 0, localStreak)
+            ? (Number(rawStreak) || 0)
             : localStreak;
         localStorage.setItem(streakKey, String(finalStreak));
 
-        var rawPoints = statsPayload && (statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
-        var rawWins   = statsPayload && (statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
-        var rawTotalGames = statsPayload && (statsPayload.total_games ?? statsPayload.matches_played ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
+        // 3. Puntos totales (Backend: user_points) & 4. Porcentaje de Victorias (Backend: matches_won / matches_played)
+        var rawPoints = statsPayload && (statsPayload.user_points ?? statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
+        var rawWins   = statsPayload && (statsPayload.matches_won ?? statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
+        var rawTotalGames = statsPayload && (statsPayload.matches_played ?? statsPayload.total_games ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
         var winPct = statsPayload && (statsPayload.win_percentage ?? statsPayload.porcentaje_victorias ?? statsPayload.win_rate);
 
         if (rawWins === undefined || rawWins === null) {
-            rawWins = userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
+            rawWins = userInfo && (userInfo.matches_won ?? userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
         }
 
         if (lbData && Array.isArray(lbData.leaderboard)) {
@@ -415,33 +431,39 @@
             if (userEntry) {
                 var val = Array.isArray(userEntry)
                     ? userEntry[1]
-                    : (userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
+                    : (userEntry.user_points ?? userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
                 if (rawPoints === undefined || rawPoints === null) {
                     rawPoints = Number(val) || 0;
                 }
-                if (rawWins === undefined || rawWins === null) {
-                    rawWins = Number(val) || 0;
-                }
             }
         }
 
-        var effectiveWins = Math.max(Number(rawWins) || 0, localWins);
+        var effectiveWins = (rawWins !== undefined && rawWins !== null)
+            ? (Number(rawWins) || 0)
+            : localWins;
         localStorage.setItem(winsKey, String(effectiveWins));
 
+        // Exact backend points without any extra local bonus (+10 removed)
         var finalPoints;
         if (rawPoints !== undefined && rawPoints !== null) {
-            finalPoints = Number(rawPoints) + localBonus;
+            finalPoints = Number(rawPoints) || 0;
+            localStorage.setItem(pointsKey, String(finalPoints));
         } else {
-            finalPoints = effectiveWins * 10 + localBonus;
+            var savedPts = localStorage.getItem(pointsKey);
+            finalPoints = savedPts !== null ? (Number(savedPts) || 0) : (effectiveWins * 10);
         }
 
         if (winPct === undefined || winPct === null || Number.isNaN(Number(winPct))) {
-            if (rawTotalGames && Number(rawTotalGames) > 0) {
-                winPct = (effectiveWins / Number(rawTotalGames)) * 100;
+            if (rawTotalGames !== undefined && rawTotalGames !== null) {
+                var totalG = Number(rawTotalGames) || 0;
+                winPct = totalG > 0 ? (effectiveWins / totalG) * 100 : 0;
+                localStorage.setItem(winPctKey, String(winPct));
             } else {
-                var savedWinPct = localStorage.getItem('footlel_win_pct_' + username);
-                winPct = savedWinPct !== null ? Number(savedWinPct) : (effectiveWins > 0 ? 100 : 0);
+                var savedWinPct = localStorage.getItem(winPctKey);
+                winPct = savedWinPct !== null ? Number(savedWinPct) : 0;
             }
+        } else {
+            localStorage.setItem(winPctKey, String(winPct));
         }
 
         return {
@@ -451,7 +473,6 @@
             winPercentage: winPct
         };
     }
-
     var profileAvatar   = $('profileAvatar');
     var profileUser     = $('profileUsername');
     var ddEditAccount   = $('ddEditAccount');
@@ -465,7 +486,8 @@
     var statWins        = $('statWins');
 
     if (isGuest) {
-        var guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
+        var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        var guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         profileUser.textContent     = guestName;
         profileAvatar.src           = GUEST_AVATAR;
         ddEditAccount.style.display = 'none';
@@ -505,6 +527,13 @@
 
             if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
                 localStorage.setItem('footlel_user_id', String(userInfo.user_id));
+            }
+
+            if (hasPlayedDailyInPayload(statsPayload) || hasPlayedDailyInPayload(userInfo)) {
+                var todayStr = formatLocalDateYYYYMMDD(new Date());
+                localStorage.setItem('footlel_daily_played_date_' + savedUsername, todayStr);
+                desafioJugado = true;
+                challengePlayed = true;
             }
 
             var mapped = mapUserStatsPayload(statsPayload, userInfo, lbData, savedUsername);
@@ -581,16 +610,42 @@
     }
 
     /* ──────────────────────────────────────────
-       4. MODE BUTTONS LOGIC
+       4. MODE BUTTONS LOGIC (DAILY VALIDATION)
     ────────────────────────────────────────── */
-    var challengePlayed = false;
+    function formatLocalDateYYYYMMDD(d) {
+        var y = d.getFullYear();
+        var m = String(d.getMonth() + 1).padStart(2, '0');
+        var day = String(d.getDate()).padStart(2, '0');
+        return y + '-' + m + '-' + day;
+    }
+
+    function hasPlayedDailyInPayload(payload) {
+        if (!payload || typeof payload !== 'object') return false;
+        return Boolean(
+            payload.played_daily_today === true ||
+            payload.daily_played === true ||
+            payload.has_played_today === true ||
+            payload.daily_challenge_played === true
+        );
+    }
+
+    function checkDailyPlayedToday() {
+        if (isGuest) return false;
+        var todayStr = formatLocalDateYYYYMMDD(new Date());
+        return localStorage.getItem('footlel_daily_played_date_' + savedUsername) === todayStr;
+    }
+
+    var desafioJugado = checkDailyPlayedToday();
+    var challengePlayed = desafioJugado;
 
     // Daily Challenge
     $('btn-diario').addEventListener('click', function (e) {
         if (isGuest) {
             e.preventDefault();
             openModal(guestModal);
-        } else if (challengePlayed) {
+            return;
+        }
+        if (desafioJugado || challengePlayed || checkDailyPlayedToday()) {
             e.preventDefault();
             openModal(challengeModal);
             startClock();
@@ -606,19 +661,27 @@
     });
 
     /* ──────────────────────────────────────────
-       5. COUNTDOWN CLOCK
+       5. COUNTDOWN CLOCK (REAL TIME TO MIDNIGHT)
     ────────────────────────────────────────── */
     var clockInterval = null;
 
+    function getSecondsUntilMidnight() {
+        var now = new Date();
+        var midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+        return Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+    }
+
     function startClock() {
         clearInterval(clockInterval);
-        var totalSeconds = 14 * 3600 + 35 * 60 + 2;
         var clockEl = $('modal-clock');
 
         function tick() {
+            var totalSeconds = getSecondsUntilMidnight();
             if (totalSeconds <= 0) {
                 clearInterval(clockInterval);
                 clockEl.textContent = '00:00:00';
+                desafioJugado = false;
+                challengePlayed = false;
                 return;
             }
             var h = Math.floor(totalSeconds / 3600);
@@ -628,7 +691,6 @@
                 String(h).padStart(2, '0') + ':' +
                 String(m).padStart(2, '0') + ':' +
                 String(s).padStart(2, '0');
-            totalSeconds--;
         }
 
         tick();
@@ -641,7 +703,6 @@
     challengeModal.addEventListener('click', function (e) {
         if (e.target === this) clearInterval(clockInterval);
     });
-
 })();
 </script>
 

@@ -185,7 +185,8 @@
     var savedAvatar = localStorage.getItem('footlel_avatar');
 
     if (isGuest) {
-        var guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
+        var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        var guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         profileUser.textContent     = guestName;
         profileAvatar.src           = GUEST_AVATAR;
         profileAvatar.alt           = 'Avatar invitado';

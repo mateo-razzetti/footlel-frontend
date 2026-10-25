@@ -431,7 +431,8 @@
 
     if (isGuest) {
         // Nombre
-        const guestName = localStorage.getItem('footlel_user_strid') || localStorage.getItem('footlel_username') || 'Invitado';
+        const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         configUsernameEl.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
         profileUsernameEl.textContent = guestName;
 
