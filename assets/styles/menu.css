@@ -393,19 +393,21 @@ body {
 /* Info icon (i) + Pure CSS Tooltip */
 .stat-info {
     position: relative;
-    display: inline-flex;
-    align-items: center;
+    display: flex;
     justify-content: center;
-    width: 15px;
-    height: 15px;
+    align-items: center;
+    width: 16px;
+    height: 16px;
+    padding: 0;
     border-radius: 50%;
     border: 1px solid var(--color-text-muted);
     color: var(--color-text-muted);
     font-family: var(--font-body);
     font-size: 10px;
     font-weight: 700;
-    font-style: italic;
+    font-style: normal !important;
     line-height: 1;
+    text-align: center;
     cursor: help;
     flex-shrink: 0;
     user-select: none;

@@ -196,6 +196,10 @@
                 });
                 if (guestResponse.ok) {
                     const guestData = await guestResponse.json();
+                    const guestToken = guestData && (guestData.access_token || guestData.token || guestData.jwt);
+                    if (guestToken) {
+                        localStorage.setItem('footlel_token', guestToken);
+                    }
                     const guestName = extractGuestName(guestData) || 'Invitado';
                     localStorage.setItem('footlel_user_strid', String(guestName));
                     localStorage.setItem('footlel_username', String(guestName));

@@ -921,7 +921,7 @@
 
     (async function loadBackendUsers() {
         try {
-            var r = await fetch(apiBaseUrl + '/stat/get-leaderboard');
+            var r = await fetch(apiBaseUrl + '/stat/get-global-leaderboard');
             if (!r.ok) return;
             var data = await r.json();
             if (data && Array.isArray(data.leaderboard)) {

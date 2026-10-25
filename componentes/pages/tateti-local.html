@@ -604,12 +604,10 @@
         // catalog without warning.
         for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
             try {
-                // The swagger for /game/start requires POST with body { user_strid }.
-                const userStrid = getCurrentUserStrid();
+                // /game/start: JWT identifies the player (no user_strid, no body).
                 const response = await postStartGame({
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_strid: String(userStrid) })
+                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') }
                 });
                 if (!response.ok) {
                     throw new Error(`Unexpected status ${response.status}`);
@@ -1080,13 +1078,15 @@
         console.warn('📤 ENVIANDO AL BACKEND:', trimmedGuess);
 
         try {
-            const userStrid = getCurrentUserStrid();
             const response = await fetch(endpoint, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + localStorage.getItem('footlel_token')
+                },
                 // Cell is no longer pre-selected: Backend receives player name
                 // only and determines matching slot (see resolveTargetCellFromResponse).
-                body: JSON.stringify({ user_strid: String(userStrid), player_guess: String(trimmedGuess) })
+                body: JSON.stringify({ player_guess: String(trimmedGuess) })
             });
 
             // Body read ONCE here (safeParseJson includes try/catch) and reused;
@@ -1123,14 +1123,12 @@
         }
     }
 
-    // Bot endpoint requires body { user_strid } (per swagger).
+    // Bot endpoint: JWT identifies the player, no body.
     async function requestAiMove() {
         try {
-            const userStrid = getCurrentUserStrid();
             const response = await fetch(API_ENDPOINTS.AI_GUESS, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_strid: String(userStrid) })
+                headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') }
             });
             if (!response.ok) {
                 throw new Error(`Unexpected server status: ${response.status}`);

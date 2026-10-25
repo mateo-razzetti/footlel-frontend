@@ -125,9 +125,12 @@
             </nav>
         </div>
 
-        <!-- Standings table -->
-        <section class="lb-list" id="lbList" aria-label="Ranking de jugadores">
-            <!-- Rendered dynamically via JS -->
+        <!-- Standings table (Shows loading state until fetch resolves) -->
+        <section class="lb-list" id="lbList" aria-label="Ranking de jugadores" aria-live="polite">
+            <div class="lb-loading" role="status">
+                <div class="lb-spinner" aria-hidden="true"></div>
+                <span>Cargando ranking...</span>
+            </div>
         </section><!-- /lb-list -->
 
         <!-- Guest CTA (hidden by default, shown via JS) -->
@@ -215,42 +218,27 @@
     /* ─────────────────────────────────────────
        3. RANKING DATA & BUILDERS (GLOBAL / AMIGOS)
     ───────────────────────────────────────── */
-    var FALLBACK_GLOBAL_PLAYERS = [
-        { username: 'FutbolMaster_10', points: 3420 },
-        { username: 'GoalKing_AR',     points: 3150 },
-        { username: 'TriviaChamp',     points: 2980 },
-        { username: 'Crack_Del_Gol',   points: 2650 },
-        { username: 'Pelota_Loca',     points: 2420 },
-        { username: 'Messi_Fan_99',    points: 2310 },
-        { username: 'DT_Estratega',    points: 2190 },
-        { username: 'Gambeta_Pro',     points: 2050 },
-        { username: 'Arquero_10',      points: 1980 },
-        { username: 'Mediocampista',   points: 1870 }
-    ];
-
     var DEFAULT_INITIAL_FRIENDS = [
         { username: 'Santi_Martinez',  status: 'En línea · Libre', statusType: 'online',  available: true, points: 2540 },
         { username: 'Felix_Rodriguez', status: 'Desconectado',     statusType: 'offline', available: true, points: 2150 }
     ];
 
-    var FRIEND_DEFAULT_POINTS = {
-        'santi_martinez':  2540,
-        'felix_rodriguez': 2150,
-        'carlos_mendez':   2410,
-        'futbolmaster_10': 3420,
-        'goalking_ar':     3150,
-        'triviachamp':     2980
-    };
+    var cachedBackendLb  = null;
+    var isLoadingRanking = true;
+    var activeTab        = 'global'; // Global active by default
 
-    var cachedBackendLb   = null;
-    var cachedBackendInfo = null;
-    var activeTab         = 'global'; // Global active by default
+    function renderLoadingState(message) {
+        lbList.innerHTML =
+            '<div class="lb-loading" role="status">' +
+                '<div class="lb-spinner" aria-hidden="true"></div>' +
+                '<span>' + (message || 'Cargando ranking...') + '</span>' +
+            '</div>';
+    }
 
-    function buildGlobalStandings(lbData, userInfo, currentUsername) {
+    function buildGlobalStandings(lbData) {
         var map = new Map();
 
-        // 1. Real data from GET /stat/get-leaderboard
-        if (lbData && Array.isArray(lbData.leaderboard) && lbData.leaderboard.length > 0) {
+        if (lbData && Array.isArray(lbData.leaderboard)) {
             lbData.leaderboard.forEach(function (entry) {
                 var rawName = Array.isArray(entry)
                     ? entry[0]
@@ -262,37 +250,12 @@
                 if (!cleanName) return;
                 var key = cleanName.toLowerCase();
 
-                if (/^guest_/i.test(cleanName) && (!currentUsername || key !== currentUsername.trim().toLowerCase())) {
+                if (/^guest_/i.test(cleanName) && (isGuest || !savedUser || key !== savedUser.toLowerCase())) {
                     return;
                 }
 
                 map.set(key, { username: cleanName, points: rawVal });
             });
-        }
-
-        // 2. Fallback / supplement if backend did not respond or returned empty
-        if (map.size === 0) {
-            FALLBACK_GLOBAL_PLAYERS.forEach(function (p) {
-                map.set(p.username.toLowerCase(), { username: p.username, points: p.points });
-            });
-        }
-
-        // 3. Ensure logged-in user is reflected with their latest points
-        if (!isGuest && currentUsername) {
-            var normUser = currentUsername.trim();
-            var userKey  = normUser.toLowerCase();
-            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
-            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
-            var backendWins = Number(userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas)) || 0;
-            var effectiveWins = Math.max(localWins, backendWins);
-
-            if (map.has(userKey)) {
-                var existing = map.get(userKey);
-                existing.username = normUser;
-                existing.points = Math.max(existing.points, effectiveWins) + bonusPts;
-            } else {
-                map.set(userKey, { username: normUser, points: effectiveWins * 10 + bonusPts });
-            }
         }
 
         var sorted = Array.from(map.values()).sort(function (a, b) {
@@ -318,24 +281,10 @@
         return DEFAULT_INITIAL_FRIENDS.slice();
     }
 
-    function computeDeterministicFriendPoints(username) {
-        var clean = String(username || '').replace(/^@/, '').trim();
-        var lower = clean.toLowerCase();
-        if (FRIEND_DEFAULT_POINTS[lower] !== undefined) {
-            return FRIEND_DEFAULT_POINTS[lower];
-        }
-        var hash = 0;
-        for (var i = 0; i < lower.length; i++) {
-            hash = (hash * 31 + lower.charCodeAt(i)) % 900;
-        }
-        return 150 + hash;
-    }
-
-    function buildFriendsStandings(globalList, currentUsername) {
+    function buildFriendsStandings(currentUsername) {
         var friends = getPersistedFriendsForUser(currentUsername);
         var map = new Map();
 
-        // Map real points from backend leaderboard when a friend exists there
         var backendPointsByUser = new Map();
         if (cachedBackendLb && Array.isArray(cachedBackendLb.leaderboard)) {
             cachedBackendLb.leaderboard.forEach(function (entry) {
@@ -351,19 +300,14 @@
             var lower = cleanName.toLowerCase();
             var pts = backendPointsByUser.has(lower)
                 ? backendPointsByUser.get(lower)
-                : (Number(f.points) || computeDeterministicFriendPoints(cleanName));
+                : (Number(f.points) || 0);
             map.set(lower, { username: cleanName, points: pts });
         });
 
         if (currentUsername) {
             var normUser = currentUsername.trim();
             var uKey = normUser.toLowerCase();
-            var globalEntry = (globalList || []).find(function (g) {
-                return g.username.toLowerCase() === uKey;
-            });
-            var bonusPts = parseInt(localStorage.getItem('footlel_bonus_pts_' + normUser) || '0', 10) || 0;
-            var localWins = parseInt(localStorage.getItem('footlel_wins_' + normUser) || '0', 10) || 0;
-            var userPts = globalEntry ? globalEntry.points : (localWins * 10 + bonusPts);
+            var userPts = backendPointsByUser.has(uKey) ? backendPointsByUser.get(uKey) : 0;
             map.set(uKey, { username: normUser, points: userPts });
         }
 
@@ -380,6 +324,15 @@
 
     function renderStandingsRows(entries) {
         lbList.innerHTML = '';
+
+        if (!entries || entries.length === 0) {
+            lbList.innerHTML =
+                '<div class="lb-loading" role="status">' +
+                    '<span>No hay datos de ranking disponibles.</span>' +
+                '</div>';
+            return;
+        }
+
         var maxRows = isGuest ? Math.min(5, entries.length) : entries.length;
 
         for (var i = 0; i < maxRows; i++) {
@@ -440,36 +393,35 @@
     }
 
     function renderActiveTab() {
-        var globalData = buildGlobalStandings(cachedBackendLb, cachedBackendInfo, isGuest ? null : savedUser);
+        if (isLoadingRanking) {
+            renderLoadingState('Cargando ranking...');
+            return;
+        }
         if (activeTab === 'amigos' && !isGuest) {
-            var friendsData = buildFriendsStandings(globalData, savedUser);
+            var friendsData = buildFriendsStandings(savedUser);
             renderStandingsRows(friendsData);
         } else {
+            var globalData = buildGlobalStandings(cachedBackendLb);
             renderStandingsRows(globalData);
         }
     }
 
-    // Initial render ("global" active by default)
-    renderActiveTab();
+    // Show "Cargando ranking..." while the backend promise is pending (no fake/zero data injected)
+    renderLoadingState('Cargando ranking...');
 
-    // Fetch real backend leaderboard & user info
     var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
     (async function fetchBackendLeaderboard() {
-        var promises = [
-            fetch(apiBaseUrl + '/stat/get-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
-        ];
-        if (!isGuest && savedUser) {
-            promises.push(
-                fetch(apiBaseUrl + '/user/get-user-info/' + encodeURIComponent(savedUser)).then(function (r) { return r.ok ? r.json() : null; })
-            );
+        try {
+            var r = await fetch(apiBaseUrl + '/stat/get-global-leaderboard');
+            cachedBackendLb = r.ok ? await r.json() : null;
+        } catch (err) {
+            console.warn('No se pudo obtener el leaderboard del backend:', err);
+            cachedBackendLb = null;
+        } finally {
+            isLoadingRanking = false;
+            renderActiveTab();
         }
-        var results = await Promise.allSettled(promises);
-        cachedBackendLb   = results[0] && results[0].status === 'fulfilled' ? results[0].value : null;
-        cachedBackendInfo = results[1] && results[1].status === 'fulfilled' ? results[1].value : null;
-        renderActiveTab();
-    })().catch(function (err) {
-        console.warn('No se pudo obtener el leaderboard del backend:', err);
-    });
+    })();
 
     /* ─────────────────────────────────────────
        4. PROFILE DROPDOWN TOGGLE

@@ -353,3 +353,12 @@
     .guest-cta-bar__actions { flex-direction: column; }
     .btn-cta-green, .btn-cta-ghost { text-align: center; }
 }
+
+
+/* ── Stat info icon override ─────────────────────────────────── */
+.stat-info {
+    font-style: normal !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
