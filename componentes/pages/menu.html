@@ -211,10 +211,7 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">PORCENTAJE DE ACIERTOS</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">
-                    i
-                    <span class="stat-tooltip" role="tooltip">Porcentaje de Aciertos = 5 (cantidad de aciertos) / 20 (cantidad de intentos) x 100% (para convertirlo en porcentaje).</span>
-                </span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">i<span class="stat-tooltip" role="tooltip">Porcentaje de Aciertos = (Cantidad de aciertos / Cantidad de intentos) x 100</span></span>
             </div>
             <span class="stat-value" id="statAccuracy">🎯 0%</span>
         </div>
@@ -223,10 +220,7 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">TU RACHA</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Tu Racha">
-                    i
-                    <span class="stat-tooltip" role="tooltip">Se suma por cada día que ingreses</span>
-                </span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Tu Racha">i<span class="stat-tooltip" role="tooltip">Tu racha aumenta por cada día consecutivo que juegues. ¡Recibís +10 puntos extra por cada día de racha acumulado!</span></span>
             </div>
             <span class="stat-value" id="statStreak">🔥 0 Días</span>
         </div>
@@ -235,10 +229,7 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">PUNTOS TOTALES</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">
-                    i
-                    <span class="stat-tooltip" role="tooltip">Muestra la sumatoria de puntos de todas las partidas</span>
-                </span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">i<span class="stat-tooltip" role="tooltip">Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.</span></span>
             </div>
             <span class="stat-value" id="statPoints">⭐ 0 pts</span>
         </div>
@@ -247,10 +238,7 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">PORCENTAJE DE VICTORIAS</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">
-                    i
-                    <span class="stat-tooltip" role="tooltip">Porcentaje de Victorias = 5 (cantidad de Partidas ganadas) / 20 (cantidad de partidas) x 100% (para convertirlo en porcentaje).</span>
-                </span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">i<span class="stat-tooltip" role="tooltip">Porcentaje de Victorias = (Partidas ganadas / Partidas jugadas) x 100</span></span>
             </div>
             <span class="stat-value" id="statWins">📈 0%</span>
         </div>
@@ -359,33 +347,29 @@
     }
 
     /* ──────────────────────────────────────────
-       4. PREPARED FETCH: GET /user/get-user-stats
+       4. FETCH: GET /stat/get-user-stats
     ────────────────────────────────────────── */
     const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
 
-    async function fetchUserStatsFromEndpoint(username) {
-        const userId = localStorage.getItem('footlel_user_id') || localStorage.getItem('footlel_user_strid') || username;
-        const candidateUrls = [
-            `${apiBaseUrl}/user/get-user-stats?user_name=${encodeURIComponent(username)}&user_strid=${encodeURIComponent(userId)}`,
-            `${apiBaseUrl}/user/get-user-stats/${encodeURIComponent(username)}`
-        ];
-
-        for (const url of candidateUrls) {
-            try {
-                const res = await fetch(url);
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data && typeof data === 'object') {
-                        return data;
-                    }
+    // GET /stat/get-user-stats with JWT (registered users only).
+    async function fetchUserStatsFromEndpoint() {
+        const token = localStorage.getItem('footlel_token');
+        if (!token || isGuest) return null;
+        try {
+            const res = await fetch(`${apiBaseUrl}/stat/get-user-stats`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data && typeof data === 'object') {
+                    return data;
                 }
-            } catch (e) {
-                // Endpoint not active yet or network error; handled by fallback
             }
+        } catch (e) {
+            // Network error; handled by fallback
         }
         return null;
     }
-
     function mapUserStatsPayload(statsPayload, userInfo, lbData, username) {
         const streakKey = 'footlel_streak_' + username;
         const winsKey   = 'footlel_wins_'   + username;
@@ -539,11 +523,16 @@
         statPoints.textContent   = formatTotalPoints(initialStats.totalPoints);
         statWins.textContent     = `📈 ${formatPercentage(initialStats.winPercentage)}`;
 
+        // Sync preferences from GET /config/get-user-config (registered user with token).
+        if (localStorage.getItem('footlel_token') && window.FootlelPrefs && window.FootlelPrefs.syncConfigFromBackend) {
+            window.FootlelPrefs.syncConfigFromBackend();
+        }
+
         (async function loadUserFooterStats() {
             const [statsResult, infoResult, lbResult] = await Promise.allSettled([
-                fetchUserStatsFromEndpoint(savedUsername),
+                fetchUserStatsFromEndpoint(),
                 fetch(`${apiBaseUrl}/user/get-user-info/${encodeURIComponent(savedUsername)}`).then(r => r.ok ? r.json() : null),
-                fetch(`${apiBaseUrl}/stat/get-leaderboard`).then(r => r.ok ? r.json() : null)
+                fetch(`${apiBaseUrl}/stat/get-global-leaderboard`).then(r => r.ok ? r.json() : null)
             ]);
 
             const statsPayload = statsResult.status === 'fulfilled' ? statsResult.value : null;

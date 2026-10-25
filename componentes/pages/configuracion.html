@@ -589,6 +589,15 @@
     function applyTheme(isLight) { window.FootlelPrefs.applyTheme(isLight); }
     function applyAnimations(disabled) { window.FootlelPrefs.applyAnimations(disabled); }
 
+    /* PATCH /config/set-user-config with the 3 current states (full object). */
+    function saveUserConfig() {
+        return window.FootlelPrefs.saveUserConfig(
+            Boolean(toggleDark && toggleDark.checked),
+            Boolean(toggleAnim && toggleAnim.checked),
+            Boolean(toggleCompat && toggleCompat.checked)
+        );
+    }
+
     /* ── Initialization from localStorage ── */
     (function initToggles() {
         // Dark mode: ACTIVE by default ('dark')
@@ -609,17 +618,9 @@
             toggleCompat.addEventListener('change', async function () {
                 const state = toggleCompat.checked;
                 localStorage.setItem('pref_toggle-compat', String(state));
-                const token = localStorage.getItem('footlel_token');
-                if (token) {
+                if (localStorage.getItem('footlel_token') && !isGuest) {
                     try {
-                        await fetch(`${API_BASE_URL}/stat/set-user-compatibility-state`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': 'Bearer ' + token
-                            },
-                            body: JSON.stringify({ boolean: Boolean(state) })
-                        });
+                        await saveUserConfig();
                     } catch (e) {
                         showToast('No se pudo sincronizar el modo compatibilidad.');
                     }
@@ -627,6 +628,27 @@
             });
         }
     })();
+
+    /* Sync switches from GET /config/get-user-config (registered users). */
+    if (localStorage.getItem('footlel_token') && !isGuest) {
+        window.FootlelPrefs.fetchUserConfig().then(function (cfg) {
+            if (!cfg) return;
+            if (typeof cfg.dark_mode === 'boolean') {
+                if (toggleDark) toggleDark.checked = cfg.dark_mode;
+                localStorage.setItem('footlel_theme', cfg.dark_mode ? 'dark' : 'light');
+                applyTheme(!cfg.dark_mode);
+            }
+            if (typeof cfg.animation_state === 'boolean') {
+                if (toggleAnim) toggleAnim.checked = cfg.animation_state;
+                localStorage.setItem('pref_toggle-animaciones', String(cfg.animation_state));
+                applyAnimations(cfg.animation_state);
+            }
+            if (typeof cfg.compatibility_mode === 'boolean') {
+                if (toggleCompat) toggleCompat.checked = cfg.compatibility_mode;
+                localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+            }
+        });
+    }
 
     /* ── Listener: Dark Mode ── */
     if (toggleDark) {
@@ -637,17 +659,9 @@
             localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
 
             // Sync with the backend
-            const token = localStorage.getItem('footlel_token');
-            if (token) {
+            if (localStorage.getItem('footlel_token') && !isGuest) {
                 try {
-                    await fetch(`${API_BASE_URL}/stat/set-user-dark-mode-state`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify({ boolean: Boolean(toggleDark.checked) })
-                    });
+                    await saveUserConfig();
                 } catch (e) {
                     showToast('No se pudo sincronizar el modo oscuro.');
                 }
@@ -663,17 +677,9 @@
             localStorage.setItem('pref_toggle-animaciones', String(disabled));
 
             // Sync with the backend
-            const token = localStorage.getItem('footlel_token');
-            if (token) {
+            if (localStorage.getItem('footlel_token') && !isGuest) {
                 try {
-                    await fetch(`${API_BASE_URL}/stat/set-user-animation-state`, {
-                        method: 'PATCH',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + token
-                        },
-                        body: JSON.stringify({ boolean: Boolean(disabled) })
-                    });
+                    await saveUserConfig();
                 } catch (e) {
                     showToast('No se pudo sincronizar las animaciones.');
                 }

@@ -71,16 +71,62 @@
         return String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
     }
 
-    function patchUserStatState(endpointPath, state) {
+    function isGuestSession() {
+        return readStorage('footlel_guest') === 'true';
+    }
+
+    function readCompatStored() {
+        return readStorage('pref_toggle-compat') === 'true';
+    }
+
+    /* GET /config/get-user-config (registered users with token). */
+    function fetchUserConfig() {
         var token = readStorage('footlel_token');
-        if (!token) return Promise.resolve(null);
-        return fetch(getApiBaseUrl() + endpointPath, {
+        if (!token || isGuestSession()) return Promise.resolve(null);
+        return fetch(getApiBaseUrl() + '/config/get-user-config', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        }).then(function (r) { return r.ok ? r.json() : null; })
+          .catch(function () { return null; });
+    }
+
+    /* PATCH /config/set-user-config, always sends the full object with the 3 states. */
+    function saveUserConfig(darkModeState, animationState, compatibilityState) {
+        var token = readStorage('footlel_token');
+        if (!token || isGuestSession()) return Promise.resolve(null);
+        return fetch(getApiBaseUrl() + '/config/set-user-config', {
             method: 'PATCH',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': 'Bearer ' + token
             },
-            body: JSON.stringify({ boolean: Boolean(state) })
+            body: JSON.stringify({
+                dark_mode: Boolean(darkModeState),
+                animation_state: Boolean(animationState),
+                compatibility_mode: Boolean(compatibilityState)
+            })
+        });
+    }
+
+    /* Current states from localStorage, with one override applied. */
+    function saveCurrentConfig(overrides) {
+        var o = overrides || {};
+        var dark = ('dark' in o) ? o.dark : !isLightStored();
+        var anim = ('anim' in o) ? o.anim : isAnimDisabledStored();
+        var compat = ('compat' in o) ? o.compat : readCompatStored();
+        return saveUserConfig(dark, anim, compat);
+    }
+
+    /* Pulls the backend config into localStorage and applies it. */
+    function syncConfigFromBackend() {
+        return fetchUserConfig().then(function (cfg) {
+            if (!cfg) return null;
+            try {
+                if (typeof cfg.dark_mode === 'boolean') localStorage.setItem(THEME_KEY, cfg.dark_mode ? 'dark' : 'light');
+                if (typeof cfg.animation_state === 'boolean') localStorage.setItem(ANIM_KEY, String(cfg.animation_state));
+                if (typeof cfg.compatibility_mode === 'boolean') localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+            } catch (e) {}
+            applyFromStorage();
+            return cfg;
         });
     }
 
@@ -97,9 +143,13 @@
         applyTheme: applyTheme,
         applyAnimations: applyAnimations,
         applyFromStorage: applyFromStorage,
-        setDarkModeState: function (state) { return patchUserStatState('/stat/set-user-dark-mode-state', state); },
-        setAnimationState: function (state) { return patchUserStatState('/stat/set-user-animation-state', state); },
-        setCompatibilityState: function (state) { return patchUserStatState('/stat/set-user-compatibility-state', state); }
+        fetchUserConfig: fetchUserConfig,
+        saveUserConfig: saveUserConfig,
+        saveCurrentConfig: saveCurrentConfig,
+        syncConfigFromBackend: syncConfigFromBackend,
+        setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
+        setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
+        setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }
     };
 
     /* Immediately (<html> always exists, avoids flash of wrong theme). */
