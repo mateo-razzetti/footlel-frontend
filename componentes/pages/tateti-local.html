@@ -587,6 +587,39 @@
         return true;
     }
 
+    // Determines if the upcoming round can decide the match (either player is 1 win away from ROUNDS_TO_WIN).
+    function isDecisiveRound() {
+        return (
+            gameState.scoreP1 >= ROUNDS_TO_WIN - 1 ||
+            gameState.scoreP2 >= ROUNDS_TO_WIN - 1
+        );
+    }
+
+    // Ensures a valid JWT is present in localStorage before calling /game/* endpoints.
+    async function ensureAuthToken() {
+        let token = localStorage.getItem('footlel_token');
+        if (token && token !== 'null' && token !== 'undefined') return token;
+        if (localStorage.getItem('footlel_guest') === 'true') {
+            try {
+                const res = await fetch(`${API_BASE_URL}/auth/guest-login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    const newToken = data && (data.access_token || data.token || data.jwt || (typeof data === 'string' ? data : null));
+                    if (newToken) {
+                        localStorage.setItem('footlel_token', newToken);
+                        return newToken;
+                    }
+                }
+            } catch (e) {
+                console.warn('No se pudo renovar el token de invitado:', e);
+            }
+        }
+        return localStorage.getItem('footlel_token');
+    }
+
     // POST /game/start (active backend route); if 404, fall back to /game/start-game.
     async function postStartGame(options) {
         const response = await fetch(API_ENDPOINTS.START_GAME, options);
@@ -602,13 +635,30 @@
         // the first request. If NO attempt fetches a real board, it is better
         // to pause the game (see showFatalStartError) than to run with a mocked
         // catalog without warning.
+        const isLastRound = isDecisiveRound();
+        gameState.isLastRound = isLastRound;
+
         for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
             try {
-                // /game/start: JWT identifies the player (no user_strid, no body).
-                const response = await postStartGame({
+                const token = await ensureAuthToken();
+                let response = await postStartGame({
                     method: 'POST',
-                    headers: { 'Authorization': 'Bearer ' + localStorage.getItem('footlel_token') }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({ is_last_round: Boolean(isLastRound) })
                 });
+
+                // Immediate fallback without body if Render deploy hasn't updated schema yet
+                if (response.status === 422) {
+                    console.warn('/game/start returned 422 with body, retrying immediately without body');
+                    response = await postStartGame({
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                }
+
                 if (!response.ok) {
                     throw new Error(`Unexpected status ${response.status}`);
                 }
@@ -627,7 +677,6 @@
         }
         return null;
     }
-
     // Blocks the game with a clear notice instead of allowing play with a
     // client-mocked board (which would never match the backend's real player_names_matrix).
     function showFatalStartError() {

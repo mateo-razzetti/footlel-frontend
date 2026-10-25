@@ -373,47 +373,60 @@
     function mapUserStatsPayload(statsPayload, userInfo, lbData, username) {
         const streakKey = 'footlel_streak_' + username;
         const winsKey   = 'footlel_wins_'   + username;
-        const bonusKey  = 'footlel_bonus_pts_' + username;
+        const pointsKey = 'footlel_points_' + username;
+        const accKey    = 'footlel_accuracy_' + username;
+        const winPctKey = 'footlel_win_pct_' + username;
 
         const localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
         const localWins   = parseInt(localStorage.getItem(winsKey)   || '0', 10) || 0;
-        const localBonus  = parseInt(localStorage.getItem(bonusKey)  || '0', 10) || 0;
 
-        // 1. Porcentaje de Aciertos
+        // 1. Porcentaje de Aciertos (Backend: correct_guesses / guesses_made)
         let accuracyPct = null;
-        if (statsPayload) {
-            if (statsPayload.accuracy_percentage !== undefined) accuracyPct = Number(statsPayload.accuracy_percentage);
-            else if (statsPayload.porcentaje_aciertos !== undefined) accuracyPct = Number(statsPayload.porcentaje_aciertos);
-            else if (statsPayload.accuracy !== undefined) accuracyPct = Number(statsPayload.accuracy);
-            else if (statsPayload.hits !== undefined && statsPayload.attempts) {
-                accuracyPct = (Number(statsPayload.hits) / Number(statsPayload.attempts)) * 100;
-            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos) {
-                accuracyPct = (Number(statsPayload.aciertos) / Number(statsPayload.intentos)) * 100;
+        if (statsPayload && typeof statsPayload === 'object') {
+            if (statsPayload.correct_guesses !== undefined && statsPayload.guesses_made !== undefined) {
+                const made = Number(statsPayload.guesses_made) || 0;
+                const corr = Number(statsPayload.correct_guesses) || 0;
+                accuracyPct = made > 0 ? (corr / made) * 100 : 0;
+            } else if (statsPayload.accuracy_percentage !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy_percentage);
+            } else if (statsPayload.porcentaje_aciertos !== undefined) {
+                accuracyPct = Number(statsPayload.porcentaje_aciertos);
+            } else if (statsPayload.accuracy !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy);
+            } else if (statsPayload.hits !== undefined && statsPayload.attempts !== undefined) {
+                const att = Number(statsPayload.attempts) || 0;
+                accuracyPct = att > 0 ? (Number(statsPayload.hits) / att) * 100 : 0;
+            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos !== undefined) {
+                const intn = Number(statsPayload.intentos) || 0;
+                accuracyPct = intn > 0 ? (Number(statsPayload.aciertos) / intn) * 100 : 0;
+            }
+            if (accuracyPct !== null && !Number.isNaN(accuracyPct)) {
+                localStorage.setItem(accKey, String(accuracyPct));
             }
         }
         if (accuracyPct === null || Number.isNaN(accuracyPct)) {
-            const savedAcc = localStorage.getItem('footlel_accuracy_' + username);
-            accuracyPct = savedAcc !== null ? Number(savedAcc) : (localWins > 0 ? 75 : 0);
+            const savedAcc = localStorage.getItem(accKey);
+            accuracyPct = savedAcc !== null ? Number(savedAcc) : 0;
         }
 
-        // 2. Racha de días
-        let rawStreak = statsPayload && (statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
+        // 2. Racha de días (Backend: win_streak)
+        let rawStreak = statsPayload && (statsPayload.win_streak ?? statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
         if (rawStreak === undefined || rawStreak === null) {
-            rawStreak = userInfo && (userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
+            rawStreak = userInfo && (userInfo.win_streak ?? userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
         }
         const finalStreak = (rawStreak !== undefined && rawStreak !== null)
-            ? Math.max(Number(rawStreak) || 0, localStreak)
+            ? (Number(rawStreak) || 0)
             : localStreak;
         localStorage.setItem(streakKey, String(finalStreak));
 
-        // 3. Puntos totales & 4. Porcentaje de Victorias
-        let rawPoints = statsPayload && (statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
-        let rawWins   = statsPayload && (statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
-        let rawTotalGames = statsPayload && (statsPayload.total_games ?? statsPayload.matches_played ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
+        // 3. Puntos totales (Backend: user_points) & 4. Porcentaje de Victorias (Backend: matches_won / matches_played)
+        let rawPoints = statsPayload && (statsPayload.user_points ?? statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
+        let rawWins   = statsPayload && (statsPayload.matches_won ?? statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
+        let rawTotalGames = statsPayload && (statsPayload.matches_played ?? statsPayload.total_games ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
         let winPct = statsPayload && (statsPayload.win_percentage ?? statsPayload.porcentaje_victorias ?? statsPayload.win_rate);
 
         if (rawWins === undefined || rawWins === null) {
-            rawWins = userInfo && (userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
+            rawWins = userInfo && (userInfo.matches_won ?? userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
         }
 
         if (lbData && Array.isArray(lbData.leaderboard)) {
@@ -427,33 +440,39 @@
             if (userEntry) {
                 const val = Array.isArray(userEntry)
                     ? userEntry[1]
-                    : (userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
+                    : (userEntry.user_points ?? userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
                 if (rawPoints === undefined || rawPoints === null) {
                     rawPoints = Number(val) || 0;
                 }
-                if (rawWins === undefined || rawWins === null) {
-                    rawWins = Number(val) || 0;
-                }
             }
         }
 
-        const effectiveWins = Math.max(Number(rawWins) || 0, localWins);
+        const effectiveWins = (rawWins !== undefined && rawWins !== null)
+            ? (Number(rawWins) || 0)
+            : localWins;
         localStorage.setItem(winsKey, String(effectiveWins));
 
+        // Exact backend points without any extra local bonus (+10 removed)
         let finalPoints;
         if (rawPoints !== undefined && rawPoints !== null) {
-            finalPoints = Number(rawPoints) + localBonus;
+            finalPoints = Number(rawPoints) || 0;
+            localStorage.setItem(pointsKey, String(finalPoints));
         } else {
-            finalPoints = effectiveWins * 10 + localBonus;
+            const savedPts = localStorage.getItem(pointsKey);
+            finalPoints = savedPts !== null ? (Number(savedPts) || 0) : (effectiveWins * 10);
         }
 
         if (winPct === undefined || winPct === null || Number.isNaN(Number(winPct))) {
-            if (rawTotalGames && Number(rawTotalGames) > 0) {
-                winPct = (effectiveWins / Number(rawTotalGames)) * 100;
+            if (rawTotalGames !== undefined && rawTotalGames !== null) {
+                const totalG = Number(rawTotalGames) || 0;
+                winPct = totalG > 0 ? (effectiveWins / totalG) * 100 : 0;
+                localStorage.setItem(winPctKey, String(winPct));
             } else {
-                const savedWinPct = localStorage.getItem('footlel_win_pct_' + username);
-                winPct = savedWinPct !== null ? Number(savedWinPct) : (effectiveWins > 0 ? 100 : 0);
+                const savedWinPct = localStorage.getItem(winPctKey);
+                winPct = savedWinPct !== null ? Number(savedWinPct) : 0;
             }
+        } else {
+            localStorage.setItem(winPctKey, String(winPct));
         }
 
         return {
@@ -463,12 +482,12 @@
             winPercentage: winPct
         };
     }
-
     /* ──────────────────────────────────────────
        5. APPLY UI STATE
     ────────────────────────────────────────── */
     if (isGuest) {
-        const guestName = localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado';
+        const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         heroUsername.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
         profileUser.textContent   = guestName;
         profileAvatar.src         = GUEST_AVATAR;

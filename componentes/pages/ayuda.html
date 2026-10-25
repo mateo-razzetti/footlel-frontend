@@ -367,7 +367,9 @@
     `;
 
     if (isGuest) {
-        profileUser.textContent  = 'Invitado';
+        const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
+        profileUser.textContent  = guestName;
         profileAvatar.src        = GUEST_AVATAR;
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';

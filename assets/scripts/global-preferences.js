@@ -131,7 +131,7 @@
     }
 
     function bindSessionCleanup() {
-        var logoutSelectors = '#ddSessionAction, #btn-logout, a.item-danger[href*="login.html"], .link-guest';
+        var logoutSelectors = '#ddSessionAction, #btn-logout, a.item-danger[href*="login.html"]';
         document.querySelectorAll(logoutSelectors).forEach(function (el) {
             el.addEventListener('click', function () {
                 try { localStorage.removeItem('footlel_token'); } catch (e) {}
