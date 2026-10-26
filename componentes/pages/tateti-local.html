@@ -647,7 +647,7 @@
                         'Content-Type': 'application/json',
                         'Authorization': 'Bearer ' + token
                     },
-                    body: JSON.stringify({ is_last_round: Boolean(isLastRound) })
+                    body: JSON.stringify({ is_last_round: Boolean(isLastRound), is_daily_challenge: false })
                 });
 
                 // Immediate fallback without body if Render deploy hasn't updated schema yet
