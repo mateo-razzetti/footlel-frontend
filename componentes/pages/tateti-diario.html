@@ -1417,19 +1417,38 @@
     function showReactionPopup(popupElement) {
         const isSuccess = popupElement === dom.popupSuccess || popupElement.classList.contains('success');
         const reaction = getRandomReaction(isSuccess ? SUCCESS_REACTIONS : ERROR_REACTIONS);
-        const imgEl = popupElement.querySelector('.reaction-img');
-        const textEl = popupElement.querySelector('.reaction-text');
+        const imgElement = popupElement.querySelector('.reaction-img');
+        const textElement = popupElement.querySelector('.reaction-text');
 
-        if (imgEl && reaction) {
-            imgEl.style.display = '';
-            imgEl.src = reaction.src;
-        }
-        if (textEl && reaction) {
-            textEl.textContent = reaction.text;
+        if (textElement && reaction) {
+            textElement.textContent = reaction.text;
         }
 
-        popupElement.classList.add('show');
-        setTimeout(() => popupElement.classList.remove('show'), REACTION_POPUP_DURATION_MS);
+        const revealPopup = () => {
+            popupElement.classList.add('show');
+            setTimeout(() => {
+                popupElement.classList.remove('show');
+                if (imgElement) {
+                    imgElement.onload = null;
+                    imgElement.onerror = null;
+                    imgElement.removeAttribute('src');
+                }
+            }, REACTION_POPUP_DURATION_MS);
+        };
+
+        if (imgElement && reaction) {
+            imgElement.onload = () => {
+                imgElement.style.display = '';
+                revealPopup();
+            };
+            imgElement.onerror = () => {
+                imgElement.style.display = 'none';
+                revealPopup();
+            };
+            imgElement.src = reaction.src;
+        } else {
+            revealPopup();
+        }
     }
 
     function showButtonError(message) {
