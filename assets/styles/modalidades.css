@@ -3,62 +3,35 @@
    assets/styles/modalidades.css
    ═══════════════════════════════════════════════════════════════ */
 
-/* ── Hero ─────────────────────────────────────────────────────── */
-.hero-modalidades {
-    text-align: center;
-    padding: 0 32px 16px;
-    max-width: 680px;
-    margin: 0 auto;
-}
+/* ── Hero: uses the shared .hero / .hero-title / .hero-subtitle from menu.css ── */
 
-.hero-modalidades .hero-title {
-    font-family: var(--font-heading);
-    font-size: clamp(22px, 3.5vw, 32px);
-    font-weight: 700;
-    color: var(--color-text-primary);
-    letter-spacing: 0.5px;
-    margin-bottom: 10px;
-}
-
-.hero-modalidades .hero-subtitle {
-    font-family: var(--font-body);
-    font-size: 15px;
-    font-weight: 400;
-    color: var(--color-text-muted);
-    line-height: 1.6;
-    margin-top: 6px;
-}
-
-/* ── Cards Grid ────────────────────────────────────────────────── */
+/* ── Cards Grid: identical to .cards-grid in menu.css ───────────── */
 .mode-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-    max-width: 1300px;
-    margin: 0 auto;
-    padding: 0 32px 16px;
+    gap: 24px;
 }
 
-/* ── Base card — same proportions as .game-card in menu.css ── */
+/* ── Base card: identical to .game-card in menu.css ─────────────── */
 .mode-card {
     background: var(--color-surface-card);
-    border: 1px solid var(--color-border-subtle);
     border-radius: var(--card-radius);
-    padding: 28px 24px;
-    min-height: 240px;
+    border: 1px solid var(--color-border-subtle);
+    padding: 32px 28px;
+    min-height: 280px;
     display: flex;
     flex-direction: column;
     gap: 12px;
-    transition: border-color var(--transition-fast), transform var(--transition-fast);
+    box-shadow: var(--shadow-card);
+    transition:
+        transform    var(--transition-fast),
+        border-color var(--transition-fast);
 }
 
 .mode-card:hover {
+    border-color: var(--color-brand-green);
     transform: translateY(-2px);
-    border-color: rgba(76, 175, 80, 0.35);
 }
-
-
-
 /* ── Icon ────────────────────────────────────────────────────── */
 .mode-icon {
     font-size: 36px;
@@ -92,14 +65,14 @@
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    margin-top: 10px;
-    padding: 11px 20px;
+    margin-top: 8px;
+    padding: 12px 24px;
     background: transparent;
     color: var(--color-text-primary);
     border: 1px solid var(--color-brand-green);
     border-radius: var(--btn-radius);
     font-family: var(--font-body);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -266,19 +239,18 @@
 /* ── .hidden Utility ─────────────────────────────────────────── */
 .hidden { display: none !important; }
 
-/* ── Responsive ───────────────────────────────────────────────── */
+/* ── Responsive (same breakpoints as menu.css .cards-grid) ───── */
+@media (max-width: 900px) {
+    .mode-grid { grid-template-columns: 1fr 1fr; }
+    .mode-grid .mode-card:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .mode-grid .mode-card:first-child { grid-column: auto; }
+}
 @media (max-width: 760px) {
-    .mode-grid { grid-template-columns: 1fr; padding: 0 16px 40px; }
-    .hero-modalidades { padding: 32px 16px 24px; }
     .modal-card { padding: 28px 20px 22px; }
 }
-@media (min-width: 761px) and (max-width: 960px) {
-    .mode-grid {
-        grid-template-columns: repeat(2, 1fr);
-        padding: 0 24px 40px;
-    }
-}
-
 /* == GUEST CTA (below grid) =============================== */
 .guest-cta-bar {
     max-width: 1300px;

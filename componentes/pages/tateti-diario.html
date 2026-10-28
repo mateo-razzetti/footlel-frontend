@@ -142,13 +142,13 @@
      REACTION POP-UPS (Floating)
 ═══════════════════════════════════════ -->
 <div class="reaction-popup success" id="popup-success" aria-live="assertive">
-    <img src="../../assets/images/messi festejo de gol.png" alt="Festejo" class="reaction-img" onerror="this.style.display='none'">
-    <span class="reaction-text">¡Golazo!</span>
+    <img src="../../assets/images/Festejo/Messi-festejo.png" alt="Festejo" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Golazo! La clavaste en el ángulo</span>
 </div>
 
 <div class="reaction-popup error" id="popup-error" aria-live="assertive">
-    <img src="../../assets/images/fabbiani gol errado.png" alt="Gol errado" class="reaction-img" onerror="this.style.display='none'">
-    <span class="reaction-text">Ta tan tan No Fabiani</span>
+    <img src="../../assets/images/Errado/Fabbiani-erra.png" alt="Gol errado" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Ta tan ta tan... Nooo Fabbiani!</span>
 </div>
 
 
@@ -1394,7 +1394,40 @@
     /* ─────────────────────────────────────────────
        11. UI FEEDBACK
     ───────────────────────────────────────────── */
+    const SUCCESS_REACTIONS = [
+        { src: '../../assets/images/Festejo/CR7-festejo.png', text: '¡SIUUU! Adentro y a cobrar' },
+        { src: '../../assets/images/Festejo/Julian-festejo.png', text: '¡Pica la Araña! Qué pedazo de acierto' },
+        { src: '../../assets/images/Festejo/Messi-festejo.png', text: '¡Golazo! La clavaste en el ángulo' },
+        { src: '../../assets/images/Festejo/Neymar-festejo.png', text: '¡Ousadia e Alegria! Adentro' },
+        { src: '../../assets/images/Festejo/Riquelme-festejo.png', text: '¡Fútbol champagne! Qué bien la viste' }
+    ];
+
+    const ERROR_REACTIONS = [
+        { src: '../../assets/images/Errado/Asamoah-erra.png', text: '¡Nooo Gyan! Reventaste el travesaño...' },
+        { src: '../../assets/images/Errado/Baggio-erra.png', text: '¡La mandaste a las nubes como Baggio!' },
+        { src: '../../assets/images/Errado/Cavani-erra.png', text: '¡No se puede creer el gol que erraste abajo del arco!' },
+        { src: '../../assets/images/Errado/Fabbiani-erra.png', text: '¡Ta tan ta tan... Nooo Fabbiani!' },
+        { src: '../../assets/images/Errado/Higuan-erra.png', text: '¡Nooo Pipa! Era por abajo...' }
+    ];
+
+    function getRandomReaction(reactionsArray) {
+        return reactionsArray[Math.floor(Math.random() * reactionsArray.length)];
+    }
+
     function showReactionPopup(popupElement) {
+        const isSuccess = popupElement === dom.popupSuccess || popupElement.classList.contains('success');
+        const reaction = getRandomReaction(isSuccess ? SUCCESS_REACTIONS : ERROR_REACTIONS);
+        const imgEl = popupElement.querySelector('.reaction-img');
+        const textEl = popupElement.querySelector('.reaction-text');
+
+        if (imgEl && reaction) {
+            imgEl.style.display = '';
+            imgEl.src = reaction.src;
+        }
+        if (textEl && reaction) {
+            textEl.textContent = reaction.text;
+        }
+
         popupElement.classList.add('show');
         setTimeout(() => popupElement.classList.remove('show'), REACTION_POPUP_DURATION_MS);
     }
