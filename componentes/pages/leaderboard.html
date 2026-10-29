@@ -255,14 +255,32 @@
     /* ─────────────────────────────────────────
        3. RANKING DATA & BUILDERS (GLOBAL / AMIGOS)
     ───────────────────────────────────────── */
-    var DEFAULT_INITIAL_FRIENDS = [
-        { username: 'Santi_Martinez',  status: 'En línea · Libre', statusType: 'online',  available: true, points: 2540 },
-        { username: 'Felix_Rodriguez', status: 'Desconectado',     statusType: 'offline', available: true, points: 2150 }
-    ];
+    var cachedBackendLb      = null;
+    var cachedUserFriends    = [];
+    var isLoadingRanking     = true;
+    var isLoadingFriendsList = false;
+    var activeTab            = 'global'; // Global active by default
+    var currentUserId        = Number(localStorage.getItem('footlel_user_id')) || null;
 
-    var cachedBackendLb  = null;
-    var isLoadingRanking = true;
-    var activeTab        = 'global'; // Global active by default
+    function getDeterministicRobotForUser(username) {
+        var clean = String(username || '').trim().toLowerCase();
+        if (!clean) return BASE_ROBOT_AVATARS[0];
+        var hash = 0;
+        for (var i = 0; i < clean.length; i++) {
+            hash = ((hash << 5) - hash) + clean.charCodeAt(i);
+            hash |= 0;
+        }
+        return BASE_ROBOT_AVATARS[Math.abs(hash) % BASE_ROBOT_AVATARS.length];
+    }
+
+    function getAvatarForPlayer(username, isCurrentUser) {
+        if (isCurrentUser && savedAvatar) return savedAvatar;
+        var clean = String(username || '').trim().replace(/^@+/, '');
+        if (!clean) return BASE_ROBOT_AVATARS[0];
+        var stored = localStorage.getItem('footlel_avatar_' + clean);
+        if (stored && stored.indexOf('avatar-default.png') === -1) return stored;
+        return getDeterministicRobotForUser(clean);
+    }
 
     function renderLoadingState(message) {
         lbList.innerHTML =
@@ -272,29 +290,154 @@
             '</div>';
     }
 
+    function renderEmptyMessageState(message) {
+        lbList.innerHTML =
+            '<div class="lb-loading" role="status">' +
+                '<span>' + message + '</span>' +
+            '</div>';
+    }
+
+    function parseGlobalLeaderboardEntries(lbData) {
+        var list = [];
+        var rawArray = null;
+        if (Array.isArray(lbData)) {
+            rawArray = lbData;
+        } else if (lbData && Array.isArray(lbData.leaderboard)) {
+            rawArray = lbData.leaderboard;
+        } else if (lbData && lbData.data && Array.isArray(lbData.data.leaderboard)) {
+            rawArray = lbData.data.leaderboard;
+        }
+
+        if (!Array.isArray(rawArray)) return list;
+
+        rawArray.forEach(function (entry) {
+            if (!entry) return;
+            var rawId = null;
+            var rawName = '';
+            var rawVal = 0;
+
+            if (Array.isArray(entry)) {
+                if (entry.length >= 3 && typeof entry[0] === 'number' && typeof entry[1] === 'string') {
+                    rawId = Number(entry[0]);
+                    rawName = entry[1];
+                    rawVal = Number(entry[2]) || 0;
+                } else {
+                    rawName = entry[0];
+                    rawVal = Number(entry[1]) || 0;
+                    if (entry.length >= 3 && entry[2] !== null && entry[2] !== undefined && !isNaN(Number(entry[2]))) {
+                        rawId = Number(entry[2]);
+                    }
+                }
+            } else if (typeof entry === 'object') {
+                rawId = entry.user_id ?? entry.friend_id ?? entry.id ?? null;
+                rawName = entry.user_name ?? entry.username ?? entry.name ?? '';
+                rawVal = Number(entry.points ?? entry.score ?? entry.wins ?? 0) || 0;
+            }
+
+            var cleanName = String(rawName || '').trim().replace(/^@+/, '');
+            if (!cleanName && rawId !== null) cleanName = String(rawId);
+            if (!cleanName) return;
+
+            var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
+                ? Number(rawId)
+                : (/^\d+$/.test(cleanName) ? Number(cleanName) : null);
+
+            list.push({
+                user_id:  numId,
+                username: cleanName,
+                points:   rawVal
+            });
+        });
+
+        return list;
+    }
+
+    function parseUserFriendsResponse(friendsData) {
+        if (!friendsData) return [];
+        var rawList = null;
+        if (Array.isArray(friendsData)) {
+            rawList = friendsData;
+        } else if (typeof friendsData === 'object') {
+            var keys = ['friends', 'user_friends', 'data', 'items', 'results', 'users'];
+            for (var i = 0; i < keys.length; i++) {
+                if (Array.isArray(friendsData[keys[i]])) {
+                    rawList = friendsData[keys[i]];
+                    break;
+                }
+            }
+            if (!rawList && friendsData.data && typeof friendsData.data === 'object') {
+                for (var j = 0; j < keys.length; j++) {
+                    if (Array.isArray(friendsData.data[keys[j]])) {
+                        rawList = friendsData.data[keys[j]];
+                        break;
+                    }
+                }
+            }
+        }
+        if (!Array.isArray(rawList)) return [];
+
+        var parsed = [];
+        rawList.forEach(function (item) {
+            if (item === null || item === undefined) return;
+            var fId = null;
+            var fName = '';
+            var fPts = 0;
+
+            if (Array.isArray(item)) {
+                if (typeof item[0] === 'number' && typeof item[1] === 'string') {
+                    fId = Number(item[0]);
+                    fName = String(item[1] || '').trim().replace(/^@+/, '');
+                    fPts = Number(item[2]) || 0;
+                } else {
+                    fName = String(item[0] || '').trim().replace(/^@+/, '');
+                    fPts = Number(item[1]) || 0;
+                    if (item.length >= 3 && !isNaN(Number(item[2]))) fId = Number(item[2]);
+                }
+            } else if (typeof item === 'number') {
+                fId = Number(item);
+            } else if (typeof item === 'string') {
+                var trimmed = item.trim().replace(/^@+/, '');
+                if (/^\d+$/.test(trimmed)) fId = Number(trimmed);
+                fName = trimmed;
+            } else if (typeof item === 'object') {
+                var rawId = item.user_id ?? item.friend_id ?? item.id ?? null;
+                if (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId))) {
+                    fId = Number(rawId);
+                }
+                fName = String(item.user_name ?? item.username ?? item.friend_name ?? item.name ?? '').trim().replace(/^@+/, '');
+                fPts = Number(item.points ?? item.score ?? item.wins ?? 0) || 0;
+            }
+
+            if (fName || fId !== null) {
+                parsed.push({
+                    user_id:  fId,
+                    username: fName,
+                    points:   fPts
+                });
+            }
+        });
+        return parsed;
+    }
+
     function buildGlobalStandings(lbData) {
         var map = new Map();
+        var entries = parseGlobalLeaderboardEntries(lbData);
 
-        if (lbData && Array.isArray(lbData.leaderboard)) {
-            lbData.leaderboard.forEach(function (entry) {
-                var rawName = Array.isArray(entry)
-                    ? entry[0]
-                    : (entry && (entry.user_name || entry.username || entry.name));
-                var rawVal = Number(Array.isArray(entry)
-                    ? entry[1]
-                    : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
-                // Strip any leading '@' from leaderboard usernames
-                var cleanName = String(rawName || '').trim().replace(/^@+/, '');
-                if (!cleanName) return;
-                var key = cleanName.toLowerCase();
+        entries.forEach(function (item) {
+            var cleanName = item.username;
+            if (!cleanName) return;
+            var key = cleanName.toLowerCase();
 
-                if (/^guest_/i.test(cleanName) && (isGuest || !savedUser || key !== savedUser.toLowerCase())) {
-                    return;
-                }
+            if (/^guest_/i.test(cleanName) && (isGuest || !savedUser || key !== savedUser.toLowerCase())) {
+                return;
+            }
 
-                map.set(key, { username: cleanName, points: rawVal });
+            map.set(key, {
+                user_id:  item.user_id,
+                username: cleanName,
+                points:   item.points
             });
-        }
+        });
 
         var sorted = Array.from(map.values()).sort(function (a, b) {
             if (b.points !== a.points) return b.points - a.points;
@@ -304,55 +447,88 @@
         return sorted.slice(0, 10);
     }
 
-    function getPersistedFriendsForUser(currentUsername) {
-        var keyV2 = 'footlel_friends_v2_' + currentUsername;
-        var raw = localStorage.getItem(keyV2);
-        if (raw) {
-            try {
-                var parsed = JSON.parse(raw);
-                if (Array.isArray(parsed)) return parsed;
-            } catch (e) { /* fallback below */ }
-        }
-        try {
-            localStorage.setItem(keyV2, JSON.stringify(DEFAULT_INITIAL_FRIENDS));
-        } catch (e) { /* ignore */ }
-        return DEFAULT_INITIAL_FRIENDS.slice();
-    }
+    function buildFriendsStandingsFromBackend(lbData, friendsList, currentUsername, loggedUserId) {
+        var allLbEntries = parseGlobalLeaderboardEntries(lbData);
+        var confirmedFriends = Array.isArray(friendsList) ? friendsList : [];
 
-    function buildFriendsStandings(currentUsername) {
-        var friends = getPersistedFriendsForUser(currentUsername);
-        var map = new Map();
+        var friendNamesSet = new Set();
+        var friendIdsSet   = new Set();
 
-        var backendPointsByUser = new Map();
-        if (cachedBackendLb && Array.isArray(cachedBackendLb.leaderboard)) {
-            cachedBackendLb.leaderboard.forEach(function (entry) {
-                var rName = Array.isArray(entry) ? entry[0] : (entry && (entry.user_name || entry.username || entry.name));
-                var rVal  = Number(Array.isArray(entry) ? entry[1] : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
-                if (rName) backendPointsByUser.set(String(rName).trim().toLowerCase(), rVal);
+        confirmedFriends.forEach(function (f) {
+            if (f.username) {
+                friendNamesSet.add(String(f.username).trim().replace(/^@+/, '').toLowerCase());
+            }
+            if (f.user_id !== null && f.user_id !== undefined && !isNaN(Number(f.user_id))) {
+                friendIdsSet.add(Number(f.user_id));
+                friendNamesSet.add(String(f.user_id));
+            }
+        });
+
+        var normCurrentUser = String(currentUsername || '').trim().replace(/^@+/, '').toLowerCase();
+        var numLoggedId = (loggedUserId !== null && loggedUserId !== undefined && !isNaN(Number(loggedUserId)))
+            ? Number(loggedUserId)
+            : null;
+
+        // Filter global leaderboard to keep ONLY the logged-in user and users present in get-user-friends
+        var filteredMap = new Map();
+
+        allLbEntries.forEach(function (entry) {
+            var entryNameLower = String(entry.username || '').trim().toLowerCase();
+            var entryId = entry.user_id;
+
+            var isSelf = (normCurrentUser && entryNameLower === normCurrentUser) ||
+                         (numLoggedId !== null && entryId !== null && Number(entryId) === numLoggedId) ||
+                         (numLoggedId !== null && entryNameLower === String(numLoggedId));
+
+            var isFriend = friendNamesSet.has(entryNameLower) ||
+                           (entryId !== null && friendIdsSet.has(Number(entryId)));
+
+            if (isSelf || isFriend) {
+                var displayKey = isSelf && normCurrentUser ? normCurrentUser : entryNameLower;
+                var displayName = isSelf && currentUsername ? currentUsername.trim().replace(/^@+/, '') : entry.username;
+                filteredMap.set(displayKey, {
+                    user_id:  entryId,
+                    username: displayName,
+                    points:   Number(entry.points) || 0,
+                    isSelf:   isSelf
+                });
+            }
+        });
+
+        // Also ensure confirmed friends who might not yet appear in the top leaderboard array are included with their points
+        confirmedFriends.forEach(function (f) {
+            var cName = String(f.username || (f.user_id !== null ? ('Usuario_' + f.user_id) : '')).trim().replace(/^@+/, '');
+            if (!cName) return;
+            var lower = cName.toLowerCase();
+            if (!filteredMap.has(lower)) {
+                filteredMap.set(lower, {
+                    user_id:  f.user_id,
+                    username: cName,
+                    points:   Number(f.points) || 0,
+                    isSelf:   false
+                });
+            }
+        });
+
+        // Ensure the logged-in user is represented in the filtered map
+        if (normCurrentUser && !filteredMap.has(normCurrentUser)) {
+            filteredMap.set(normCurrentUser, {
+                user_id:  numLoggedId,
+                username: currentUsername.trim().replace(/^@+/, ''),
+                points:   0,
+                isSelf:   true
             });
         }
 
-        friends.forEach(function (f) {
-            var cleanName = String(f.username || f.name || '').replace(/^@/, '').trim();
-            if (!cleanName) return;
-            var lower = cleanName.toLowerCase();
-            var pts = backendPointsByUser.has(lower)
-                ? backendPointsByUser.get(lower)
-                : (Number(f.points) || 0);
-            map.set(lower, { username: cleanName, points: pts });
-        });
-
-        if (currentUsername) {
-            var normUser = currentUsername.trim();
-            var uKey = normUser.toLowerCase();
-            var userPts = backendPointsByUser.has(uKey) ? backendPointsByUser.get(uKey) : 0;
-            map.set(uKey, { username: normUser, points: userPts });
-        }
-
-        return Array.from(map.values()).sort(function (a, b) {
+        var sorted = Array.from(filteredMap.values()).sort(function (a, b) {
             if (b.points !== a.points) return b.points - a.points;
             return a.username.localeCompare(b.username);
         });
+
+        return {
+            entries: sorted,
+            hasFriends: confirmedFriends.length > 0 && sorted.length > 1
+        };
     }
 
     function formatPoints(pts) {
@@ -364,10 +540,7 @@
         lbList.innerHTML = '';
 
         if (!entries || entries.length === 0) {
-            lbList.innerHTML =
-                '<div class="lb-loading" role="status">' +
-                    '<span>No hay datos de ranking disponibles.</span>' +
-                '</div>';
+            renderEmptyMessageState('No hay datos de ranking disponibles.');
             return;
         }
 
@@ -376,7 +549,7 @@
         for (var i = 0; i < maxRows; i++) {
             var item = entries[i];
             var rank = i + 1;
-            var isCurrentUser = !isGuest && savedUser && item.username.toLowerCase() === savedUser.toLowerCase();
+            var isCurrentUser = !isGuest && (item.isSelf || (savedUser && item.username.toLowerCase() === savedUser.toLowerCase()));
 
             var row = document.createElement('div');
             var classes = ['lb-row'];
@@ -407,7 +580,7 @@
 
             var avatarImg = document.createElement('img');
             avatarImg.className = 'lb-avatar';
-            avatarImg.src = (isCurrentUser && savedAvatar) ? savedAvatar : '../../assets/images/avatar-default.png';
+            avatarImg.src = getAvatarForPlayer(item.username, isCurrentUser);
             avatarImg.alt = 'Avatar ' + item.username;
             avatarImg.onerror = function () {
                 this.src = GUEST_AVATAR;
@@ -431,27 +604,89 @@
     }
 
     function renderActiveTab() {
-        if (isLoadingRanking) {
+        if (isLoadingRanking || (activeTab === 'amigos' && isLoadingFriendsList)) {
             renderLoadingState('Cargando ranking...');
             return;
         }
         if (activeTab === 'amigos' && !isGuest) {
-            var friendsData = buildFriendsStandings(savedUser);
-            renderStandingsRows(friendsData);
+            var friendsResult = buildFriendsStandingsFromBackend(cachedBackendLb, cachedUserFriends, savedUser, currentUserId);
+            if (!friendsResult.hasFriends || friendsResult.entries.length <= 1) {
+                renderEmptyMessageState('Aún no tienes amigos agregados. ¡Ve a buscar rivales!');
+                return;
+            }
+            renderStandingsRows(friendsResult.entries);
         } else {
             var globalData = buildGlobalStandings(cachedBackendLb);
             renderStandingsRows(globalData);
         }
     }
 
-    // Show "Cargando ranking..." while the backend promise is pending (no fake/zero data injected)
+    // Show "Cargando ranking..." while the backend promise is pending
     renderLoadingState('Cargando ranking...');
 
     var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    async function fetchUserFriendsFromBackend() {
+        if (isGuest) return [];
+        var token = (localStorage.getItem('footlel_token') || '').trim();
+        if (!token || token === 'null' || token === 'undefined') return [];
+
+        try {
+            var resp = await fetch(apiBaseUrl + '/user/get-user-friends', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            if (resp.ok) {
+                var data = await resp.json();
+                var parsed = parseUserFriendsResponse(data);
+                cachedUserFriends = parsed;
+                return parsed;
+            }
+            cachedUserFriends = [];
+            return [];
+        } catch (err) {
+            console.warn('No se pudo obtener la lista de amigos del backend:', err);
+            cachedUserFriends = [];
+            return [];
+        }
+    }
+
+    async function refreshFriendsRankingTab() {
+        isLoadingFriendsList = true;
+        renderActiveTab();
+        try {
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            var lbPromise = fetch(apiBaseUrl + '/stat/get-global-leaderboard', {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            }).then(function (r) { return r.ok ? r.json() : cachedBackendLb; }).catch(function () { return cachedBackendLb; });
+
+            var results = await Promise.all([
+                lbPromise,
+                fetchUserFriendsFromBackend()
+            ]);
+            if (results[0]) {
+                cachedBackendLb = results[0];
+            }
+        } finally {
+            isLoadingRanking = false;
+            isLoadingFriendsList = false;
+            renderActiveTab();
+        }
+    }
+
     (async function fetchBackendLeaderboard() {
         try {
-            var r = await fetch(apiBaseUrl + '/stat/get-global-leaderboard');
-            cachedBackendLb = r.ok ? await r.json() : null;
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            var requests = [
+                fetch(apiBaseUrl + '/stat/get-global-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
+            ];
+            if (!isGuest && token) {
+                requests.push(fetchUserFriendsFromBackend());
+            }
+            var results = await Promise.all(requests);
+            cachedBackendLb = results[0];
         } catch (err) {
             console.warn('No se pudo obtener el leaderboard del backend:', err);
             cachedBackendLb = null;
@@ -489,7 +724,11 @@
             tab.classList.add('is-active');
             tab.setAttribute('aria-selected', 'true');
             activeTab = tab.dataset.tab;
-            renderActiveTab();
+            if (activeTab === 'amigos') {
+                refreshFriendsRankingTab();
+            } else {
+                renderActiveTab();
+            }
         });
     });
 

@@ -574,11 +574,16 @@
                 } else if (item.length >= 2 && typeof item[0] === 'string' && typeof item[1] === 'number') {
                     tupleName = cleanUsername(item[0]);
                     tuplePts = Number(item[1]) || 0;
-                    if (item.length >= 3 && !isNaN(Number(item[2]))) {
+                    if (item.length >= 3 && item[2] !== null && item[2] !== undefined && !isNaN(Number(item[2]))) {
                         tupleId = Number(item[2]);
+                    } else if (/^\d+$/.test(tupleName)) {
+                        tupleId = Number(tupleName);
                     }
                 } else if (typeof item[0] === 'string') {
                     tupleName = cleanUsername(item[0]);
+                    if (/^\d+$/.test(tupleName)) {
+                        tupleId = Number(tupleName);
+                    }
                 } else if (typeof item[0] === 'number') {
                     tupleId = Number(item[0]);
                 }
@@ -838,29 +843,40 @@
         }
     }
 
-    async function resolveUserIdForEntry(entry) {
-        if (!entry) return null;
-        if (entry.user_id !== null && entry.user_id !== undefined && !isNaN(Number(entry.user_id))) {
-            return Number(entry.user_id);
+    function resolveUserIdForEntry(entry, btnEl) {
+        // 1. Check DOM dataset on button or parent <li> first
+        if (btnEl) {
+            var btnId = btnEl.getAttribute('data-user-id') || (btnEl.dataset && btnEl.dataset.userId);
+            if (btnId !== null && btnId !== undefined && btnId !== '' && !isNaN(Number(btnId))) {
+                return Number(btnId);
+            }
+            var parentRow = btnEl.closest ? btnEl.closest('[data-user-id]') : null;
+            if (parentRow) {
+                var rowId = parentRow.getAttribute('data-user-id') || (parentRow.dataset && parentRow.dataset.userId);
+                if (rowId !== null && rowId !== undefined && rowId !== '' && !isNaN(Number(rowId))) {
+                    return Number(rowId);
+                }
+            }
         }
+
+        if (!entry) return null;
+
+        // 2. Check explicit numeric user_id / friend_id / id on the entry object
+        var directId = entry.user_id ?? entry.friend_id ?? entry.user_id_request ?? entry.id;
+        if (directId !== null && directId !== undefined && directId !== '' && !isNaN(Number(directId))) {
+            return Number(directId);
+        }
+
+        // 3. Check userDirectoryByName or numeric username string
         var clean = cleanUsername(entry.username);
         if (!clean) return null;
+        if (/^\d+$/.test(clean)) {
+            return Number(clean);
+        }
         var norm = normalizeText(clean);
         if (state.userDirectoryByName[norm] && state.userDirectoryByName[norm].user_id !== null) {
             return Number(state.userDirectoryByName[norm].user_id);
         }
-
-        // Try fetching user info by username if backend supports it
-        try {
-            var r = await fetch(API_BASE_URL + '/user/get-user-info/' + encodeURIComponent(clean), {
-                headers: getAuthHeaders(false)
-            });
-            if (r.ok) {
-                var info = await r.json();
-                var rec = registerUserInDirectory(info);
-                if (rec && rec.user_id !== null) return Number(rec.user_id);
-            }
-        } catch (_) {}
 
         return null;
     }
@@ -870,7 +886,7 @@
         if (acceptBtn) acceptBtn.disabled = true;
         if (rejectBtn) rejectBtn.disabled = true;
 
-        var requestUserId = await resolveUserIdForEntry(reqEntry);
+        var requestUserId = resolveUserIdForEntry(reqEntry, acceptBtn || rejectBtn);
         if (requestUserId === null || isNaN(Number(requestUserId))) {
             showAlertBanner(requestsErrorBanner, 'No se pudo identificar el ID del usuario de esta solicitud.');
             if (acceptBtn) acceptBtn.disabled = false;
@@ -1096,9 +1112,9 @@
             btnEl.setAttribute('aria-disabled', 'true');
         }
 
-        var targetUserId = await resolveUserIdForEntry(userEntry);
-        if (targetUserId === null || isNaN(Number(targetUserId))) {
-            showAlertBanner(searchErrorBanner, 'No se pudo obtener el ID de este jugador en el servidor.');
+        var idDelUsuario = resolveUserIdForEntry(userEntry, btnEl);
+        if (idDelUsuario === null || isNaN(Number(idDelUsuario))) {
+            showAlertBanner(searchErrorBanner, 'Este jugador aún no tiene un ID numérico asociado en el ranking del servidor.');
             if (btnEl) {
                 btnEl.disabled = false;
                 btnEl.removeAttribute('aria-disabled');
@@ -1106,17 +1122,20 @@
             return;
         }
 
+        var token = (localStorage.getItem('footlel_token') || '').trim();
+
         try {
             var response = await fetch(API_BASE_URL + '/user/send-user-friend-request', {
                 method: 'POST',
-                headers: getAuthHeaders(true),
-                body: JSON.stringify({
-                    friend_id: Number(targetUserId)
-                })
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ "friend_id": Number(idDelUsuario) })
             });
 
             if (response.ok) {
-                userEntry.user_id = Number(targetUserId);
+                userEntry.user_id = Number(idDelUsuario);
                 markRequestAsSent(userEntry);
 
                 if (btnEl) {
@@ -1145,7 +1164,7 @@
                         btnEl.textContent = 'Ya son amigos';
                     }
                 } else if (/ya\s+fue\s+enviada|ya\s+enviaste|pendiente|already\s+sent/i.test(detail)) {
-                    userEntry.user_id = Number(targetUserId);
+                    userEntry.user_id = Number(idDelUsuario);
                     markRequestAsSent(userEntry);
                     if (btnEl) {
                         btnEl.classList.remove('btn-add--active');
@@ -1319,8 +1338,12 @@
             if (r.ok) {
                 var data = await r.json();
                 var parsed = normalizeUserCollection(data, ['leaderboard']);
-                parsed.forEach(function (entry) {
+                parsed.forEach(function (entry, index) {
                     if (!entry.username || /^guest_/i.test(entry.username)) return;
+                    // Ensure every loaded entry carries a numeric user_id (either from backend payload, numeric string, or 1-based list id)
+                    if (entry.user_id === null || entry.user_id === undefined || isNaN(Number(entry.user_id))) {
+                        entry.user_id = /^\d+$/.test(entry.username) ? Number(entry.username) : (index + 1);
+                    }
                     var exists = state.backendUsers.some(function (u) {
                         return normalizeText(u.username) === normalizeText(entry.username);
                     });
@@ -1337,34 +1360,6 @@
         }
     }
 
-    var remoteLookupDebounce = null;
-    function lookupExactUserFromBackend(rawQuery) {
-        var candidate = cleanUsername(rawQuery);
-        if (!candidate || candidate.length < 2) return;
-        clearTimeout(remoteLookupDebounce);
-        remoteLookupDebounce = setTimeout(async function () {
-            try {
-                var r = await fetch(API_BASE_URL + '/user/get-user-info/' + encodeURIComponent(candidate), {
-                    headers: getAuthHeaders(false)
-                });
-                if (!r.ok) return;
-                var info = await r.json();
-                var rec = registerUserInDirectory(info);
-                if (rec && rec.username && !/^guest_/i.test(rec.username)) {
-                    var existingIdx = state.backendUsers.findIndex(function (u) {
-                        return normalizeText(u.username) === normalizeText(rec.username);
-                    });
-                    if (existingIdx === -1) {
-                        state.backendUsers.push(rec);
-                    } else if (rec.user_id !== null) {
-                        state.backendUsers[existingIdx].user_id = rec.user_id;
-                    }
-                    renderSearchUsers();
-                }
-            } catch (_) { /* endpoint optional */ }
-        }, 300);
-    }
-
     /* ─────────────────────────────────────────
        11. EVENTOS DE BÚSQUEDA Y PESTAÑAS
     ───────────────────────────────────────── */
@@ -1378,7 +1373,6 @@
         buscarInput.addEventListener('input', function () {
             hideAlertBanner(searchErrorBanner);
             renderSearchUsers();
-            lookupExactUserFromBackend(buscarInput.value);
         });
     }
 
