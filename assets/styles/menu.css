@@ -473,6 +473,59 @@ body {
     transform: translateX(-50%) translateY(0);
 }
 
+/* ── Mathematical Vertical Fraction inside Stat Tooltips ───────── */
+.tooltip-formula-title {
+    /* Displays the metric name above the mathematical formula */
+    display: block;
+    font-weight: 600;
+    color: var(--color-brand-green);
+    margin-bottom: 6px;
+}
+
+.tooltip-formula-row {
+    /* Aligns the fraction and the '× 100' horizontally on the same midline */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.tooltip-fraction {
+    /* Stacks numerator on top of denominator vertically */
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.2;
+    vertical-align: middle;
+}
+
+.tooltip-numerator {
+    /* Top number (e.g. hits or wins) with a bottom border acting as the fraction bar */
+    display: block;
+    width: 100%;
+    padding: 0 6px 3px;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    text-align: center;
+}
+
+.tooltip-denominator {
+    /* Bottom number (e.g. attempts or total matches) */
+    display: block;
+    width: 100%;
+    padding: 3px 6px 0;
+    font-weight: 600;
+    text-align: center;
+}
+
+.tooltip-multiplier {
+    /* Keeps '× 100' on a single line next to the fraction bar */
+    white-space: nowrap;
+    font-weight: 600;
+}
+
 .stat-value {
     font-family: var(--font-heading);
     font-size: 20px;

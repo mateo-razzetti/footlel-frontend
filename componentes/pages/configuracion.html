@@ -396,10 +396,11 @@
     }
 
     /* ──────────────────────────────────────────
-       1. ESTADO INVITADO / REGISTRADO
+       1. GUEST / REGISTERED STATE
     ────────────────────────────────────────── */
     const isGuest = localStorage.getItem('footlel_guest') === 'true';
-    const savedUsername = localStorage.getItem('footlel_username') || 'Jugador';
+    // Strip any leading '@' from stored username
+    const savedUsername = (localStorage.getItem('footlel_username') || 'Jugador').trim().replace(/^@+/, '');
     const savedAvatar   = localStorage.getItem('footlel_avatar');
     if (savedAvatar) {
         const headerAv = document.getElementById('profileAvatar');
@@ -430,13 +431,13 @@
     `;
 
     if (isGuest) {
-        // Nombre
+        // Guest display name
         const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
         const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         configUsernameEl.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
         profileUsernameEl.textContent = guestName;
 
-        // Avatares
+        // Avatars
         profileAvatarEl.src = GUEST_AVATAR;
         configAvatarEl.src  = GUEST_AVATAR_LG;
 

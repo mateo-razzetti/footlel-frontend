@@ -130,9 +130,19 @@
                     }
 
                     try {
-                        const infoResponse = await fetch(`${API_BASE_URL}/user/get-user-info`, {
-                            headers: { 'Authorization': 'Bearer ' + token }
-                        });
+                        // Fetch user profile information and user preferences in parallel right after login
+                        const [infoResponse, configResponse] = await Promise.all([
+                            // Request 1: GET /user/get-user-info with the JWT token
+                            fetch(`${API_BASE_URL}/user/get-user-info`, {
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            }),
+                            // Request 2: GET /config/get-user-config to preload theme & animation preferences before redirecting
+                            fetch(`${API_BASE_URL}/config/get-user-config`, {
+                                headers: { 'Authorization': 'Bearer ' + token }
+                            })
+                        ]);
+
+                        // Process user profile response if 200 OK
                         if (infoResponse.ok) {
                             const userInfo = await infoResponse.json();
                             const finalUserId = userInfo.user_id ?? resolvedUserId;
@@ -142,11 +152,31 @@
                             }
                             localStorage.setItem('footlel_email', userInfo.user_email || '');
                             if (userInfo.user_name) {
-                                localStorage.setItem('footlel_username', userInfo.user_name);
+                                // Clean any leading '@' before saving username to localStorage
+                                const cleanName = String(userInfo.user_name).trim().replace(/^@+/, '');
+                                localStorage.setItem('footlel_username', cleanName);
+                            }
+                        }
+
+                        // Process user configuration response if 200 OK (prevents UI flicker on menu.html load)
+                        if (configResponse.ok) {
+                            // Parse JSON payload: { dark_mode, animation_state, compatibility_mode }
+                            const userConfig = await configResponse.json();
+                            // Map dark_mode boolean to 'dark' or 'light' theme key in localStorage
+                            if (typeof userConfig.dark_mode === 'boolean') {
+                                localStorage.setItem('footlel_theme', userConfig.dark_mode ? 'dark' : 'light');
+                            }
+                            // Map animation_state boolean to string in localStorage
+                            if (typeof userConfig.animation_state === 'boolean') {
+                                localStorage.setItem('pref_toggle-animaciones', String(userConfig.animation_state));
+                            }
+                            // Map compatibility_mode boolean to string in localStorage
+                            if (typeof userConfig.compatibility_mode === 'boolean') {
+                                localStorage.setItem('pref_toggle-compat', String(userConfig.compatibility_mode));
                             }
                         }
                     } catch (infoError) {
-                        console.error('No se pudo obtener la info desde get-user-info:', infoError);
+                        console.error('No se pudo obtener la info o configuración inicial:', infoError);
                     }
 
                     // Restore the redirect

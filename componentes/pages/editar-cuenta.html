@@ -29,7 +29,7 @@
                     aria-controls="profileDropdown" type="button">
                     <img src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-default&backgroundColor=292929"
                         alt="Avatar de usuario" class="profile-avatar" id="headerAvatar">
-                    <span class="profile-username" id="profileUsername">@nombre_usuario</span>
+                    <span class="profile-username" id="profileUsername">nombre_usuario</span>
                     <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
                         aria-hidden="true">
@@ -227,13 +227,14 @@
 
             /* User Profile Setup (Backend connection) */
             document.addEventListener('DOMContentLoaded', async function () {
-                const savedUsername = localStorage.getItem('footlel_username') || 'Usuario';
+                // Read saved username and strip any leading '@' symbol
+                const savedUsername = (localStorage.getItem('footlel_username') || 'Usuario').trim().replace(/^@+/, '');
                 const savedEmail = localStorage.getItem('footlel_email') || '';
                 const savedAvatar = localStorage.getItem('footlel_avatar');
 
-                // Preload basic UI (display name, email and avatar)
+                // Preload basic UI (display name, email and avatar) without '@' prefix
                 const profileUsername = document.getElementById('profileUsername');
-                if (profileUsername) profileUsername.textContent = '@' + savedUsername;
+                if (profileUsername) profileUsername.textContent = savedUsername;
 
                 document.getElementById('username').value = savedUsername;
                 if (savedEmail) {
@@ -262,10 +263,13 @@
                             localStorage.setItem('footlel_email', data.user_email);
                         }
                         if (data.user_name) {
-                            localStorage.setItem('footlel_username', data.user_name);
+                            // Strip any leading '@' from backend username before saving and displaying
+                            const cleanName = String(data.user_name).trim().replace(/^@+/, '');
+                            localStorage.setItem('footlel_username', cleanName);
+                            if (profileUsername) profileUsername.textContent = cleanName;
                         }
 
-                        document.getElementById('username').value = data.user_name || localStorage.getItem('footlel_username') || '';
+                        document.getElementById('username').value = String(data.user_name || localStorage.getItem('footlel_username') || '').trim().replace(/^@+/, '');
                         document.getElementById('email').value = data.user_email || localStorage.getItem('footlel_email') || '';
                     } else {
                         console.warn("No se pudo obtener la info del backend.");
