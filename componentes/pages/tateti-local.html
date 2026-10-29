@@ -660,7 +660,8 @@
                 }
 
                 if (!response.ok) {
-                    throw new Error(`Unexpected status ${response.status}`);
+                    const errorDetail = await response.text();
+                    throw new Error(`Status ${response.status}: ${errorDetail}`);
                 }
                 // Expected shape: { row_headers, column_headers, local_player_turn }
                 const startData = await response.json();
