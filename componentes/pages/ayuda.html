@@ -347,8 +347,42 @@
     });
 
     /* ──────────────────────────────────────────
-       3. GUEST / REGISTERED STATE
+       3. GUEST / REGISTERED STATE & AVATAR ROBOT
     ────────────────────────────────────────── */
+    const BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            let guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.includes('avatar-default.png') || guestAv.startsWith('data:image/svg+xml')) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        const userKey = username ? ('footlel_avatar_' + username) : null;
+        let savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.includes('avatar-default.png') || savedAv.includes('seed=footlel-default')) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
     const isGuest      = localStorage.getItem('footlel_guest') === 'true';
     const profileUser  = document.getElementById('profileUsername');
     const profileAvatar = document.getElementById('profileAvatar');
@@ -357,8 +391,6 @@
     const ddSessionAction = document.getElementById('ddSessionAction');
     const ddSessionLabel  = document.getElementById('ddSessionLabel');
     const ddSessionIcon   = document.getElementById('ddSessionIcon');
-
-    const GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
 
     const LOGIN_ICON = `
         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
@@ -370,7 +402,7 @@
         const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
         const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         profileUser.textContent  = guestName;
-        profileAvatar.src        = GUEST_AVATAR;
+        profileAvatar.src        = getOrAssignAvatar(guestName, true);
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
         ddSessionLabel.textContent  = 'Iniciar Sesión';
@@ -379,10 +411,9 @@
     } else {
         // Read stored username and strip any leading '@' symbol
         const saved = (localStorage.getItem('footlel_username') || 'Jugador').trim().replace(/^@+/, '');
-        const savedAvatar = localStorage.getItem('footlel_avatar');
-        if (savedAvatar) {
-            const avatarEl = document.getElementById('profileAvatar');
-            if (avatarEl) avatarEl.src = savedAvatar;
+        const savedAvatar = getOrAssignAvatar(saved, false);
+        if (savedAvatar && profileAvatar) {
+            profileAvatar.src = savedAvatar;
         }
         if (profileUser) profileUser.textContent = saved;
     }

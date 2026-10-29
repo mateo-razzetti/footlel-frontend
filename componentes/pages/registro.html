@@ -23,6 +23,7 @@
         </header>
 
         <form class="login-form" id="register-form" action="#" method="POST" novalidate>
+            <div class="field-error error-alert-box" id="general-error" role="alert" aria-live="polite" style="margin-bottom: 12px;" hidden></div>
 
             <!-- Email -->
             <div class="form-group">
@@ -36,9 +37,10 @@
                     required
                 >
                 <!-- Email validation error (hidden by default) -->
-                <p class="field-error" id="email-error" aria-live="polite" hidden>
-                    Ingresá un correo válido.
-                </p>
+                <div class="field-error error-alert-box" id="email-error" aria-live="polite" hidden>
+                    <svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="error-alert-text">Ingresá un correo válido.</span>
+                </div>
             </div>
 
             <!-- Username -->
@@ -97,9 +99,10 @@
                     </button>
                 </div>
                 <!-- Error message: hidden by default, shown if passwords do not match -->
-                <p class="field-error" id="password-mismatch-error" aria-live="polite" hidden>
-                    Las contraseñas no coinciden.
-                </p>
+                <div class="field-error error-alert-box" id="password-mismatch-error" aria-live="polite" hidden>
+                    <svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="error-alert-text">Las contraseñas no coinciden.</span>
+                </div>
             </div>
 
             <button type="submit" class="btn-primary">Registrarse</button>
@@ -162,6 +165,77 @@
         const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         const PASSWORD_ERROR_MSG = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.';
 
+        /* ── Base Robot Avatars & Backend Error Formatter ──────── */
+        const BASE_ROBOT_AVATARS = [
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+        ];
+
+        function assignRandomAvatarForNewUser(username) {
+            const cleanUser = String(username || '').trim().replace(/^@+/, '');
+            const randomAvatar = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (cleanUser) {
+                localStorage.setItem('footlel_avatar_' + cleanUser, randomAvatar);
+            }
+            localStorage.setItem('footlel_avatar', randomAvatar);
+            return randomAvatar;
+        }
+
+        const ALERT_ICON_SVG = `<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+        function formatBackendError(rawMsg) {
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+                return window.FootlelPrefs.formatBackendError(rawMsg);
+            }
+            if (!rawMsg) return 'Ocurrió un error inesperado.';
+            let msg = String(rawMsg).trim();
+            if (msg.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(msg);
+                    if (parsed && (parsed.detail || parsed.message)) {
+                        msg = String(parsed.detail || parsed.message).trim();
+                    }
+                } catch (_) {}
+            }
+            msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+            msg = msg
+                .replace(/\bcontrasenias\b/gi, 'contraseñas')
+                .replace(/\bcontrasenia\b/gi, 'contraseña')
+                .replace(/\binvalidos\b/gi, 'inválidos')
+                .replace(/\binvalidas\b/gi, 'inválidas')
+                .replace(/\binvalido\b/gi, 'inválido')
+                .replace(/\binvalida\b/gi, 'inválida')
+                .replace(/\bcodigos\b/gi, 'códigos')
+                .replace(/\bcodigo\b/gi, 'código')
+                .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+                .replace(/\belectronico\b/gi, 'electrónico')
+                .replace(/\bnumeros\b/gi, 'números')
+                .replace(/\bnumero\b/gi, 'número')
+                .replace(/\btelefono\b/gi, 'teléfono')
+                .replace(/\bsesion\b/gi, 'sesión')
+                .replace(/\bverificacion\b/gi, 'verificación')
+                .replace(/\bautenticacion\b/gi, 'autenticación')
+                .replace(/\bconfiguracion\b/gi, 'configuración')
+                .replace(/\binformacion\b/gi, 'información')
+                .replace(/\bconexion\b/gi, 'conexión')
+                .replace(/\boperacion\b/gi, 'operación')
+                .replace(/\bmanana\b/gi, 'mañana')
+                .replace(/\bminimo\b/gi, 'mínimo')
+                .replace(/\bmaximo\b/gi, 'máximo')
+                .replace(/\bexito\b/gi, 'éxito');
+            if (msg.length > 0) {
+                msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+            }
+            if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+                msg += '.';
+            }
+            return msg;
+        }
+
         /* ================================================================
            Submit validation:
              0. Empty fields — sequential, with a field-specific message
@@ -181,15 +255,17 @@
             // ── Reusable error element (created only once) ──
             let generalError = document.getElementById('general-error');
             if (!generalError) {
-                generalError = document.createElement('p');
+                generalError = document.createElement('div');
                 generalError.id = 'general-error';
-                generalError.className = 'field-error';
+                generalError.className = 'field-error error-alert-box';
                 generalError.style.marginBottom = '12px';
                 document.getElementById('register-form').prepend(generalError);
             }
 
             function showError(msg, focusId) {
-                generalError.textContent = msg;
+                const cleanText = formatBackendError(msg);
+                generalError.innerHTML = `${ALERT_ICON_SVG}<span class="error-alert-text"></span>`;
+                generalError.querySelector('.error-alert-text').textContent = cleanText;
                 generalError.hidden = false;
                 if (focusId) document.getElementById(focusId).focus();
             }
@@ -248,16 +324,16 @@
                 });
 
                 if (response.ok) {
+                    // Asignar automáticamente uno de los 6 avatares robot aleatorio al nuevo usuario
+                    assignRandomAvatarForNewUser(user_name);
                     window.location.href = 'correo-enviado.html';
                 } else {
                     const data = await response.json();
-                    generalError.textContent = data.detail || data.message || 'Ocurrió un error. Intentá de nuevo.';
-                    generalError.hidden = false;
+                    showError(data.detail || data.message || 'Ocurrió un error. Intentá de nuevo.');
                 }
             } catch (error) {
                 console.error(error);
-                generalError.textContent = 'No se pudo conectar con el servidor. Intentá más tarde.';
-                generalError.hidden = false;
+                showError('No se pudo conectar con el servidor. Intentá más tarde.');
             }
         });
 

@@ -195,6 +195,23 @@
     </div>
 </div>
 
+<!-- Modal: Desafío Diario ya completado hoy -->
+<div class="modal-backdrop hidden" id="modal-desafio"
+     role="dialog" aria-modal="true" aria-labelledby="modal-des-title">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">✅</div>
+        <h2 class="modal-title" id="modal-des-title">¡Desafío completado!</h2>
+        <p class="modal-text" id="modal-des-text">
+            Ya completaste el desafío diario de hoy. ¡Volvé mañana para jugar una nueva partida y seguir sumando racha! El próximo desafío se desbloquea en:
+        </p>
+        <p class="modal-clock" id="modal-clock" aria-live="polite">00:00:00</p>
+        <div class="modal-actions">
+            <a href="menu.html" class="modal-btn-primary">Volver al Menú</a>
+            <a href="modalidades.html" class="modal-btn-secondary">Elegir otro modo</a>
+        </div>
+    </div>
+</div>
+
 
 <!-- ═══════════════════════════════════════
      GAME LOGIC (Vanilla JS)
@@ -574,21 +591,137 @@
         }
     }
 
+    /* ─────────────────────────────────────────────
+       5.1 BACKEND ERROR FORMATTER & DAILY COMPLETED MODAL
+    ───────────────────────────────────────────── */
+    let lastStartBackendDetail = null;
+    let dailyClockIntervalId = null;
+
+    function formatBackendError(rawMsg) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+            return window.FootlelPrefs.formatBackendError(rawMsg);
+        }
+        if (!rawMsg) return 'Ocurrió un error inesperado.';
+        let msg = String(rawMsg).trim();
+        if (msg.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(msg);
+                if (parsed && (parsed.detail || parsed.message)) {
+                    msg = String(parsed.detail || parsed.message).trim();
+                }
+            } catch (_) {}
+        }
+        msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+        msg = msg
+            .replace(/\bcontrasenias\b/gi, 'contraseñas')
+            .replace(/\bcontrasenia\b/gi, 'contraseña')
+            .replace(/\binvalidos\b/gi, 'inválidos')
+            .replace(/\binvalidas\b/gi, 'inválidas')
+            .replace(/\binvalido\b/gi, 'inválido')
+            .replace(/\binvalida\b/gi, 'inválida')
+            .replace(/\bcodigos\b/gi, 'códigos')
+            .replace(/\bcodigo\b/gi, 'código')
+            .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+            .replace(/\belectronico\b/gi, 'electrónico')
+            .replace(/\bnumeros\b/gi, 'números')
+            .replace(/\bnumero\b/gi, 'número')
+            .replace(/\btelefono\b/gi, 'teléfono')
+            .replace(/\bsesion\b/gi, 'sesión')
+            .replace(/\bverificacion\b/gi, 'verificación')
+            .replace(/\bautenticacion\b/gi, 'autenticación')
+            .replace(/\bconfiguracion\b/gi, 'configuración')
+            .replace(/\binformacion\b/gi, 'información')
+            .replace(/\bconexion\b/gi, 'conexión')
+            .replace(/\boperacion\b/gi, 'operación')
+            .replace(/\bmanana\b/gi, 'mañana')
+            .replace(/\bminimo\b/gi, 'mínimo')
+            .replace(/\bmaximo\b/gi, 'máximo')
+            .replace(/\bexito\b/gi, 'éxito');
+        if (msg.length > 0) {
+            msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+        }
+        if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+            msg += '.';
+        }
+        return msg;
+    }
+
+    function isDailyChallengeCompletedError(detailText) {
+        if (!detailText) return false;
+        const norm = String(detailText).toLowerCase();
+        return (
+            norm.includes('daily challenge') ||
+            norm.includes('vuelve mañana') ||
+            norm.includes('vuelve manana') ||
+            norm.includes('completado el daily') ||
+            norm.includes('ya ha completado')
+        );
+    }
+
+    function getSecondsUntilMidnight() {
+        const now = new Date();
+        const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+        return Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
+    }
+
+    function startDailyMidnightClock() {
+        clearInterval(dailyClockIntervalId);
+        const clockEl = document.getElementById('modal-clock');
+        if (!clockEl) return;
+
+        function tick() {
+            const totalSeconds = getSecondsUntilMidnight();
+            if (totalSeconds <= 0) {
+                clearInterval(dailyClockIntervalId);
+                clockEl.textContent = '00:00:00';
+                return;
+            }
+            const h = Math.floor(totalSeconds / 3600);
+            const m = Math.floor((totalSeconds % 3600) / 60);
+            const s = totalSeconds % 60;
+            clockEl.textContent =
+                String(h).padStart(2, '0') + ':' +
+                String(m).padStart(2, '0') + ':' +
+                String(s).padStart(2, '0');
+        }
+
+        tick();
+        dailyClockIntervalId = setInterval(tick, 1000);
+    }
+
+    function openDailyCompletedModal() {
+        stopRoundTimer();
+        const modal = document.getElementById('modal-desafio');
+        if (!modal) return;
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        startDailyMidnightClock();
+        const firstBtn = modal.querySelector('a, button');
+        if (firstBtn) setTimeout(() => firstBtn.focus(), 60);
+    }
+
     // Requests a new /game/start and renders the board with that response.
-    // Returns true on success, false if aborted (see showFatalStartError).
+    // Returns true on success, false if aborted (see showFatalStartError / openDailyCompletedModal).
     // Used both at game start (initGame) and when advancing rounds
     // (resetBoardState) — see rationale in resetBoardState comment.
     async function loadFreshGameBoard() {
         setBoardLoadingState(true);
+        lastStartBackendDetail = null;
         const startData = await fetchGameStartData();
+
+        if (startData && startData.dailyAlreadyCompleted) {
+            setBoardLoadingState(false);
+            openDailyCompletedModal();
+            return false;
+        }
 
         // Without real `startData`, the rendered board would be 100% mocked on
         // client side (pickRandomConditions) with NO relation to the real
         // player_names_matrix generated by the backend -> any guess would seem
         // "random". Previously this failed silently; now blocked with a clear notice.
-        if (!startData) {
+        if (!startData || startData.backendError) {
             setBoardLoadingState(false);
-            showFatalStartError();
+            showFatalStartError((startData && startData.detail) || lastStartBackendDetail);
             return false;
         }
 
@@ -672,8 +805,25 @@
                 }
 
                 if (!response.ok) {
-                    const errorDetail = await response.text();
-                    throw new Error(`Status ${response.status}: ${errorDetail}`);
+                    const rawErrorText = await response.text();
+                    let extractedDetail = rawErrorText;
+                    try {
+                        const errJson = JSON.parse(rawErrorText);
+                        if (errJson && (errJson.detail || errJson.message)) {
+                            extractedDetail = String(errJson.detail || errJson.message);
+                        }
+                    } catch (_) {}
+                    lastStartBackendDetail = extractedDetail;
+
+                    // Si el backend informa que ya completó el desafío diario hoy, abrimos el modal de inmediato sin reintentar
+                    if (isDailyChallengeCompletedError(extractedDetail)) {
+                        return { dailyAlreadyCompleted: true, detail: extractedDetail };
+                    }
+                    // Si es otro error de negocio (4xx) con detail explícito del backend, lo mostramos directo
+                    if (response.status >= 400 && response.status < 500 && extractedDetail) {
+                        return { backendError: true, detail: extractedDetail };
+                    }
+                    throw new Error(`Status ${response.status}: ${rawErrorText}`);
                 }
                 // Expected shape: { row_headers, column_headers, local_player_turn }
                 const startData = await response.json();
@@ -693,16 +843,40 @@
 
     // Blocks the game with a clear notice instead of allowing play with a
     // client-mocked board (which would never match the backend's real player_names_matrix).
-    function showFatalStartError() {
+    function showFatalStartError(backendDetail) {
         stopRoundTimer();
         const main = document.querySelector('.main-content') || document.body;
+        const existing = main.querySelector('.connection-error-notice');
+        if (existing) existing.remove();
+
+        const hasBackendDetail = Boolean(backendDetail && String(backendDetail).trim());
+        const titleText = hasBackendDetail
+            ? 'No se pudo iniciar la partida'
+            : 'No pudimos conectar con el servidor';
+        const subtitleText = hasBackendDetail
+            ? formatBackendError(backendDetail)
+            : 'Probá recargar la página en unos segundos.';
+
         const notice = document.createElement('div');
         notice.className = 'connection-error-notice';
+        notice.setAttribute('role', 'alert');
         notice.innerHTML = `
-            <p class="connection-error-title">No pudimos conectar con el servidor</p>
-            <p class="connection-error-subtitle">Probá recargar la página en unos segundos.</p>
-            <button type="button" class="connection-error-btn" onclick="location.reload()">Reintentar</button>
+            <div class="connection-error-header">
+                <svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p class="connection-error-title"></p>
+            </div>
+            <p class="connection-error-subtitle"></p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <button type="button" class="connection-error-btn" onclick="location.reload()">Reintentar</button>
+                <a href="modalidades.html" class="connection-error-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.28);">Volver</a>
+            </div>
         `;
+        notice.querySelector('.connection-error-title').textContent = titleText;
+        notice.querySelector('.connection-error-subtitle').textContent = subtitleText;
         main.prepend(notice);
     }
 
@@ -1216,10 +1390,13 @@
             console.warn(`📥 RESPUESTA DEL BACKEND (Status ${response.status}):`, data);
 
             if (!response.ok) {
+                const backendErrorMsg = data && (data.detail || data.message)
+                    ? formatBackendError(data.detail || data.message)
+                    : null;
                 if (response.status === 400 || response.status === 422) {
-                    return { isCorrect: false, data };
+                    return { isCorrect: false, data, backendErrorMsg };
                 }
-                throw new Error(`Unexpected server status: ${response.status}`);
+                return { isCorrect: false, data, isNetworkError: true, backendErrorMsg };
             }
 
             // Backend responds 200 when move is processed, using `correct_answer`
@@ -1524,7 +1701,7 @@
             // instead of resetting to 60.
             dom.btnConfirm.disabled = false;
             dom.playerSearch.disabled = false;
-            showButtonError('Error de conexión, reintentá');
+            showButtonError(guessResult.backendErrorMsg || 'Error de conexión, reintentá');
             resumeRoundTimer();
             return;
         }

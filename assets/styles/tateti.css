@@ -82,26 +82,46 @@
     padding-top: 12px;
 }
 
-/* ── Connection Error Notice ─────────────────────────────────── */
+/* ── Connection / Backend Error Notice ───────────────────────── */
 .connection-error-notice {
-    margin: 4px auto 12px;
+    margin: 8px auto 16px;
     max-width: 480px;
+    width: calc(100% - 32px);
+    padding: 16px 20px;
+    background: rgba(239, 83, 80, 0.12);
+    border: 1px solid rgba(239, 83, 80, 0.4);
+    border-radius: 12px;
     text-align: center;
     color: #FFFFFF;
     font-family: var(--font-body, sans-serif);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: errorFadeIn 0.25s ease forwards;
+}
+
+.connection-error-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #ff6b6b;
 }
 
 .connection-error-title {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: 700;
-    color: #F44336;
-    margin-bottom: 6px;
+    color: #ff6b6b;
+    margin: 0;
 }
 
 .connection-error-subtitle {
-    opacity: 0.8;
-    margin-bottom: 14px;
+    font-size: 13.5px;
+    opacity: 0.9;
+    margin: 0 0 8px;
     color: #FFFFFF;
+    line-height: 1.5;
 }
 
 body.light-mode .connection-error-notice,
@@ -109,14 +129,22 @@ body.light-mode .connection-error-subtitle {
     color: #1A1A1A;
 }
 
+body.light-mode .connection-error-title,
+body.light-mode .connection-error-header {
+    color: #d32f2f;
+}
+
 .connection-error-btn {
     background: var(--color-brand-green, #4CAF50);
     color: #FFFFFF;
     border: none;
-    padding: 12px 28px;
+    padding: 10px 24px;
     border-radius: 26px;
     font-weight: 700;
     cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13.5px;
 }
 
 .board-section {
@@ -640,10 +668,11 @@ body.light-mode .autocomplete-results li:focus-visible {
     letter-spacing: 4px;
 }
 
-/* ── Round / End-game modals: centered, Footlel look ─────────── */
+/* ── Round / End-game / Daily-completed modals: centered, Footlel look ── */
 #modal-ronda,
 #modal-victoria,
-#modal-derrota {
+#modal-derrota,
+#modal-desafio {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -651,11 +680,13 @@ body.light-mode .autocomplete-results li:focus-visible {
 }
 #modal-ronda.hidden,
 #modal-victoria.hidden,
-#modal-derrota.hidden { display: none !important; }
+#modal-derrota.hidden,
+#modal-desafio.hidden { display: none !important; }
 
 #modal-ronda .modal-card,
 #modal-victoria .modal-card,
-#modal-derrota .modal-card {
+#modal-derrota .modal-card,
+#modal-desafio .modal-card {
     background: #292929;
     border: 2px solid #4CAF50;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
@@ -666,7 +697,8 @@ body.light-mode .autocomplete-results li:focus-visible {
 
 #modal-ronda .modal-title,
 #modal-victoria .modal-title,
-#modal-derrota .modal-title {
+#modal-derrota .modal-title,
+#modal-desafio .modal-title {
     color: #F5F5F5;
     font-size: 22px;
 }
@@ -695,7 +727,8 @@ body.light-mode .autocomplete-results li:focus-visible {
 /* Light mode */
 body.light-mode #modal-ronda .modal-card,
 body.light-mode #modal-victoria .modal-card,
-body.light-mode #modal-derrota .modal-card {
+body.light-mode #modal-derrota .modal-card,
+body.light-mode #modal-desafio .modal-card {
     background: #FFFFFF;
     border-color: #4CAF50;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
@@ -703,12 +736,15 @@ body.light-mode #modal-derrota .modal-card {
 body.light-mode #modal-ronda .modal-title,
 body.light-mode #modal-victoria .modal-title,
 body.light-mode #modal-derrota .modal-title,
+body.light-mode #modal-desafio .modal-title,
 body.light-mode .round-score { color: #1A1A1A; }
 body.light-mode #modal-ronda.modal-backdrop,
 body.light-mode #modal-victoria.modal-backdrop,
-body.light-mode #modal-derrota.modal-backdrop { background: rgba(245, 245, 245, 0.75); }
+body.light-mode #modal-derrota.modal-backdrop,
+body.light-mode #modal-desafio.modal-backdrop { background: rgba(245, 245, 245, 0.75); }
 body.light-mode #modal-victoria .modal-btn-secondary,
-body.light-mode #modal-derrota .modal-btn-secondary {
+body.light-mode #modal-derrota .modal-btn-secondary,
+body.light-mode #modal-desafio .modal-btn-secondary {
     color: #1A1A1A;
     border-color: rgba(0, 0, 0, 0.2);
 }

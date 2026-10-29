@@ -301,6 +301,79 @@
                 countdownEl.textContent = mm + ':' + ss;
             }, 1000);
 
+            /* ── Error Formatter & Alert Renderer ── */
+            const ALERT_ICON_SVG = '<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+            function formatBackendError(rawMsg) {
+                if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+                    return window.FootlelPrefs.formatBackendError(rawMsg);
+                }
+                if (!rawMsg) return 'Ocurrió un error inesperado.';
+                let msg = String(rawMsg).trim();
+                if (msg.startsWith('{')) {
+                    try {
+                        const parsed = JSON.parse(msg);
+                        if (parsed && (parsed.detail || parsed.message)) {
+                            msg = String(parsed.detail || parsed.message).trim();
+                        }
+                    } catch (_) {}
+                }
+                msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+                msg = msg
+                    .replace(/\bcontrasenias\b/gi, 'contraseñas')
+                    .replace(/\bcontrasenia\b/gi, 'contraseña')
+                    .replace(/\binvalidos\b/gi, 'inválidos')
+                    .replace(/\binvalidas\b/gi, 'inválidas')
+                    .replace(/\binvalido\b/gi, 'inválido')
+                    .replace(/\binvalida\b/gi, 'inválida')
+                    .replace(/\bcodigos\b/gi, 'códigos')
+                    .replace(/\bcodigo\b/gi, 'código')
+                    .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+                    .replace(/\belectronico\b/gi, 'electrónico')
+                    .replace(/\bnumeros\b/gi, 'números')
+                    .replace(/\bnumero\b/gi, 'número')
+                    .replace(/\btelefono\b/gi, 'teléfono')
+                    .replace(/\bsesion\b/gi, 'sesión')
+                    .replace(/\bverificacion\b/gi, 'verificación')
+                    .replace(/\bautenticacion\b/gi, 'autenticación')
+                    .replace(/\bconfiguracion\b/gi, 'configuración')
+                    .replace(/\binformacion\b/gi, 'información')
+                    .replace(/\bconexion\b/gi, 'conexión')
+                    .replace(/\boperacion\b/gi, 'operación')
+                    .replace(/\bmanana\b/gi, 'mañana')
+                    .replace(/\bminimo\b/gi, 'mínimo')
+                    .replace(/\bmaximo\b/gi, 'máximo')
+                    .replace(/\bexito\b/gi, 'éxito');
+                if (msg.length > 0) {
+                    msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+                }
+                if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+                    msg += '.';
+                }
+                return msg;
+            }
+
+            function showVerifyError(rawMsg) {
+                let errorBox = document.getElementById('error-box');
+                if (!errorBox) {
+                    errorBox = document.createElement('div');
+                    errorBox.id = 'error-box';
+                    errorBox.className = 'field-error error-alert-box';
+                    errorBox.setAttribute('role', 'alert');
+                    errorBox.setAttribute('aria-live', 'polite');
+                    errorBox.style.marginTop = '16px';
+                    document.getElementById('verifyEditForm').parentNode.insertBefore(
+                        errorBox,
+                        document.getElementById('verifyEditForm').nextSibling
+                    );
+                }
+                const cleanText = formatBackendError(rawMsg);
+                errorBox.innerHTML = ALERT_ICON_SVG + '<span class="error-alert-text"></span>';
+                errorBox.querySelector('.error-alert-text').textContent = cleanText;
+                errorBox.hidden = false;
+                errorBox.style.display = 'flex';
+            }
+
             /* ── Confirm Changes: Fetch to the backend ── */
             document.getElementById('verifyEditForm').addEventListener('submit', async function (e) {
                 e.preventDefault();
@@ -310,6 +383,7 @@
                 if (otp.length < 6) {
                     const firstEmpty = otpInputs.find(function (i) { return !i.value; });
                     if (firstEmpty) firstEmpty.focus();
+                    showVerifyError('Ingresá el código completo de 6 dígitos.');
                     return;
                 }
 
@@ -346,8 +420,15 @@
                         }
 
                         // Success handling
-                        if (pendingUsername) localStorage.setItem('footlel_username', pendingUsername);
-                        if (pendingAvatar) localStorage.setItem('footlel_avatar', pendingAvatar);
+                        const cleanNewUser = String(pendingUsername || localStorage.getItem('footlel_username') || '').trim().replace(/^@+/, '');
+                        if (cleanNewUser) localStorage.setItem('footlel_username', cleanNewUser);
+                        const finalAvatar = pendingAvatar || localStorage.getItem('footlel_avatar');
+                        if (finalAvatar) {
+                            localStorage.setItem('footlel_avatar', finalAvatar);
+                            if (cleanNewUser) {
+                                localStorage.setItem('footlel_avatar_' + cleanNewUser, finalAvatar);
+                            }
+                        }
                         if (pendingEmail) localStorage.setItem('footlel_email', pendingEmail);
 
                         // Clean up leftovers
@@ -359,25 +440,14 @@
                         // Redirect the user
                         window.location.href = 'menu.html';
                     } else {
-                        // Error handling
+                        // Error handling with formatted backend error and modern alert design
                         const data = await response.json();
                         const errorMsg = data.detail || data.message || "Error al actualizar los datos.";
-
-                        let errorBox = document.getElementById('error-box');
-                        if (!errorBox) {
-                            errorBox = document.createElement('p');
-                            errorBox.id = 'error-box';
-                            errorBox.style.color = 'red';
-                            errorBox.style.fontWeight = '600';
-                            errorBox.style.marginTop = '15px';
-                            errorBox.style.textAlign = 'center';
-                            // Insert below the form
-                            document.getElementById('verifyEditForm').parentNode.insertBefore(errorBox, document.getElementById('verifyEditForm').nextSibling);
-                        }
-                        errorBox.textContent = errorMsg;
+                        showVerifyError(errorMsg);
                     }
                 } catch (error) {
                     console.error("Error conectando con el backend:", error);
+                    showVerifyError("No se pudo conectar con el servidor. Intentá más tarde.");
                 }
             });
 

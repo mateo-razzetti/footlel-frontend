@@ -565,15 +565,49 @@
         };
     }
     /* ──────────────────────────────────────────
-       5. APPLY UI STATE
+       5. APPLY UI STATE & AVATAR ROBOT
     ────────────────────────────────────────── */
+    const BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            let guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.includes('avatar-default.png') || guestAv.startsWith('data:image/svg+xml')) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        const userKey = username ? ('footlel_avatar_' + username) : null;
+        let savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.includes('avatar-default.png') || savedAv.includes('seed=footlel-default')) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
     if (isGuest) {
         const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
         const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         heroUsername.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
         profileUser.textContent   = guestName;
-        profileAvatar.src         = GUEST_AVATAR;
-        profileAvatar.alt         = 'Avatar genérico de invitado';
+        profileAvatar.src         = getOrAssignAvatar(guestName, true);
+        profileAvatar.alt         = 'Avatar de invitado';
 
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
@@ -608,7 +642,7 @@
     } else {
         // Sanitize stored username with cleanUsername() so no '@' ever appears in the UI
         const savedUsername = cleanUsername(localStorage.getItem('footlel_username') || 'Jugador') || 'Jugador';
-        const savedAvatar = localStorage.getItem('footlel_avatar');
+        const savedAvatar = getOrAssignAvatar(savedUsername, false);
         if (savedAvatar) profileAvatar.src = savedAvatar;
         heroUsername.textContent = savedUsername;
         profileUser.textContent  = savedUsername;
@@ -656,6 +690,7 @@
                     localStorage.setItem('footlel_username', cleanFromBackend);
                     heroUsername.textContent = cleanFromBackend;
                     profileUser.textContent  = cleanFromBackend;
+                    profileAvatar.src        = getOrAssignAvatar(cleanFromBackend, false);
                 }
             }
 
