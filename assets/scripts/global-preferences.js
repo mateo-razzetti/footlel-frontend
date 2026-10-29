@@ -118,16 +118,29 @@
 
     /* Pulls the backend config into localStorage and applies it. */
     function syncConfigFromBackend() {
+        // Call fetchUserConfig() which performs GET /config/get-user-config with Bearer token
         return fetchUserConfig().then(function (cfg) {
+            // If no config returned (guest or network error), exit gracefully
             if (!cfg) return null;
             try {
+                // Save dark_mode boolean from backend as 'dark' or 'light' in localStorage
                 if (typeof cfg.dark_mode === 'boolean') localStorage.setItem(THEME_KEY, cfg.dark_mode ? 'dark' : 'light');
+                // Save animation_state boolean from backend as string in localStorage
                 if (typeof cfg.animation_state === 'boolean') localStorage.setItem(ANIM_KEY, String(cfg.animation_state));
+                // Save compatibility_mode boolean from backend as string in localStorage
                 if (typeof cfg.compatibility_mode === 'boolean') localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
             } catch (e) {}
+            // Re-apply CSS classes (.light-mode, .disable-animations) and logo from updated localStorage
             applyFromStorage();
+            // Return the configuration object for any caller awaiting it
             return cfg;
         });
+    }
+
+    /* Helper to strip leading '@' symbols from any username string */
+    function cleanUsername(rawName) {
+        // Convert to string, trim spaces, and remove one or more leading '@' characters via regex
+        return String(rawName || '').trim().replace(/^@+/, '');
     }
 
     function bindSessionCleanup() {
@@ -147,6 +160,7 @@
         saveUserConfig: saveUserConfig,
         saveCurrentConfig: saveCurrentConfig,
         syncConfigFromBackend: syncConfigFromBackend,
+        cleanUsername: cleanUsername,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
         setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }
@@ -157,8 +171,12 @@
 
     /* Once <body> exists. */
     document.addEventListener('DOMContentLoaded', function () {
+        // 1. Apply stored preferences immediately once body is available (zero flicker)
         applyFromStorage();
+        // 2. Bind logout buttons so token is cleared on sign-out
         bindSessionCleanup();
+        // 3. Asynchronously fetch GET /config/get-user-config and update localStorage + DOM
+        syncConfigFromBackend();
     });
 
     /* Back/forward cache restores pages without re-running scripts. */

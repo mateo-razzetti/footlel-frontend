@@ -211,7 +211,20 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">PORCENTAJE DE ACIERTOS</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">i<span class="stat-tooltip" role="tooltip">Porcentaje de Aciertos = (Cantidad de aciertos / Cantidad de intentos) x 100</span></span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">i<span class="stat-tooltip" role="tooltip">
+                    <!-- Title above the mathematical formula -->
+                    <span class="tooltip-formula-title">Porcentaje de Aciertos =</span>
+                    <!-- Flex row aligning the vertical fraction and the '× 100' multiplier -->
+                    <span class="tooltip-formula-row">
+                        <span class="tooltip-fraction">
+                            <!-- Numerator: correct guesses (updated dynamically via JS) -->
+                            <span class="tooltip-numerator" id="tooltipCorrectGuesses">0 aciertos</span>
+                            <!-- Denominator: total guesses made (updated dynamically via JS) -->
+                            <span class="tooltip-denominator" id="tooltipTotalGuesses">0 intentos</span>
+                        </span>
+                        <span class="tooltip-multiplier">× 100</span>
+                    </span>
+                </span></span>
             </div>
             <span class="stat-value" id="statAccuracy">🎯 0%</span>
         </div>
@@ -238,7 +251,20 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">PORCENTAJE DE VICTORIAS</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">i<span class="stat-tooltip" role="tooltip">Porcentaje de Victorias = (Partidas ganadas / Partidas jugadas) x 100</span></span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">i<span class="stat-tooltip" role="tooltip">
+                    <!-- Title above the mathematical formula -->
+                    <span class="tooltip-formula-title">Porcentaje de Victorias =</span>
+                    <!-- Flex row aligning the vertical fraction and the '× 100' multiplier -->
+                    <span class="tooltip-formula-row">
+                        <span class="tooltip-fraction">
+                            <!-- Numerator: matches won (updated dynamically via JS) -->
+                            <span class="tooltip-numerator" id="tooltipMatchesWon">0 ganadas</span>
+                            <!-- Denominator: matches played (updated dynamically via JS) -->
+                            <span class="tooltip-denominator" id="tooltipMatchesPlayed">0 jugadas</span>
+                        </span>
+                        <span class="tooltip-multiplier">× 100</span>
+                    </span>
+                </span></span>
             </div>
             <span class="stat-value" id="statWins">📈 0%</span>
         </div>
@@ -301,11 +327,16 @@
     ────────────────────────────────────────── */
     function $(id) { return document.getElementById(id); }
 
+    // Helper that strips any leading '@' symbol and extra spaces from a username
+    function cleanUsername(rawName) {
+        return String(rawName || '').trim().replace(/^@+/, '');
+    }
+
     /* ──────────────────────────────────────────
        1. STATE (Guest vs Registered)
     ────────────────────────────────────────── */
     var isGuest       = localStorage.getItem('footlel_guest') === 'true';
-    var savedUsername = (localStorage.getItem('footlel_username') || 'Jugador').trim();
+    var savedUsername = cleanUsername(localStorage.getItem('footlel_username') || 'Jugador') || 'Jugador';
     var savedAvatar   = localStorage.getItem('footlel_avatar');
     if (savedAvatar) {
         $('profileAvatar').src = savedAvatar;
@@ -367,16 +398,28 @@
         var pointsKey = 'footlel_points_' + username;
         var accKey    = 'footlel_accuracy_' + username;
         var winPctKey = 'footlel_win_pct_' + username;
+        // Keys to persist raw numerator/denominator counts in localStorage
+        var corrKey   = 'footlel_correct_guesses_' + username;
+        var madeKey   = 'footlel_guesses_made_'    + username;
+        var playedKey = 'footlel_matches_played_'  + username;
 
         var localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
         var localWins   = parseInt(localStorage.getItem(winsKey)   || '0', 10) || 0;
+        var correctGuesses = parseInt(localStorage.getItem(corrKey)   || '0', 10) || 0;
+        var guessesMade    = parseInt(localStorage.getItem(madeKey)   || '0', 10) || 0;
+        var matchesPlayed  = parseInt(localStorage.getItem(playedKey) || '0', 10) || 0;
 
-        // 1. Porcentaje de Aciertos (Backend: correct_guesses / guesses_made)
+        // 1. Accuracy Percentage (Backend: correct_guesses / guesses_made)
         var accuracyPct = null;
         if (statsPayload && typeof statsPayload === 'object') {
             if (statsPayload.correct_guesses !== undefined && statsPayload.guesses_made !== undefined) {
                 var made = Number(statsPayload.guesses_made) || 0;
                 var corr = Number(statsPayload.correct_guesses) || 0;
+                // Store exact numerator and denominator from backend
+                correctGuesses = corr;
+                guessesMade    = made;
+                localStorage.setItem(corrKey, String(corr));
+                localStorage.setItem(madeKey, String(made));
                 accuracyPct = made > 0 ? (corr / made) * 100 : 0;
             } else if (statsPayload.accuracy_percentage !== undefined) {
                 accuracyPct = Number(statsPayload.accuracy_percentage);
@@ -400,7 +443,7 @@
             accuracyPct = savedAcc !== null ? Number(savedAcc) : 0;
         }
 
-        // 2. Racha de días (Backend: win_streak)
+        // 2. Daily Streak (Backend: win_streak)
         var rawStreak = statsPayload && (statsPayload.win_streak ?? statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
         if (rawStreak === undefined || rawStreak === null) {
             rawStreak = userInfo && (userInfo.win_streak ?? userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
@@ -410,7 +453,7 @@
             : localStreak;
         localStorage.setItem(streakKey, String(finalStreak));
 
-        // 3. Puntos totales (Backend: user_points) & 4. Porcentaje de Victorias (Backend: matches_won / matches_played)
+        // 3. Total Points (Backend: user_points) & 4. Win Percentage (Backend: matches_won / matches_played)
         var rawPoints = statsPayload && (statsPayload.user_points ?? statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
         var rawWins   = statsPayload && (statsPayload.matches_won ?? statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
         var rawTotalGames = statsPayload && (statsPayload.matches_played ?? statsPayload.total_games ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
@@ -453,6 +496,11 @@
             finalPoints = savedPts !== null ? (Number(savedPts) || 0) : (effectiveWins * 10);
         }
 
+        if (rawTotalGames !== undefined && rawTotalGames !== null) {
+            matchesPlayed = Number(rawTotalGames) || 0;
+            localStorage.setItem(playedKey, String(matchesPlayed));
+        }
+
         if (winPct === undefined || winPct === null || Number.isNaN(Number(winPct))) {
             if (rawTotalGames !== undefined && rawTotalGames !== null) {
                 var totalG = Number(rawTotalGames) || 0;
@@ -470,7 +518,11 @@
             accuracy: accuracyPct,
             streak: finalStreak,
             totalPoints: finalPoints,
-            winPercentage: winPct
+            winPercentage: winPct,
+            correctGuesses: correctGuesses,
+            guessesMade: guessesMade,
+            matchesWon: effectiveWins,
+            matchesPlayed: matchesPlayed
         };
     }
     var profileAvatar   = $('profileAvatar');
@@ -484,6 +536,31 @@
     var statStreak      = $('statStreak');
     var statPoints      = $('statPoints');
     var statWins        = $('statWins');
+    // References to the numerator and denominator spans inside the mathematical fraction tooltips
+    var tooltipCorrectGuesses = $('tooltipCorrectGuesses');
+    var tooltipTotalGuesses   = $('tooltipTotalGuesses');
+    var tooltipMatchesWon     = $('tooltipMatchesWon');
+    var tooltipMatchesPlayed  = $('tooltipMatchesPlayed');
+
+    // Updates the vertical fraction numbers inside both stat tooltips
+    function updateFractionTooltips(mappedStats) {
+        if (tooltipCorrectGuesses) {
+            var c = mappedStats.correctGuesses ?? 0;
+            tooltipCorrectGuesses.textContent = c + (c === 1 ? ' acierto' : ' aciertos');
+        }
+        if (tooltipTotalGuesses) {
+            var m = mappedStats.guessesMade ?? 0;
+            tooltipTotalGuesses.textContent = m + (m === 1 ? ' intento' : ' intentos');
+        }
+        if (tooltipMatchesWon) {
+            var w = mappedStats.matchesWon ?? 0;
+            tooltipMatchesWon.textContent = w + (w === 1 ? ' ganada' : ' ganadas');
+        }
+        if (tooltipMatchesPlayed) {
+            var p = mappedStats.matchesPlayed ?? 0;
+            tooltipMatchesPlayed.textContent = p + (p === 1 ? ' jugada' : ' jugadas');
+        }
+    }
 
     if (isGuest) {
         var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
@@ -513,11 +590,17 @@
         statStreak.textContent   = formatStreakText(initialStats.streak);
         statPoints.textContent   = formatTotalPoints(initialStats.totalPoints);
         statWins.textContent     = '📈 ' + formatPercentage(initialStats.winPercentage);
+        // Populate fraction tooltips with cached numerator/denominator values
+        updateFractionTooltips(initialStats);
 
         (async function loadUserFooterStats() {
+            var token = localStorage.getItem('footlel_token');
             var results = await Promise.allSettled([
                 fetchUserStatsFromEndpoint(),
-                fetch(apiBaseUrl + '/user/get-user-info/' + encodeURIComponent(savedUsername)).then(function (r) { return r.ok ? r.json() : null; }),
+                // Updated to match Swagger: GET /user/get-user-info with Authorization Bearer header
+                token
+                    ? fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.ok ? r.json() : null; })
+                    : Promise.resolve(null),
                 fetch(apiBaseUrl + '/stat/get-global-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
             ]);
 
@@ -527,6 +610,13 @@
 
             if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
                 localStorage.setItem('footlel_user_id', String(userInfo.user_id));
+            }
+            if (userInfo && userInfo.user_name) {
+                var cleanFromBackend = cleanUsername(userInfo.user_name);
+                if (cleanFromBackend) {
+                    localStorage.setItem('footlel_username', cleanFromBackend);
+                    profileUser.textContent = cleanFromBackend;
+                }
             }
 
             if (hasPlayedDailyInPayload(statsPayload) || hasPlayedDailyInPayload(userInfo)) {
@@ -541,6 +631,8 @@
             statStreak.textContent   = formatStreakText(mapped.streak);
             statPoints.textContent   = formatTotalPoints(mapped.totalPoints);
             statWins.textContent     = '📈 ' + formatPercentage(mapped.winPercentage);
+            // Update fraction tooltips with fresh numbers from /stat/get-user-stats
+            updateFractionTooltips(mapped);
         })().catch(function (err) { console.warn('No se pudieron actualizar las estadísticas del footer:', err); });
     }
 

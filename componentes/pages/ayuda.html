@@ -377,7 +377,8 @@
         ddSessionAction.classList.remove('item-danger');
         ddSessionIcon.innerHTML     = LOGIN_ICON;
     } else {
-        const saved = localStorage.getItem('footlel_username') || 'Jugador';
+        // Read stored username and strip any leading '@' symbol
+        const saved = (localStorage.getItem('footlel_username') || 'Jugador').trim().replace(/^@+/, '');
         const savedAvatar = localStorage.getItem('footlel_avatar');
         if (savedAvatar) {
             const avatarEl = document.getElementById('profileAvatar');

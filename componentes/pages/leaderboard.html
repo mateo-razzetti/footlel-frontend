@@ -50,7 +50,7 @@
                     id="profileAvatar"
                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
                 >
-                <span class="profile-username" id="profileUsername">@nombre_usuario</span>
+                <span class="profile-username" id="profileUsername">nombre_usuario</span>
                 <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                      fill="none" stroke="currentColor" stroke-width="2.5"
                      stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -181,11 +181,12 @@
     var guestCta        = document.getElementById('guestCta');
     var lbList          = document.getElementById('lbList');
 
-    var savedUser   = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim();
+    // Strip any leading '@' from stored username
+    var savedUser   = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim().replace(/^@+/, '');
     var savedAvatar = localStorage.getItem('footlel_avatar');
 
     if (isGuest) {
-        var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim().replace(/^@+/, '');
         var guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         profileUser.textContent     = guestName;
         profileAvatar.src           = GUEST_AVATAR;
@@ -213,7 +214,8 @@
         if (savedAvatar) {
             profileAvatar.src = savedAvatar;
         }
-        profileUser.textContent = '@' + savedUser;
+        // Display clean username in header without '@' prefix
+        profileUser.textContent = savedUser;
     }
 
     /* ─────────────────────────────────────────
@@ -247,7 +249,8 @@
                 var rawVal = Number(Array.isArray(entry)
                     ? entry[1]
                     : (entry && (entry.points ?? entry.score ?? entry.wins ?? 0))) || 0;
-                var cleanName = String(rawName || '').trim();
+                // Strip any leading '@' from leaderboard usernames
+                var cleanName = String(rawName || '').trim().replace(/^@+/, '');
                 if (!cleanName) return;
                 var key = cleanName.toLowerCase();
 
