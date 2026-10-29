@@ -7,6 +7,78 @@
    Must be loaded in the <head> of every HTML file.
    ═══════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════
+   GLOBAL LAYOUT, BOX-SIZING & CUSTOM SCROLLBAR
+   ══════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: #333333 transparent;
+}
+
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Custom Webkit Scrollbar (Dark Theme Default) ───────────── */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #333333;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #4CAF50;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* ── Custom Scrollbar in Light Mode ─────────────────────────── */
+html.light-mode,
+body.light-mode {
+    scrollbar-width: thin;
+    scrollbar-color: #BDBDBD transparent;
+}
+
+html.light-mode ::-webkit-scrollbar-track,
+body.light-mode ::-webkit-scrollbar-track {
+    background: #F5F5F5;
+}
+
+html.light-mode ::-webkit-scrollbar-thumb,
+body.light-mode ::-webkit-scrollbar-thumb {
+    background-color: #BDBDBD;
+    border-radius: 4px;
+}
+
+html.light-mode ::-webkit-scrollbar-thumb:hover,
+body.light-mode ::-webkit-scrollbar-thumb:hover {
+    background-color: #4CAF50;
+}
+
 
 /* ══════════════════════════════════════════════════════════════
    LIGHT MODE — html.light-mode
