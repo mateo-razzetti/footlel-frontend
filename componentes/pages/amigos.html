@@ -767,9 +767,7 @@
             var displayUsername = cleanUsername(friend.username) || ('Usuario #' + friend.user_id);
             var li = document.createElement('li');
             li.className = 'friend-row';
-            if (friend.user_id !== null && friend.user_id !== undefined) {
-                li.dataset.userId = String(friend.user_id);
-            }
+            li.dataset.username = displayUsername;
 
             var avatar = createAvatarImg(displayUsername);
 
@@ -843,8 +841,26 @@
         }
     }
 
+    function resolveUsernameForEntry(entry, btnEl) {
+        if (btnEl) {
+            var btnName = btnEl.getAttribute('data-username') || (btnEl.dataset && btnEl.dataset.username);
+            if (btnName && cleanUsername(btnName)) {
+                return cleanUsername(btnName);
+            }
+            var parentRow = btnEl.closest ? btnEl.closest('[data-username]') : null;
+            if (parentRow) {
+                var rowName = parentRow.getAttribute('data-username') || (parentRow.dataset && parentRow.dataset.username);
+                if (rowName && cleanUsername(rowName)) {
+                    return cleanUsername(rowName);
+                }
+            }
+        }
+        if (!entry) return '';
+        if (typeof entry === 'string') return cleanUsername(entry);
+        return cleanUsername(entry.username || entry.user_name || entry.friend_name || entry.name || '');
+    }
+
     function resolveUserIdForEntry(entry, btnEl) {
-        // 1. Check DOM dataset on button or parent <li> first
         if (btnEl) {
             var btnId = btnEl.getAttribute('data-user-id') || (btnEl.dataset && btnEl.dataset.userId);
             if (btnId !== null && btnId !== undefined && btnId !== '' && !isNaN(Number(btnId))) {
@@ -858,26 +874,18 @@
                 }
             }
         }
-
         if (!entry) return null;
-
-        // 2. Check explicit numeric user_id / friend_id / id on the entry object
         var directId = entry.user_id ?? entry.friend_id ?? entry.user_id_request ?? entry.id;
         if (directId !== null && directId !== undefined && directId !== '' && !isNaN(Number(directId))) {
             return Number(directId);
         }
-
-        // 3. Check userDirectoryByName or numeric username string
-        var clean = cleanUsername(entry.username);
+        var clean = resolveUsernameForEntry(entry, btnEl);
         if (!clean) return null;
-        if (/^\d+$/.test(clean)) {
-            return Number(clean);
-        }
+        if (/^\d+$/.test(clean)) return Number(clean);
         var norm = normalizeText(clean);
         if (state.userDirectoryByName[norm] && state.userDirectoryByName[norm].user_id !== null) {
             return Number(state.userDirectoryByName[norm].user_id);
         }
-
         return null;
     }
 
@@ -886,31 +894,46 @@
         if (acceptBtn) acceptBtn.disabled = true;
         if (rejectBtn) rejectBtn.disabled = true;
 
-        var requestUserId = resolveUserIdForEntry(reqEntry, acceptBtn || rejectBtn);
-        if (requestUserId === null || isNaN(Number(requestUserId))) {
-            showAlertBanner(requestsErrorBanner, 'No se pudo identificar el ID del usuario de esta solicitud.');
-            if (acceptBtn) acceptBtn.disabled = false;
-            if (rejectBtn) rejectBtn.disabled = false;
-            return;
-        }
+        var requestUsername = resolveUsernameForEntry(reqEntry, acceptBtn || rejectBtn);
+        var requestUserId   = resolveUserIdForEntry(reqEntry, acceptBtn || rejectBtn);
 
         try {
+            // 1) Try current OpenAPI UserRequestReply schema ({ user_id_request, reply }) if numeric ID is available,
+            //    or fall back automatically to username-based payload ({ friend_name / user_name_request, reply }) if backend migrated it.
+            var primaryPayload = (requestUserId !== null && !isNaN(Number(requestUserId)))
+                ? { user_id_request: Number(requestUserId), reply: Boolean(replyBoolean) }
+                : { friend_name: String(requestUsername), user_name_request: String(requestUsername), reply: Boolean(replyBoolean) };
+
             var response = await fetch(API_BASE_URL + '/user/reply-user-friend-request', {
                 method: 'POST',
                 headers: getAuthHeaders(true),
-                body: JSON.stringify({
-                    user_id_request: Number(requestUserId),
-                    reply: Boolean(replyBoolean)
-                })
+                body: JSON.stringify(primaryPayload)
             });
 
+            // If backend returns 422 Validation Error because it now expects friend_name / user_name_request string:
+            if (response.status === 422 && requestUsername) {
+                response = await fetch(API_BASE_URL + '/user/reply-user-friend-request', {
+                    method: 'POST',
+                    headers: getAuthHeaders(true),
+                    body: JSON.stringify({
+                        friend_name: String(requestUsername),
+                        user_name_request: String(requestUsername),
+                        user_name: String(requestUsername),
+                        reply: Boolean(replyBoolean)
+                    })
+                });
+            }
+
             if (response.ok) {
-                // Remove request from state
+                // Remove request from state by username (or id)
                 state.friendRequests = state.friendRequests.filter(function (item) {
-                    if (item.user_id !== null && item.user_id !== undefined) {
+                    if (requestUsername && item.username) {
+                        return normalizeText(item.username) !== normalizeText(requestUsername);
+                    }
+                    if (requestUserId !== null && item.user_id !== null && item.user_id !== undefined) {
                         return Number(item.user_id) !== Number(requestUserId);
                     }
-                    return normalizeText(item.username) !== normalizeText(reqEntry.username);
+                    return false;
                 });
 
                 updateRequestsBadge();
@@ -966,6 +989,7 @@
                         var displayUsername = cleanUsername(req.username) || ('Usuario #' + req.user_id);
                         var li = document.createElement('li');
                         li.className = 'friend-row';
+                        li.dataset.username = displayUsername;
                         if (req.user_id !== null && req.user_id !== undefined) {
                             li.dataset.userId = String(req.user_id);
                         }
@@ -1069,35 +1093,27 @@
        9. PESTAÑA "BUSCAR" (POST /user/send-user-friend-request)
     ───────────────────────────────────────── */
     function isAlreadySent(userEntry) {
-        var normName = normalizeText(userEntry.username);
-        var targetId = userEntry.user_id;
+        var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
         return state.sentRequests.some(function (u) {
-            if (typeof u === 'object' && u !== null) {
-                if (targetId !== null && targetId !== undefined && u.user_id !== null && u.user_id !== undefined) {
-                    if (Number(u.user_id) === Number(targetId)) return true;
-                }
-                return normalizeText(u.username) === normName;
-            }
-            return normalizeText(u) === normName;
+            var uName = typeof u === 'object' && u !== null ? u.username : u;
+            return normalizeText(uName) === normName;
         });
     }
 
     function isAlreadyFriend(userEntry) {
-        var normName = normalizeText(userEntry.username);
-        var targetId = userEntry.user_id;
+        var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
         return state.friends.some(function (f) {
-            if (targetId !== null && targetId !== undefined && f.user_id !== null && f.user_id !== undefined) {
-                if (Number(f.user_id) === Number(targetId)) return true;
-            }
-            return normalizeText(f.username) === normName;
+            var fName = typeof f === 'object' && f !== null ? f.username : f;
+            return normalizeText(fName) === normName;
         });
     }
 
-    function markRequestAsSent(userEntry) {
-        if (!isAlreadySent(userEntry)) {
+    function markRequestAsSent(usernameStr) {
+        var clean = cleanUsername(usernameStr);
+        if (!clean) return;
+        if (!isAlreadySent({ username: clean })) {
             state.sentRequests.push({
-                user_id:  userEntry.user_id ?? null,
-                username: cleanUsername(userEntry.username)
+                username: clean
             });
             saveArrayStorage(KEYS.SENT_REQUESTS, state.sentRequests);
         }
@@ -1112,9 +1128,9 @@
             btnEl.setAttribute('aria-disabled', 'true');
         }
 
-        var idDelUsuario = resolveUserIdForEntry(userEntry, btnEl);
-        if (idDelUsuario === null || isNaN(Number(idDelUsuario))) {
-            showAlertBanner(searchErrorBanner, 'Este jugador aún no tiene un ID numérico asociado en el ranking del servidor.');
+        var nombreDelAmigo = resolveUsernameForEntry(userEntry, btnEl);
+        if (!nombreDelAmigo) {
+            showAlertBanner(searchErrorBanner, 'No se pudo obtener el nombre de usuario de este jugador.');
             if (btnEl) {
                 btnEl.disabled = false;
                 btnEl.removeAttribute('aria-disabled');
@@ -1125,18 +1141,18 @@
         var token = (localStorage.getItem('footlel_token') || '').trim();
 
         try {
+            // OpenAPI schema UserFriend requires: { "friend_name": String(nombreDelAmigo) }
             var response = await fetch(API_BASE_URL + '/user/send-user-friend-request', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': 'Bearer ' + token
                 },
-                body: JSON.stringify({ "friend_id": Number(idDelUsuario) })
+                body: JSON.stringify({ "friend_name": String(nombreDelAmigo) })
             });
 
             if (response.ok) {
-                userEntry.user_id = Number(idDelUsuario);
-                markRequestAsSent(userEntry);
+                markRequestAsSent(nombreDelAmigo);
 
                 if (btnEl) {
                     btnEl.classList.remove('btn-add--active');
@@ -1164,8 +1180,7 @@
                         btnEl.textContent = 'Ya son amigos';
                     }
                 } else if (/ya\s+fue\s+enviada|ya\s+enviaste|pendiente|already\s+sent/i.test(detail)) {
-                    userEntry.user_id = Number(idDelUsuario);
-                    markRequestAsSent(userEntry);
+                    markRequestAsSent(nombreDelAmigo);
                     if (btnEl) {
                         btnEl.classList.remove('btn-add--active');
                         btnEl.classList.add('btn-add--pending');
@@ -1250,9 +1265,7 @@
             var clean = cleanUsername(userEntry.username);
             var li = document.createElement('li');
             li.className = 'friend-row';
-            if (userEntry.user_id !== null && userEntry.user_id !== undefined) {
-                li.dataset.userId = String(userEntry.user_id);
-            }
+            li.dataset.username = clean;
 
             var avatar = createAvatarImg(clean);
 
@@ -1275,9 +1288,6 @@
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.dataset.username = clean;
-            if (userEntry.user_id !== null && userEntry.user_id !== undefined) {
-                btn.dataset.userId = String(userEntry.user_id);
-            }
 
             if (isAlreadyFriend(userEntry)) {
                 btn.className = 'btn-add btn-add--pending';
@@ -1338,17 +1348,16 @@
             if (r.ok) {
                 var data = await r.json();
                 var parsed = normalizeUserCollection(data, ['leaderboard']);
-                parsed.forEach(function (entry, index) {
+                parsed.forEach(function (entry) {
                     if (!entry.username || /^guest_/i.test(entry.username)) return;
-                    // Ensure every loaded entry carries a numeric user_id (either from backend payload, numeric string, or 1-based list id)
-                    if (entry.user_id === null || entry.user_id === undefined || isNaN(Number(entry.user_id))) {
-                        entry.user_id = /^\d+$/.test(entry.username) ? Number(entry.username) : (index + 1);
-                    }
                     var exists = state.backendUsers.some(function (u) {
                         return normalizeText(u.username) === normalizeText(entry.username);
                     });
                     if (!exists) {
-                        state.backendUsers.push(entry);
+                        state.backendUsers.push({
+                            username: cleanUsername(entry.username),
+                            points:   Number(entry.points) || 0
+                        });
                     }
                 });
             }

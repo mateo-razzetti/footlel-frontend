@@ -447,74 +447,66 @@
         return sorted.slice(0, 10);
     }
 
-    function buildFriendsStandingsFromBackend(lbData, friendsList, currentUsername, loggedUserId) {
+    function buildFriendsStandingsFromBackend(lbData, friendsList, currentUsername) {
         var allLbEntries = parseGlobalLeaderboardEntries(lbData);
         var confirmedFriends = Array.isArray(friendsList) ? friendsList : [];
 
+        // Build set of normalized friend usernames from GET /user/get-user-friends
         var friendNamesSet = new Set();
-        var friendIdsSet   = new Set();
-
         confirmedFriends.forEach(function (f) {
-            if (f.username) {
-                friendNamesSet.add(String(f.username).trim().replace(/^@+/, '').toLowerCase());
-            }
-            if (f.user_id !== null && f.user_id !== undefined && !isNaN(Number(f.user_id))) {
-                friendIdsSet.add(Number(f.user_id));
-                friendNamesSet.add(String(f.user_id));
+            var rawFriendName = typeof f === 'string'
+                ? f
+                : (f && (f.username || f.user_name || f.friend_name || f.name || ''));
+            var cleanFriendName = String(rawFriendName || '').trim().replace(/^@+/, '');
+            if (cleanFriendName) {
+                friendNamesSet.add(cleanFriendName.toLowerCase());
             }
         });
 
-        var normCurrentUser = String(currentUsername || '').trim().replace(/^@+/, '').toLowerCase();
-        var numLoggedId = (loggedUserId !== null && loggedUserId !== undefined && !isNaN(Number(loggedUserId)))
-            ? Number(loggedUserId)
-            : null;
+        var cleanCurrentUser = String(currentUsername || '').trim().replace(/^@+/, '');
+        var normCurrentUser  = cleanCurrentUser.toLowerCase();
 
-        // Filter global leaderboard to keep ONLY the logged-in user and users present in get-user-friends
+        // Filter global leaderboard by comparing username strings directly
         var filteredMap = new Map();
 
         allLbEntries.forEach(function (entry) {
-            var entryNameLower = String(entry.username || '').trim().toLowerCase();
-            var entryId = entry.user_id;
+            var entryCleanName = String(entry.username || '').trim().replace(/^@+/, '');
+            if (!entryCleanName) return;
+            var entryNameLower = entryCleanName.toLowerCase();
 
-            var isSelf = (normCurrentUser && entryNameLower === normCurrentUser) ||
-                         (numLoggedId !== null && entryId !== null && Number(entryId) === numLoggedId) ||
-                         (numLoggedId !== null && entryNameLower === String(numLoggedId));
-
-            var isFriend = friendNamesSet.has(entryNameLower) ||
-                           (entryId !== null && friendIdsSet.has(Number(entryId)));
+            var isSelf   = Boolean(normCurrentUser && entryNameLower === normCurrentUser);
+            var isFriend = friendNamesSet.has(entryNameLower);
 
             if (isSelf || isFriend) {
-                var displayKey = isSelf && normCurrentUser ? normCurrentUser : entryNameLower;
-                var displayName = isSelf && currentUsername ? currentUsername.trim().replace(/^@+/, '') : entry.username;
-                filteredMap.set(displayKey, {
-                    user_id:  entryId,
-                    username: displayName,
+                filteredMap.set(entryNameLower, {
+                    username: isSelf ? cleanCurrentUser : entryCleanName,
                     points:   Number(entry.points) || 0,
                     isSelf:   isSelf
                 });
             }
         });
 
-        // Also ensure confirmed friends who might not yet appear in the top leaderboard array are included with their points
+        // Also include confirmed friends who might have 0 points and not yet appear in global leaderboard
         confirmedFriends.forEach(function (f) {
-            var cName = String(f.username || (f.user_id !== null ? ('Usuario_' + f.user_id) : '')).trim().replace(/^@+/, '');
+            var rawFriendName = typeof f === 'string'
+                ? f
+                : (f && (f.username || f.user_name || f.friend_name || f.name || ''));
+            var cName = String(rawFriendName || '').trim().replace(/^@+/, '');
             if (!cName) return;
             var lower = cName.toLowerCase();
             if (!filteredMap.has(lower)) {
                 filteredMap.set(lower, {
-                    user_id:  f.user_id,
                     username: cName,
-                    points:   Number(f.points) || 0,
+                    points:   Number(f && f.points) || 0,
                     isSelf:   false
                 });
             }
         });
 
-        // Ensure the logged-in user is represented in the filtered map
+        // Ensure logged-in user is present in the filtered standings
         if (normCurrentUser && !filteredMap.has(normCurrentUser)) {
             filteredMap.set(normCurrentUser, {
-                user_id:  numLoggedId,
-                username: currentUsername.trim().replace(/^@+/, ''),
+                username: cleanCurrentUser,
                 points:   0,
                 isSelf:   true
             });
@@ -527,7 +519,7 @@
 
         return {
             entries: sorted,
-            hasFriends: confirmedFriends.length > 0 && sorted.length > 1
+            hasFriends: friendNamesSet.size > 0 && sorted.length > 1
         };
     }
 
@@ -609,7 +601,7 @@
             return;
         }
         if (activeTab === 'amigos' && !isGuest) {
-            var friendsResult = buildFriendsStandingsFromBackend(cachedBackendLb, cachedUserFriends, savedUser, currentUserId);
+            var friendsResult = buildFriendsStandingsFromBackend(cachedBackendLb, cachedUserFriends, savedUser);
             if (!friendsResult.hasFriends || friendsResult.entries.length <= 1) {
                 renderEmptyMessageState('Aún no tienes amigos agregados. ¡Ve a buscar rivales!');
                 return;
