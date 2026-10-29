@@ -8,8 +8,10 @@
 /* ── Cards Grid: identical to .cards-grid in menu.css ───────────── */
 .mode-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
+    width: 100%;
+    max-width: 100%;
 }
 
 /* ── Base card: identical to .game-card in menu.css ─────────────── */
@@ -253,7 +255,8 @@
 }
 /* == GUEST CTA (below grid) =============================== */
 .guest-cta-bar {
-    max-width: 1300px;
+    width: 100%;
+    max-width: 100%;
     margin: 32px auto 16px;
     padding: 18px 28px;
     background: var(--color-surface-card);
