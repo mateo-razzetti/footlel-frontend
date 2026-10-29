@@ -346,18 +346,18 @@
             img: resolveAssetUrl('Equipos - Premier League/tottenham-hotspur-logo-footylogos.png')
         },
         {
-            id: 'ac-milan',
-            name: 'AC Milan',
-            aliases: ['AC Milan', 'Milan'],
-            relPath: 'Equipos - Serie A/ac-milan-logo-footylogos.png',
-            img: resolveAssetUrl('Equipos - Serie A/ac-milan-logo-footylogos.png')
-        },
-        {
             id: 'inter-milan',
-            name: 'Inter Milan',
-            aliases: ['Inter de Milán', 'Inter de Milan', 'Inter Milan', 'Inter', 'Internazionale'],
+            name: 'Inter de Milán',
+            aliases: ['Inter de Milán', 'Inter de Milan', 'Inter Milan', 'FC Internazionale', 'Internazionale', 'Inter'],
             relPath: 'Equipos - Serie A/inter-milan-logo-footylogos.png',
             img: resolveAssetUrl('Equipos - Serie A/inter-milan-logo-footylogos.png')
+        },
+        {
+            id: 'ac-milan',
+            name: 'AC Milan',
+            aliases: ['AC Milan', 'A.C. Milan', 'AC Milán'],
+            relPath: 'Equipos - Serie A/ac-milan-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Serie A/ac-milan-logo-footylogos.png')
         },
         {
             id: 'juventus',
@@ -917,12 +917,25 @@
 
     // Two names match if equal when normalized, or if one contains the other
     // (covers "Tottenham" ⊂ "Tottenham Hotspur", "Liverpool" ⊂ "Liverpool FC",
-    // "AS Roma" ⊃ "Roma").
+    // "AS Roma" ⊃ "Roma"), while guarding against city-name collisions
+    // ("Inter de Milán" vs "AC Milan", "Real Madrid" vs "Atlético de Madrid",
+    // "Manchester City" vs "Manchester United").
+    function namesStrictlyMatch(a, b) {
+        const na = normalizeForMatch(a);
+        const nb = normalizeForMatch(b);
+        return Boolean(na && nb && na === nb);
+    }
+
     function namesLooselyMatch(a, b) {
         const na = normalizeForMatch(a);
         const nb = normalizeForMatch(b);
         if (!na || !nb) return false;
-        return na === nb || na.includes(nb) || nb.includes(na);
+        if (na === nb) return true;
+        // Prevent any cross-matching between Inter and AC Milan
+        const aHasInter = /\b(inter|internazionale)\b/.test(na);
+        const bHasInter = /\b(inter|internazionale)\b/.test(nb);
+        if (aHasInter !== bHasInter) return false;
+        return na.includes(nb) || nb.includes(na);
     }
 
     function buildCatalogEntryCandidates(entry, extraUrl) {
@@ -956,6 +969,49 @@
         const { rawName, rawImg } = extractConditionInput(raw);
         if (!rawName && !rawImg) return null;
         const slug = slugifyName(rawName);
+        const normalizedRaw = normalizeForMatch(rawName);
+
+        // 0) Explicit disambiguation for clubs sharing a city name in CLUB_CATALOG
+        if (catalog === CLUB_CATALOG && normalizedRaw) {
+            if (/\b(inter|internazionale)\b/.test(normalizedRaw)) {
+                const interEntry = catalog.find(entry => entry.id === 'inter-milan');
+                if (interEntry) {
+                    return { ...interEntry, imgCandidates: buildCatalogEntryCandidates(interEntry, rawImg) };
+                }
+            }
+            if (/\bmilan\b/.test(normalizedRaw) && !/\b(inter|internazionale)\b/.test(normalizedRaw)) {
+                const acMilanEntry = catalog.find(entry => entry.id === 'ac-milan');
+                if (acMilanEntry) {
+                    return { ...acMilanEntry, imgCandidates: buildCatalogEntryCandidates(acMilanEntry, rawImg) };
+                }
+            }
+            if (/\b(atletico|atleti)\b/.test(normalizedRaw)) {
+                const atletiEntry = catalog.find(entry => entry.id === 'atletico-madrid');
+                if (atletiEntry) {
+                    return { ...atletiEntry, imgCandidates: buildCatalogEntryCandidates(atletiEntry, rawImg) };
+                }
+            }
+            if (/\breal\s+madrid\b/.test(normalizedRaw)) {
+                const realEntry = catalog.find(entry => entry.id === 'real-madrid');
+                if (realEntry) {
+                    return { ...realEntry, imgCandidates: buildCatalogEntryCandidates(realEntry, rawImg) };
+                }
+            }
+            if (/\bmanchester\b/.test(normalizedRaw) || /\bman\b/.test(normalizedRaw)) {
+                if (/\bcity\b/.test(normalizedRaw)) {
+                    const cityEntry = catalog.find(entry => entry.id === 'manchester-city');
+                    if (cityEntry) {
+                        return { ...cityEntry, imgCandidates: buildCatalogEntryCandidates(cityEntry, rawImg) };
+                    }
+                }
+                if (/\b(united|utd)\b/.test(normalizedRaw)) {
+                    const utdEntry = catalog.find(entry => entry.id === 'manchester-united');
+                    if (utdEntry) {
+                        return { ...utdEntry, imgCandidates: buildCatalogEntryCandidates(utdEntry, rawImg) };
+                    }
+                }
+            }
+        }
 
         // 1) Exact match of id/slug (fast, covers happy path).
         const byId = catalog.find(entry => entry.id === rawName || entry.id === slug);
@@ -963,7 +1019,19 @@
             return { ...byId, imgCandidates: buildCatalogEntryCandidates(byId, rawImg) };
         }
 
-        // 2) Match against entry name or any known alias (Spanish/English/DB variants).
+        // 2) Exact normalized match against entry name or any known alias first.
+        const byExactNormalized = catalog.find(entry => {
+            if (namesStrictlyMatch(entry.name, rawName)) return true;
+            if (Array.isArray(entry.aliases)) {
+                return entry.aliases.some(alias => namesStrictlyMatch(alias, rawName));
+            }
+            return false;
+        });
+        if (byExactNormalized) {
+            return { ...byExactNormalized, imgCandidates: buildCatalogEntryCandidates(byExactNormalized, rawImg) };
+        }
+
+        // 3) Loose substring match against entry name or any known alias.
         const byNameOrAlias = catalog.find(entry => {
             if (namesLooselyMatch(entry.name, rawName)) return true;
             if (Array.isArray(entry.aliases)) {
