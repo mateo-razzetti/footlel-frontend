@@ -143,6 +143,117 @@
         return String(rawName || '').trim().replace(/^@+/, '');
     }
 
+    /* ── 6 Avatares Robot Base (mismos de editar-cuenta.html) ── */
+    var BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    /* Elige uno de los 6 robots al azar */
+    function pickRandomRobotAvatar() {
+        return BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+    }
+
+    /* Obtiene el avatar guardado del usuario o invitado, o le asigna un robot aleatorio si no tiene */
+    function getOrAssignAvatar(username, isGuest) {
+        var guestFlag = (typeof isGuest === 'boolean') ? isGuest : isGuestSession();
+        var cleanUser = cleanUsername(username || readStorage('footlel_username') || '');
+        if (guestFlag) {
+            var guestAv = readStorage('footlel_guest_avatar') || readStorage('footlel_avatar');
+            if (!guestAv || guestAv.indexOf('avatar-default.png') !== -1 || guestAv.indexOf('data:image/svg+xml') === 0) {
+                guestAv = pickRandomRobotAvatar();
+                try {
+                    localStorage.setItem('footlel_guest_avatar', guestAv);
+                    localStorage.setItem('footlel_avatar', guestAv);
+                } catch (e) {}
+            }
+            return guestAv;
+        }
+        var userKey = cleanUser ? ('footlel_avatar_' + cleanUser) : null;
+        var savedAv = (userKey && readStorage(userKey)) || readStorage('footlel_avatar');
+        if (!savedAv || savedAv.indexOf('avatar-default.png') !== -1 || savedAv.indexOf('seed=footlel-default') !== -1) {
+            savedAv = pickRandomRobotAvatar();
+            try {
+                if (userKey) localStorage.setItem(userKey, savedAv);
+                localStorage.setItem('footlel_avatar', savedAv);
+            } catch (e) {}
+        } else if (userKey && !readStorage(userKey)) {
+            try { localStorage.setItem(userKey, savedAv); } catch (e) {}
+        }
+        return savedAv;
+    }
+
+    /* Formatea los mensajes de error del Backend (corrige ñ, tildes y capitaliza) */
+    function formatBackendError(rawMsg) {
+        if (!rawMsg) return 'Ocurrió un error inesperado.';
+        var msg = String(rawMsg).trim();
+        // Si viene como JSON stringificado (ej: '{"detail":"..."}'), extraer detail
+        if (msg.charAt(0) === '{') {
+            try {
+                var parsed = JSON.parse(msg);
+                if (parsed && (parsed.detail || parsed.message)) {
+                    msg = String(parsed.detail || parsed.message).trim();
+                }
+            } catch (e) {}
+        }
+        // Quitar prefijos técnicos redundantes como "error de login: ", "error de registro: ", "error de inicio de juego: "
+        msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+        // Reemplazar palabras sin ñ o sin tilde que envía el backend
+        msg = msg
+            .replace(/\bcontrasenias\b/gi, 'contraseñas')
+            .replace(/\bcontrasenia\b/gi, 'contraseña')
+            .replace(/\binvalidos\b/gi, 'inválidos')
+            .replace(/\binvalidas\b/gi, 'inválidas')
+            .replace(/\binvalido\b/gi, 'inválido')
+            .replace(/\binvalida\b/gi, 'inválida')
+            .replace(/\bcodigos\b/gi, 'códigos')
+            .replace(/\bcodigo\b/gi, 'código')
+            .replace(/\busuario\s+invalido\b/gi, 'usuario inválido')
+            .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+            .replace(/\belectronico\b/gi, 'electrónico')
+            .replace(/\bnumeros\b/gi, 'números')
+            .replace(/\bnumero\b/gi, 'número')
+            .replace(/\btelefono\b/gi, 'teléfono')
+            .replace(/\bsesion\b/gi, 'sesión')
+            .replace(/\bverificacion\b/gi, 'verificación')
+            .replace(/\bautenticacion\b/gi, 'autenticación')
+            .replace(/\bconfiguracion\b/gi, 'configuración')
+            .replace(/\binformacion\b/gi, 'información')
+            .replace(/\bconexion\b/gi, 'conexión')
+            .replace(/\boperacion\b/gi, 'operación')
+            .replace(/\bmanana\b/gi, 'mañana')
+            .replace(/\bminimo\b/gi, 'mínimo')
+            .replace(/\bmaximo\b/gi, 'máximo')
+            .replace(/\bexito\b/gi, 'éxito');
+        // Capitalizar la primera letra del mensaje
+        if (msg.length > 0) {
+            msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+        }
+        // Asegurar punto final si no termina en signo de puntuación
+        if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+            msg += '.';
+        }
+        return msg;
+    }
+
+    var ALERT_ERROR_ICON_SVG = '<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+    /* Renderiza un mensaje de error estilizado con ícono SVG adentro de un contenedor */
+    function renderErrorAlert(containerEl, rawMsg) {
+        if (!containerEl) return;
+        var cleanText = formatBackendError(rawMsg);
+        containerEl.classList.add('field-error', 'error-alert-box');
+        containerEl.innerHTML = ALERT_ERROR_ICON_SVG + '<span class="error-alert-text"></span>';
+        var span = containerEl.querySelector('.error-alert-text');
+        if (span) span.textContent = cleanText;
+        containerEl.hidden = false;
+        containerEl.style.display = 'flex';
+    }
+
     function bindSessionCleanup() {
         var logoutSelectors = '#ddSessionAction, #btn-logout, a.item-danger[href*="login.html"]';
         document.querySelectorAll(logoutSelectors).forEach(function (el) {
@@ -161,6 +272,11 @@
         saveCurrentConfig: saveCurrentConfig,
         syncConfigFromBackend: syncConfigFromBackend,
         cleanUsername: cleanUsername,
+        BASE_ROBOT_AVATARS: BASE_ROBOT_AVATARS,
+        pickRandomRobotAvatar: pickRandomRobotAvatar,
+        getOrAssignAvatar: getOrAssignAvatar,
+        formatBackendError: formatBackendError,
+        renderErrorAlert: renderErrorAlert,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
         setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }

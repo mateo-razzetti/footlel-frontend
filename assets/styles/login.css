@@ -129,15 +129,46 @@ body {
     display: block;
 }
 
-/* ── Validation error message ── */
-.field-error {
+/* ── Validation error message (Modern Alert Style) ── */
+@keyframes errorFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.field-error,
+.error-alert-box {
     width: 100%;
     margin-top: 8px;
+    padding: 10px 14px;
+    background-color: rgba(239, 83, 80, 0.12);
+    border: 1px solid rgba(239, 83, 80, 0.4);
+    border-radius: 8px;
     font-family: var(--font-body);
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 500;
-    color: #ef5350;
+    line-height: 1.45;
+    color: #ff6b6b;
     text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: errorFadeIn 0.25s ease forwards;
+}
+
+.field-error[hidden],
+.error-alert-box[hidden] {
+    display: none !important;
+}
+
+.error-alert-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: #ff6b6b;
+}
+
+.error-alert-text {
+    flex: 1;
 }
 
 .forgot-password {

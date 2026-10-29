@@ -296,26 +296,6 @@
 
 
 <!-- ═══════════════════════════════════════
-     MODAL 2: Challenge Already Played
-═══════════════════════════════════════ -->
-<div class="modal-backdrop hidden" id="modal-desafio"
-     role="dialog" aria-modal="true" aria-labelledby="modal-des-title">
-    <div class="modal-card">
-        <button class="modal-close" id="close-desafio" aria-label="Cerrar">✕</button>
-        <div class="modal-icon" aria-hidden="true">✅</div>
-        <h2 class="modal-title" id="modal-des-title">¡Desafío completado!</h2>
-        <p class="modal-text">
-            Ya jugaste tu partida diaria. Preparate, el próximo desafío se desbloquea en:
-        </p>
-        <p class="modal-clock" id="modal-clock" aria-live="polite">14:35:02</p>
-        <div class="modal-actions">
-            <a href="menu.html" class="modal-btn-primary">Volver al Menú</a>
-        </div>
-    </div>
-</div>
-
-
-<!-- ═══════════════════════════════════════
      VANILLA JS
 ═══════════════════════════════════════ -->
 <script>
@@ -333,11 +313,45 @@
     }
 
     /* ──────────────────────────────────────────
-       1. STATE (Guest vs Registered)
+       1. STATE (Guest vs Registered) & AVATAR ROBOT
     ────────────────────────────────────────── */
+    var BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            var guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.indexOf('avatar-default.png') !== -1 || guestAv.indexOf('data:image/svg+xml') === 0) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        var userKey = username ? ('footlel_avatar_' + username) : null;
+        var savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.indexOf('avatar-default.png') !== -1 || savedAv.indexOf('seed=footlel-default') !== -1) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
     var isGuest       = localStorage.getItem('footlel_guest') === 'true';
     var savedUsername = cleanUsername(localStorage.getItem('footlel_username') || 'Jugador') || 'Jugador';
-    var savedAvatar   = localStorage.getItem('footlel_avatar');
+    var savedAvatar   = getOrAssignAvatar(savedUsername, isGuest);
     if (savedAvatar) {
         $('profileAvatar').src = savedAvatar;
     }
@@ -566,7 +580,7 @@
         var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
         var guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
         profileUser.textContent     = guestName;
-        profileAvatar.src           = GUEST_AVATAR;
+        profileAvatar.src           = getOrAssignAvatar(guestName, true);
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
         ddSessionLabel.textContent  = 'Iniciar Sesión';
@@ -579,6 +593,7 @@
         });
     } else {
         profileUser.textContent = savedUsername;
+        profileAvatar.src       = getOrAssignAvatar(savedUsername, false);
 
         var streakKey = 'footlel_streak_' + savedUsername;
         if (localStorage.getItem(streakKey) === null) {
@@ -616,14 +631,8 @@
                 if (cleanFromBackend) {
                     localStorage.setItem('footlel_username', cleanFromBackend);
                     profileUser.textContent = cleanFromBackend;
+                    profileAvatar.src = getOrAssignAvatar(cleanFromBackend, false);
                 }
-            }
-
-            if (hasPlayedDailyInPayload(statsPayload) || hasPlayedDailyInPayload(userInfo)) {
-                var todayStr = formatLocalDateYYYYMMDD(new Date());
-                localStorage.setItem('footlel_daily_played_date_' + savedUsername, todayStr);
-                desafioJugado = true;
-                challengePlayed = true;
             }
 
             var mapped = mapUserStatsPayload(statsPayload, userInfo, lbData, savedUsername);
@@ -666,31 +675,28 @@
     });
 
     /* ──────────────────────────────────────────
-       3. MODAL CONTROL
+       3. MODAL CONTROL (Solo Invitado Restringido)
     ────────────────────────────────────────── */
-    var guestModal     = $('modal-invitado');
-    var challengeModal = $('modal-desafio');
+    var guestModal = $('modal-invitado');
 
     function openModal(el) {
+        if (!el) return;
         el.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
         var firstFocusable = el.querySelector('button, a');
         if (firstFocusable) setTimeout(function () { firstFocusable.focus(); }, 60);
     }
     function closeModal(el) {
+        if (!el) return;
         el.classList.add('hidden');
         document.body.style.overflow = '';
     }
     function closeAllModals() {
         closeModal(guestModal);
-        closeModal(challengeModal);
     }
 
     $('close-invitado').addEventListener('click', function () { closeModal(guestModal); });
-    $('close-desafio').addEventListener('click',  function () { closeModal(challengeModal);  });
-
     guestModal.addEventListener('click', function (e) { if (e.target === this) closeModal(this); });
-    challengeModal.addEventListener('click',  function (e) { if (e.target === this) closeModal(this); });
 
     if (isGuest) {
         document.querySelectorAll('a[href*="amigos.html"]').forEach(function (link) {
@@ -702,45 +708,14 @@
     }
 
     /* ──────────────────────────────────────────
-       4. MODE BUTTONS LOGIC (DAILY VALIDATION)
+       4. MODE BUTTONS LOGIC (Guest check only;
+          Daily Challenge completion is checked by Backend in tateti-diario.html)
     ────────────────────────────────────────── */
-    function formatLocalDateYYYYMMDD(d) {
-        var y = d.getFullYear();
-        var m = String(d.getMonth() + 1).padStart(2, '0');
-        var day = String(d.getDate()).padStart(2, '0');
-        return y + '-' + m + '-' + day;
-    }
-
-    function hasPlayedDailyInPayload(payload) {
-        if (!payload || typeof payload !== 'object') return false;
-        return Boolean(
-            payload.played_daily_today === true ||
-            payload.daily_played === true ||
-            payload.has_played_today === true ||
-            payload.daily_challenge_played === true
-        );
-    }
-
-    function checkDailyPlayedToday() {
-        if (isGuest) return false;
-        var todayStr = formatLocalDateYYYYMMDD(new Date());
-        return localStorage.getItem('footlel_daily_played_date_' + savedUsername) === todayStr;
-    }
-
-    var desafioJugado = checkDailyPlayedToday();
-    var challengePlayed = desafioJugado;
-
-    // Daily Challenge
+    // Daily Challenge (blocked only for guests; logged-in users navigate to tateti-diario.html)
     $('btn-diario').addEventListener('click', function (e) {
         if (isGuest) {
             e.preventDefault();
             openModal(guestModal);
-            return;
-        }
-        if (desafioJugado || challengePlayed || checkDailyPlayedToday()) {
-            e.preventDefault();
-            openModal(challengeModal);
-            startClock();
         }
     });
 
@@ -750,50 +725,6 @@
             e.preventDefault();
             openModal(guestModal);
         }
-    });
-
-    /* ──────────────────────────────────────────
-       5. COUNTDOWN CLOCK (REAL TIME TO MIDNIGHT)
-    ────────────────────────────────────────── */
-    var clockInterval = null;
-
-    function getSecondsUntilMidnight() {
-        var now = new Date();
-        var midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
-        return Math.max(0, Math.floor((midnight.getTime() - now.getTime()) / 1000));
-    }
-
-    function startClock() {
-        clearInterval(clockInterval);
-        var clockEl = $('modal-clock');
-
-        function tick() {
-            var totalSeconds = getSecondsUntilMidnight();
-            if (totalSeconds <= 0) {
-                clearInterval(clockInterval);
-                clockEl.textContent = '00:00:00';
-                desafioJugado = false;
-                challengePlayed = false;
-                return;
-            }
-            var h = Math.floor(totalSeconds / 3600);
-            var m = Math.floor((totalSeconds % 3600) / 60);
-            var s = totalSeconds % 60;
-            clockEl.textContent =
-                String(h).padStart(2, '0') + ':' +
-                String(m).padStart(2, '0') + ':' +
-                String(s).padStart(2, '0');
-        }
-
-        tick();
-        clockInterval = setInterval(tick, 1000);
-    }
-
-    $('close-desafio').addEventListener('click', function () {
-        clearInterval(clockInterval);
-    });
-    challengeModal.addEventListener('click', function (e) {
-        if (e.target === this) clearInterval(clockInterval);
     });
 })();
 </script>

@@ -225,12 +225,100 @@
                 }
             });
 
+            /* Avatar & Error Formatting Helpers */
+            const BASE_ROBOT_AVATARS = [
+                'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+                'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+                'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+                'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+                'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+                'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+            ];
+
+            function getOrAssignAvatar(username) {
+                if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+                    return window.FootlelPrefs.getOrAssignAvatar(username, false);
+                }
+                const cleanUser = String(username || '').trim().replace(/^@+/, '');
+                const userKey = cleanUser ? ('footlel_avatar_' + cleanUser) : null;
+                let savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+                if (!savedAv || savedAv.includes('avatar-default.png') || savedAv.includes('seed=footlel-default')) {
+                    savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                    if (userKey) localStorage.setItem(userKey, savedAv);
+                    localStorage.setItem('footlel_avatar', savedAv);
+                } else if (userKey && !localStorage.getItem(userKey)) {
+                    localStorage.setItem(userKey, savedAv);
+                }
+                return savedAv;
+            }
+
+            const ALERT_ICON_SVG = '<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+
+            function formatBackendError(rawMsg) {
+                if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+                    return window.FootlelPrefs.formatBackendError(rawMsg);
+                }
+                if (!rawMsg) return 'Ocurrió un error inesperado.';
+                let msg = String(rawMsg).trim();
+                if (msg.startsWith('{')) {
+                    try {
+                        const parsed = JSON.parse(msg);
+                        if (parsed && (parsed.detail || parsed.message)) {
+                            msg = String(parsed.detail || parsed.message).trim();
+                        }
+                    } catch (_) {}
+                }
+                msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+                msg = msg
+                    .replace(/\bcontrasenias\b/gi, 'contraseñas')
+                    .replace(/\bcontrasenia\b/gi, 'contraseña')
+                    .replace(/\binvalidos\b/gi, 'inválidos')
+                    .replace(/\binvalidas\b/gi, 'inválidas')
+                    .replace(/\binvalido\b/gi, 'inválido')
+                    .replace(/\binvalida\b/gi, 'inválida')
+                    .replace(/\bcodigos\b/gi, 'códigos')
+                    .replace(/\bcodigo\b/gi, 'código')
+                    .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+                    .replace(/\belectronico\b/gi, 'electrónico')
+                    .replace(/\bnumeros\b/gi, 'números')
+                    .replace(/\bnumero\b/gi, 'número')
+                    .replace(/\btelefono\b/gi, 'teléfono')
+                    .replace(/\bsesion\b/gi, 'sesión')
+                    .replace(/\bverificacion\b/gi, 'verificación')
+                    .replace(/\bautenticacion\b/gi, 'autenticación')
+                    .replace(/\bconfiguracion\b/gi, 'configuración')
+                    .replace(/\binformacion\b/gi, 'información')
+                    .replace(/\bconexion\b/gi, 'conexión')
+                    .replace(/\boperacion\b/gi, 'operación')
+                    .replace(/\bmanana\b/gi, 'mañana')
+                    .replace(/\bminimo\b/gi, 'mínimo')
+                    .replace(/\bmaximo\b/gi, 'máximo')
+                    .replace(/\bexito\b/gi, 'éxito');
+                if (msg.length > 0) {
+                    msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+                }
+                if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+                    msg += '.';
+                }
+                return msg;
+            }
+
+            function renderAlertError(el, rawMsg) {
+                if (!el) return;
+                const cleanText = formatBackendError(rawMsg);
+                el.className = 'field-error error-alert-box';
+                el.innerHTML = ALERT_ICON_SVG + '<span class="error-alert-text"></span>';
+                el.querySelector('.error-alert-text').textContent = cleanText;
+                el.hidden = false;
+                el.style.display = 'flex';
+            }
+
             /* User Profile Setup (Backend connection) */
             document.addEventListener('DOMContentLoaded', async function () {
                 // Read saved username and strip any leading '@' symbol
                 const savedUsername = (localStorage.getItem('footlel_username') || 'Usuario').trim().replace(/^@+/, '');
                 const savedEmail = localStorage.getItem('footlel_email') || '';
-                const savedAvatar = localStorage.getItem('footlel_avatar');
+                const savedAvatar = getOrAssignAvatar(savedUsername);
 
                 // Preload basic UI (display name, email and avatar) without '@' prefix
                 const profileUsername = document.getElementById('profileUsername');
@@ -244,6 +332,10 @@
                 if (savedAvatar) {
                     document.getElementById('avatarPreview').src = savedAvatar;
                     document.getElementById('headerAvatar').src = savedAvatar;
+                    document.querySelectorAll('.base-avatar-option').forEach(function (btn) {
+                        const img = btn.querySelector('img');
+                        btn.classList.toggle('is-selected', Boolean(img && img.src === savedAvatar));
+                    });
                 }
 
                 // Fetch the real user info
@@ -267,11 +359,26 @@
                             const cleanName = String(data.user_name).trim().replace(/^@+/, '');
                             localStorage.setItem('footlel_username', cleanName);
                             if (profileUsername) profileUsername.textContent = cleanName;
+                            const userAv = getOrAssignAvatar(cleanName);
+                            document.getElementById('avatarPreview').src = userAv;
+                            document.getElementById('headerAvatar').src = userAv;
                         }
 
                         document.getElementById('username').value = String(data.user_name || localStorage.getItem('footlel_username') || '').trim().replace(/^@+/, '');
                         document.getElementById('email').value = data.user_email || localStorage.getItem('footlel_email') || '';
                     } else {
+                        let errData = null;
+                        try { errData = await response.json(); } catch (_) {}
+                        if (errData && (errData.detail || errData.message)) {
+                            let formErr = document.getElementById('edit-general-error');
+                            if (!formErr) {
+                                formErr = document.createElement('div');
+                                formErr.id = 'edit-general-error';
+                                formErr.style.marginBottom = '14px';
+                                document.getElementById('editAccountForm').prepend(formErr);
+                            }
+                            renderAlertError(formErr, errData.detail || errData.message);
+                        }
                         console.warn("No se pudo obtener la info del backend.");
                     }
                 } catch (error) {
@@ -358,37 +465,36 @@
                 // Username validation (cannot be empty)
                 let usernameError = document.getElementById('username-error');
                 if (!usernameError) {
-                    usernameError = document.createElement('p');
+                    usernameError = document.createElement('div');
                     usernameError.id = 'username-error';
-                    usernameError.className = 'field-error';
+                    usernameError.className = 'field-error error-alert-box';
                     usernameError.setAttribute('aria-live', 'polite');
-                    usernameError.style.color = '#ff4d4d';
                     usernameError.hidden = true;
                     document.getElementById('username').closest('.form-group').appendChild(usernameError);
                 }
                 if (!pendingUsername) {
-                    usernameError.textContent = USERNAME_ERROR_MSG;
-                    usernameError.hidden = false;
+                    renderAlertError(usernameError, USERNAME_ERROR_MSG);
                     document.getElementById('username').focus();
                     return; // Halt execution so that it neither saves nor redirects
                 }
                 usernameError.hidden = true;
+                usernameError.style.display = 'none';
 
                 // 2. Email
                 const pendingEmail = document.getElementById('email').value.trim();
                 var emailErrorEl = document.getElementById('email-error');
                 if (!emailErrorEl) {
-                    emailErrorEl = document.createElement('p');
+                    emailErrorEl = document.createElement('div');
                     emailErrorEl.id = 'email-error';
-                    emailErrorEl.className = 'field-error';
-                    emailErrorEl.style.cssText = 'color:#ff5252;font-size:12px;margin:6px 0 0;display:none;';
+                    emailErrorEl.className = 'field-error error-alert-box';
+                    emailErrorEl.setAttribute('aria-live', 'polite');
+                    emailErrorEl.hidden = true;
                     document.getElementById('email').closest('.form-group').appendChild(emailErrorEl);
                 }
+                emailErrorEl.hidden = true;
                 emailErrorEl.style.display = 'none';
-                emailErrorEl.textContent = '';
                 if (!pendingEmail || !EMAIL_REGEX.test(pendingEmail)) {
-                    emailErrorEl.textContent = EMAIL_ERROR_MSG;
-                    emailErrorEl.style.display = 'block';
+                    renderAlertError(emailErrorEl, EMAIL_ERROR_MSG);
                     document.getElementById('email').focus();
                     return; // Halts execution so that it neither saves nor redirects 
                 }
@@ -399,11 +505,10 @@
                 // Secure password validation (only when a new password was typed)
                 let passwordError = document.getElementById('password-error');
                 if (!passwordError) {
-                    passwordError = document.createElement('p');
+                    passwordError = document.createElement('div');
                     passwordError.id = 'password-error';
-                    passwordError.className = 'field-error';
+                    passwordError.className = 'field-error error-alert-box';
                     passwordError.setAttribute('aria-live', 'polite');
-                    passwordError.style.color = '#ff4d4d';
                     passwordError.hidden = true;
                     document.getElementById('new-password').closest('.form-group').appendChild(passwordError);
                 }
@@ -413,14 +518,14 @@
                 } else {
                     if (!PASSWORD_REGEX.test(typedPassword)) {
                         e.preventDefault();
-                        passwordError.textContent = PASSWORD_ERROR_MSG;
-                        passwordError.hidden = false;
+                        renderAlertError(passwordError, PASSWORD_ERROR_MSG);
                         document.getElementById('new-password').focus();
                         return;
                     }
                     localStorage.setItem('pending_user_password', typedPassword);
                 }
                 passwordError.hidden = true;
+                passwordError.style.display = 'none';
 
                 localStorage.setItem('pending_user_name', pendingUsername);
                 localStorage.setItem('pending_user_email', pendingEmail);

@@ -21,6 +21,7 @@
             <h1 class="brand-title">FOOTLEL</h1>
         </header>
         <form class="login-form" action="#" method="POST" novalidate>
+            <div id="login-error" class="field-error error-alert-box" role="alert" aria-live="polite" style="margin-bottom: 14px;" hidden></div>
             <div class="form-group">
                 <input class="form-input" type="text" id="username" name="username" placeholder="Ingresá tu usuario" autocomplete="username" required>
             </div>
@@ -68,6 +69,97 @@
             });
         });
 
+        /* ── Base Robot Avatars & Backend Error Formatter ──────── */
+        const BASE_ROBOT_AVATARS = [
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+        ];
+
+        function pickRandomRobotAvatar() {
+            return BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+        }
+
+        function ensureRegisteredUserAvatar(username) {
+            const cleanUser = String(username || '').trim().replace(/^@+/, '');
+            if (!cleanUser) return;
+            const userAvatarKey = 'footlel_avatar_' + cleanUser;
+            let userAvatar = localStorage.getItem(userAvatarKey);
+            if (!userAvatar || userAvatar.includes('avatar-default.png') || userAvatar.includes('seed=footlel-default')) {
+                userAvatar = pickRandomRobotAvatar();
+                localStorage.setItem(userAvatarKey, userAvatar);
+            }
+            localStorage.setItem('footlel_avatar', userAvatar);
+        }
+
+        function assignRandomGuestAvatar() {
+            const randomAvatar = pickRandomRobotAvatar();
+            localStorage.setItem('footlel_guest_avatar', randomAvatar);
+            localStorage.setItem('footlel_avatar', randomAvatar);
+            return randomAvatar;
+        }
+
+        const ALERT_ICON_SVG = `<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+        function formatBackendError(rawMsg) {
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+                return window.FootlelPrefs.formatBackendError(rawMsg);
+            }
+            if (!rawMsg) return 'Ocurrió un error inesperado.';
+            let msg = String(rawMsg).trim();
+            if (msg.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(msg);
+                    if (parsed && (parsed.detail || parsed.message)) {
+                        msg = String(parsed.detail || parsed.message).trim();
+                    }
+                } catch (_) {}
+            }
+            msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+            msg = msg
+                .replace(/\bcontrasenias\b/gi, 'contraseñas')
+                .replace(/\bcontrasenia\b/gi, 'contraseña')
+                .replace(/\binvalidos\b/gi, 'inválidos')
+                .replace(/\binvalidas\b/gi, 'inválidas')
+                .replace(/\binvalido\b/gi, 'inválido')
+                .replace(/\binvalida\b/gi, 'inválida')
+                .replace(/\bcodigos\b/gi, 'códigos')
+                .replace(/\bcodigo\b/gi, 'código')
+                .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+                .replace(/\belectronico\b/gi, 'electrónico')
+                .replace(/\bnumeros\b/gi, 'números')
+                .replace(/\bnumero\b/gi, 'número')
+                .replace(/\btelefono\b/gi, 'teléfono')
+                .replace(/\bsesion\b/gi, 'sesión')
+                .replace(/\bverificacion\b/gi, 'verificación')
+                .replace(/\bautenticacion\b/gi, 'autenticación')
+                .replace(/\bconfiguracion\b/gi, 'configuración')
+                .replace(/\binformacion\b/gi, 'información')
+                .replace(/\bconexion\b/gi, 'conexión')
+                .replace(/\boperacion\b/gi, 'operación')
+                .replace(/\bmanana\b/gi, 'mañana')
+                .replace(/\bminimo\b/gi, 'mínimo')
+                .replace(/\bmaximo\b/gi, 'máximo')
+                .replace(/\bexito\b/gi, 'éxito');
+            if (msg.length > 0) {
+                msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+            }
+            if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+                msg += '.';
+            }
+            return msg;
+        }
+
+        function showLoginError(errorEl, rawMsg) {
+            const cleanText = formatBackendError(rawMsg);
+            errorEl.innerHTML = `${ALERT_ICON_SVG}<span class="error-alert-text"></span>`;
+            errorEl.querySelector('.error-alert-text').textContent = cleanText;
+            errorEl.hidden = false;
+        }
+
         /* ── Log in (registered user) ──────────────────── */
         const loginForm = document.querySelector('.login-form');
         loginForm.addEventListener('submit', async function (e) {
@@ -76,26 +168,24 @@
             const usernameVal = document.getElementById('username').value.trim();
             const passwordVal = document.getElementById('password').value.trim();
 
-            // ── Reusable error element (created only once) ──
-            let errorEl = document.getElementById('login-general-error');
+            // ── Reusable error element (#login-error) ──
+            let errorEl = document.getElementById('login-error') || document.getElementById('login-general-error');
             if (!errorEl) {
-                errorEl = document.createElement('p');
-                errorEl.id = 'login-general-error';
-                errorEl.className = 'field-error';
-                errorEl.style.marginBottom = '12px';
+                errorEl = document.createElement('div');
+                errorEl.id = 'login-error';
+                errorEl.className = 'field-error error-alert-box';
+                errorEl.style.marginBottom = '14px';
                 loginForm.prepend(errorEl);
             }
 
             // ── Sequential validation with specific messages ──
             if (!usernameVal) {
-                errorEl.textContent = 'Falta ingresar el usuario.';
-                errorEl.hidden = false;
+                showLoginError(errorEl, 'Falta ingresar el usuario.');
                 document.getElementById('username').focus();
                 return;
             }
             if (!passwordVal) {
-                errorEl.textContent = 'Falta ingresar la contraseña.';
-                errorEl.hidden = false;
+                showLoginError(errorEl, 'Falta ingresar la contraseña.');
                 document.getElementById('password').focus();
                 return;
             }
@@ -114,8 +204,9 @@
 
                 if (response.ok) {
                     const data = await response.json();
+                    let finalUsername = usernameVal.replace(/^@+/, '');
                     localStorage.setItem('footlel_guest', 'false');
-                    localStorage.setItem('footlel_username', usernameVal);
+                    localStorage.setItem('footlel_username', finalUsername);
                     localStorage.removeItem('footlel_password');
 
                     const token = data.access_token || data.token || data.jwt || (typeof data === 'string' ? data : null);
@@ -154,7 +245,8 @@
                             if (userInfo.user_name) {
                                 // Clean any leading '@' before saving username to localStorage
                                 const cleanName = String(userInfo.user_name).trim().replace(/^@+/, '');
-                                localStorage.setItem('footlel_username', cleanName);
+                                finalUsername = cleanName || finalUsername;
+                                localStorage.setItem('footlel_username', finalUsername);
                             }
                         }
 
@@ -179,17 +271,18 @@
                         console.error('No se pudo obtener la info o configuración inicial:', infoError);
                     }
 
+                    // Ensure registered user has a base robot avatar assigned (or restore existing one)
+                    ensureRegisteredUserAvatar(finalUsername);
+
                     // Restore the redirect
                     window.location.href = 'menu.html';
                 } else {
-                    // ── Backend error: show message ──
+                    // ── Backend error: show formatted message with modern alert design ──
                     const data = await response.json();
-                    errorEl.textContent = data.detail || data.message || 'Error al iniciar sesión';
-                    errorEl.hidden = false;
+                    showLoginError(errorEl, data.detail || data.message || 'Error al iniciar sesión');
                 }
             } catch (error) {
-                errorEl.textContent = 'No se pudo conectar con el servidor. Intentá más tarde.';
-                errorEl.hidden = false;
+                showLoginError(errorEl, 'No se pudo conectar con el servidor. Intentá más tarde.');
             }
         });
 
@@ -265,6 +358,8 @@
             e.preventDefault();
             localStorage.removeItem('footlel_token');
             localStorage.setItem('footlel_guest', 'true');
+            // Asignar automáticamente uno de los 6 avatares robot de forma aleatoria para la sesión de invitado
+            assignRandomGuestAvatar();
             try {
                 const guestResponse = await fetch(`${API_BASE_URL}/auth/guest-login`, {
                     method: 'POST',

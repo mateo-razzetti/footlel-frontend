@@ -284,13 +284,38 @@
     var ADD_USER_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>';
 
     /* ─────────────────────────────────────────
-       1. HEADER — user
+       1. HEADER — user & AVATAR ROBOT
     ───────────────────────────────────────── */
+    var BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, false);
+        }
+        var userKey = username ? ('footlel_avatar_' + username) : null;
+        var savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.indexOf('avatar-default.png') !== -1 || savedAv.indexOf('seed=footlel-default') !== -1) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
     // Get reference to the header username element
     var profileUser = document.getElementById('profileUsername');
     // Read stored username, trim spaces, and strip any leading '@' character
     var savedUser   = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim().replace(/^@+/, '');
-    var savedAvatar = localStorage.getItem('footlel_avatar');
+    var savedAvatar = getOrAssignAvatar(savedUser);
     if (savedAvatar) {
         document.getElementById('profileAvatar').src = savedAvatar;
     }
