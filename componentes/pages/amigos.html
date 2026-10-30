@@ -50,7 +50,7 @@
                 type="button"
             >
                 <img
-                    src="../../assets/images/avatar-default.png"
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
                     alt="Avatar de usuario"
                     class="profile-avatar"
                     id="profileAvatar"
@@ -532,12 +532,15 @@
     function normalizeUserCollection(payload, preferredKeys) {
         if (!payload) return [];
         var rawList = null;
+        var parallelIds = null;
+
         if (Array.isArray(payload)) {
             rawList = payload;
         } else if (typeof payload === 'object') {
             var keysToTry = (preferredKeys || []).concat([
+                'friend_request_names', 'friend_names', 'user_friend_names',
                 'friends', 'user_friends', 'friend_requests', 'user_friend_requests',
-                'requests', 'users', 'data', 'items', 'results', 'leaderboard'
+                'requests', 'incoming', 'users', 'data', 'items', 'results', 'leaderboard'
             ]);
             for (var i = 0; i < keysToTry.length; i++) {
                 var k = keysToTry[i];
@@ -555,16 +558,33 @@
                     }
                 }
             }
+
+            // Detect companion IDs array (e.g. friend_request_ids or friend_ids)
+            var idKeys = ['friend_request_ids', 'friend_ids', 'user_friend_ids', 'friends_ids', 'request_ids', 'ids'];
+            for (var m = 0; m < idKeys.length; m++) {
+                var ik = idKeys[m];
+                if (Array.isArray(payload[ik])) {
+                    parallelIds = payload[ik];
+                    break;
+                }
+                if (payload.data && typeof payload.data === 'object' && Array.isArray(payload.data[ik])) {
+                    parallelIds = payload.data[ik];
+                    break;
+                }
+            }
         }
         if (!Array.isArray(rawList)) return [];
 
         var normalized = [];
-        rawList.forEach(function (item) {
+        rawList.forEach(function (item, idx) {
             if (item === null || item === undefined) return;
+            var pairedId = (Array.isArray(parallelIds) && idx < parallelIds.length && parallelIds[idx] !== null && parallelIds[idx] !== undefined && !isNaN(Number(parallelIds[idx])))
+                ? Number(parallelIds[idx])
+                : null;
 
             // Case 1: Tuple/Array e.g. [user_id, user_name] or [user_name, points, user_id]
             if (Array.isArray(item)) {
-                var tupleId = null;
+                var tupleId = pairedId;
                 var tupleName = '';
                 var tuplePts = 0;
                 if (item.length >= 2 && typeof item[0] === 'number' && typeof item[1] === 'string') {
@@ -576,12 +596,12 @@
                     tuplePts = Number(item[1]) || 0;
                     if (item.length >= 3 && item[2] !== null && item[2] !== undefined && !isNaN(Number(item[2]))) {
                         tupleId = Number(item[2]);
-                    } else if (/^\d+$/.test(tupleName)) {
+                    } else if (tupleId === null && /^\d+$/.test(tupleName)) {
                         tupleId = Number(tupleName);
                     }
                 } else if (typeof item[0] === 'string') {
                     tupleName = cleanUsername(item[0]);
-                    if (/^\d+$/.test(tupleName)) {
+                    if (tupleId === null && /^\d+$/.test(tupleName)) {
                         tupleId = Number(tupleName);
                     }
                 } else if (typeof item[0] === 'number') {
@@ -602,19 +622,30 @@
             }
             if (typeof item === 'string') {
                 var trimmed = item.trim();
-                if (/^\d+$/.test(trimmed)) {
+                if (/^\d+$/.test(trimmed) && pairedId === null) {
                     var recStrId = registerUserInDirectory({ user_id: Number(trimmed) });
                     if (recStrId) normalized.push(recStrId);
                 } else {
-                    var recStrName = registerUserInDirectory({ username: trimmed });
-                    if (recStrName && recStrName.username) normalized.push(recStrName);
+                    var recStrName = registerUserInDirectory({ user_id: pairedId, username: trimmed });
+                    if (recStrName && (recStrName.username || recStrName.user_id !== null)) {
+                        if (pairedId !== null) {
+                            recStrName.user_id = pairedId;
+                            recStrName.user_id_request = pairedId;
+                        }
+                        normalized.push(recStrName);
+                    }
                 }
                 return;
             }
 
             // Case 3: Object { user_id / id / friend_id / user_id_request, user_name / username / ... }
             if (typeof item === 'object') {
-                var recObj = registerUserInDirectory(item);
+                var objWithId = Object.assign({}, item);
+                if (pairedId !== null && objWithId.user_id === undefined && objWithId.user_id_request === undefined && objWithId.id === undefined) {
+                    objWithId.user_id = pairedId;
+                    objWithId.user_id_request = pairedId;
+                }
+                var recObj = registerUserInDirectory(objWithId);
                 if (recObj && (recObj.username || recObj.user_id !== null)) {
                     normalized.push(recObj);
                 }
@@ -622,6 +653,83 @@
         });
 
         return normalized;
+    }
+
+    function parseFriendRequestsPayload(data) {
+        console.log('Friend requests payload:', data);
+        if (!data) return [];
+
+        var namesArr = data.friend_request_names || (data.data && data.data.friend_request_names);
+        var idsArr   = data.friend_request_ids   || (data.data && data.data.friend_request_ids);
+
+        if (Array.isArray(namesArr)) {
+            var list = [];
+            for (var i = 0; i < namesArr.length; i++) {
+                var rawName = namesArr[i];
+                var rawId   = (Array.isArray(idsArr) && i < idsArr.length) ? idsArr[i] : null;
+                var cleanName = cleanUsername(
+                    (typeof rawName === 'object' && rawName !== null)
+                        ? (rawName.user_name || rawName.username || rawName.friend_name || rawName.sender_name || rawName.name || '')
+                        : rawName
+                );
+                var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
+                    ? Number(rawId)
+                    : ((typeof rawName === 'object' && rawName !== null && !isNaN(Number(rawName.user_id_request ?? rawName.user_id ?? rawName.request_id ?? rawName.id)))
+                        ? Number(rawName.user_id_request ?? rawName.user_id ?? rawName.request_id ?? rawName.id)
+                        : null);
+
+                if (cleanName || numId !== null) {
+                    registerUserInDirectory({ user_id: numId, username: cleanName });
+                    list.push({
+                        user_id:         numId,
+                        user_id_request: numId,
+                        request_id:      numId,
+                        username:        cleanName || ('Usuario #' + numId)
+                    });
+                }
+            }
+            return list;
+        }
+
+        return normalizeUserCollection(data, ['friend_requests', 'user_friend_requests', 'requests', 'incoming']);
+    }
+
+    function parseFriendsPayload(data) {
+        console.log('Friends payload:', data);
+        if (!data) return [];
+
+        var namesArr = data.friend_names || data.user_friend_names || data.friends_names ||
+                       (data.data && (data.data.friend_names || data.data.user_friend_names || data.data.friends_names));
+        var idsArr   = data.friend_ids   || data.user_friend_ids   || data.friends_ids   ||
+                       (data.data && (data.data.friend_ids   || data.data.user_friend_ids   || data.data.friends_ids));
+
+        if (Array.isArray(namesArr)) {
+            var list = [];
+            for (var i = 0; i < namesArr.length; i++) {
+                var rawName = namesArr[i];
+                var rawId   = (Array.isArray(idsArr) && i < idsArr.length) ? idsArr[i] : null;
+                var cleanName = cleanUsername(
+                    (typeof rawName === 'object' && rawName !== null)
+                        ? (rawName.user_name || rawName.username || rawName.friend_name || rawName.name || '')
+                        : rawName
+                );
+                var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
+                    ? Number(rawId)
+                    : null;
+
+                if (cleanName || numId !== null) {
+                    var rec = registerUserInDirectory({ user_id: numId, username: cleanName });
+                    list.push({
+                        user_id:  numId !== null ? numId : (rec ? rec.user_id : null),
+                        username: cleanName || (rec ? rec.username : ('Usuario #' + numId)),
+                        points:   rec ? rec.points : 0
+                    });
+                }
+            }
+            return list;
+        }
+
+        return normalizeUserCollection(data, ['friends', 'user_friends', 'friend_names', 'user_friend_names']);
     }
 
     function createAvatarImg(username) {
@@ -703,7 +811,7 @@
 
             if (response.ok) {
                 var data = await response.json();
-                var parsedFriends = normalizeUserCollection(data, ['friends', 'user_friends']);
+                var parsedFriends = parseFriendsPayload(data);
                 state.friends = parsedFriends;
                 // Persist normalized list so leaderboard.html "Amigos" tab also stays in sync
                 saveArrayStorage(KEYS.FRIENDS_CACHE, parsedFriends);
@@ -724,7 +832,9 @@
             showAlertBanner(friendsErrorBanner, 'No pudimos conectar con el servidor para cargar tus amigos.');
         } finally {
             state.isLoadingFriends = false;
+            syncSentRequestsWithBackendState();
             renderFriendsList();
+            renderRequestsTab();
             renderSearchUsers();
         }
     }
@@ -820,7 +930,7 @@
 
             if (response.ok) {
                 var data = await response.json();
-                state.friendRequests = normalizeUserCollection(data, ['friend_requests', 'user_friend_requests', 'requests']);
+                state.friendRequests = parseFriendRequestsPayload(data);
             } else {
                 var errData = null;
                 try { errData = await response.json(); } catch (_) {}
@@ -836,8 +946,10 @@
             showAlertBanner(requestsErrorBanner, 'No pudimos conectar con el servidor para cargar tus solicitudes.');
         } finally {
             state.isLoadingRequests = false;
+            syncSentRequestsWithBackendState();
             updateRequestsBadge();
             renderRequestsTab();
+            renderSearchUsers();
         }
     }
 
@@ -861,6 +973,12 @@
     }
 
     function resolveUserIdForEntry(entry, btnEl) {
+        if (entry && typeof entry === 'object') {
+            var directId = entry.user_id_request ?? entry.request_id ?? entry.user_id ?? entry.friend_id ?? entry.id;
+            if (directId !== null && directId !== undefined && directId !== '' && !isNaN(Number(directId))) {
+                return Number(directId);
+            }
+        }
         if (btnEl) {
             var btnId = btnEl.getAttribute('data-user-id') || (btnEl.dataset && btnEl.dataset.userId);
             if (btnId !== null && btnId !== undefined && btnId !== '' && !isNaN(Number(btnId))) {
@@ -873,11 +991,6 @@
                     return Number(rowId);
                 }
             }
-        }
-        if (!entry) return null;
-        var directId = entry.user_id ?? entry.friend_id ?? entry.user_id_request ?? entry.id;
-        if (directId !== null && directId !== undefined && directId !== '' && !isNaN(Number(directId))) {
-            return Number(directId);
         }
         var clean = resolveUsernameForEntry(entry, btnEl);
         if (!clean) return null;
@@ -895,56 +1008,34 @@
         if (rejectBtn) rejectBtn.disabled = true;
 
         var requestUsername = resolveUsernameForEntry(reqEntry, acceptBtn || rejectBtn);
-        var requestUserId   = resolveUserIdForEntry(reqEntry, acceptBtn || rejectBtn);
+        var requestId       = resolveUserIdForEntry(reqEntry, acceptBtn || rejectBtn);
 
         try {
-            // 1) Try current OpenAPI UserRequestReply schema ({ user_id_request, reply }) if numeric ID is available,
-            //    or fall back automatically to username-based payload ({ friend_name / user_name_request, reply }) if backend migrated it.
-            var primaryPayload = (requestUserId !== null && !isNaN(Number(requestUserId)))
-                ? { user_id_request: Number(requestUserId), reply: Boolean(replyBoolean) }
-                : { friend_name: String(requestUsername), user_name_request: String(requestUsername), reply: Boolean(replyBoolean) };
+            // Send exact schema required by POST /user/reply-user-friend-request:
+            // { "user_id_request": Number(requestId), "reply": true/false }
+            var payload = {
+                user_id_request: Number(requestId),
+                reply: Boolean(replyBoolean)
+            };
 
             var response = await fetch(API_BASE_URL + '/user/reply-user-friend-request', {
                 method: 'POST',
                 headers: getAuthHeaders(true),
-                body: JSON.stringify(primaryPayload)
+                body: JSON.stringify(payload)
             });
 
-            // If backend returns 422 Validation Error because it now expects friend_name / user_name_request string:
-            if (response.status === 422 && requestUsername) {
-                response = await fetch(API_BASE_URL + '/user/reply-user-friend-request', {
-                    method: 'POST',
-                    headers: getAuthHeaders(true),
-                    body: JSON.stringify({
-                        friend_name: String(requestUsername),
-                        user_name_request: String(requestUsername),
-                        user_name: String(requestUsername),
-                        reply: Boolean(replyBoolean)
-                    })
-                });
-            }
-
             if (response.ok) {
-                // Remove request from state by username (or id)
-                state.friendRequests = state.friendRequests.filter(function (item) {
-                    if (requestUsername && item.username) {
-                        return normalizeText(item.username) !== normalizeText(requestUsername);
-                    }
-                    if (requestUserId !== null && item.user_id !== null && item.user_id !== undefined) {
-                        return Number(item.user_id) !== Number(requestUserId);
-                    }
-                    return false;
-                });
-
-                updateRequestsBadge();
-                renderRequestsTab();
-
                 if (replyBoolean) {
                     showGlobalToast('✓ ¡Solicitud aceptada!');
-                    await fetchUserFriends();
                 } else {
                     showGlobalToast('Solicitud rechazada');
                 }
+
+                // Reload both friend requests and friends list from backend, and update badge & UI
+                await Promise.all([
+                    fetchFriendRequests(),
+                    fetchUserFriends()
+                ]);
             } else {
                 var errData = null;
                 try { errData = await response.json(); } catch (_) {}
@@ -987,11 +1078,12 @@
                 } else {
                     visibleFriendReqs.forEach(function (req) {
                         var displayUsername = cleanUsername(req.username) || ('Usuario #' + req.user_id);
+                        var reqId = req.user_id_request ?? req.request_id ?? req.user_id ?? null;
                         var li = document.createElement('li');
                         li.className = 'friend-row';
                         li.dataset.username = displayUsername;
-                        if (req.user_id !== null && req.user_id !== undefined) {
-                            li.dataset.userId = String(req.user_id);
+                        if (reqId !== null && reqId !== undefined) {
+                            li.dataset.userId = String(reqId);
                         }
 
                         var avatar = createAvatarImg(displayUsername);
@@ -1017,11 +1109,19 @@
                         acceptBtn.type = 'button';
                         acceptBtn.className = 'btn-req btn-req--accept';
                         acceptBtn.textContent = 'Aceptar';
+                        if (reqId !== null && reqId !== undefined) {
+                            acceptBtn.dataset.userId = String(reqId);
+                        }
+                        acceptBtn.dataset.username = displayUsername;
 
                         var rejectBtn = document.createElement('button');
                         rejectBtn.type = 'button';
                         rejectBtn.className = 'btn-req btn-req--reject';
                         rejectBtn.textContent = 'Rechazar';
+                        if (reqId !== null && reqId !== undefined) {
+                            rejectBtn.dataset.userId = String(reqId);
+                        }
+                        rejectBtn.dataset.username = displayUsername;
 
                         acceptBtn.addEventListener('click', function () {
                             replyToFriendRequest(req, true, acceptBtn, rejectBtn);
@@ -1094,6 +1194,7 @@
     ───────────────────────────────────────── */
     function isAlreadySent(userEntry) {
         var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
+        if (!normName) return false;
         return state.sentRequests.some(function (u) {
             var uName = typeof u === 'object' && u !== null ? u.username : u;
             return normalizeText(uName) === normName;
@@ -1102,10 +1203,44 @@
 
     function isAlreadyFriend(userEntry) {
         var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
+        var entryId  = (typeof userEntry === 'object' && userEntry !== null && userEntry.user_id !== null && userEntry.user_id !== undefined)
+            ? Number(userEntry.user_id)
+            : null;
         return state.friends.some(function (f) {
             var fName = typeof f === 'object' && f !== null ? f.username : f;
-            return normalizeText(fName) === normName;
+            if (normName && fName && normalizeText(fName) === normName) return true;
+            if (entryId !== null && typeof f === 'object' && f !== null && f.user_id !== null && f.user_id !== undefined) {
+                return Number(f.user_id) === entryId;
+            }
+            return false;
         });
+    }
+
+    function isAlreadyIncomingRequest(userEntry) {
+        var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
+        var entryId  = (typeof userEntry === 'object' && userEntry !== null && userEntry.user_id !== null && userEntry.user_id !== undefined)
+            ? Number(userEntry.user_id)
+            : null;
+        return state.friendRequests.some(function (req) {
+            var rName = typeof req === 'object' && req !== null ? req.username : req;
+            if (normName && rName && normalizeText(rName) === normName) return true;
+            if (entryId !== null && typeof req === 'object' && req !== null && req.user_id !== null && req.user_id !== undefined) {
+                return Number(req.user_id) === entryId;
+            }
+            return false;
+        });
+    }
+
+    function syncSentRequestsWithBackendState() {
+        var beforeLen = state.sentRequests.length;
+        state.sentRequests = state.sentRequests.filter(function (sentItem) {
+            var sentName = typeof sentItem === 'object' && sentItem !== null ? sentItem.username : sentItem;
+            if (!sentName) return false;
+            return !isAlreadyFriend({ username: sentName }) && !isAlreadyIncomingRequest({ username: sentName });
+        });
+        if (state.sentRequests.length !== beforeLen) {
+            saveArrayStorage(KEYS.SENT_REQUESTS, state.sentRequests);
+        }
     }
 
     function markRequestAsSent(usernameStr) {
@@ -1154,14 +1289,8 @@
             if (response.ok) {
                 markRequestAsSent(nombreDelAmigo);
 
-                if (btnEl) {
-                    btnEl.classList.remove('btn-add--active');
-                    btnEl.classList.add('btn-add--pending');
-                    btnEl.disabled = true;
-                    btnEl.setAttribute('aria-disabled', 'true');
-                    btnEl.textContent = 'Solicitud enviada';
-                }
-
+                // Remove/hide immediately from "Buscar" and move to "Solicitudes Enviadas"
+                renderSearchUsers();
                 renderRequestsTab();
                 showSentRequestToast('✓ ¡Solicitud Enviada!');
             } else {
@@ -1170,24 +1299,12 @@
                 var detail = extractErrorDetail(errData, 'No se pudo enviar la solicitud de amistad.');
                 showAlertBanner(searchErrorBanner, detail);
 
-                // If backend indicates request was already sent or they are already friends, reflect it on the button
+                // If backend indicates request was already sent or they are already friends, hide from "Buscar" immediately
                 if (/ya\s+son\s+amigos|already\s+friends/i.test(detail)) {
-                    if (btnEl) {
-                        btnEl.classList.remove('btn-add--active');
-                        btnEl.classList.add('btn-add--pending');
-                        btnEl.disabled = true;
-                        btnEl.setAttribute('aria-disabled', 'true');
-                        btnEl.textContent = 'Ya son amigos';
-                    }
+                    await fetchUserFriends();
                 } else if (/ya\s+fue\s+enviada|ya\s+enviaste|pendiente|already\s+sent/i.test(detail)) {
                     markRequestAsSent(nombreDelAmigo);
-                    if (btnEl) {
-                        btnEl.classList.remove('btn-add--active');
-                        btnEl.classList.add('btn-add--pending');
-                        btnEl.disabled = true;
-                        btnEl.setAttribute('aria-disabled', 'true');
-                        btnEl.textContent = 'Solicitud enviada';
-                    }
+                    renderSearchUsers();
                     renderRequestsTab();
                 } else if (btnEl) {
                     btnEl.disabled = false;
@@ -1215,8 +1332,19 @@
             if (!clean || /^guest_/i.test(clean)) return;
             var norm = normalizeText(clean);
             if (!norm || seen.has(norm)) return;
+
+            // a) Excluir al propio usuario logueado
             if (norm === normSelf) return;
             if (currentUserId && u.user_id && Number(u.user_id) === Number(currentUserId)) return;
+
+            // b) Excluir usuarios que ya son amigos (GET /user/get-user-friends)
+            if (isAlreadyFriend(u)) return;
+
+            // c) Excluir usuarios en "Solicitudes Enviadas"
+            if (isAlreadySent(u)) return;
+
+            // d) Excluir usuarios que ya nos enviaron solicitud (friend_request_names de GET /user/get-user-friend-requests)
+            if (isAlreadyIncomingRequest(u)) return;
 
             if (!query || norm.includes(query)) {
                 seen.add(norm);
@@ -1288,24 +1416,11 @@
             var btn = document.createElement('button');
             btn.type = 'button';
             btn.dataset.username = clean;
-
-            if (isAlreadyFriend(userEntry)) {
-                btn.className = 'btn-add btn-add--pending';
-                btn.disabled = true;
-                btn.setAttribute('aria-disabled', 'true');
-                btn.textContent = 'Ya son amigos';
-            } else if (isAlreadySent(userEntry)) {
-                btn.className = 'btn-add btn-add--pending';
-                btn.disabled = true;
-                btn.setAttribute('aria-disabled', 'true');
-                btn.textContent = 'Solicitud enviada';
-            } else {
-                btn.className = 'btn-add btn-add--active';
-                btn.innerHTML = ADD_USER_ICON_SVG + ' + Agregar';
-                btn.addEventListener('click', function () {
-                    sendFriendRequest(userEntry, btn);
-                });
-            }
+            btn.className = 'btn-add btn-add--active';
+            btn.innerHTML = ADD_USER_ICON_SVG + ' + Agregar';
+            btn.addEventListener('click', function () {
+                sendFriendRequest(userEntry, btn);
+            });
 
             li.appendChild(avatar);
             li.appendChild(infoDiv);
@@ -1331,9 +1446,19 @@
                 localStorage.setItem('footlel_user_strid', String(currentUserId));
             }
             if (info && info.user_name) {
-                savedUser = cleanUsername(info.user_name) || savedUser;
+                var newUser = cleanUsername(info.user_name) || savedUser;
+                if (newUser !== savedUser) {
+                    savedUser = newUser;
+                    KEYS.FRIENDS_CACHE = 'footlel_friends_v2_'       + savedUser;
+                    KEYS.SENT_REQUESTS = 'footlel_sent_requests_v2_' + savedUser;
+                    state.sentRequests = loadArrayStorage(KEYS.SENT_REQUESTS);
+                }
                 localStorage.setItem('footlel_username', savedUser);
                 profileUser.textContent = savedUser;
+                var updatedAvatar = getOrAssignAvatar(savedUser);
+                if (updatedAvatar) {
+                    document.getElementById('profileAvatar').src = updatedAvatar;
+                }
             }
         } catch (_) {}
     }

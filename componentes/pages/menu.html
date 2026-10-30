@@ -55,13 +55,14 @@
                 type="button"
             >
                 <img
-                    src="../../assets/images/avatar-default.png"
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
                     alt="Avatar de usuario"
                     class="profile-avatar"
                     id="profileAvatar"
                     onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
                 >
                 <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                <span class="menu-notif-badge" id="profileFriendsBadge" hidden style="display: none;" aria-label="Solicitudes de amistad pendientes">0</span>
                 <!-- Chevron down -->
                 <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                      fill="none" stroke="currentColor" stroke-width="2.5"
@@ -109,7 +110,8 @@
                         <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                     </svg>
-                    Mis Amigos
+                    <span>Mis Amigos</span>
+                    <span class="menu-notif-badge menu-notif-badge--dropdown" id="ddFriendsBadge" hidden style="display: none;">0</span>
                 </a>
 
                 <!-- Help -->
@@ -189,7 +191,10 @@
             <!-- Card 3: Challenge Friends -->
             <article class="game-card" id="cardFriends" aria-labelledby="cardFriendsTitle">
                 <div class="card-icon" aria-hidden="true">🤝</div>
-                <h2 class="card-title" id="cardFriendsTitle">Desafiar Amigos</h2>
+                <h2 class="card-title" id="cardFriendsTitle">
+                    Desafiar Amigos
+                    <span class="menu-notif-badge" id="cardFriendsBadge" hidden style="display: none;">0</span>
+                </h2>
                 <p class="card-desc">
                     Invitá a tus amigos a un duelo privado de Tateti y demostrá quién sabe
                     más de fútbol. Compartí el código de partida y a jugar.
@@ -668,18 +673,41 @@
 
         (async function loadUserFooterStats() {
             const token = localStorage.getItem('footlel_token');
-            const [statsResult, infoResult, lbResult] = await Promise.allSettled([
+            const [statsResult, infoResult, lbResult, friendReqsResult] = await Promise.allSettled([
                 fetchUserStatsFromEndpoint(),
                 // Updated to match Swagger: GET /user/get-user-info with Authorization Bearer header
                 token
                     ? fetch(`${apiBaseUrl}/user/get-user-info`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.ok ? r.json() : null)
                     : Promise.resolve(null),
-                fetch(`${apiBaseUrl}/stat/get-global-leaderboard`).then(r => r.ok ? r.json() : null)
+                fetch(`${apiBaseUrl}/stat/get-global-leaderboard`).then(r => r.ok ? r.json() : null),
+                token
+                    ? fetch(`${apiBaseUrl}/user/get-user-friend-requests`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.ok ? r.json() : null)
+                    : Promise.resolve(null)
             ]);
 
             const statsPayload = statsResult.status === 'fulfilled' ? statsResult.value : null;
             const userInfo     = infoResult.status === 'fulfilled' ? infoResult.value : null;
             const lbData       = lbResult.status === 'fulfilled' ? lbResult.value : null;
+            const friendReqs   = friendReqsResult.status === 'fulfilled' ? friendReqsResult.value : null;
+
+            if (friendReqs && typeof friendReqs === 'object') {
+                const reqArr = Array.isArray(friendReqs.friend_request_names)
+                    ? friendReqs.friend_request_names
+                    : (Array.isArray(friendReqs.friend_requests) ? friendReqs.friend_requests : (Array.isArray(friendReqs.requests) ? friendReqs.requests : (Array.isArray(friendReqs) ? friendReqs : [])));
+                const reqCount = reqArr.length;
+                ['profileFriendsBadge', 'ddFriendsBadge', 'cardFriendsBadge'].forEach(function (badgeId) {
+                    const badgeEl = document.getElementById(badgeId);
+                    if (!badgeEl) return;
+                    badgeEl.textContent = String(reqCount);
+                    if (reqCount > 0) {
+                        badgeEl.hidden = false;
+                        badgeEl.style.display = 'inline-flex';
+                    } else {
+                        badgeEl.hidden = true;
+                        badgeEl.style.display = 'none';
+                    }
+                });
+            }
 
             if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
                 localStorage.setItem('footlel_user_id', String(userInfo.user_id));
