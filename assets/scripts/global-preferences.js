@@ -409,11 +409,21 @@
     function isMatchStarted(data) {
         if (!data || typeof data !== 'object') return false;
         var rawStarted = data.match_started !== undefined ? data.match_started : (data.data && data.data.match_started);
-        if (rawStarted === true || rawStarted === 'true' || rawStarted === 1 || rawStarted === '1') return true;
-        var alt = data.game_started || data.started || (data.data && (data.data.game_started || data.data.started));
-        if (alt === true || alt === 'true' || alt === 1 || alt === '1') return true;
+        var isStarted = (rawStarted === true || rawStarted === 'true' || rawStarted === 1 || rawStarted === '1');
+        if (!isStarted) {
+            var alt = data.game_started || data.started || (data.data && (data.data.game_started || data.data.started));
+            if (alt === true || alt === 'true' || alt === 1 || alt === '1') isStarted = true;
+        }
         var gid = extractGameId(data);
-        if (gid !== null && gid > 0 && rawStarted !== false && rawStarted !== 'false') return true;
+        if (gid !== null && gid > 0 && rawStarted !== false && rawStarted !== 'false') isStarted = true;
+        if (!isStarted) return false;
+
+        // Ensure board clubs and countries have arrived before leaving waiting room
+        var b = (data && data.board) || (data && data.data && data.data.board);
+        if (Array.isArray(b) && b.length >= 2 && Array.isArray(b[0]) && b[0].length >= 3) {
+            return true;
+        }
+        if (data.row_headers || (data.data && data.data.row_headers)) return true;
         return false;
     }
 

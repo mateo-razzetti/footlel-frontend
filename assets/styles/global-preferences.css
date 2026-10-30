@@ -549,21 +549,18 @@ html.light-mode .notif-match-btn--reject:hover:not(:disabled) { background: rgba
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
 }
 .match-wait-spinner {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
     margin: 0 auto 16px;
     border-radius: 50%;
-    border: 4px solid rgba(158, 158, 158, 0.25);
-    border-top-color: #4CAF50;
+    border: 4px solid rgba(255, 255, 255, 0.12);
+    border-top: 4px solid #4CAF50;
+    border-right: 4px solid #4CAF50;
+    box-shadow: 0 0 14px rgba(76, 175, 80, 0.5);
     box-sizing: border-box;
     display: block;
     will-change: transform;
-    -webkit-animation: matchWaitSpin 0.85s linear infinite;
     animation: matchWaitSpin 0.85s linear infinite;
-}
-@-webkit-keyframes matchWaitSpin {
-    0%   { -webkit-transform: rotate(0deg); }
-    100% { -webkit-transform: rotate(360deg); }
 }
 @keyframes matchWaitSpin {
     0%   { transform: rotate(0deg); }
