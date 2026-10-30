@@ -1600,9 +1600,11 @@
     }
 
     function onlineMyNumber() {
-        return online.role === 'host' ? 1 : 2;
+        // En el backend, quien llama a /game/start-multiplayer-game es quien ACEPTA el desafío (guest).
+        // Por lo tanto, en la base de datos el Aceptador (guest) es players_id[0] (Jugador 1, marca 1).
+        // Y el Retador (host) es players_id[1] (Jugador 2, marca 2 / -1).
+        return online.role === 'guest' ? 1 : 2;
     }
-
     function onlineOpponentNumber() {
         return onlineMyNumber() === 1 ? 2 : 1;
     }
@@ -1886,7 +1888,11 @@
         else if (winnerRaw !== undefined) winnerNum = winnerToPlayerNumber(winnerRaw);
         if (!winnerNum) {
             const iWon = pickPayloadValue(data, ['i_won', 'you_won', 'is_winner', 'won']);
-            if (iWon === true) winnerNum = onlineMyNumber();
+            if (iWon === true) {
+                winnerNum = onlineMyNumber();
+            } else if (iWon === false) {
+                winnerNum = onlineOpponentNumber();
+            }
             const iLost = pickPayloadValue(data, ['i_lost', 'you_lost', 'lost']);
             if (iLost === true) winnerNum = onlineOpponentNumber();
         }
@@ -1897,9 +1903,15 @@
             draw = false;
         } else if (checkDrawCondition()) {
             over = true;
-            draw = true;
+            if (gameState.scoreP1 > gameState.scoreP2) winnerNum = 1;
+            else if (gameState.scoreP2 > gameState.scoreP1) winnerNum = 2;
+            else draw = true;
         } else if (draw) {
             over = true;
+        } else if (over && !winnerNum) {
+            if (gameState.scoreP1 > gameState.scoreP2) winnerNum = 1;
+            else if (gameState.scoreP2 > gameState.scoreP1) winnerNum = 2;
+            else draw = true;
         }
         return { over, winnerNum, draw };
     }
@@ -2027,13 +2039,16 @@
         const myName = cleanName(localStorage.getItem('footlel_username')) || 'Vos';
         const session = readMpSession();
         const opponent = cleanName(session && session.opponent) || 'Rival';
-        const isHost = !session || session.role !== 'guest';
-        if (dom.scoreTeam1El) dom.scoreTeam1El.textContent = `${isHost ? myName : opponent} (X)`;
-        if (dom.scoreTeam2El) dom.scoreTeam2El.textContent = `${isHost ? opponent : myName} (O)`;
+        // En el backend, el que Acepta (guest) es el Jugador 1 (X) y el Retador (host) es el Jugador 2 (O)
+        const isGuest = session && session.role === 'guest';
+        const p1Name = isGuest ? myName : opponent;
+        const p2Name = isGuest ? opponent : myName;
+
+        if (dom.scoreTeam1El) dom.scoreTeam1El.textContent = `${p1Name} (X)`;
+        if (dom.scoreTeam2El) dom.scoreTeam2El.textContent = `${p2Name} (O)`;
         if (dom.timeText) dom.timeText.textContent = '1v1 Online';
         if (dom.turnIndicator) dom.turnIndicator.textContent = 'Conectando con la partida...';
     }
-
     function renderTurnIndicator() {
         if (gameState.isGameOver || !dom.turnIndicator) return;
         const currentNumber = online.isMyTurn ? onlineMyNumber() : onlineOpponentNumber();
@@ -2089,7 +2104,9 @@
                 if (tEl) tEl.textContent = title;
                 if (iEl) iEl.textContent = icon;
                 if (label) label.textContent = 'Casillas conquistadas';
-                if (sEl) sEl.textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+                const myScore = onlineMyNumber() === 1 ? gameState.scoreP1 : gameState.scoreP2;
+                const oppScore = onlineMyNumber() === 1 ? gameState.scoreP2 : gameState.scoreP1;
+                if (sEl) sEl.textContent = `${myScore} — ${oppScore}`;
             }
         }, MP_GAME_OVER_MODAL_DELAY_MS);
     }
