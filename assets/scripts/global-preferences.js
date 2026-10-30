@@ -271,6 +271,12 @@
        La sesión de la partida se guarda en sessionStorage[MP_SESSION_KEY]
        y la consume tateti-online.html. */
     var MP_SESSION_KEY = 'footlel_mp_session';
+    function getBoardPageUrl() {
+        if (window.location.pathname.indexOf('/componentes/pages/') !== -1) {
+            return 'tateti-online.html';
+        }
+        return 'componentes/pages/tateti-online.html';
+    }
     var MP_BOARD_PAGE = 'tateti-online.html';
     var MP_JOIN_MAX_ATTEMPTS = 12;
     var MP_JOIN_RETRY_MS = 1500;
@@ -549,7 +555,7 @@
                 startData: result.data,
                 createdAt: Date.now()
             });
-            window.location.href = MP_BOARD_PAGE;
+            window.location.href = getBoardPageUrl();
             return { ok: true };
         });
     }
@@ -588,7 +594,7 @@
                             startData: start.data,
                             createdAt: Date.now()
                         });
-                        window.location.href = MP_BOARD_PAGE;
+                        window.location.href = getBoardPageUrl();
                         return { ok: true };
                     }
                 }
