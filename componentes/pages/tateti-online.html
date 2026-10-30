@@ -1000,8 +1000,13 @@
 
     function isMatchStarted(data) {
         if (!data || typeof data !== 'object') return false;
-        if (data.match_started === true) return true;
-        return !!(data.data && typeof data.data === 'object' && data.data.match_started === true);
+        const rawStarted = data.match_started !== undefined ? data.match_started : (data.data && data.data.match_started);
+        if (rawStarted === true || rawStarted === 'true' || rawStarted === 1 || rawStarted === '1') return true;
+        const alt = data.game_started || data.started || (data.data && (data.data.game_started || data.data.started));
+        if (alt === true || alt === 'true' || alt === 1 || alt === '1') return true;
+        const gid = extractGameId(data);
+        if (gid !== null && gid > 0 && rawStarted !== false && rawStarted !== 'false') return true;
+        return false;
     }
 
     function setLoadingText(title, subtitle) {
