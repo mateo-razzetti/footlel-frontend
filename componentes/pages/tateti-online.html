@@ -172,25 +172,23 @@
 (function () {
     'use strict';
 
-    const runWhenReady = (fn) => {
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', fn);
-        } else {
-            fn();
-        }
-    };
-
-    runWhenReady(() => {
-
-    /* ─────────────────────────────────────────────
-       1. CONFIGURATION CONSTANTS
-    ───────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════
+       1. CONSTANTS (Absolute Top of Script — Strict TDZ Prevention)
+    ══════════════════════════════════════════════════════════ */
+    const TURN_DURATION_SECONDS = 60;
+    const MP_SYNC_INTERVAL_MS = 5000;     // POST /game/multiplayer-sync while it is NOT our turn
+    const MP_JOIN_POLL_MS = 5000;         // POST /game/join-multiplayer-game until match_started === true
+    const MP_JOIN_TIMEOUT_MS = 180000;
+    const MP_MAX_SYNC_FAILURES = 3;
+    const MP_GAME_OVER_MODAL_DELAY_MS = 1500;
     const RESULT_DISPLAY_DELAY_MS = 2500;
     const REACTION_POPUP_DURATION_MS = 2800;
     const BUTTON_ERROR_DURATION_MS = 2000;
     const AUTOCOMPLETE_MIN_CHARS = 2;
     const AUTOCOMPLETE_MAX_RESULTS = 50;
     const AUTOCOMPLETE_DEBOUNCE_MS = 100;
+    const MP_SESSION_KEY = 'footlel_mp_session';
+
     const PLAYERS_CSV_PATH = '../../assets/data/data-jugadores.txt';
     const PLAYERS_CSV_ALT_PATH = '../../assets/data/data-1790367964874.csv';
     const PLAYERS_CSV_URL = new URL(PLAYERS_CSV_PATH, window.location.href).href;
@@ -200,7 +198,6 @@
     const CLUB_LEAGUE_FOLDERS = ['Equipos - Premier League', 'Equipo - Bundesliga', 'Equipos - La Liga', 'Equipos - Serie A'];
 
     const API_BASE_URL = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
-
     const API_ENDPOINTS = {
         MP_START: `${API_BASE_URL}/game/start-multiplayer-game`,
         MP_JOIN:  `${API_BASE_URL}/game/join-multiplayer-game`,
@@ -216,9 +213,6 @@
         }
     }
 
-    /* ─────────────────────────────────────────────
-       2. CONDITION CATALOG
-    ───────────────────────────────────────────── */
     const CLUB_CATALOG = [
         {
             id: 'bayer-leverkusen',
@@ -379,51 +373,6 @@
         }
     ];
 
-    /* ─────────────────────────────────────────────
-       3. GAME STATE
-    ───────────────────────────────────────────── */
-    const gameState = {
-        currentPlayer: 1,
-        scoreP1: 0,
-        scoreP2: 0,
-        timeLeft: TURN_DURATION_SECONDS,
-        timerIntervalId: null,
-        isGameOver: false,
-        board: [
-            [0, 0, 0],
-            [0, 0, 0],
-            [0, 0, 0]
-        ]
-    };
-
-    /* ─────────────────────────────────────────────
-       4. DOM REFERENCES
-    ───────────────────────────────────────────── */
-    const dom = {
-        timeText: document.getElementById('time-text'),
-        turnIndicator: document.getElementById('turn-indicator'),
-        cells: document.querySelectorAll('.playable-cell'),
-        playerSearch: document.getElementById('player-search'),
-        btnConfirm: document.getElementById('btn-confirm'),
-        popupSuccess: document.getElementById('popup-success'),
-        popupError: document.getElementById('popup-error'),
-        victoryModal: document.getElementById('modal-victoria'),
-        scoreValueP1El: document.getElementById('score-value-p1'),
-        scoreValueP2El: document.getElementById('score-value-p2'),
-        autocompleteList: document.getElementById('autocomplete-results'),
-        boardLoadingOverlay: document.getElementById('board-loading-overlay'),
-        condTopSlots: [
-            document.getElementById('cond-top-0'),
-            document.getElementById('cond-top-1'),
-            document.getElementById('cond-top-2')
-        ],
-        condLeftSlots: [
-            document.getElementById('cond-left-0'),
-            document.getElementById('cond-left-1'),
-            document.getElementById('cond-left-2')
-        ]
-    };
-
     const FALLBACK_PLAYERS_ROSTER = [
         'Fernando Torres', 'Hernán Crespo', 'Frank Lampard', 'Gianfranco Zola', 'Claude Makélélé',
         'David Silva', 'Sergio Agüero', 'Joe Hart', 'Mario Balotelli', 'Bacary Sagna',
@@ -446,20 +395,97 @@
         'Martin Terrier'
     ];
 
+    const SUCCESS_REACTIONS = [
+        { src: '../../assets/images/Festejo/CR7-festejo.png', text: '¡SIUUU! Adentro y a cobrar' },
+        { src: '../../assets/images/Festejo/Julian-festejo.png', text: '¡Pica la Araña! Qué pedazo de acierto' },
+        { src: '../../assets/images/Festejo/Messi-festejo.png', text: '¡Golazo! La clavaste en el ángulo' },
+        { src: '../../assets/images/Festejo/Neymar-festejo.png', text: '¡Ousadia e Alegria! Adentro' },
+        { src: '../../assets/images/Festejo/Riquelme-festejo.png', text: '¡Fútbol champagne! Qué bien la viste' }
+    ];
+
+    const ERROR_REACTIONS = [
+        { src: '../../assets/images/Errado/Asamoah-erra.png', text: '¡Nooo Gyan! Reventaste el travesaño...' },
+        { src: '../../assets/images/Errado/Baggio-erra.png', text: '¡La mandaste a las nubes como Baggio!' },
+        { src: '../../assets/images/Errado/Cavani-erra.png', text: '¡No se puede creer el gol que erraste abajo del arco!' },
+        { src: '../../assets/images/Errado/Fabbiani-erra.png', text: '¡Ta tan ta tan... Nooo Fabbiani!' },
+        { src: '../../assets/images/Errado/Higuan-erra.png', text: '¡Nooo Pipa! Era por abajo...' }
+    ];
+
+    /* ══════════════════════════════════════════════════════════
+       2. GLOBAL STATE (Absolute Top of Script — Strict TDZ Prevention)
+    ══════════════════════════════════════════════════════════ */
+    const gameState = {
+        currentPlayer: 1,
+        scoreP1: 0,
+        scoreP2: 0,
+        timeLeft: TURN_DURATION_SECONDS,
+        timerIntervalId: null,
+        isGameOver: false,
+        board: [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    };
+
+    const online = {
+        role: 'host',            // host = retador (X, jugador 1), guest = invitado (O, jugador 2)
+        gameId: null,
+        myName: '',
+        opponentName: '',
+        isMyTurn: false,
+        turnActive: false,       // true while the sync polling is paused and we are playing our turn
+        syncIntervalId: null,
+        syncInFlight: false,
+        syncFailures: 0
+    };
+
     let availablePlayers = [...FALLBACK_PLAYERS_ROSTER];
     let autocompleteDebounceId = null;
+    let isGuessInFlight = false;
+    let dom = {};
 
-    /* ─────────────────────────────────────────────
-       5. INITIALIZATION & HELPERS
-    ───────────────────────────────────────────── */
+    function initDomReferences() {
+        dom = {
+            timeText: document.getElementById('time-text'),
+            turnIndicator: document.getElementById('turn-indicator'),
+            cells: document.querySelectorAll('.playable-cell'),
+            playerSearch: document.getElementById('player-search'),
+            btnConfirm: document.getElementById('btn-confirm'),
+            popupSuccess: document.getElementById('popup-success'),
+            popupError: document.getElementById('popup-error'),
+            victoryModal: document.getElementById('modal-victoria'),
+            scoreValueP1El: document.getElementById('score-value-p1'),
+            scoreValueP2El: document.getElementById('score-value-p2'),
+            scoreTeam1El: document.getElementById('score-team-1'),
+            scoreTeam2El: document.getElementById('score-team-2'),
+            autocompleteList: document.getElementById('autocomplete-results'),
+            boardLoadingOverlay: document.getElementById('board-loading-overlay'),
+            condTopSlots: [
+                document.getElementById('cond-top-0'),
+                document.getElementById('cond-top-1'),
+                document.getElementById('cond-top-2')
+            ],
+            condLeftSlots: [
+                document.getElementById('cond-left-0'),
+                document.getElementById('cond-left-1'),
+                document.getElementById('cond-left-2')
+            ]
+        };
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       3. HELPER FUNCTIONS & AUTH
+    ══════════════════════════════════════════════════════════ */
     function setBoardLoadingState(isLoading) {
         if (dom.boardLoadingOverlay) {
             dom.boardLoadingOverlay.classList.toggle('hidden', !isLoading);
             dom.boardLoadingOverlay.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+            dom.boardLoadingOverlay.style.display = isLoading ? 'flex' : 'none';
         }
         if (isLoading) {
-            dom.btnConfirm.disabled = true;
-            dom.playerSearch.disabled = true;
+            if (dom.btnConfirm) dom.btnConfirm.disabled = true;
+            if (dom.playerSearch) dom.playerSearch.disabled = true;
             closeAutocompleteList();
         } else if (!gameState.isGameOver) {
             refreshInputLock();
@@ -525,6 +551,7 @@
 
     function showFatalStartError(backendDetail) {
         stopSyncPolling();
+        setBoardLoadingState(false);
         const main = document.querySelector('.main-content') || document.body;
         const existing = main.querySelector('.connection-error-notice');
         if (existing) existing.remove();
@@ -574,10 +601,11 @@
         }
     }
 
-    /* ─────────────────────────────────────────────
-       6. BOARD CONDITIONS (clubs / nations)
-    ───────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════
+       4. BOARD CONDITIONS (Clubs / Nations)
+    ══════════════════════════════════════════════════════════ */
     function clearConditionSlots() {
+        if (!dom.condTopSlots || !dom.condLeftSlots) return;
         [...dom.condTopSlots, ...dom.condLeftSlots].forEach(slot => {
             if (!slot) return;
             slot.title = '';
@@ -602,8 +630,8 @@
 
         for (const obj of candidateObjects) {
             for (const key of keys) {
-                if (Array.isArray(obj[key]) && obj[key].length === 3) {
-                    return obj[key];
+                if (Array.isArray(obj[key]) && obj[key].length >= 3) {
+                    return obj[key].slice(0, 3);
                 }
             }
         }
@@ -612,8 +640,8 @@
 
     function getBoardHeaders(startData) {
         if (!startData || typeof startData !== 'object') return { clubs: null, nations: null };
-        const clubKeys = ['row_headers', 'clubs', 'club_headers', 'teams', 'team_headers', 'equipos', 'topConditions', 'rows'];
-        const nationKeys = ['column_headers', 'nations', 'nation_headers', 'countries', 'country_headers', 'paises', 'selecciones', 'leftConditions', 'columns'];
+        const clubKeys = ['row_headers', 'clubs', 'club_headers', 'club_names', 'teams', 'team_headers', 'team_names', 'equipos', 'clubes', 'topConditions', 'rows'];
+        const nationKeys = ['column_headers', 'nations', 'nation_headers', 'nation_names', 'countries', 'country_headers', 'country_names', 'paises', 'selecciones', 'naciones', 'leftConditions', 'columns'];
 
         let clubs = extractHeadersArray(startData, clubKeys);
         let nations = extractHeadersArray(startData, nationKeys);
@@ -641,26 +669,28 @@
     function applyBoardConditions(startData) {
         if (!startData) {
             clearConditionSlots();
-            return Promise.resolve();
+            return;
         }
         const { clubs: rawClubs, nations: rawNations } = getBoardHeaders(startData);
-
         const topConditions = resolveConditions(rawClubs, CLUB_CATALOG);
         const leftConditions = resolveConditions(rawNations, NATION_CATALOG);
 
-        const shieldLoadPromises = [
-            ...topConditions.map((condition, columnIndex) => renderConditionSlot(dom.condTopSlots[columnIndex], condition)),
-            ...leftConditions.map((condition, rowIndex) => renderConditionSlot(dom.condLeftSlots[rowIndex], condition))
-        ];
-
-        dom.cells.forEach(cell => {
-            const row = parseInt(cell.getAttribute('data-row'), 10);
-            const col = parseInt(cell.getAttribute('data-col'), 10);
-            if (topConditions[col]) cell.dataset.clubId = topConditions[col].id;
-            if (leftConditions[row]) cell.dataset.nationId = leftConditions[row].id;
+        // Render slots immediately (images load in background without blocking the UI transition)
+        topConditions.forEach((condition, columnIndex) => {
+            if (dom.condTopSlots[columnIndex]) renderConditionSlot(dom.condTopSlots[columnIndex], condition);
+        });
+        leftConditions.forEach((condition, rowIndex) => {
+            if (dom.condLeftSlots[rowIndex]) renderConditionSlot(dom.condLeftSlots[rowIndex], condition);
         });
 
-        return Promise.all(shieldLoadPromises);
+        if (dom.cells) {
+            dom.cells.forEach(cell => {
+                const row = parseInt(cell.getAttribute('data-row'), 10);
+                const col = parseInt(cell.getAttribute('data-col'), 10);
+                if (topConditions[col]) cell.dataset.clubId = topConditions[col].id;
+                if (leftConditions[row]) cell.dataset.nationId = leftConditions[row].id;
+            });
+        }
     }
 
     function slugifyName(rawName) {
@@ -826,9 +856,9 @@
     }
 
     function renderConditionSlot(slotElement, condition) {
-        if (!slotElement || !condition) return Promise.resolve();
+        if (!slotElement || !condition) return;
         const img = slotElement.querySelector('.cond-img');
-        if (!img) return Promise.resolve();
+        if (!img) return;
 
         const candidates = Array.isArray(condition.imgCandidates) && condition.imgCandidates.length > 0
             ? condition.imgCandidates
@@ -840,41 +870,29 @@
         img.alt = condition.name || '';
         slotElement.title = condition.name || '';
 
-        return new Promise(resolve => {
-            let settled = false;
-            const finish = () => {
-                if (settled) return;
-                settled = true;
-                resolve();
-            };
-            let nextCandidateIndex = 0;
-
-            const tryNextCandidate = () => {
-                if (nextCandidateIndex >= candidates.length) {
-                    img.onerror = null;
-                    img.alt = condition.name || '';
-                    img.src = FALLBACK_SHIELD_IMG;
-                    img.style.opacity = '0.55';
-                    finish();
-                    return;
-                }
-                img.src = candidates[nextCandidateIndex];
-                nextCandidateIndex += 1;
-            };
-
-            img.onload = () => {
+        let nextCandidateIndex = 0;
+        const tryNextCandidate = () => {
+            if (nextCandidateIndex >= candidates.length) {
+                img.onerror = null;
                 img.alt = condition.name || '';
-                finish();
-            };
-            img.onerror = tryNextCandidate;
-            setTimeout(finish, 600);
-            tryNextCandidate();
-        });
+                img.src = FALLBACK_SHIELD_IMG;
+                img.style.opacity = '0.55';
+                return;
+            }
+            img.src = candidates[nextCandidateIndex];
+            nextCandidateIndex += 1;
+        };
+
+        img.onload = () => {
+            img.alt = condition.name || '';
+        };
+        img.onerror = tryNextCandidate;
+        tryNextCandidate();
     }
 
-    /* ─────────────────────────────────────────────
-       7. BOARD WIN / DRAW CHECK
-    ───────────────────────────────────────────── */
+    /* ══════════════════════════════════════════════════════════
+       5. BOARD WIN / DRAW CHECK
+    ══════════════════════════════════════════════════════════ */
     function checkWinCondition(player) {
         const board = gameState.board;
         for (let row = 0; row < 3; row++) {
@@ -892,29 +910,9 @@
         return gameState.board.flat().every(cell => cell !== 0);
     }
 
-    /* ─────────────────────────────────────────────
-       8. MULTIPLAYER ONLINE SESSION & SYNC
-    ───────────────────────────────────────────── */
-    const MP_SESSION_KEY = 'footlel_mp_session';
-    const MP_SYNC_INTERVAL_MS = 5000;     // POST /game/multiplayer-sync while it is NOT our turn
-    const MP_JOIN_POLL_MS = 5000;         // POST /game/join-multiplayer-game until match_started === true
-    const MP_JOIN_TIMEOUT_MS = 180000;
-    const MP_MAX_SYNC_FAILURES = 3;
-    const TURN_DURATION_SECONDS = 60;
-    const MP_GAME_OVER_MODAL_DELAY_MS = 1500;
-
-    const online = {
-        role: 'host',            // host = retador (X, jugador 1), guest = invitado (O, jugador 2)
-        gameId: null,
-        myName: '',
-        opponentName: '',
-        isMyTurn: false,
-        turnActive: false,       // true while the sync polling is paused and we are playing our turn
-        syncIntervalId: null,
-        syncInFlight: false,
-        syncFailures: 0
-    };
-
+    /* ══════════════════════════════════════════════════════════
+       6. SESSION & PAYLOAD EXTRACTORS
+    ══════════════════════════════════════════════════════════ */
     function readMpSession() {
         try {
             const raw = sessionStorage.getItem(MP_SESSION_KEY);
@@ -1013,7 +1011,9 @@
         if (subtitleEl) subtitleEl.textContent = subtitle;
     }
 
-    // Sala de espera: POST /game/join-multiplayer-game every 5s until match_started === true.
+    /* ══════════════════════════════════════════════════════════
+       7. MULTIPLAYER BOARD LOADING & SALA DE ESPERA
+    ══════════════════════════════════════════════════════════ */
     async function pollJoinUntilStarted() {
         const startedAt = Date.now();
         let lastDetail = '';
@@ -1049,9 +1049,9 @@
         online.isMyTurn = false;
         online.turnActive = false;
 
-        // join-multiplayer-game (match_started: true) carries game_id, clubs and countries.
-        let startData = isMatchStarted(session.startData) ? session.startData : null;
-        let gameId = startData ? (toGameId(session.gameId) !== null ? toGameId(session.gameId) : extractGameId(startData)) : null;
+        const sessionIsStarted = session.matchStarted === true || isMatchStarted(session.startData) || isMatchStarted(session);
+        let startData = sessionIsStarted ? (session.startData || session) : null;
+        let gameId = toGameId(session.gameId) !== null ? toGameId(session.gameId) : (startData ? extractGameId(startData) : null);
 
         if (!startData || gameId === null) {
             setLoadingText(
@@ -1079,8 +1079,11 @@
         }
 
         online.gameId = gameId;
-        // Empty 3x3 board: marks only come from multiplayer-sync / multiplayer-guess.
-        await applyBoardConditions(startData);
+
+        // Render clubs and nations on the empty 3x3 board
+        applyBoardConditions(startData);
+
+        // Immediately transition away from "Cargando Partida 1v1..." to the active board
         setBoardLoadingState(false);
         return true;
     }
@@ -1130,7 +1133,6 @@
         return Array.isArray(value) && value.length === 3 && value.every(row => Array.isArray(row) && row.length === 3);
     }
 
-    // Returns the updated 3x3 table sent by the backend (field name tolerant).
     function extractServerBoard(data) {
         const named = pickPayloadValue(data, [
             'board', 'game_board', 'player_slots_matrix', 'matrix', 'table', 'updated_table',
@@ -1142,14 +1144,13 @@
         for (const source of sources) {
             if (!source || typeof source !== 'object') continue;
             for (const key of Object.keys(source)) {
-                if (/names|headers/i.test(key)) continue; // never the answers matrix / headers
+                if (/names|headers/i.test(key)) continue;
                 if (isBoardLike(source[key])) return source[key];
             }
         }
         return null;
     }
 
-    // Applies the table of any payload (sync or guess) to the DOM board.
     function applyBoardFromData(data) {
         const board = extractServerBoard(data);
         if (board) syncBoardFromServer(board);
@@ -1211,6 +1212,9 @@
         return { over, winnerNum, draw };
     }
 
+    /* ══════════════════════════════════════════════════════════
+       8. SYNC POLLING & TURNS
+    ══════════════════════════════════════════════════════════ */
     function startSyncPolling() {
         stopSyncPolling();
         online.syncIntervalId = setInterval(syncOnlineGame, MP_SYNC_INTERVAL_MS);
@@ -1226,13 +1230,13 @@
 
     async function syncOnlineGame() {
         if (online.syncInFlight || online.gameId === null || gameState.isGameOver) return;
-        if (isGuessInFlight || online.turnActive) return; // polling is paused during our own turn
+        if (isGuessInFlight || online.turnActive) return;
         online.syncInFlight = true;
         try {
             const res = await postMultiplayer(API_ENDPOINTS.MP_SYNC, { game_id: Number(online.gameId) });
             if (!res.ok) {
                 online.syncFailures += 1;
-                if (online.syncFailures >= MP_MAX_SYNC_FAILURES) {
+                if (online.syncFailures >= MP_MAX_SYNC_FAILURES && dom.turnIndicator) {
                     dom.turnIndicator.textContent = 'Reconectando con la partida...';
                     dom.turnIndicator.style.color = '#FFB300';
                 }
@@ -1248,18 +1252,15 @@
     function applyOnlineState(data) {
         if (!data || typeof data !== 'object' || gameState.isGameOver) return;
 
-        // 1) Always repaint with the table returned by the backend.
         applyBoardFromData(data);
         applyTurnFromData(data);
 
-        // 2) game_ended === true -> final modal, stop everything.
         const outcome = evaluateOutcome(data);
         if (outcome.over) {
             handleOnlineGameOver(outcome);
             return;
         }
 
-        // 3) my_turn === true -> pause the sync polling and start playing.
         if (online.isMyTurn) {
             beginMyTurn();
         } else {
@@ -1274,13 +1275,14 @@
         stopSyncPolling();
         renderTurnIndicator();
         refreshInputLock();
-        if (!dom.playerSearch.disabled) dom.playerSearch.focus();
+        if (dom.playerSearch && !dom.playerSearch.disabled) dom.playerSearch.focus();
         startTurnTimer();
     }
 
-    /* ── Turn clock (only runs on our own turn) ── */
     function renderTimerDisplay() {
-        dom.timeText.textContent = `00:${String(Math.max(gameState.timeLeft, 0)).padStart(2, '0')}`;
+        if (dom.timeText) {
+            dom.timeText.textContent = `00:${String(Math.max(gameState.timeLeft, 0)).padStart(2, '0')}`;
+        }
     }
 
     function stopTurnTimer() {
@@ -1298,7 +1300,6 @@
             renderTimerDisplay();
             if (gameState.timeLeft <= 0) {
                 stopTurnTimer();
-                // Time is up: send an empty guess, which ends the turn.
                 submitTurn('', true);
             }
         }, 1000);
@@ -1311,17 +1312,18 @@
 
     function resetTimerLabel() {
         stopTurnTimer();
-        dom.timeText.textContent = '1v1 Online';
+        if (dom.timeText) dom.timeText.textContent = '1v1 Online';
     }
 
-    // Input is enabled only on our own turn.
     function refreshInputLock() {
         const canPlay = online.isMyTurn && !gameState.isGameOver && !isGuessInFlight;
-        dom.btnConfirm.disabled = !canPlay;
-        dom.playerSearch.disabled = !canPlay;
-        dom.playerSearch.placeholder = online.isMyTurn
-            ? 'Buscar futbolista...'
-            : `Esperando a ${online.opponentName || 'tu rival'}...`;
+        if (dom.btnConfirm) dom.btnConfirm.disabled = !canPlay;
+        if (dom.playerSearch) {
+            dom.playerSearch.disabled = !canPlay;
+            dom.playerSearch.placeholder = online.isMyTurn
+                ? 'Buscar futbolista...'
+                : `Esperando a ${online.opponentName || 'tu rival'}...`;
+        }
         if (!canPlay) closeAutocompleteList();
     }
 
@@ -1334,16 +1336,14 @@
         const session = readMpSession();
         const opponent = cleanName(session && session.opponent) || 'Rival';
         const isHost = !session || session.role !== 'guest';
-        const team1 = document.getElementById('score-team-1');
-        const team2 = document.getElementById('score-team-2');
-        if (team1) team1.textContent = `${isHost ? myName : opponent} (X)`;
-        if (team2) team2.textContent = `${isHost ? opponent : myName} (O)`;
+        if (dom.scoreTeam1El) dom.scoreTeam1El.textContent = `${isHost ? myName : opponent} (X)`;
+        if (dom.scoreTeam2El) dom.scoreTeam2El.textContent = `${isHost ? opponent : myName} (O)`;
         if (dom.timeText) dom.timeText.textContent = '1v1 Online';
-        dom.turnIndicator.textContent = 'Conectando con la partida...';
+        if (dom.turnIndicator) dom.turnIndicator.textContent = 'Conectando con la partida...';
     }
 
     function renderTurnIndicator() {
-        if (gameState.isGameOver) return;
+        if (gameState.isGameOver || !dom.turnIndicator) return;
         const currentNumber = online.isMyTurn ? onlineMyNumber() : onlineOpponentNumber();
         gameState.currentPlayer = currentNumber;
         dom.turnIndicator.textContent = online.isMyTurn
@@ -1357,8 +1357,8 @@
     function updateScoreDisplay() {
         gameState.scoreP1 = countCells(1);
         gameState.scoreP2 = countCells(2);
-        dom.scoreValueP1El.textContent = gameState.scoreP1;
-        dom.scoreValueP2El.textContent = gameState.scoreP2;
+        if (dom.scoreValueP1El) dom.scoreValueP1El.textContent = gameState.scoreP1;
+        if (dom.scoreValueP2El) dom.scoreValueP2El.textContent = gameState.scoreP2;
     }
 
     function handleOnlineGameOver(outcome) {
@@ -1367,8 +1367,8 @@
         stopSyncPolling();
         resetTimerLabel();
         clearMpSession();
-        dom.btnConfirm.disabled = true;
-        dom.playerSearch.disabled = true;
+        if (dom.btnConfirm) dom.btnConfirm.disabled = true;
+        if (dom.playerSearch) dom.playerSearch.disabled = true;
         closeAutocompleteList();
 
         let title;
@@ -1384,22 +1384,27 @@
             title = 'Partida finalizada';
             icon = '🏁';
         }
-        dom.turnIndicator.textContent = title;
+        if (dom.turnIndicator) dom.turnIndicator.textContent = title;
 
         setTimeout(() => {
             document.body.style.overflow = 'hidden';
-            dom.victoryModal.classList.remove('hidden');
-            dom.victoryModal.querySelector('.modal-title').textContent = title;
-            dom.victoryModal.querySelector('.modal-icon').textContent = icon;
-            const label = dom.victoryModal.querySelector('.endgame-label');
-            if (label) label.textContent = 'Casillas conquistadas';
-            dom.victoryModal.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+            if (dom.victoryModal) {
+                dom.victoryModal.classList.remove('hidden');
+                const tEl = dom.victoryModal.querySelector('.modal-title');
+                const iEl = dom.victoryModal.querySelector('.modal-icon');
+                const label = dom.victoryModal.querySelector('.endgame-label');
+                const sEl = dom.victoryModal.querySelector('.score-display');
+                if (tEl) tEl.textContent = title;
+                if (iEl) iEl.textContent = icon;
+                if (label) label.textContent = 'Casillas conquistadas';
+                if (sEl) sEl.textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+            }
         }, MP_GAME_OVER_MODAL_DELAY_MS);
     }
 
-    /* ─────────────────────────────────────────────
+    /* ══════════════════════════════════════════════════════════
        9. CELL MARKING & BOARD SYNC
-    ───────────────────────────────────────────── */
+    ══════════════════════════════════════════════════════════ */
     function resolveTargetCellFromResponse(data, player) {
         if (!data) return null;
 
@@ -1475,30 +1480,15 @@
         cell.appendChild(mark);
     }
 
-    /* ─────────────────────────────────────────────
+    /* ══════════════════════════════════════════════════════════
        10. POPUPS & BUTTON FEEDBACK
-    ───────────────────────────────────────────── */
-    const SUCCESS_REACTIONS = [
-        { src: '../../assets/images/Festejo/CR7-festejo.png', text: '¡SIUUU! Adentro y a cobrar' },
-        { src: '../../assets/images/Festejo/Julian-festejo.png', text: '¡Pica la Araña! Qué pedazo de acierto' },
-        { src: '../../assets/images/Festejo/Messi-festejo.png', text: '¡Golazo! La clavaste en el ángulo' },
-        { src: '../../assets/images/Festejo/Neymar-festejo.png', text: '¡Ousadia e Alegria! Adentro' },
-        { src: '../../assets/images/Festejo/Riquelme-festejo.png', text: '¡Fútbol champagne! Qué bien la viste' }
-    ];
-
-    const ERROR_REACTIONS = [
-        { src: '../../assets/images/Errado/Asamoah-erra.png', text: '¡Nooo Gyan! Reventaste el travesaño...' },
-        { src: '../../assets/images/Errado/Baggio-erra.png', text: '¡La mandaste a las nubes como Baggio!' },
-        { src: '../../assets/images/Errado/Cavani-erra.png', text: '¡No se puede creer el gol que erraste abajo del arco!' },
-        { src: '../../assets/images/Errado/Fabbiani-erra.png', text: '¡Ta tan ta tan... Nooo Fabbiani!' },
-        { src: '../../assets/images/Errado/Higuan-erra.png', text: '¡Nooo Pipa! Era por abajo...' }
-    ];
-
+    ══════════════════════════════════════════════════════════ */
     function getRandomReaction(reactionsArray) {
         return reactionsArray[Math.floor(Math.random() * reactionsArray.length)];
     }
 
     function showReactionPopup(popupElement) {
+        if (!popupElement) return;
         const isSuccess = popupElement === dom.popupSuccess || popupElement.classList.contains('success');
         const reaction = getRandomReaction(isSuccess ? SUCCESS_REACTIONS : ERROR_REACTIONS);
         const imgElement = popupElement.querySelector('.reaction-img');
@@ -1536,6 +1526,7 @@
     }
 
     function showButtonError(message) {
+        if (!dom.btnConfirm) return;
         const originalText = dom.btnConfirm.textContent;
         dom.btnConfirm.textContent = message;
         dom.btnConfirm.style.backgroundColor = '#F44336';
@@ -1548,9 +1539,9 @@
         }, BUTTON_ERROR_DURATION_MS);
     }
 
-    /* ─────────────────────────────────────────────
+    /* ══════════════════════════════════════════════════════════
        11. GUESS SUBMISSION (POST /game/multiplayer-guess)
-    ───────────────────────────────────────────── */
+    ══════════════════════════════════════════════════════════ */
     async function submitPlayerGuess(playerName) {
         const trimmedGuess = String(playerName).trim();
 
@@ -1580,32 +1571,31 @@
         return { isCorrect, data: res.data };
     }
 
-    let isGuessInFlight = false;
-
     function handleConfirmClick() {
-        if (isGuessInFlight || dom.btnConfirm.disabled || gameState.isGameOver) return;
+        if (isGuessInFlight || (dom.btnConfirm && dom.btnConfirm.disabled) || gameState.isGameOver) return;
         if (!online.isMyTurn) {
             showButtonError('Es el turno de tu rival');
             return;
         }
-        const playerName = dom.playerSearch.value.trim();
+        const playerName = dom.playerSearch ? dom.playerSearch.value.trim() : '';
         if (playerName.length === 0) {
             showButtonError('¡Escribí un jugador!');
-            dom.playerSearch.focus();
+            if (dom.playerSearch) dom.playerSearch.focus();
             return;
         }
         submitTurn(playerName, false);
     }
 
-    // ONE attempt per turn: right, wrong or timeout, the turn ends and sync polling resumes.
     async function submitTurn(rawGuess, timedOut) {
         if (isGuessInFlight || gameState.isGameOver || !online.isMyTurn) return;
 
         const guess = String(rawGuess || '').trim();
         stopTurnTimer();
-        dom.btnConfirm.disabled = true;
-        dom.playerSearch.disabled = true;
-        dom.playerSearch.value = '';
+        if (dom.btnConfirm) dom.btnConfirm.disabled = true;
+        if (dom.playerSearch) {
+            dom.playerSearch.disabled = true;
+            dom.playerSearch.value = '';
+        }
         closeAutocompleteList();
 
         isGuessInFlight = true;
@@ -1619,7 +1609,6 @@
         if (guessResult.isNetworkError) {
             showButtonError(guessResult.backendErrorMsg || 'Error de conexión, reintentá');
             if (guessResult.resync) {
-                // Backend says it is not our turn: hand control back to the sync polling.
                 online.isMyTurn = false;
                 online.turnActive = false;
                 renderTurnIndicator();
@@ -1627,7 +1616,6 @@
                 startSyncPolling();
                 return;
             }
-            // Technical failure: the turn was NOT consumed, let the player retry.
             if (timedOut) gameState.timeLeft = 5;
             refreshInputLock();
             runTurnTimer();
@@ -1636,12 +1624,10 @@
 
         const { isCorrect, data } = guessResult;
 
-        // Repaint with the response (updated table / cell) and show the reaction.
         resolveTargetCellFromResponse(data, onlineMyNumber());
         applyBoardFromData(data);
         showReactionPopup(isCorrect ? dom.popupSuccess : dom.popupError);
 
-        // The turn is over no matter what happened.
         online.isMyTurn = false;
         online.turnActive = false;
 
@@ -1657,9 +1643,9 @@
         startSyncPolling();
     }
 
-    /* ─────────────────────────────────────────────
+    /* ══════════════════════════════════════════════════════════
        12. AUTOCOMPLETE (PLAYER SEARCH)
-    ───────────────────────────────────────────── */
+    ══════════════════════════════════════════════════════════ */
     function normalizeSearchText(str) {
         return String(str)
             .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -1721,7 +1707,7 @@
     }
 
     function renderAutocompleteResults() {
-        if (!online.isMyTurn || gameState.isGameOver) {
+        if (!online.isMyTurn || gameState.isGameOver || !dom.playerSearch || !dom.autocompleteList) {
             closeAutocompleteList();
             return;
         }
@@ -1764,17 +1750,18 @@
     }
 
     function closeAutocompleteList() {
-        dom.autocompleteList.style.display = 'none';
-        dom.playerSearch.setAttribute('aria-expanded', 'false');
+        if (dom.autocompleteList) dom.autocompleteList.style.display = 'none';
+        if (dom.playerSearch) dom.playerSearch.setAttribute('aria-expanded', 'false');
     }
 
     function selectAutocompleteResult(playerName) {
-        dom.playerSearch.value = playerName;
+        if (dom.playerSearch) dom.playerSearch.value = playerName;
         closeAutocompleteList();
-        dom.btnConfirm.focus();
+        if (dom.btnConfirm) dom.btnConfirm.focus();
     }
 
     function handleOutsideAutocompleteClick(event) {
+        if (!dom.playerSearch || !dom.autocompleteList) return;
         const clickedInsideSearch = dom.playerSearch.contains(event.target);
         const clickedInsideResults = dom.autocompleteList.contains(event.target);
         if (!clickedInsideSearch && !clickedInsideResults) {
@@ -1783,22 +1770,25 @@
     }
 
     function bindEventListeners() {
-        dom.btnConfirm.addEventListener('click', handleConfirmClick);
-        dom.playerSearch.addEventListener('input', handleSearchInput);
-        dom.playerSearch.addEventListener('focus', renderAutocompleteResults);
-        dom.playerSearch.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleConfirmClick();
-            }
-        });
+        if (dom.btnConfirm) dom.btnConfirm.addEventListener('click', handleConfirmClick);
+        if (dom.playerSearch) {
+            dom.playerSearch.addEventListener('input', handleSearchInput);
+            dom.playerSearch.addEventListener('focus', renderAutocompleteResults);
+            dom.playerSearch.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleConfirmClick();
+                }
+            });
+        }
         document.addEventListener('click', handleOutsideAutocompleteClick);
     }
 
-    /* ─────────────────────────────────────────────
-       13. GAME START
-    ───────────────────────────────────────────── */
-    async function initGame() {
+    /* ══════════════════════════════════════════════════════════
+       13. GAME START (Bootstrap)
+    ══════════════════════════════════════════════════════════ */
+    async function initOnlineGame() {
+        initDomReferences();
         warnIfRunningFromFileProtocol();
         bindEventListeners();
 
@@ -1817,8 +1807,15 @@
         startSyncPolling();
     }
 
-    initGame();
-    });
+    const runWhenReady = (fn) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            fn();
+        }
+    };
+
+    runWhenReady(initOnlineGame);
 })();
 </script>
 <script type="module" src="../../services/apiConfig.js"></script>
