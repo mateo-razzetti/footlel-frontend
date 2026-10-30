@@ -197,6 +197,13 @@
     };
 
     runWhenReady(() => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'online') {
+                window.location.replace('tateti-online.html' + window.location.search);
+                return;
+            }
+        } catch (_) {}
 
     /* ─────────────────────────────────────────────
        1. CONFIGURATION CONSTANTS

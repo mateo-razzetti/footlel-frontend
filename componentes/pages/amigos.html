@@ -211,6 +211,14 @@
             <!-- Error Banner for Tab 2 -->
             <div class="error-alert-box amigos-alert-banner" id="requestsErrorBanner" role="alert" hidden></div>
 
+            <!-- Section 0: Incoming 1v1 match invitations (GET /user/get-user-match-requests) -->
+            <section class="requests-section" aria-labelledby="sectionMatchReqs">
+                <h2 class="requests-section-title" id="sectionMatchReqs">Desafíos 1v1</h2>
+                <ul class="friend-list" id="matchRequestsContainer" aria-label="Desafíos de partida 1v1">
+                    <li class="friend-row friend-row--empty">Cargando desafíos...</li>
+                </ul>
+            </section>
+
             <!-- Section 1: Incoming Friend Requests -->
             <section class="requests-section" aria-labelledby="sectionFriendReqs">
                 <h2 class="requests-section-title" id="sectionFriendReqs">Solicitudes de Amistad</h2>
@@ -270,6 +278,16 @@
 
     <!-- Global floating toast for confirmations across tabs -->
     <div class="amigos-floating-toast" id="globalAmigosToast" role="status" aria-live="polite" hidden style="display: none;"></div>
+
+<!-- 1v1 waiting room: shown after sending a challenge until the friend accepts -->
+<div class="match-wait-overlay" id="matchWaitOverlay" role="dialog" aria-modal="true" aria-labelledby="matchWaitTitle" hidden>
+    <div class="match-wait-card">
+        <div class="match-wait-spinner" aria-hidden="true"></div>
+        <h2 class="match-wait-title" id="matchWaitTitle">Sala de espera</h2>
+        <p class="match-wait-text" id="matchWaitText">Esperando a que tu amigo acepte el desafío...</p>
+        <button type="button" class="match-wait-cancel" id="matchWaitCancel">Cancelar</button>
+    </div>
+</div>
 
 </div><!-- /page-shell -->
 
@@ -485,12 +503,14 @@
     var state = {
         friends:            [],
         friendRequests:     [],
+        matchRequests:      [], // incoming 1v1 invitations: array of challenger names
         sentRequests:       loadArrayStorage(KEYS.SENT_REQUESTS),
         backendUsers:       [], // Array of { user_id, username, points }
         userDirectoryByName: {}, // normalized username -> { user_id, username, points }
         userDirectoryById:   {}, // numeric id -> { user_id, username, points }
         isLoadingFriends:   true,
         isLoadingRequests:  true,
+        isLoadingMatch:     true,
         isLoadingSearch:    true
     };
 
@@ -499,6 +519,7 @@
     ───────────────────────────────────────── */
     var friendsListContainer    = document.getElementById('friendsListContainer');
     var friendRequestsContainer = document.getElementById('friendRequestsContainer');
+    var matchRequestsContainer  = document.getElementById('matchRequestsContainer');
     var sentRequestsContainer   = document.getElementById('sentRequestsContainer');
     var searchUsersContainer    = document.getElementById('searchUsersContainer');
     var requestsBadge           = document.getElementById('requestsBadge');
@@ -823,10 +844,11 @@
        6. RENDER: BADGE CONTADOR DE SOLICITUDES
     ───────────────────────────────────────── */
     function updateRequestsBadge() {
-        var count = state.friendRequests.length;
+        var count = state.friendRequests.length + state.matchRequests.length;
         if (window.FootlelPrefs && typeof window.FootlelPrefs.renderHeaderNotifications === 'function') {
             window.FootlelPrefs.renderHeaderNotifications({
-                friend_request_names: state.friendRequests.map(function (r) { return r.username; })
+                friend_request_names: state.friendRequests.map(function (r) { return r.username; }),
+                match_request_names: state.matchRequests.slice()
             });
         }
         if (!requestsBadge) return;
@@ -941,14 +963,16 @@
             infoDiv.appendChild(nameSpan);
             infoDiv.appendChild(statusSpan);
 
-            // Desafiar 1v1 button temporarily disabled with "Próximamente" badge & tooltip
+            // "Desafiar 1v1": POST /user/send-user-match-request, then waiting room
             var btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'btn-challenge btn-challenge--disabled btn-challenge--coming-soon';
-            btn.disabled = true;
-            btn.setAttribute('aria-disabled', 'true');
-            btn.title = 'Próximamente: Duelos 1v1 Online en tiempo real';
-            btn.innerHTML = '<span>Desafiar 1v1</span><span class="coming-soon-badge">Próximamente</span>';
+            btn.className = 'btn-challenge btn-challenge--active';
+            btn.dataset.username = displayUsername;
+            btn.textContent = 'Desafiar 1v1';
+            btn.title = 'Desafiar a ' + displayUsername + ' a una partida 1v1 online';
+            btn.addEventListener('click', function () {
+                challengeFriend(displayUsername, btn);
+            });
 
             li.appendChild(avatar);
             li.appendChild(infoDiv);
@@ -1111,6 +1135,8 @@
 
     function renderRequestsTab() {
         var query = normalizeText(searchRequestsInput ? searchRequestsInput.value : '');
+
+        renderMatchRequests(query);
 
         // 1. Incoming Friend Requests
         if (friendRequestsContainer) {
@@ -1554,6 +1580,327 @@
     /* ─────────────────────────────────────────
        11. EVENTOS DE BÚSQUEDA Y PESTAÑAS
     ───────────────────────────────────────── */
+    /* ─────────────────────────────────────────
+       10b. DESAFÍOS 1v1 (MULTIJUGADOR ONLINE)
+          - POST /user/send-user-match-request   { friend_name }
+          - GET  /user/get-user-match-requests
+          - POST /user/reply-user-match-request  { friend_name, reply }
+          - POST /game/start-multiplayer-game    { friend_name }   (anfitrión)
+          - POST /game/join-multiplayer-game                       (invitado)
+       La sesión de la partida queda en sessionStorage['footlel_mp_session']
+       y la consume tateti-online.html.
+    ───────────────────────────────────────── */
+    var MP_SESSION_KEY        = 'footlel_mp_session';
+    var MP_BOARD_PAGE         = 'tateti-online.html';
+    var MATCH_WAIT_POLL_MS    = 2500;
+    var MATCH_WAIT_TIMEOUT_MS = 120000;
+
+    var matchWait = { active: false, timerId: null, startedAt: 0, friend: '', inFlight: false };
+
+    var matchWaitOverlay = document.getElementById('matchWaitOverlay');
+    var matchWaitText    = document.getElementById('matchWaitText');
+    var matchWaitCancel  = document.getElementById('matchWaitCancel');
+
+    function extractMatchGameId(data) {
+        if (!data || typeof data !== 'object') return null;
+        var raw = data.game_id;
+        if ((raw === undefined || raw === null) && data.data && typeof data.data === 'object') raw = data.data.game_id;
+        if (raw === undefined || raw === null) raw = data.id;
+        var n = Number(raw);
+        return (raw !== undefined && raw !== null && raw !== '' && isFinite(n)) ? n : null;
+    }
+
+    // Supports parallel arrays (match_request_names / friend_request_names) or arrays of strings/objects.
+    function parseMatchRequestsPayload(data) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.parseMatchRequestNames === 'function') {
+            return window.FootlelPrefs.parseMatchRequestNames(data);
+        }
+        if (!data) return [];
+        var list = null;
+        if (Array.isArray(data)) {
+            list = data;
+        } else if (typeof data === 'object') {
+            var keys = ['match_request_names', 'friend_request_names', 'match_requests', 'match_invitations', 'requests'];
+            for (var i = 0; i < keys.length; i++) {
+                if (Array.isArray(data[keys[i]])) { list = data[keys[i]]; break; }
+            }
+            if (!list && data.data && typeof data.data === 'object') return parseMatchRequestsPayload(data.data);
+        }
+        if (!list) return [];
+        var names = [];
+        list.forEach(function (entry) {
+            var raw = (entry && typeof entry === 'object')
+                ? (entry.user_name || entry.username || entry.friend_name || entry.sender_name || entry.challenger_name || entry.name || '')
+                : entry;
+            var n = cleanUsername(raw);
+            if (n && names.map(normalizeText).indexOf(normalizeText(n)) === -1) names.push(n);
+        });
+        return names;
+    }
+
+    async function fetchMatchRequests() {
+        try {
+            var response = await fetch(API_BASE_URL + '/user/get-user-match-requests', {
+                method: 'GET',
+                headers: getAuthHeaders(false)
+            });
+            if (response.ok) {
+                state.matchRequests = parseMatchRequestsPayload(await response.json());
+            } else if (response.status === 404) {
+                state.matchRequests = [];
+            }
+        } catch (err) {
+            console.warn('Error al obtener desafíos 1v1:', err);
+        } finally {
+            state.isLoadingMatch = false;
+            updateRequestsBadge();
+            renderRequestsTab();
+        }
+    }
+
+    function renderMatchRequests(query) {
+        if (!matchRequestsContainer) return;
+        matchRequestsContainer.innerHTML = '';
+
+        if (state.isLoadingMatch) {
+            var loadingLi = document.createElement('li');
+            loadingLi.className = 'friend-row friend-row--empty';
+            loadingLi.textContent = 'Cargando desafíos...';
+            matchRequestsContainer.appendChild(loadingLi);
+            return;
+        }
+
+        var visible = state.matchRequests.filter(function (name) {
+            return !query || normalizeText(name).includes(query);
+        });
+
+        if (visible.length === 0) {
+            var emptyLi = document.createElement('li');
+            emptyLi.className = 'friend-row friend-row--empty';
+            emptyLi.textContent = 'No tienes desafíos 1v1 pendientes';
+            matchRequestsContainer.appendChild(emptyLi);
+            return;
+        }
+
+        visible.forEach(function (challengerName) {
+            var li = document.createElement('li');
+            li.className = 'friend-row';
+            li.dataset.username = challengerName;
+
+            var infoDiv = document.createElement('div');
+            infoDiv.className = 'friend-info';
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'friend-name';
+            nameSpan.textContent = challengerName;
+
+            var statusSpan = document.createElement('span');
+            statusSpan.className = 'friend-status';
+            statusSpan.textContent = '¡' + challengerName + ' te invitó a jugar una partida 1v1!';
+
+            infoDiv.appendChild(nameSpan);
+            infoDiv.appendChild(statusSpan);
+
+            var actionsDiv = document.createElement('div');
+            actionsDiv.className = 'req-actions';
+
+            var acceptBtn = document.createElement('button');
+            acceptBtn.type = 'button';
+            acceptBtn.className = 'btn-req btn-req--accept';
+            acceptBtn.textContent = 'Aceptar 1v1';
+
+            var rejectBtn = document.createElement('button');
+            rejectBtn.type = 'button';
+            rejectBtn.className = 'btn-req btn-req--reject';
+            rejectBtn.textContent = 'Rechazar';
+
+            acceptBtn.addEventListener('click', function () {
+                replyToMatchRequest(challengerName, true, acceptBtn, rejectBtn);
+            });
+            rejectBtn.addEventListener('click', function () {
+                replyToMatchRequest(challengerName, false, acceptBtn, rejectBtn);
+            });
+
+            actionsDiv.appendChild(acceptBtn);
+            actionsDiv.appendChild(rejectBtn);
+
+            li.appendChild(createAvatarImg(challengerName));
+            li.appendChild(infoDiv);
+            li.appendChild(actionsDiv);
+            matchRequestsContainer.appendChild(li);
+        });
+    }
+
+    async function replyToMatchRequest(challengerName, accept, acceptBtn, rejectBtn) {
+        hideAlertBanner(requestsErrorBanner);
+        if (!window.FootlelPrefs || typeof window.FootlelPrefs.acceptMatchAndJoin !== 'function') {
+            showAlertBanner(requestsErrorBanner, 'La página todavía está cargando. Intentá de nuevo en un segundo.');
+            return;
+        }
+        acceptBtn.disabled = true;
+        rejectBtn.disabled = true;
+
+        if (accept) {
+            // reply(true) -> join-multiplayer-game -> save session -> redirect to the board
+            acceptBtn.textContent = 'Uniéndote...';
+            var joined = await window.FootlelPrefs.acceptMatchAndJoin(String(challengerName));
+            if (!joined.ok) {
+                acceptBtn.textContent = 'Aceptar 1v1';
+                acceptBtn.disabled = false;
+                rejectBtn.disabled = false;
+                showAlertBanner(requestsErrorBanner, joined.detail || 'No se pudo aceptar el desafío.');
+            }
+            return;
+        }
+
+        var res = await window.FootlelPrefs.replyMatchRequest(String(challengerName), false);
+        if (res.ok) {
+            state.matchRequests = state.matchRequests.filter(function (n) {
+                return normalizeText(n) !== normalizeText(challengerName);
+            });
+            updateRequestsBadge();
+            renderRequestsTab();
+            showGlobalToast('Desafío rechazado');
+        } else {
+            acceptBtn.disabled = false;
+            rejectBtn.disabled = false;
+            showAlertBanner(requestsErrorBanner, res.detail || 'No se pudo rechazar el desafío.');
+        }
+    }
+
+    function closeMatchWaitingRoom() {
+        matchWait.active = false;
+        if (matchWait.timerId) clearTimeout(matchWait.timerId);
+        matchWait.timerId = null;
+        if (matchWaitOverlay) matchWaitOverlay.hidden = true;
+        document.querySelectorAll('.btn-challenge--active').forEach(function (b) { b.disabled = false; });
+    }
+
+    function openMatchWaitingRoom(friendName) {
+        matchWait.active = true;
+        matchWait.friend = friendName;
+        matchWait.startedAt = Date.now();
+        matchWait.inFlight = false;
+        if (matchWaitText) matchWaitText.textContent = 'Esperando a que ' + friendName + ' acepte el desafío...';
+        if (matchWaitOverlay) matchWaitOverlay.hidden = false;
+        document.querySelectorAll('.btn-challenge--active').forEach(function (b) { b.disabled = true; });
+        pollMatchStart();
+    }
+
+    // Host side: keep calling POST /game/start-multiplayer-game until the friend accepts.
+    async function pollMatchStart() {
+        if (!matchWait.active || matchWait.inFlight) return;
+        matchWait.inFlight = true;
+        var finished = false;
+        var friend = matchWait.friend;
+        try {
+            var response = await fetch(API_BASE_URL + '/game/start-multiplayer-game', {
+                method: 'POST',
+                headers: getAuthHeaders(true),
+                body: JSON.stringify({ friend_name: String(friend) })
+            });
+            var data = null;
+            try { data = await response.json(); } catch (_) {}
+
+            if (matchWait.active && response.ok) {
+                var gameId = extractMatchGameId(data);
+                if (gameId !== null) {
+                    try {
+                        sessionStorage.setItem(MP_SESSION_KEY, JSON.stringify({
+                            role: 'host',
+                            opponent: friend,
+                            gameId: gameId,
+                            startData: data,
+                            createdAt: Date.now()
+                        }));
+                    } catch (_) {}
+                    finished = true;
+                    closeMatchWaitingRoom();
+                    window.location.href = MP_BOARD_PAGE;
+                    return;
+                }
+            } else if (response.status === 401 || response.status === 403) {
+                finished = true;
+                closeMatchWaitingRoom();
+                showAlertBanner(friendsErrorBanner, extractErrorDetail(data, 'Tu sesión expiró. Volvé a iniciar sesión.'));
+            }
+            // Any other error: the friend has not accepted yet -> keep waiting.
+        } catch (err) {
+            console.warn('Esperando al amigo (start-multiplayer-game):', err);
+        } finally {
+            matchWait.inFlight = false;
+        }
+
+        if (finished || !matchWait.active) return;
+
+        if (Date.now() - matchWait.startedAt > MATCH_WAIT_TIMEOUT_MS) {
+            closeMatchWaitingRoom();
+            showAlertBanner(friendsErrorBanner, friend + ' no respondió al desafío. Podés intentarlo de nuevo.');
+            return;
+        }
+        matchWait.timerId = setTimeout(pollMatchStart, MATCH_WAIT_POLL_MS);
+    }
+
+    async function challengeFriend(friendName, btnEl) {
+        if (matchWait.active) return;
+        hideAlertBanner(friendsErrorBanner);
+        var cleanFriend = cleanUsername(friendName);
+        if (!cleanFriend) {
+            showAlertBanner(friendsErrorBanner, 'No se pudo obtener el nombre de tu amigo.');
+            return;
+        }
+        if (btnEl) btnEl.disabled = true;
+
+        var proceedToWait = false;
+        try {
+            var response = await fetch(API_BASE_URL + '/user/send-user-match-request', {
+                method: 'POST',
+                headers: getAuthHeaders(true),
+                body: JSON.stringify({ friend_name: String(cleanFriend) })
+            });
+            if (response.ok) {
+                proceedToWait = true;
+                showGlobalToast('¡Desafío enviado a ' + cleanFriend + '!');
+            } else {
+                var errData = null;
+                try { errData = await response.json(); } catch (_) {}
+                var detail = extractErrorDetail(errData, 'No se pudo enviar el desafío.');
+                if (/ya\s+(fue\s+)?(enviad|envi[aó]ste|tiene)|pendiente|already\s+sent/i.test(detail)) {
+                    // Invitation already pending: just wait for the answer.
+                    proceedToWait = true;
+                    showGlobalToast('Ya habías desafiado a ' + cleanFriend + '. Esperando respuesta...');
+                } else {
+                    showAlertBanner(friendsErrorBanner, detail);
+                }
+            }
+        } catch (err) {
+            console.error('Error enviando desafío 1v1:', err);
+            showAlertBanner(friendsErrorBanner, 'No pudimos conectar con el servidor. Inténtalo nuevamente.');
+        }
+
+        if (proceedToWait) {
+            openMatchWaitingRoom(cleanFriend);
+        } else if (btnEl) {
+            btnEl.disabled = false;
+        }
+    }
+
+    if (matchWaitCancel) {
+        matchWaitCancel.addEventListener('click', function () {
+            closeMatchWaitingRoom();
+            showGlobalToast('Desafío cancelado');
+        });
+    }
+
+    // Header bell polling (global-preferences.js) keeps this list in sync without extra requests.
+    window.addEventListener('footlel:match-requests-updated', function (e) {
+        var names = (e.detail && Array.isArray(e.detail.names)) ? e.detail.names : [];
+        if (names.join('|') === state.matchRequests.join('|') && !state.isLoadingMatch) return;
+        state.matchRequests = names;
+        state.isLoadingMatch = false;
+        renderRequestsTab();
+    });
+
     if (searchFriendsInput) {
         searchFriendsInput.addEventListener('input', renderFriendsList);
     }
@@ -1596,6 +1943,7 @@
             fetchUserFriends();
         } else if (tabName === 'solicitudes') {
             fetchFriendRequests();
+            fetchMatchRequests();
         } else if (tabName === 'buscar') {
             renderSearchUsers();
         }
@@ -1635,7 +1983,8 @@
         ]);
         await Promise.all([
             fetchUserFriends(),
-            fetchFriendRequests()
+            fetchFriendRequests(),
+            fetchMatchRequests()
         ]);
     })();
 
