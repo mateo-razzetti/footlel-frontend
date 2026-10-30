@@ -279,15 +279,6 @@
     <!-- Global floating toast for confirmations across tabs -->
     <div class="amigos-floating-toast" id="globalAmigosToast" role="status" aria-live="polite" hidden style="display: none;"></div>
 
-<!-- 1v1 waiting room: shown after sending a challenge until the friend accepts -->
-<div class="match-wait-overlay" id="matchWaitOverlay" role="dialog" aria-modal="true" aria-labelledby="matchWaitTitle" hidden>
-    <div class="match-wait-card">
-        <div class="match-wait-spinner" aria-hidden="true"></div>
-        <h2 class="match-wait-title" id="matchWaitTitle">Sala de espera</h2>
-        <p class="match-wait-text" id="matchWaitText">Esperando a que tu amigo acepte el desafío...</p>
-        <button type="button" class="match-wait-cancel" id="matchWaitCancel">Cancelar</button>
-    </div>
-</div>
 
 </div><!-- /page-shell -->
 
@@ -1585,31 +1576,11 @@
           - POST /user/send-user-match-request   { friend_name }
           - GET  /user/get-user-match-requests
           - POST /user/reply-user-match-request  { friend_name, reply }
-          - POST /game/start-multiplayer-game    { friend_name }   (anfitrión)
-          - POST /game/join-multiplayer-game                       (invitado)
+          - POST /game/start-multiplayer-game    { friend_name }   (lo llama quien ACEPTA)
+          - POST /game/join-multiplayer-game     (polling 5s, ambos, hasta match_started)
        La sesión de la partida queda en sessionStorage['footlel_mp_session']
        y la consume tateti-online.html.
     ───────────────────────────────────────── */
-    var MP_SESSION_KEY        = 'footlel_mp_session';
-    var MP_BOARD_PAGE         = 'tateti-online.html';
-    var MATCH_WAIT_POLL_MS    = 2500;
-    var MATCH_WAIT_TIMEOUT_MS = 120000;
-
-    var matchWait = { active: false, timerId: null, startedAt: 0, friend: '', inFlight: false };
-
-    var matchWaitOverlay = document.getElementById('matchWaitOverlay');
-    var matchWaitText    = document.getElementById('matchWaitText');
-    var matchWaitCancel  = document.getElementById('matchWaitCancel');
-
-    function extractMatchGameId(data) {
-        if (!data || typeof data !== 'object') return null;
-        var raw = data.game_id;
-        if ((raw === undefined || raw === null) && data.data && typeof data.data === 'object') raw = data.data.game_id;
-        if (raw === undefined || raw === null) raw = data.id;
-        var n = Number(raw);
-        return (raw !== undefined && raw !== null && raw !== '' && isFinite(n)) ? n : null;
-    }
-
     // Supports parallel arrays (match_request_names / friend_request_names) or arrays of strings/objects.
     function parseMatchRequestsPayload(data) {
         if (window.FootlelPrefs && typeof window.FootlelPrefs.parseMatchRequestNames === 'function') {
@@ -1741,14 +1712,14 @@
         rejectBtn.disabled = true;
 
         if (accept) {
-            // reply(true) -> join-multiplayer-game -> save session -> redirect to the board
-            acceptBtn.textContent = 'Uniéndote...';
+            // reply(true) -> start-multiplayer-game -> waiting room -> join (5s) until match_started -> board
+            acceptBtn.textContent = 'Conectando...';
             var joined = await window.FootlelPrefs.acceptMatchAndJoin(String(challengerName));
             if (!joined.ok) {
                 acceptBtn.textContent = 'Aceptar 1v1';
                 acceptBtn.disabled = false;
                 rejectBtn.disabled = false;
-                showAlertBanner(requestsErrorBanner, joined.detail || 'No se pudo aceptar el desafío.');
+                if (!joined.cancelled) showAlertBanner(requestsErrorBanner, joined.detail || 'No se pudo aceptar el desafío.');
             }
             return;
         }
@@ -1768,87 +1739,23 @@
         }
     }
 
-    function closeMatchWaitingRoom() {
-        matchWait.active = false;
-        if (matchWait.timerId) clearTimeout(matchWait.timerId);
-        matchWait.timerId = null;
-        if (matchWaitOverlay) matchWaitOverlay.hidden = true;
-        document.querySelectorAll('.btn-challenge--active').forEach(function (b) { b.disabled = false; });
-    }
+    var challengeActive = false;
 
-    function openMatchWaitingRoom(friendName) {
-        matchWait.active = true;
-        matchWait.friend = friendName;
-        matchWait.startedAt = Date.now();
-        matchWait.inFlight = false;
-        if (matchWaitText) matchWaitText.textContent = 'Esperando a que ' + friendName + ' acepte el desafío...';
-        if (matchWaitOverlay) matchWaitOverlay.hidden = false;
-        document.querySelectorAll('.btn-challenge--active').forEach(function (b) { b.disabled = true; });
-        pollMatchStart();
-    }
-
-    // Host side: keep calling POST /game/start-multiplayer-game until the friend accepts.
-    async function pollMatchStart() {
-        if (!matchWait.active || matchWait.inFlight) return;
-        matchWait.inFlight = true;
-        var finished = false;
-        var friend = matchWait.friend;
-        try {
-            var response = await fetch(API_BASE_URL + '/game/start-multiplayer-game', {
-                method: 'POST',
-                headers: getAuthHeaders(true),
-                body: JSON.stringify({ friend_name: String(friend) })
-            });
-            var data = null;
-            try { data = await response.json(); } catch (_) {}
-
-            if (matchWait.active && response.ok) {
-                var gameId = extractMatchGameId(data);
-                if (gameId !== null) {
-                    try {
-                        sessionStorage.setItem(MP_SESSION_KEY, JSON.stringify({
-                            role: 'host',
-                            opponent: friend,
-                            gameId: gameId,
-                            startData: data,
-                            createdAt: Date.now()
-                        }));
-                    } catch (_) {}
-                    finished = true;
-                    closeMatchWaitingRoom();
-                    window.location.href = MP_BOARD_PAGE;
-                    return;
-                }
-            } else if (response.status === 401 || response.status === 403) {
-                finished = true;
-                closeMatchWaitingRoom();
-                showAlertBanner(friendsErrorBanner, extractErrorDetail(data, 'Tu sesión expiró. Volvé a iniciar sesión.'));
-            }
-            // Any other error: the friend has not accepted yet -> keep waiting.
-        } catch (err) {
-            console.warn('Esperando al amigo (start-multiplayer-game):', err);
-        } finally {
-            matchWait.inFlight = false;
-        }
-
-        if (finished || !matchWait.active) return;
-
-        if (Date.now() - matchWait.startedAt > MATCH_WAIT_TIMEOUT_MS) {
-            closeMatchWaitingRoom();
-            showAlertBanner(friendsErrorBanner, friend + ' no respondió al desafío. Podés intentarlo de nuevo.');
-            return;
-        }
-        matchWait.timerId = setTimeout(pollMatchStart, MATCH_WAIT_POLL_MS);
-    }
-
+    // Player A: POST /user/send-user-match-request -> waiting room ->
+    // POST /game/join-multiplayer-game every 5s until match_started === true -> board.
     async function challengeFriend(friendName, btnEl) {
-        if (matchWait.active) return;
+        if (challengeActive) return;
         hideAlertBanner(friendsErrorBanner);
         var cleanFriend = cleanUsername(friendName);
         if (!cleanFriend) {
             showAlertBanner(friendsErrorBanner, 'No se pudo obtener el nombre de tu amigo.');
             return;
         }
+        if (!window.FootlelPrefs || typeof window.FootlelPrefs.startChallengeWait !== 'function') {
+            showAlertBanner(friendsErrorBanner, 'La página todavía está cargando. Intentá de nuevo en un segundo.');
+            return;
+        }
+        challengeActive = true;
         if (btnEl) btnEl.disabled = true;
 
         var proceedToWait = false;
@@ -1879,17 +1786,17 @@
         }
 
         if (proceedToWait) {
-            openMatchWaitingRoom(cleanFriend);
-        } else if (btnEl) {
-            btnEl.disabled = false;
+            var result = await window.FootlelPrefs.startChallengeWait(cleanFriend);
+            if (!result.ok) {
+                if (result.cancelled) {
+                    showGlobalToast('Desafío cancelado');
+                } else {
+                    showAlertBanner(friendsErrorBanner, result.detail || 'No se pudo iniciar la partida.');
+                }
+            }
         }
-    }
-
-    if (matchWaitCancel) {
-        matchWaitCancel.addEventListener('click', function () {
-            closeMatchWaitingRoom();
-            showGlobalToast('Desafío cancelado');
-        });
+        challengeActive = false;
+        if (btnEl) btnEl.disabled = false;
     }
 
     // Header bell polling (global-preferences.js) keeps this list in sync without extra requests.

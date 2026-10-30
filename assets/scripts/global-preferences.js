@@ -389,46 +389,154 @@
         } catch (e) { return null; }
     }
 
-    /* POST /game/join-multiplayer-game (no body). The host may not have
-       started the game yet, so retry for a while before giving up. */
-    function joinMultiplayerGame(maxAttempts, retryMs) {
-        var attempts = maxAttempts || MP_JOIN_MAX_ATTEMPTS;
-        var delay = retryMs || MP_JOIN_RETRY_MS;
-        function attempt(n) {
-            return mpRequest('POST', '/game/join-multiplayer-game').then(function (res) {
-                var gameId = res.ok ? extractGameId(res.data) : null;
-                if (res.ok && gameId !== null) return { ok: true, gameId: gameId, data: res.data };
-                if (res.status === 401 || res.status === 403 || n >= attempts) {
-                    return { ok: false, detail: res.detail || (res.ok ? 'El servidor no devolvió el game_id.' : '') };
-                }
-                return new Promise(function (resolve) { setTimeout(resolve, delay); })
-                    .then(function () { return attempt(n + 1); });
-            });
-        }
-        return attempt(1);
+    /* ── Máquina de estados del modo 1v1 Online ──────────────────────────
+       A (desafía):  send-user-match-request -> sala de espera ->
+                     join-multiplayer-game cada 5s hasta match_started === true
+       B (acepta):   reply-user-match-request(true) -> start-multiplayer-game
+                     -> sala de espera -> join-multiplayer-game cada 5s
+                     hasta match_started === true
+       Con match_started === true el JSON de join trae game_id, equipos y
+       países: se guarda en sessionStorage y se redirige al tablero. */
+    var MP_JOIN_POLL_MS = 5000;
+    var MP_JOIN_TIMEOUT_MS = 180000;
+
+    function isMatchStarted(data) {
+        if (!data || typeof data !== 'object') return false;
+        if (data.match_started === true) return true;
+        return !!(data.data && typeof data.data === 'object' && data.data.match_started === true);
     }
 
-    /* Accept flow: reply(true) -> join -> persist session -> go to the board.
-       Resolves { ok:false, detail } on failure (never redirects in that case). */
+    /* Polls POST /game/join-multiplayer-game every 5s (no overlap between calls).
+       Returns { promise, cancel }. promise resolves { ok, data } | { ok:false, cancelled?, detail? }. */
+    function createJoinPoller() {
+        var cancelled = false;
+        var timer = null;
+        var resolveFn = null;
+        var startedAt = Date.now();
+
+        var promise = new Promise(function (resolve) {
+            resolveFn = resolve;
+            function tick() {
+                if (cancelled) return;
+                mpRequest('POST', '/game/join-multiplayer-game').then(function (res) {
+                    if (cancelled) return;
+                    if (res.ok && isMatchStarted(res.data)) {
+                        resolve({ ok: true, data: res.data });
+                        return;
+                    }
+                    if (res.status === 401 || res.status === 403) {
+                        resolve({ ok: false, detail: res.detail || 'Tu sesión expiró. Volvé a iniciar sesión.' });
+                        return;
+                    }
+                    if (Date.now() - startedAt > MP_JOIN_TIMEOUT_MS) {
+                        resolve({ ok: false, detail: 'La partida no comenzó a tiempo. Intentá de nuevo.' });
+                        return;
+                    }
+                    timer = setTimeout(tick, MP_JOIN_POLL_MS);
+                });
+            }
+            tick();
+        });
+
+        return {
+            promise: promise,
+            cancel: function () {
+                cancelled = true;
+                if (timer) clearTimeout(timer);
+                if (resolveFn) resolveFn({ ok: false, cancelled: true });
+            }
+        };
+    }
+
+    /* ── Overlay "Sala de espera" reutilizable en cualquier página ── */
+    function showMatchWaitRoom(title, text, onCancel) {
+        var overlay = document.getElementById('matchWaitOverlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'matchWaitOverlay';
+            overlay.className = 'match-wait-overlay';
+            overlay.setAttribute('role', 'dialog');
+            overlay.setAttribute('aria-modal', 'true');
+            overlay.innerHTML =
+                '<div class="match-wait-card">' +
+                '<div class="match-wait-spinner" aria-hidden="true"></div>' +
+                '<h2 class="match-wait-title"></h2>' +
+                '<p class="match-wait-text"></p>' +
+                '<button type="button" class="match-wait-cancel">Cancelar</button>' +
+                '</div>';
+            document.body.appendChild(overlay);
+        }
+        overlay.querySelector('.match-wait-title').textContent = title || 'Sala de espera';
+        overlay.querySelector('.match-wait-text').textContent = text || '';
+        var cancelBtn = overlay.querySelector('.match-wait-cancel');
+        cancelBtn.onclick = function () {
+            if (typeof onCancel === 'function') onCancel();
+        };
+        overlay.hidden = false;
+        overlay.style.display = 'flex';
+    }
+
+    function hideMatchWaitRoom() {
+        var overlay = document.getElementById('matchWaitOverlay');
+        if (overlay) {
+            overlay.hidden = true;
+            overlay.style.display = 'none';
+        }
+    }
+
+    /* Waits (with the waiting room open) until match_started === true, then
+       stores the session and redirects to the board. */
+    function waitRoomThenEnterBoard(role, opponentName, title, text) {
+        var poller = createJoinPoller();
+        showMatchWaitRoom(title, text, function () { poller.cancel(); });
+        return poller.promise.then(function (result) {
+            hideMatchWaitRoom();
+            if (!result.ok) return result;
+            var gameId = extractGameId(result.data);
+            if (gameId === null) {
+                return { ok: false, detail: 'El servidor no devolvió el game_id de la partida.' };
+            }
+            saveMatchSession({
+                role: role,
+                opponent: opponentName,
+                gameId: gameId,
+                matchStarted: true,
+                startData: result.data,
+                createdAt: Date.now()
+            });
+            window.location.href = MP_BOARD_PAGE;
+            return { ok: true };
+        });
+    }
+
+    /* Player A, after POST /user/send-user-match-request succeeded. */
+    function startChallengeWait(friendName) {
+        var name = String(friendName);
+        return waitRoomThenEnterBoard('host', name, 'Sala de espera',
+            'Esperando a que ' + name + ' acepte el desafío...');
+    }
+
+    /* Player B accepts: reply(true) -> start-multiplayer-game -> wait for match_started. */
     function acceptMatchAndJoin(challengerName) {
         var name = String(challengerName);
         return replyMatchRequest(name, true).then(function (reply) {
             if (!reply.ok) {
                 return { ok: false, detail: reply.detail || 'No se pudo aceptar el desafío.' };
             }
-            return joinMultiplayerGame().then(function (join) {
-                if (!join.ok) {
-                    return { ok: false, detail: join.detail || 'No pudimos unirte a la partida. Intentá de nuevo.' };
-                }
-                saveMatchSession({
-                    role: 'guest',
-                    opponent: name,
-                    gameId: join.gameId,
-                    startData: join.data,
-                    createdAt: Date.now()
+            return mpRequest('POST', '/game/start-multiplayer-game', { friend_name: name }).then(function (start) {
+                if (start.ok) return start;
+                // Fallback: backend may expect the name of the user who accepted.
+                var myName = cleanUsername(readStorage('footlel_username'));
+                if (!myName || myName.toLowerCase() === name.toLowerCase()) return start;
+                return mpRequest('POST', '/game/start-multiplayer-game', { friend_name: myName }).then(function (retry) {
+                    return retry.ok ? retry : start;
                 });
-                window.location.href = MP_BOARD_PAGE;
-                return { ok: true };
+            }).then(function (start) {
+                var alreadyStarted = /ya\s|already|started|iniciad|en\s+curso/i.test(start.detail || '');
+                if (!start.ok && !alreadyStarted) {
+                    return { ok: false, detail: start.detail || 'No se pudo iniciar la partida.' };
+                }
+                return waitRoomThenEnterBoard('guest', name, 'Sala de espera', 'Conectando a la partida...');
             });
         });
     }
@@ -490,7 +598,7 @@
                 if (!res.ok) {
                     acceptBtn.textContent = 'Aceptar';
                     setBusy(false);
-                    showError(res.detail);
+                    if (!res.cancelled) showError(res.detail);
                 }
             });
         });
@@ -745,7 +853,9 @@
         parseMatchRequestNames: parseMatchRequestNames,
         fetchMatchRequests: fetchMatchRequests,
         replyMatchRequest: replyMatchRequest,
-        joinMultiplayerGame: joinMultiplayerGame,
+        startChallengeWait: startChallengeWait,
+        showMatchWaitRoom: showMatchWaitRoom,
+        hideMatchWaitRoom: hideMatchWaitRoom,
         acceptMatchAndJoin: acceptMatchAndJoin,
         saveMatchSession: saveMatchSession,
         readMatchSession: readMatchSession,
