@@ -263,6 +263,188 @@
         });
     }
 
+    function renderHeaderNotifications(friendReqs) {
+        var notifList  = document.getElementById('notifList');
+        var notifBadge = document.getElementById('notifBadge');
+        if (!notifList || !notifBadge) return;
+
+        var items = [];
+        if (friendReqs && typeof friendReqs === 'object') {
+            var reqNames = Array.isArray(friendReqs.friend_request_names)
+                ? friendReqs.friend_request_names
+                : (Array.isArray(friendReqs.friend_requests)
+                    ? friendReqs.friend_requests
+                    : (Array.isArray(friendReqs.requests)
+                        ? friendReqs.requests
+                        : (Array.isArray(friendReqs) ? friendReqs : [])));
+
+            reqNames.forEach(function (entry) {
+                var rawName = (typeof entry === 'object' && entry !== null)
+                    ? (entry.user_name || entry.username || entry.friend_name || entry.sender_name || entry.name || '')
+                    : entry;
+                var cName = cleanUsername(rawName);
+                if (cName) {
+                    items.push({
+                        type: 'friend_request',
+                        text: '¡Tenes una nueva solicitud de amistad de ' + cName + '!',
+                        href: 'amigos.html'
+                    });
+                }
+            });
+
+            var matchInvites = Array.isArray(friendReqs.match_request_names)
+                ? friendReqs.match_request_names
+                : (Array.isArray(friendReqs.match_requests)
+                    ? friendReqs.match_requests
+                    : (Array.isArray(friendReqs.match_invitations) ? friendReqs.match_invitations : []));
+
+            matchInvites.forEach(function (entry) {
+                var rawName = (typeof entry === 'object' && entry !== null)
+                    ? (entry.user_name || entry.username || entry.sender_name || entry.name || '')
+                    : entry;
+                var cName = cleanUsername(rawName);
+                if (cName) {
+                    items.push({
+                        type: 'match_invite',
+                        text: 'El usuario ' + cName + ' te invitó a jugar una partida',
+                        href: 'amigos.html'
+                    });
+                }
+            });
+        }
+
+        notifList.innerHTML = '';
+
+        if (items.length === 0) {
+            notifBadge.textContent = '';
+            notifBadge.hidden = true;
+            notifBadge.style.display = 'none';
+
+            var emptyLi = document.createElement('li');
+            emptyLi.className = 'notif-empty';
+            emptyLi.textContent = 'No tienes notificaciones nuevas';
+            notifList.appendChild(emptyLi);
+            return;
+        }
+
+        notifBadge.textContent = String(items.length);
+        notifBadge.hidden = false;
+        notifBadge.style.display = 'inline-flex';
+
+        items.forEach(function (notif) {
+            var li = document.createElement('li');
+            li.className = 'notif-list-item';
+
+            var link = document.createElement('a');
+            link.href = notif.href;
+            link.className = 'notif-item';
+
+            var dot = document.createElement('span');
+            dot.className = 'notif-item-dot';
+            dot.setAttribute('aria-hidden', 'true');
+
+            var textSpan = document.createElement('span');
+            textSpan.className = 'notif-item-text';
+            textSpan.textContent = notif.text;
+
+            link.appendChild(dot);
+            link.appendChild(textSpan);
+
+            link.addEventListener('click', function (e) {
+                if (notif.type === 'friend_request') {
+                    try { sessionStorage.setItem('footlel_open_tab', 'solicitudes'); } catch (_) {}
+                    var solTab = document.querySelector('.amigos-tab[data-tab="solicitudes"]');
+                    if (solTab) {
+                        e.preventDefault();
+                        solTab.click();
+                    }
+                }
+                var dd = document.getElementById('notifDropdown');
+                var btn = document.getElementById('notifBtn');
+                if (dd) dd.classList.remove('is-open');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            });
+
+            li.appendChild(link);
+            notifList.appendChild(li);
+        });
+    }
+
+    function refreshHeaderNotifications() {
+        var token = (readStorage('footlel_token') || '').trim();
+        if (!token || token === 'null' || token === 'undefined' || isGuestSession()) {
+            return Promise.resolve(null);
+        }
+        return fetch(getApiBaseUrl() + '/user/get-user-friend-requests', {
+            headers: { 'Authorization': 'Bearer ' + token }
+        })
+        .then(function (r) { return r.ok ? r.json() : null; })
+        .then(function (data) {
+            if (data) renderHeaderNotifications(data);
+            return data;
+        })
+        .catch(function () { return null; });
+    }
+
+    function setupHeaderNotifications() {
+        var notifWrapper  = document.getElementById('notifWrapper');
+        var notifBtn      = document.getElementById('notifBtn');
+        var notifDropdown = document.getElementById('notifDropdown');
+        var profileBtn    = document.getElementById('profileBtn');
+        var profileDd     = document.getElementById('profileDropdown');
+
+        if (!notifWrapper || !notifBtn || !notifDropdown) return;
+
+        if (isGuestSession()) {
+            notifWrapper.style.display = 'none';
+            return;
+        }
+
+        function closeNotif() {
+            notifDropdown.classList.remove('is-open');
+            notifBtn.setAttribute('aria-expanded', 'false');
+        }
+
+        function openNotif() {
+            if (profileDd) profileDd.classList.remove('is-open');
+            if (profileBtn) profileBtn.setAttribute('aria-expanded', 'false');
+            notifDropdown.classList.add('is-open');
+            notifBtn.setAttribute('aria-expanded', 'true');
+        }
+
+        if (notifBtn.dataset.notifBound !== 'true') {
+            notifBtn.dataset.notifBound = 'true';
+            notifBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (notifDropdown.classList.contains('is-open')) {
+                    closeNotif();
+                } else {
+                    openNotif();
+                }
+            });
+
+            if (profileBtn) {
+                profileBtn.addEventListener('click', function () {
+                    closeNotif();
+                });
+            }
+
+            document.addEventListener('click', function (e) {
+                if (!notifWrapper.contains(e.target)) {
+                    closeNotif();
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeNotif();
+                }
+            });
+        }
+
+        refreshHeaderNotifications();
+    }
+
     window.FootlelPrefs = {
         applyTheme: applyTheme,
         applyAnimations: applyAnimations,
@@ -277,6 +459,8 @@
         getOrAssignAvatar: getOrAssignAvatar,
         formatBackendError: formatBackendError,
         renderErrorAlert: renderErrorAlert,
+        renderHeaderNotifications: renderHeaderNotifications,
+        refreshHeaderNotifications: refreshHeaderNotifications,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
         setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }
@@ -291,7 +475,9 @@
         applyFromStorage();
         // 2. Bind logout buttons so token is cleared on sign-out
         bindSessionCleanup();
-        // 3. Asynchronously fetch GET /config/get-user-config and update localStorage + DOM
+        // 3. Setup header notifications bell & dropdown on any page with the header
+        setupHeaderNotifications();
+        // 4. Asynchronously fetch GET /config/get-user-config and update localStorage + DOM
         syncConfigFromBackend();
     });
 
