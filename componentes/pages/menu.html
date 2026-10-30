@@ -42,105 +42,144 @@
             <span class="logo-text">FOOT<span>LEL</span></span>
         </a>
 
-        <!-- Profile + Dropdown -->
-        <div class="profile-wrapper" id="profileWrapper">
+        <!-- Header Actions: Notifications + Profile -->
+        <div class="header-actions">
 
-            <!-- Trigger button -->
-            <button
-                class="profile-btn"
-                id="profileBtn"
-                aria-haspopup="true"
-                aria-expanded="false"
-                aria-controls="profileDropdown"
-                type="button"
-            >
-                <img
-                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
-                    alt="Avatar de usuario"
-                    class="profile-avatar"
-                    id="profileAvatar"
-                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+            <!-- Notifications Bell + Dropdown -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button
+                    class="notif-btn"
+                    id="notifBtn"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notifDropdown"
+                    aria-label="Notificaciones"
                 >
-                <span class="profile-username" id="profileUsername">nombre_usuario</span>
-                <span class="menu-notif-badge" id="profileFriendsBadge" hidden style="display: none;" aria-label="Solicitudes de amistad pendientes">0</span>
-                <!-- Chevron down -->
-                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-                     fill="none" stroke="currentColor" stroke-width="2.5"
-                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                    <polyline points="6 9 12 15 18 9"/>
-                </svg>
-            </button>
-
-            <!-- Floating dropdown -->
-            <nav
-                class="profile-dropdown"
-                id="profileDropdown"
-                role="menu"
-                aria-label="Opciones de cuenta"
-            >
-                <!-- Settings -->
-                <a href="configuracion.html" class="dropdown-item" role="menuitem">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                         stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="3"/>
-                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    <svg class="notif-bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
-                    Configuración
-                </a>
+                    <span class="notif-badge" id="notifBadge" hidden style="display: none;"></span>
+                </button>
 
-                <!-- Edit Account (registered users only) -->
-                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                         stroke-linejoin="round" aria-hidden="true">
-                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                <!-- Notifications Dropdown -->
+                <div
+                    class="notif-dropdown"
+                    id="notifDropdown"
+                    role="region"
+                    aria-label="Notificaciones"
+                >
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notificaciones</span>
+                    </div>
+                    <ul class="notif-list" id="notifList">
+                        <li class="notif-empty">No tienes notificaciones nuevas</li>
+                    </ul>
+                </div>
+            </div><!-- /notif-wrapper -->
+
+            <!-- Profile + Dropdown -->
+            <div class="profile-wrapper" id="profileWrapper">
+
+                <!-- Trigger button -->
+                <button
+                    class="profile-btn"
+                    id="profileBtn"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    type="button"
+                >
+                    <img
+                        src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                        alt="Avatar de usuario"
+                        class="profile-avatar"
+                        id="profileAvatar"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                    >
+                    <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                    <!-- Chevron down -->
+                    <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"/>
                     </svg>
-                    Editar Cuenta
-                </a>
+                </button>
 
-                <!-- My Friends (registered users only) -->
-                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                         stroke-linejoin="round" aria-hidden="true">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                        <circle cx="9" cy="7" r="4"/>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                    </svg>
-                    <span>Mis Amigos</span>
-                    <span class="menu-notif-badge menu-notif-badge--dropdown" id="ddFriendsBadge" hidden style="display: none;">0</span>
-                </a>
+                <!-- Floating dropdown -->
+                <nav
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    role="menu"
+                    aria-label="Opciones de cuenta"
+                >
+                    <!-- Settings -->
+                    <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        Configuración
+                    </a>
 
-                <!-- Help -->
-                <a href="ayuda.html" class="dropdown-item" role="menuitem">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                         stroke-linejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10"/>
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-                        <line x1="12" y1="17" x2="12.01" y2="17"/>
-                    </svg>
-                    Ayuda
-                </a>
+                    <!-- Edit Account (registered users only) -->
+                    <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Editar Cuenta
+                    </a>
 
-                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                    <!-- My Friends (registered users only) -->
+                    <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Mis Amigos
+                    </a>
 
-                <!-- Log out / Log in -->
-                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
-                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                         stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    <span id="ddSessionLabel">Cerrar Sesión</span>
-                </a>
-            </nav>
-        </div><!-- /profile-wrapper -->
+                    <!-- Help -->
+                    <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        Ayuda
+                    </a>
+
+                    <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+                    <!-- Log out / Log in -->
+                    <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span id="ddSessionLabel">Cerrar Sesión</span>
+                    </a>
+                </nav>
+            </div><!-- /profile-wrapper -->
+
+        </div><!-- /header-actions -->
 
     </header>
 
@@ -191,10 +230,7 @@
             <!-- Card 3: Challenge Friends -->
             <article class="game-card" id="cardFriends" aria-labelledby="cardFriendsTitle">
                 <div class="card-icon" aria-hidden="true">🤝</div>
-                <h2 class="card-title" id="cardFriendsTitle">
-                    Desafiar Amigos
-                    <span class="menu-notif-badge" id="cardFriendsBadge" hidden style="display: none;">0</span>
-                </h2>
+                <h2 class="card-title" id="cardFriendsTitle">Desafiar Amigos</h2>
                 <p class="card-desc">
                     Invitá a tus amigos a un duelo privado de Tateti y demostrá quién sabe
                     más de fútbol. Compartí el código de partida y a jugar.
@@ -606,6 +642,109 @@
         return savedAv;
     }
 
+    const notifWrapper    = document.getElementById('notifWrapper');
+    const notifBtn        = document.getElementById('notifBtn');
+    const notifBadge      = document.getElementById('notifBadge');
+    const notifDropdown   = document.getElementById('notifDropdown');
+    const notifList       = document.getElementById('notifList');
+
+    function renderHeaderNotifications(friendReqs) {
+        if (!notifList || !notifBadge) return;
+
+        const items = [];
+        if (friendReqs && typeof friendReqs === 'object') {
+            const reqNames = Array.isArray(friendReqs.friend_request_names)
+                ? friendReqs.friend_request_names
+                : (Array.isArray(friendReqs.friend_requests)
+                    ? friendReqs.friend_requests
+                    : (Array.isArray(friendReqs.requests)
+                        ? friendReqs.requests
+                        : (Array.isArray(friendReqs) ? friendReqs : [])));
+
+            reqNames.forEach(function (entry) {
+                const rawName = (typeof entry === 'object' && entry !== null)
+                    ? (entry.user_name || entry.username || entry.friend_name || entry.sender_name || entry.name || '')
+                    : entry;
+                const cleanName = cleanUsername(rawName);
+                if (cleanName) {
+                    items.push({
+                        type: 'friend_request',
+                        text: `¡Tenes una nueva solicitud de amistad de ${cleanName}!`,
+                        href: 'amigos.html'
+                    });
+                }
+            });
+
+            const matchInvites = Array.isArray(friendReqs.match_request_names)
+                ? friendReqs.match_request_names
+                : (Array.isArray(friendReqs.match_requests)
+                    ? friendReqs.match_requests
+                    : (Array.isArray(friendReqs.match_invitations) ? friendReqs.match_invitations : []));
+
+            matchInvites.forEach(function (entry) {
+                const rawName = (typeof entry === 'object' && entry !== null)
+                    ? (entry.user_name || entry.username || entry.sender_name || entry.name || '')
+                    : entry;
+                const cleanName = cleanUsername(rawName);
+                if (cleanName) {
+                    items.push({
+                        type: 'match_invite',
+                        text: `El usuario ${cleanName} te invitó a jugar una partida`,
+                        href: 'amigos.html'
+                    });
+                }
+            });
+        }
+
+        notifList.innerHTML = '';
+
+        if (items.length === 0) {
+            notifBadge.textContent = '';
+            notifBadge.hidden = true;
+            notifBadge.style.display = 'none';
+
+            const emptyLi = document.createElement('li');
+            emptyLi.className = 'notif-empty';
+            emptyLi.textContent = 'No tienes notificaciones nuevas';
+            notifList.appendChild(emptyLi);
+            return;
+        }
+
+        notifBadge.textContent = String(items.length);
+        notifBadge.hidden = false;
+        notifBadge.style.display = 'inline-flex';
+
+        items.forEach(function (notif) {
+            const li = document.createElement('li');
+            li.className = 'notif-list-item';
+
+            const link = document.createElement('a');
+            link.href = notif.href;
+            link.className = 'notif-item';
+
+            const dot = document.createElement('span');
+            dot.className = 'notif-item-dot';
+            dot.setAttribute('aria-hidden', 'true');
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'notif-item-text';
+            textSpan.textContent = notif.text;
+
+            link.appendChild(dot);
+            link.appendChild(textSpan);
+
+            link.addEventListener('click', function () {
+                if (notif.type === 'friend_request') {
+                    try { sessionStorage.setItem('footlel_open_tab', 'solicitudes'); } catch (_) {}
+                }
+                closeNotifDropdown();
+            });
+
+            li.appendChild(link);
+            notifList.appendChild(li);
+        });
+    }
+
     if (isGuest) {
         const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
         const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
@@ -614,6 +753,7 @@
         profileAvatar.src         = getOrAssignAvatar(guestName, true);
         profileAvatar.alt         = 'Avatar de invitado';
 
+        if (notifWrapper) notifWrapper.style.display = 'none';
         ddEditAccount.style.display = 'none';
         ddFriends.style.display     = 'none';
 
@@ -690,24 +830,7 @@
             const lbData       = lbResult.status === 'fulfilled' ? lbResult.value : null;
             const friendReqs   = friendReqsResult.status === 'fulfilled' ? friendReqsResult.value : null;
 
-            if (friendReqs && typeof friendReqs === 'object') {
-                const reqArr = Array.isArray(friendReqs.friend_request_names)
-                    ? friendReqs.friend_request_names
-                    : (Array.isArray(friendReqs.friend_requests) ? friendReqs.friend_requests : (Array.isArray(friendReqs.requests) ? friendReqs.requests : (Array.isArray(friendReqs) ? friendReqs : [])));
-                const reqCount = reqArr.length;
-                ['profileFriendsBadge', 'ddFriendsBadge', 'cardFriendsBadge'].forEach(function (badgeId) {
-                    const badgeEl = document.getElementById(badgeId);
-                    if (!badgeEl) return;
-                    badgeEl.textContent = String(reqCount);
-                    if (reqCount > 0) {
-                        badgeEl.hidden = false;
-                        badgeEl.style.display = 'inline-flex';
-                    } else {
-                        badgeEl.hidden = true;
-                        badgeEl.style.display = 'none';
-                    }
-                });
-            }
+            renderHeaderNotifications(friendReqs);
 
             if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
                 localStorage.setItem('footlel_user_id', String(userInfo.user_id));
@@ -733,12 +856,32 @@
     }
 
     /* ──────────────────────────────────────────
-       6. PROFILE DROPDOWN TOGGLE
+       6. NOTIFICATIONS & PROFILE DROPDOWN TOGGLE
     ────────────────────────────────────────── */
     const profileBtn      = document.getElementById('profileBtn');
     const profileDropdown = document.getElementById('profileDropdown');
 
+    function openNotifDropdown() {
+        if (!notifDropdown || !notifBtn) return;
+        closeDropdown();
+        notifDropdown.classList.add('is-open');
+        notifBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeNotifDropdown() {
+        if (!notifDropdown || !notifBtn) return;
+        notifDropdown.classList.remove('is-open');
+        notifBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleNotifDropdown() {
+        if (!notifDropdown) return;
+        const isOpen = notifDropdown.classList.contains('is-open');
+        isOpen ? closeNotifDropdown() : openNotifDropdown();
+    }
+
     function openDropdown() {
+        closeNotifDropdown();
         profileDropdown.classList.add('is-open');
         profileBtn.setAttribute('aria-expanded', 'true');
     }
@@ -753,12 +896,23 @@
         isOpen ? closeDropdown() : openDropdown();
     }
 
+    if (notifBtn) {
+        notifBtn.dataset.notifBound = 'true';
+        notifBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleNotifDropdown();
+        });
+    }
+
     profileBtn.addEventListener('click', function (e) {
         e.stopPropagation();
         toggleDropdown();
     });
 
     document.addEventListener('click', function (e) {
+        if (notifWrapper && !notifWrapper.contains(e.target)) {
+            closeNotifDropdown();
+        }
         if (!document.getElementById('profileWrapper').contains(e.target)) {
             closeDropdown();
         }
@@ -766,6 +920,7 @@
 
     document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
+            closeNotifDropdown();
             closeDropdown();
             closeGuestModal();
         }
