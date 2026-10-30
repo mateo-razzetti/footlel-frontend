@@ -640,6 +640,26 @@
 
     function getBoardHeaders(startData) {
         if (!startData || typeof startData !== 'object') return { clubs: null, nations: null };
+
+        // 1. Direct contract from POST /game/join-multiplayer-game:
+        // { match_started: true, game_id: 109, board: [ [club1, club2, club3], [nation1, nation2, nation3], (optional 3x3 table) ] }
+        const boardCandidate = (startData && startData.board) || (startData && startData.data && startData.data.board);
+        if (Array.isArray(boardCandidate) && boardCandidate.length >= 2 && Array.isArray(boardCandidate[0]) && Array.isArray(boardCandidate[1])) {
+            if (boardCandidate[0].length >= 3 && boardCandidate[1].length >= 3) {
+                let clubs = boardCandidate[0].slice(0, 3);
+                let nations = boardCandidate[1].slice(0, 3);
+                const clubScore = clubs.filter(c => resolveSingleCondition(c, CLUB_CATALOG) !== null).length;
+                const nationScore = clubs.filter(c => resolveSingleCondition(c, NATION_CATALOG) !== null).length;
+                if (nationScore > clubScore) {
+                    const temp = clubs;
+                    clubs = nations;
+                    nations = temp;
+                }
+                return { clubs, nations };
+            }
+        }
+
+        // 2. Named property fallback (row_headers, column_headers, clubs, nations)
         const clubKeys = ['row_headers', 'clubs', 'club_headers', 'club_names', 'teams', 'team_headers', 'team_names', 'equipos', 'clubes', 'topConditions', 'rows'];
         const nationKeys = ['column_headers', 'nations', 'nation_headers', 'nation_names', 'countries', 'country_headers', 'country_names', 'paises', 'selecciones', 'naciones', 'leftConditions', 'columns'];
 
@@ -1000,8 +1020,13 @@
 
     function isMatchStarted(data) {
         if (!data || typeof data !== 'object') return false;
-        if (data.match_started === true) return true;
-        return !!(data.data && typeof data.data === 'object' && data.data.match_started === true);
+        const rawStarted = data.match_started !== undefined ? data.match_started : (data.data && data.data.match_started);
+        if (rawStarted === true || rawStarted === 'true' || rawStarted === 1 || rawStarted === '1') return true;
+        const alt = data.game_started || data.started || (data.data && (data.data.game_started || data.data.started));
+        if (alt === true || alt === 'true' || alt === 1 || alt === '1') return true;
+        const gid = extractGameId(data);
+        if (gid !== null && gid > 0 && rawStarted !== false && rawStarted !== 'false') return true;
+        return false;
     }
 
     function setLoadingText(title, subtitle) {
@@ -1134,11 +1159,27 @@
     }
 
     function extractServerBoard(data) {
+        if (!data || typeof data !== 'object') return null;
+
+        // 1. Direct check for updated_board (from POST /game/multiplayer-sync)
+        if (isBoardLike(data.updated_board)) return data.updated_board;
+        if (data.data && isBoardLike(data.data.updated_board)) return data.data.updated_board;
+
+        // 2. Check if board is [ clubs, nations, 3x3 table ] (from POST /game/join-multiplayer-game)
+        if (Array.isArray(data.board) && data.board.length >= 3 && isBoardLike(data.board[2])) {
+            return data.board[2];
+        }
+        if (data.data && Array.isArray(data.data.board) && data.data.board.length >= 3 && isBoardLike(data.data.board[2])) {
+            return data.data.board[2];
+        }
+
+        // 3. Check standard property aliases
         const named = pickPayloadValue(data, [
-            'board', 'game_board', 'player_slots_matrix', 'matrix', 'table', 'updated_table',
+            'updated_board', 'board', 'game_board', 'player_slots_matrix', 'matrix', 'table', 'updated_table',
             'board_table', 'cells', 'tablero'
         ]);
         if (isBoardLike(named)) return named;
+
         const sources = [data];
         if (data && data.data && typeof data.data === 'object') sources.push(data.data);
         for (const source of sources) {

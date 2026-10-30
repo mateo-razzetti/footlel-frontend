@@ -271,10 +271,16 @@
        La sesión de la partida se guarda en sessionStorage[MP_SESSION_KEY]
        y la consume tateti-online.html. */
     var MP_SESSION_KEY = 'footlel_mp_session';
+    function getBoardPageUrl() {
+        if (window.location.pathname.indexOf('/componentes/pages/') !== -1) {
+            return 'tateti-online.html';
+        }
+        return 'componentes/pages/tateti-online.html';
+    }
     var MP_BOARD_PAGE = 'tateti-online.html';
     var MP_JOIN_MAX_ATTEMPTS = 12;
     var MP_JOIN_RETRY_MS = 1500;
-    var NOTIFICATIONS_POLL_MS = 10000;
+    var NOTIFICATIONS_POLL_MS = 5000;
 
     function getAuthToken() {
         var t = (readStorage('footlel_token') || '').trim();
@@ -402,8 +408,13 @@
 
     function isMatchStarted(data) {
         if (!data || typeof data !== 'object') return false;
-        if (data.match_started === true) return true;
-        return !!(data.data && typeof data.data === 'object' && data.data.match_started === true);
+        var rawStarted = data.match_started !== undefined ? data.match_started : (data.data && data.data.match_started);
+        if (rawStarted === true || rawStarted === 'true' || rawStarted === 1 || rawStarted === '1') return true;
+        var alt = data.game_started || data.started || (data.data && (data.data.game_started || data.data.started));
+        if (alt === true || alt === 'true' || alt === 1 || alt === '1') return true;
+        var gid = extractGameId(data);
+        if (gid !== null && gid > 0 && rawStarted !== false && rawStarted !== 'false') return true;
+        return false;
     }
 
     /* Polls POST /game/join-multiplayer-game every 5s (no overlap between calls).
@@ -420,14 +431,26 @@
                 if (cancelled) return;
                 mpRequest('POST', '/game/join-multiplayer-game').then(function (res) {
                     if (cancelled) return;
-                    if (res.ok && isMatchStarted(res.data)) {
-                        resolve({ ok: true, data: res.data });
+                    try {
+                        if (res.ok && isMatchStarted(res.data)) {
+                            resolve({ ok: true, data: res.data });
+                            return;
+                        }
+                        if (res.status === 401 || res.status === 403) {
+                            resolve({ ok: false, detail: res.detail || 'Tu sesión expiró. Volvé a iniciar sesión.' });
+                            return;
+                        }
+                    } catch (err) {
+                        console.warn('Error procesando respuesta de join:', err);
+                    }
+                    if (Date.now() - startedAt > MP_JOIN_TIMEOUT_MS) {
+                        resolve({ ok: false, detail: 'La partida no comenzó a tiempo. Intentá de nuevo.' });
                         return;
                     }
-                    if (res.status === 401 || res.status === 403) {
-                        resolve({ ok: false, detail: res.detail || 'Tu sesión expiró. Volvé a iniciar sesión.' });
-                        return;
-                    }
+                    timer = setTimeout(tick, MP_JOIN_POLL_MS);
+                }).catch(function (err) {
+                    if (cancelled) return;
+                    console.warn('Error de red en polling de join:', err);
                     if (Date.now() - startedAt > MP_JOIN_TIMEOUT_MS) {
                         resolve({ ok: false, detail: 'La partida no comenzó a tiempo. Intentá de nuevo.' });
                         return;
@@ -449,6 +472,8 @@
     }
 
     /* ── Overlay "Sala de espera" reutilizable en cualquier página ── */
+    var matchWaitTimerId = null;
+
     function showMatchWaitRoom(title, text, onCancel) {
         var overlay = document.getElementById('matchWaitOverlay');
         if (!overlay) {
@@ -462,21 +487,47 @@
                 '<div class="match-wait-spinner" aria-hidden="true"></div>' +
                 '<h2 class="match-wait-title"></h2>' +
                 '<p class="match-wait-text"></p>' +
+                '<p class="match-wait-status" style="font-size:12px;color:rgba(158,158,158,0.85);margin:-10px 0 16px;"></p>' +
                 '<button type="button" class="match-wait-cancel">Cancelar</button>' +
                 '</div>';
             document.body.appendChild(overlay);
         }
         overlay.querySelector('.match-wait-title').textContent = title || 'Sala de espera';
-        overlay.querySelector('.match-wait-text').textContent = text || '';
+        var textEl = overlay.querySelector('.match-wait-text');
+        var statusEl = overlay.querySelector('.match-wait-status');
+        if (textEl) textEl.textContent = text || '';
+        if (statusEl) statusEl.textContent = 'Esperando confirmación...';
+
         var cancelBtn = overlay.querySelector('.match-wait-cancel');
         cancelBtn.onclick = function () {
+            hideMatchWaitRoom();
             if (typeof onCancel === 'function') onCancel();
         };
+
+        if (matchWaitTimerId) {
+            clearInterval(matchWaitTimerId);
+            matchWaitTimerId = null;
+        }
+        var secondsElapsed = 0;
+        matchWaitTimerId = setInterval(function () {
+            secondsElapsed += 1;
+            var mins = Math.floor(secondsElapsed / 60);
+            var secs = secondsElapsed % 60;
+            var timeStr = (mins > 0 ? (mins + ':' + (secs < 10 ? '0' : '') + secs) : (secs + 's'));
+            if (statusEl) {
+                statusEl.textContent = 'Esperando confirmación (' + timeStr + ')...';
+            }
+        }, 1000);
+
         overlay.hidden = false;
         overlay.style.display = 'flex';
     }
 
     function hideMatchWaitRoom() {
+        if (matchWaitTimerId) {
+            clearInterval(matchWaitTimerId);
+            matchWaitTimerId = null;
+        }
         var overlay = document.getElementById('matchWaitOverlay');
         if (overlay) {
             overlay.hidden = true;
@@ -504,7 +555,7 @@
                 startData: result.data,
                 createdAt: Date.now()
             });
-            window.location.href = MP_BOARD_PAGE;
+            window.location.href = getBoardPageUrl();
             return { ok: true };
         });
     }
@@ -532,6 +583,21 @@
                     return retry.ok ? retry : start;
                 });
             }).then(function (start) {
+                if (start.ok && isMatchStarted(start.data)) {
+                    var gid = extractGameId(start.data);
+                    if (gid !== null && gid > 0) {
+                        saveMatchSession({
+                            role: 'guest',
+                            opponent: name,
+                            gameId: gid,
+                            matchStarted: true,
+                            startData: start.data,
+                            createdAt: Date.now()
+                        });
+                        window.location.href = getBoardPageUrl();
+                        return { ok: true };
+                    }
+                }
                 var alreadyStarted = /ya\s|already|started|iniciad|en\s+curso/i.test(start.detail || '');
                 if (!start.ok && !alreadyStarted) {
                     return { ok: false, detail: start.detail || 'No se pudo iniciar la partida.' };
