@@ -771,3 +771,32 @@ html.disable-animations .bg-balls {
     border-color: var(--color-text-primary);
     color: var(--color-text-primary);
 }
+
+/* ── Friend Requests Notification Badge ───────────────────────── */
+.menu-notif-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 50px;
+    background: var(--color-brand-green);
+    color: #FFFFFF;
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.menu-notif-badge--dropdown {
+    margin-left: auto;
+}
+
+.card-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+

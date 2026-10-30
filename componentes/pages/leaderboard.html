@@ -44,7 +44,7 @@
                 type="button"
             >
                 <img
-                    src="../../assets/images/avatar-default.png"
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
                     alt="Avatar de usuario"
                     class="profile-avatar"
                     id="profileAvatar"
@@ -358,7 +358,7 @@
         if (Array.isArray(friendsData)) {
             rawList = friendsData;
         } else if (typeof friendsData === 'object') {
-            var keys = ['friends', 'user_friends', 'data', 'items', 'results', 'users'];
+            var keys = ['friend_names', 'user_friend_names', 'friends_names', 'friends', 'user_friends', 'data', 'items', 'results', 'users'];
             for (var i = 0; i < keys.length; i++) {
                 if (Array.isArray(friendsData[keys[i]])) {
                     rawList = friendsData[keys[i]];
