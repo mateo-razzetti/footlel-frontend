@@ -526,3 +526,49 @@ html.light-mode .notif-match-btn--reject {
     border-color: rgba(0, 0, 0, 0.1);
 }
 html.light-mode .notif-match-btn--reject:hover:not(:disabled) { background: rgba(0, 0, 0, 0.14); color: #1A1A1A; }
+/* 1v1 waiting room overlay (shared) */
+.match-wait-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    padding: 16px;
+}
+.match-wait-overlay[hidden] { display: none; }
+.match-wait-card {
+    width: 100%;
+    max-width: 380px;
+    background: #292929;
+    color: #FFFFFF;
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.match-wait-spinner {
+    width: 44px;
+    height: 44px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    border: 4px solid rgba(158, 158, 158, 0.3);
+    border-top-color: #4CAF50;
+    animation: matchWaitSpin 0.9s linear infinite;
+}
+@keyframes matchWaitSpin { to { transform: rotate(360deg); } }
+.match-wait-title { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+.match-wait-text { font-size: 14px; color: #9E9E9E; margin: 0 0 20px; }
+.match-wait-cancel {
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(158, 158, 158, 0.35);
+    background: transparent;
+    color: #FFFFFF;
+    font-weight: 600;
+    cursor: pointer;
+}
+.match-wait-cancel:hover { background: rgba(158, 158, 158, 0.15); }
+html.light-mode .match-wait-card { background: #fff; color: #1A1A1A; }
+html.light-mode .match-wait-cancel { color: #1A1A1A; border-color: rgba(0, 0, 0, 0.2); }

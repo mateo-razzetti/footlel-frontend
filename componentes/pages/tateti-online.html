@@ -386,6 +386,8 @@
         currentPlayer: 1,
         scoreP1: 0,
         scoreP2: 0,
+        timeLeft: TURN_DURATION_SECONDS,
+        timerIntervalId: null,
         isGameOver: false,
         board: [
             [0, 0, 0],
@@ -592,19 +594,48 @@
 
     function extractHeadersArray(startData, keys) {
         if (!startData || typeof startData !== 'object') return null;
-        for (const key of keys) {
-            if (Array.isArray(startData[key]) && startData[key].length === 3) {
-                return startData[key];
-            }
-        }
-        if (startData.data && typeof startData.data === 'object') {
+        const candidateObjects = [startData];
+        if (startData.data && typeof startData.data === 'object') candidateObjects.push(startData.data);
+        if (startData.game && typeof startData.game === 'object') candidateObjects.push(startData.game);
+        if (startData.board && typeof startData.board === 'object' && !Array.isArray(startData.board)) candidateObjects.push(startData.board);
+        if (startData.game_board && typeof startData.game_board === 'object' && !Array.isArray(startData.game_board)) candidateObjects.push(startData.game_board);
+
+        for (const obj of candidateObjects) {
             for (const key of keys) {
-                if (Array.isArray(startData.data[key]) && startData.data[key].length === 3) {
-                    return startData.data[key];
+                if (Array.isArray(obj[key]) && obj[key].length === 3) {
+                    return obj[key];
                 }
             }
         }
         return null;
+    }
+
+    function getBoardHeaders(startData) {
+        if (!startData || typeof startData !== 'object') return { clubs: null, nations: null };
+        const clubKeys = ['row_headers', 'clubs', 'club_headers', 'teams', 'team_headers', 'equipos', 'topConditions', 'rows'];
+        const nationKeys = ['column_headers', 'nations', 'nation_headers', 'countries', 'country_headers', 'paises', 'selecciones', 'leftConditions', 'columns'];
+
+        let clubs = extractHeadersArray(startData, clubKeys);
+        let nations = extractHeadersArray(startData, nationKeys);
+
+        if (!clubs && nations) {
+            clubs = extractHeadersArray(startData, ['column_headers', 'columns', 'header_columns']);
+        }
+        if (!nations && clubs) {
+            nations = extractHeadersArray(startData, ['row_headers', 'rows', 'header_rows']);
+        }
+
+        if (Array.isArray(clubs) && Array.isArray(nations) && clubs.length === 3 && nations.length === 3) {
+            const clubScore = clubs.filter(c => resolveSingleCondition(c, CLUB_CATALOG) !== null).length;
+            const nationScore = clubs.filter(c => resolveSingleCondition(c, NATION_CATALOG) !== null).length;
+            if (nationScore > clubScore) {
+                const temp = clubs;
+                clubs = nations;
+                nations = temp;
+            }
+        }
+
+        return { clubs, nations };
     }
 
     function applyBoardConditions(startData) {
@@ -612,8 +643,7 @@
             clearConditionSlots();
             return Promise.resolve();
         }
-        const rawClubs = extractHeadersArray(startData, ['row_headers', 'clubs', 'teams', 'equipos', 'topConditions']);
-        const rawNations = extractHeadersArray(startData, ['column_headers', 'nations', 'countries', 'paises', 'selecciones', 'leftConditions']);
+        const { clubs: rawClubs, nations: rawNations } = getBoardHeaders(startData);
 
         const topConditions = resolveConditions(rawClubs, CLUB_CATALOG);
         const leftConditions = resolveConditions(rawNations, NATION_CATALOG);
@@ -866,10 +896,11 @@
        8. MULTIPLAYER ONLINE SESSION & SYNC
     ───────────────────────────────────────────── */
     const MP_SESSION_KEY = 'footlel_mp_session';
-    const MP_SYNC_INTERVAL_MS = 2000;
-    const MP_INIT_MAX_ATTEMPTS = 12;
-    const MP_INIT_RETRY_MS = 1500;
-    const MP_MAX_SYNC_FAILURES = 5;
+    const MP_SYNC_INTERVAL_MS = 5000;     // POST /game/multiplayer-sync while it is NOT our turn
+    const MP_JOIN_POLL_MS = 5000;         // POST /game/join-multiplayer-game until match_started === true
+    const MP_JOIN_TIMEOUT_MS = 180000;
+    const MP_MAX_SYNC_FAILURES = 3;
+    const TURN_DURATION_SECONDS = 60;
     const MP_GAME_OVER_MODAL_DELAY_MS = 1500;
 
     const online = {
@@ -878,6 +909,7 @@
         myName: '',
         opponentName: '',
         isMyTurn: false,
+        turnActive: false,       // true while the sync polling is paused and we are playing our turn
         syncIntervalId: null,
         syncInFlight: false,
         syncFailures: 0
@@ -968,19 +1000,39 @@
         }
     }
 
-    async function requestWithRetry(requestFn) {
-        let last = { detail: '' };
-        for (let attempt = 1; attempt <= MP_INIT_MAX_ATTEMPTS; attempt++) {
-            const res = await requestFn();
-            const gameId = res.ok ? extractGameId(res.data) : null;
-            if (res.ok && gameId !== null) return { ok: true, data: res.data, gameId };
-            last = res.ok ? { ...res, detail: 'El servidor no devolvió el game_id de la partida.' } : res;
-            if (res.status === 401 || res.status === 403) break;
-            if (attempt < MP_INIT_MAX_ATTEMPTS) {
-                await new Promise(resolve => setTimeout(resolve, MP_INIT_RETRY_MS));
+    function isMatchStarted(data) {
+        if (!data || typeof data !== 'object') return false;
+        if (data.match_started === true) return true;
+        return !!(data.data && typeof data.data === 'object' && data.data.match_started === true);
+    }
+
+    function setLoadingText(title, subtitle) {
+        const titleEl = dom.boardLoadingOverlay && dom.boardLoadingOverlay.querySelector('.board-loading-title');
+        const subtitleEl = dom.boardLoadingOverlay && dom.boardLoadingOverlay.querySelector('.board-loading-subtitle');
+        if (titleEl) titleEl.textContent = title;
+        if (subtitleEl) subtitleEl.textContent = subtitle;
+    }
+
+    // Sala de espera: POST /game/join-multiplayer-game every 5s until match_started === true.
+    async function pollJoinUntilStarted() {
+        const startedAt = Date.now();
+        let lastDetail = '';
+        while (Date.now() - startedAt < MP_JOIN_TIMEOUT_MS) {
+            const res = await postMultiplayer(API_ENDPOINTS.MP_JOIN);
+            if (res.ok && isMatchStarted(res.data)) {
+                const gameId = extractGameId(res.data);
+                if (gameId === null) {
+                    return { ok: false, detail: 'El servidor no devolvió el game_id de la partida.' };
+                }
+                return { ok: true, data: res.data, gameId };
             }
+            if (res.status === 401 || res.status === 403) {
+                return { ok: false, detail: res.detail || 'Tu sesión expiró. Volvé a iniciar sesión.' };
+            }
+            lastDetail = res.detail || lastDetail;
+            await new Promise(resolve => setTimeout(resolve, MP_JOIN_POLL_MS));
         }
-        return { ok: false, detail: last.detail || '' };
+        return { ok: false, detail: lastDetail || 'La partida no comenzó a tiempo. Intentá de nuevo.' };
     }
 
     async function loadOnlineGameBoard() {
@@ -994,26 +1046,21 @@
         online.role = session.role;
         online.myName = cleanName(localStorage.getItem('footlel_username'));
         online.opponentName = cleanName(session.opponent);
-        online.isMyTurn = online.role === 'host';
-        gameState.currentPlayer = onlineMyNumber();
+        online.isMyTurn = false;
+        online.turnActive = false;
 
-        let startData = session.startData || null;
-        let gameId = toGameId(session.gameId);
+        // join-multiplayer-game (match_started: true) carries game_id, clubs and countries.
+        let startData = isMatchStarted(session.startData) ? session.startData : null;
+        let gameId = startData ? (toGameId(session.gameId) !== null ? toGameId(session.gameId) : extractGameId(startData)) : null;
 
         if (!startData || gameId === null) {
-            let result;
-            if (online.role === 'host') {
-                if (!online.opponentName) {
-                    setBoardLoadingState(false);
-                    showFatalStartError('No se indicó a qué amigo desafiaste.');
-                    return false;
-                }
-                result = await requestWithRetry(() => postMultiplayer(API_ENDPOINTS.MP_START, {
-                    friend_name: String(online.opponentName)
-                }));
-            } else {
-                result = await requestWithRetry(() => postMultiplayer(API_ENDPOINTS.MP_JOIN));
-            }
+            setLoadingText(
+                'Sala de espera',
+                online.role === 'host' && online.opponentName
+                    ? `Esperando a que ${online.opponentName} acepte el desafío...`
+                    : 'Conectando a la partida...'
+            );
+            const result = await pollJoinUntilStarted();
             if (!result.ok) {
                 setBoardLoadingState(false);
                 showFatalStartError(result.detail);
@@ -1021,24 +1068,19 @@
             }
             startData = result.data;
             gameId = result.gameId;
-            writeMpSession({ ...session, gameId, startData });
+            writeMpSession({ ...session, gameId, matchStarted: true, startData });
         }
 
-        const hasClubs = extractHeadersArray(startData, ['row_headers', 'clubs', 'teams', 'equipos', 'topConditions']);
-        const hasNations = extractHeadersArray(startData, ['column_headers', 'nations', 'countries', 'paises', 'selecciones', 'leftConditions']);
-        if (!hasClubs || !hasNations) {
+        const { clubs, nations } = getBoardHeaders(startData);
+        if (!clubs || !nations) {
             setBoardLoadingState(false);
             showFatalStartError('El servidor no devolvió los equipos y países del tablero.');
             return false;
         }
 
         online.gameId = gameId;
+        // Empty 3x3 board: marks only come from multiplayer-sync / multiplayer-guess.
         await applyBoardConditions(startData);
-
-        const initialBoard = extractServerBoard(startData);
-        if (initialBoard) syncBoardFromServer(initialBoard);
-        applyTurnFromData(startData);
-
         setBoardLoadingState(false);
         return true;
     }
@@ -1066,7 +1108,7 @@
     }
 
     function extractMyTurn(data) {
-        const booleanKeys = ['local_player_turn', 'is_my_turn', 'my_turn', 'your_turn', 'is_player_turn', 'player_turn'];
+        const booleanKeys = ['my_turn', 'is_my_turn', 'local_player_turn', 'your_turn', 'is_player_turn', 'player_turn'];
         for (const key of booleanKeys) {
             const value = pickPayloadValue(data, [key]);
             if (typeof value === 'boolean') return value;
@@ -1084,10 +1126,34 @@
         return myTurn;
     }
 
+    function isBoardLike(value) {
+        return Array.isArray(value) && value.length === 3 && value.every(row => Array.isArray(row) && row.length === 3);
+    }
+
+    // Returns the updated 3x3 table sent by the backend (field name tolerant).
     function extractServerBoard(data) {
-        const board = pickPayloadValue(data, ['board', 'game_board', 'player_slots_matrix', 'matrix', 'cells', 'tablero']);
-        if (Array.isArray(board) && board.length === 3 && board.every(row => Array.isArray(row))) return board;
+        const named = pickPayloadValue(data, [
+            'board', 'game_board', 'player_slots_matrix', 'matrix', 'table', 'updated_table',
+            'board_table', 'cells', 'tablero'
+        ]);
+        if (isBoardLike(named)) return named;
+        const sources = [data];
+        if (data && data.data && typeof data.data === 'object') sources.push(data.data);
+        for (const source of sources) {
+            if (!source || typeof source !== 'object') continue;
+            for (const key of Object.keys(source)) {
+                if (/names|headers/i.test(key)) continue; // never the answers matrix / headers
+                if (isBoardLike(source[key])) return source[key];
+            }
+        }
         return null;
+    }
+
+    // Applies the table of any payload (sync or guess) to the DOM board.
+    function applyBoardFromData(data) {
+        const board = extractServerBoard(data);
+        if (board) syncBoardFromServer(board);
+        updateScoreDisplay();
     }
 
     function winnerToPlayerNumber(rawWinner) {
@@ -1115,7 +1181,7 @@
 
     function evaluateOutcome(data) {
         const overRaw = pickPayloadValue(data, [
-            'is_game_over', 'game_over', 'game_finished', 'is_finished', 'finished', 'ended', 'is_over', 'game_ended'
+            'game_ended', 'is_game_over', 'game_over', 'game_finished', 'is_finished', 'finished', 'ended', 'is_over'
         ]);
         const winnerRaw = pickPayloadValue(data, ['winner', 'winner_name', 'winner_username', 'winner_id', 'winning_player']);
         const drawRaw = pickPayloadValue(data, ['is_draw', 'draw', 'tie']);
@@ -1125,6 +1191,12 @@
         if (checkWinCondition(1)) winnerNum = 1;
         else if (checkWinCondition(2)) winnerNum = 2;
         else if (winnerRaw !== undefined) winnerNum = winnerToPlayerNumber(winnerRaw);
+        if (!winnerNum) {
+            const iWon = pickPayloadValue(data, ['i_won', 'you_won', 'is_winner', 'won']);
+            if (iWon === true) winnerNum = onlineMyNumber();
+            const iLost = pickPayloadValue(data, ['i_lost', 'you_lost', 'lost']);
+            if (iLost === true) winnerNum = onlineOpponentNumber();
+        }
 
         let draw = drawRaw === true || (typeof winnerRaw === 'string' && /^(draw|tie|empate)$/i.test(winnerRaw.trim()));
         if (winnerNum) {
@@ -1154,7 +1226,7 @@
 
     async function syncOnlineGame() {
         if (online.syncInFlight || online.gameId === null || gameState.isGameOver) return;
-        if (isGuessInFlight) return;
+        if (isGuessInFlight || online.turnActive) return; // polling is paused during our own turn
         online.syncInFlight = true;
         try {
             const res = await postMultiplayer(API_ENDPOINTS.MP_SYNC, { game_id: Number(online.gameId) });
@@ -1176,20 +1248,73 @@
     function applyOnlineState(data) {
         if (!data || typeof data !== 'object' || gameState.isGameOver) return;
 
-        const serverBoard = extractServerBoard(data);
-        if (serverBoard) syncBoardFromServer(serverBoard);
+        // 1) Always repaint with the table returned by the backend.
+        applyBoardFromData(data);
         applyTurnFromData(data);
-        updateScoreDisplay();
 
+        // 2) game_ended === true -> final modal, stop everything.
         const outcome = evaluateOutcome(data);
         if (outcome.over) {
             handleOnlineGameOver(outcome);
             return;
         }
-        renderTurnIndicator();
-        refreshInputLock();
+
+        // 3) my_turn === true -> pause the sync polling and start playing.
+        if (online.isMyTurn) {
+            beginMyTurn();
+        } else {
+            renderTurnIndicator();
+            refreshInputLock();
+        }
     }
 
+    function beginMyTurn() {
+        if (online.turnActive || gameState.isGameOver) return;
+        online.turnActive = true;
+        stopSyncPolling();
+        renderTurnIndicator();
+        refreshInputLock();
+        if (!dom.playerSearch.disabled) dom.playerSearch.focus();
+        startTurnTimer();
+    }
+
+    /* ── Turn clock (only runs on our own turn) ── */
+    function renderTimerDisplay() {
+        dom.timeText.textContent = `00:${String(Math.max(gameState.timeLeft, 0)).padStart(2, '0')}`;
+    }
+
+    function stopTurnTimer() {
+        if (gameState.timerIntervalId !== null) {
+            clearInterval(gameState.timerIntervalId);
+            gameState.timerIntervalId = null;
+        }
+    }
+
+    function runTurnTimer() {
+        stopTurnTimer();
+        renderTimerDisplay();
+        gameState.timerIntervalId = setInterval(() => {
+            gameState.timeLeft -= 1;
+            renderTimerDisplay();
+            if (gameState.timeLeft <= 0) {
+                stopTurnTimer();
+                // Time is up: send an empty guess, which ends the turn.
+                submitTurn('', true);
+            }
+        }, 1000);
+    }
+
+    function startTurnTimer() {
+        gameState.timeLeft = TURN_DURATION_SECONDS;
+        runTurnTimer();
+    }
+
+    function resetTimerLabel() {
+        stopTurnTimer();
+        dom.timeText.textContent = '1v1 Online';
+    }
+
+    // Input is enabled only on our own turn.
     function refreshInputLock() {
         const canPlay = online.isMyTurn && !gameState.isGameOver && !isGuessInFlight;
         dom.btnConfirm.disabled = !canPlay;
@@ -1240,6 +1365,7 @@
         if (gameState.isGameOver) return;
         gameState.isGameOver = true;
         stopSyncPolling();
+        resetTimerLabel();
         clearMpSession();
         dom.btnConfirm.disabled = true;
         dom.playerSearch.disabled = true;
@@ -1456,56 +1582,68 @@
 
     let isGuessInFlight = false;
 
-    async function handleConfirmClick() {
-        if (isGuessInFlight || dom.btnConfirm.disabled) return;
-        if (gameState.isGameOver) return;
+    function handleConfirmClick() {
+        if (isGuessInFlight || dom.btnConfirm.disabled || gameState.isGameOver) return;
         if (!online.isMyTurn) {
             showButtonError('Es el turno de tu rival');
             return;
         }
-
         const playerName = dom.playerSearch.value.trim();
         if (playerName.length === 0) {
             showButtonError('¡Escribí un jugador!');
             dom.playerSearch.focus();
             return;
         }
+        submitTurn(playerName, false);
+    }
 
+    // ONE attempt per turn: right, wrong or timeout, the turn ends and sync polling resumes.
+    async function submitTurn(rawGuess, timedOut) {
+        if (isGuessInFlight || gameState.isGameOver || !online.isMyTurn) return;
+
+        const guess = String(rawGuess || '').trim();
+        stopTurnTimer();
         dom.btnConfirm.disabled = true;
         dom.playerSearch.disabled = true;
         dom.playerSearch.value = '';
+        closeAutocompleteList();
 
         isGuessInFlight = true;
         let guessResult;
         try {
-            guessResult = await submitPlayerGuess(playerName);
+            guessResult = await submitPlayerGuess(guess);
         } finally {
             isGuessInFlight = false;
         }
 
         if (guessResult.isNetworkError) {
             showButtonError(guessResult.backendErrorMsg || 'Error de conexión, reintentá');
-            if (guessResult.resync) await syncOnlineGame();
+            if (guessResult.resync) {
+                // Backend says it is not our turn: hand control back to the sync polling.
+                online.isMyTurn = false;
+                online.turnActive = false;
+                renderTurnIndicator();
+                refreshInputLock();
+                startSyncPolling();
+                return;
+            }
+            // Technical failure: the turn was NOT consumed, let the player retry.
+            if (timedOut) gameState.timeLeft = 5;
             refreshInputLock();
+            runTurnTimer();
             return;
         }
 
         const { isCorrect, data } = guessResult;
 
-        if (!isCorrect) {
-            showReactionPopup(dom.popupError);
-            setTimeout(() => {
-                dom.playerSearch.value = '';
-                refreshInputLock();
-                if (online.isMyTurn && !dom.playerSearch.disabled) dom.playerSearch.focus();
-                syncOnlineGame();
-            }, RESULT_DISPLAY_DELAY_MS);
-            return;
-        }
-
+        // Repaint with the response (updated table / cell) and show the reaction.
         resolveTargetCellFromResponse(data, onlineMyNumber());
-        showReactionPopup(dom.popupSuccess);
-        updateScoreDisplay();
+        applyBoardFromData(data);
+        showReactionPopup(isCorrect ? dom.popupSuccess : dom.popupError);
+
+        // The turn is over no matter what happened.
+        online.isMyTurn = false;
+        online.turnActive = false;
 
         const outcome = evaluateOutcome(data);
         if (outcome.over) {
@@ -1513,10 +1651,10 @@
             return;
         }
 
-        online.isMyTurn = false;
+        resetTimerLabel();
         renderTurnIndicator();
         refreshInputLock();
-        syncOnlineGame();
+        startSyncPolling();
     }
 
     /* ─────────────────────────────────────────────
@@ -1648,6 +1786,12 @@
         dom.btnConfirm.addEventListener('click', handleConfirmClick);
         dom.playerSearch.addEventListener('input', handleSearchInput);
         dom.playerSearch.addEventListener('focus', renderAutocompleteResults);
+        dom.playerSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleConfirmClick();
+            }
+        });
         document.addEventListener('click', handleOutsideAutocompleteClick);
     }
 
