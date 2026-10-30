@@ -1053,35 +1053,46 @@
         if (acceptBtn) acceptBtn.disabled = true;
         if (rejectBtn) rejectBtn.disabled = true;
 
-        var requestUsername = resolveUsernameForEntry(reqEntry, acceptBtn || rejectBtn);
-        var requestId       = resolveUserIdForEntry(reqEntry, acceptBtn || rejectBtn);
+        var senderUsername = resolveUsernameForEntry(reqEntry, acceptBtn || rejectBtn);
+        if (!senderUsername) {
+            showAlertBanner(requestsErrorBanner, 'No se pudo obtener el nombre de usuario de la solicitud.');
+            if (acceptBtn) acceptBtn.disabled = false;
+            if (rejectBtn) rejectBtn.disabled = false;
+            return;
+        }
 
         try {
             // Send exact schema required by POST /user/reply-user-friend-request:
-            // { "user_id_request": Number(requestId), "reply": true/false }
-            var payload = {
-                user_id_request: Number(requestId),
-                reply: Boolean(replyBoolean)
-            };
-
+            // { "friend_name": String(senderUsername), "reply": Boolean(replyBoolean) }
             var response = await fetch(API_BASE_URL + '/user/reply-user-friend-request', {
                 method: 'POST',
                 headers: getAuthHeaders(true),
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    friend_name: String(senderUsername),
+                    reply: Boolean(replyBoolean)
+                })
             });
 
             if (response.ok) {
+                // Immediately remove from pending requests state and update badges & UI
+                state.friendRequests = state.friendRequests.filter(function (item) {
+                    return normalizeText(item.username) !== normalizeText(senderUsername);
+                });
+                updateRequestsBadge();
+                renderRequestsTab();
+
                 if (replyBoolean) {
                     showGlobalToast('✓ ¡Solicitud aceptada!');
                 } else {
                     showGlobalToast('Solicitud rechazada');
                 }
 
-                // Reload both friend requests and friends list from backend, and update badge & UI
+                // Reload both friend requests and friends list from backend, and update badge & header notifications
                 await Promise.all([
                     fetchFriendRequests(),
                     fetchUserFriends()
                 ]);
+                updateRequestsBadge();
             } else {
                 var errData = null;
                 try { errData = await response.json(); } catch (_) {}
