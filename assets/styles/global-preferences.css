@@ -480,3 +480,49 @@ html.light-mode .notif-list-item {
 
 
 
+
+/* 1v1 match invitation items in the notifications dropdown */
+.notif-item--match {
+    cursor: default;
+    align-items: flex-start;
+}
+.notif-match-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+.notif-actions {
+    display: flex;
+    gap: 8px;
+}
+.notif-match-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.notif-match-btn:active { transform: scale(0.96); }
+.notif-match-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.notif-match-btn--accept { background: #4CAF50; color: #fff; }
+.notif-match-btn--accept:hover:not(:disabled) { background: #43a047; }
+.notif-match-btn--reject {
+    background: rgba(80, 80, 80, 0.55);
+    color: #cfcfcf;
+    border-color: rgba(158, 158, 158, 0.25);
+}
+.notif-match-btn--reject:hover:not(:disabled) { background: rgba(100, 100, 100, 0.65); color: #fff; }
+.notif-match-error {
+    font-size: 12px;
+    color: #ef5350;
+}
+html.light-mode .notif-match-btn--reject {
+    background: rgba(0, 0, 0, 0.08);
+    color: #616161;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+html.light-mode .notif-match-btn--reject:hover:not(:disabled) { background: rgba(0, 0, 0, 0.14); color: #1A1A1A; }

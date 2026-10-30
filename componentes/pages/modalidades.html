@@ -219,8 +219,8 @@
                 <div class="mode-icon" aria-hidden="true">🌐</div>
                 <h2 class="mode-title" id="modoOnlineTitle">1v1 Online</h2>
                 <p class="mode-desc">
-                    Desafiá a un jugador real en cualquier parte del mundo.
-                    Creá o uníte a una sala privada con un código de partida.
+                    Desafiá a un amigo real a una partida 1v1 en tiempo real.
+                    Enviale el desafío desde "Mis Amigos" y jueguen apenas lo acepte.
                 </p>
                 <button type="button" class="btn-mode" id="btn-online">
                     <span>INGRESAR</span><span>→</span>
@@ -759,12 +759,22 @@
         }
     });
 
-    // 1v1 Online (blocked for guests)
+    // 1v1 Online (blocked for guests). Registered users either resume the active
+    // multiplayer session (tateti-online.html) or go to "Mis Amigos" to challenge someone.
     $('btn-online').addEventListener('click', function (e) {
         if (isGuest) {
             e.preventDefault();
             openModal(guestModal);
+            return;
         }
+        var activeSession = null;
+        try { activeSession = JSON.parse(sessionStorage.getItem('footlel_mp_session') || 'null'); } catch (_) {}
+        if (activeSession && activeSession.gameId !== undefined && activeSession.gameId !== null) {
+            window.location.href = 'tateti-online.html';
+            return;
+        }
+        try { sessionStorage.setItem('footlel_open_tab', 'amigos'); } catch (_) {}
+        window.location.href = 'amigos.html';
     });
 })();
 </script>

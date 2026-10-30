@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Tateti (1v1 Online)</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Global Styles, Menu and Game -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <link rel="stylesheet" href="../../assets/styles/modalidades.css">
+    <link rel="stylesheet" href="../../assets/styles/tateti.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+
+    <!-- Global Script (Theme/Animations) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         GAME HEADER
+    ═══════════════════════════════════════ -->
+    <header class="game-header">
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <div class="timer-display" id="timer-display">
+            <span aria-hidden="true">🌐</span> <span id="time-text">1v1 Online</span>
+        </div>
+
+        <div class="turn-indicator" id="turn-indicator">
+            Conectando con la partida...
+        </div>
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         CENTRAL BOARD (4x4 GRID)
+    ═══════════════════════════════════════ -->
+    <main class="main-content">
+        <section class="board-section">
+            <div class="game-board" id="game-board">
+
+                <!-- Row 1: empty corner + 3 club conditions (columns) -->
+                <div class="empty-corner"></div>
+                <div class="cond-top" id="cond-top-0" data-condition-slot="club">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="cond-top" id="cond-top-1" data-condition-slot="club">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="cond-top" id="cond-top-2" data-condition-slot="club">
+                    <img class="cond-img" alt="">
+                </div>
+
+                <!-- Row 2: national team condition (row) + 3 playable cells -->
+                <div class="cond-left" id="cond-left-0" data-condition-slot="nation">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="playable-cell" data-row="0" data-col="0" data-index="0"></div>
+                <div class="playable-cell" data-row="0" data-col="1" data-index="1"></div>
+                <div class="playable-cell" data-row="0" data-col="2" data-index="2"></div>
+
+                <!-- Row 3 -->
+                <div class="cond-left" id="cond-left-1" data-condition-slot="nation">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="playable-cell" data-row="1" data-col="0" data-index="3"></div>
+                <div class="playable-cell" data-row="1" data-col="1" data-index="4"></div>
+                <div class="playable-cell" data-row="1" data-col="2" data-index="5"></div>
+
+                <!-- Row 4 -->
+                <div class="cond-left" id="cond-left-2" data-condition-slot="nation">
+                    <img class="cond-img" alt="">
+                </div>
+                <div class="playable-cell" data-row="2" data-col="0" data-index="6"></div>
+                <div class="playable-cell" data-row="2" data-col="1" data-index="7"></div>
+                <div class="playable-cell" data-row="2" data-col="2" data-index="8"></div>
+
+            </div>
+
+            <!-- Estado de carga mientras se sincroniza el tablero -->
+            <div class="board-loading-overlay" id="board-loading-overlay" role="status" aria-live="polite">
+                <div class="board-loading-card">
+                    <span class="board-loading-ball" aria-hidden="true">⚽</span>
+                    <p class="board-loading-title">Cargando Partida 1v1...</p>
+                    <p class="board-loading-subtitle">Sincronizando el tablero con tu rival...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══════════════════════════════════════
+             BUSCADOR INFERIOR
+        ═══════════════════════════════════════ -->
+        <section class="search-section">
+            <div class="search-wrapper">
+                <input
+                    type="text"
+                    class="search-input"
+                    id="player-search"
+                    placeholder="Esperando inicio de partida..."
+                    autocomplete="off"
+                    role="combobox"
+                    aria-expanded="false"
+                    aria-autocomplete="list"
+                    aria-controls="autocomplete-results"
+                    disabled>
+                <ul class="autocomplete-results" id="autocomplete-results" role="listbox"></ul>
+            </div>
+            <button class="btn-confirm" id="btn-confirm" type="button" disabled>Confirmar Jugada</button>
+        </section>
+
+    </main>
+
+    <!-- ═══════════════════════════════════════
+         MARCADOR / FOOTER
+    ═══════════════════════════════════════ -->
+    <footer class="game-footer">
+        <div class="score-board">
+            <span class="score-team" id="score-team-1">Jugador 1 (X)</span>
+            <span class="score-tally"><span id="score-value-p1">0</span>&nbsp;—&nbsp;<span id="score-value-p2">0</span></span>
+            <span class="score-team" id="score-team-2">Jugador 2 (O)</span>
+        </div>
+        <div class="score-caption" id="score-caption">Partida 1v1 Online en tiempo real</div>
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     REACTION POP-UPS (Floating)
+═══════════════════════════════════════ -->
+<div class="reaction-popup success" id="popup-success" aria-live="assertive">
+    <img src="../../assets/images/Festejo/Messi-festejo.png" alt="Festejo" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Golazo! La clavaste en el ángulo</span>
+</div>
+
+<div class="reaction-popup error" id="popup-error" aria-live="assertive">
+    <img src="../../assets/images/Errado/Fabbiani-erra.png" alt="Gol errado" class="reaction-img" onerror="this.style.display='none'">
+    <span class="reaction-text">¡Ta tan ta tan... Nooo Fabbiani!</span>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     END-GAME MODAL
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-victoria" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <div class="modal-icon" aria-hidden="true">🏆</div>
+        <h2 class="modal-title">¡Ganaste la partida!</h2>
+        <p class="endgame-label">Casillas conquistadas</p>
+        <div class="score-display">0 — 0</div>
+        <div class="modal-actions">
+            <a href="amigos.html" class="modal-btn-primary">Volver a Amigos</a>
+            <a href="menu.html" class="modal-btn-secondary">Volver al Menú</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     GAME LOGIC (Vanilla JS)
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    const runWhenReady = (fn) => {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', fn);
+        } else {
+            fn();
+        }
+    };
+
+    runWhenReady(() => {
+
+    /* ─────────────────────────────────────────────
+       1. CONFIGURATION CONSTANTS
+    ───────────────────────────────────────────── */
+    const RESULT_DISPLAY_DELAY_MS = 2500;
+    const REACTION_POPUP_DURATION_MS = 2800;
+    const BUTTON_ERROR_DURATION_MS = 2000;
+    const AUTOCOMPLETE_MIN_CHARS = 2;
+    const AUTOCOMPLETE_MAX_RESULTS = 50;
+    const AUTOCOMPLETE_DEBOUNCE_MS = 100;
+    const PLAYERS_CSV_PATH = '../../assets/data/data-jugadores.txt';
+    const PLAYERS_CSV_ALT_PATH = '../../assets/data/data-1790367964874.csv';
+    const PLAYERS_CSV_URL = new URL(PLAYERS_CSV_PATH, window.location.href).href;
+    const PLAYERS_CSV_ALT_URL = new URL(PLAYERS_CSV_ALT_PATH, window.location.href).href;
+    const IMAGES_BASE_PATH = '../../assets/images';
+    const FALLBACK_SHIELD_IMG = new URL('../../assets/images/logo-oscuro.png', window.location.href).href;
+    const CLUB_LEAGUE_FOLDERS = ['Equipos - Premier League', 'Equipo - Bundesliga', 'Equipos - La Liga', 'Equipos - Serie A'];
+
+    const API_BASE_URL = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    const API_ENDPOINTS = {
+        MP_START: `${API_BASE_URL}/game/start-multiplayer-game`,
+        MP_JOIN:  `${API_BASE_URL}/game/join-multiplayer-game`,
+        MP_SYNC:  `${API_BASE_URL}/game/multiplayer-sync`,
+        MP_GUESS: `${API_BASE_URL}/game/multiplayer-guess`
+    };
+
+    function resolveAssetUrl(relPath) {
+        try {
+            return new URL(`${IMAGES_BASE_PATH}/${relPath}`, window.location.href).href;
+        } catch {
+            return `${IMAGES_BASE_PATH}/${relPath}`;
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       2. CONDITION CATALOG
+    ───────────────────────────────────────────── */
+    const CLUB_CATALOG = [
+        {
+            id: 'bayer-leverkusen',
+            name: 'Bayer Leverkusen',
+            aliases: ['Bayer Leverkusen', 'Bayer 04 Leverkusen', 'Leverkusen'],
+            relPath: 'Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png',
+            img: resolveAssetUrl('Equipo - Bundesliga/bayer-leverkusen-logo-footylogos.png')
+        },
+        {
+            id: 'bayern-munich',
+            name: 'Bayern Munich',
+            aliases: ['Bayern Múnich', 'Bayern Munich', 'FC Bayern Munich', 'FC Bayern München', 'Bayern'],
+            relPath: 'Equipo - Bundesliga/bayern-munich-logo-footylogos.png',
+            img: resolveAssetUrl('Equipo - Bundesliga/bayern-munich-logo-footylogos.png')
+        },
+        {
+            id: 'borussia-dortmund',
+            name: 'Borussia Dortmund',
+            aliases: ['Borussia Dortmund', 'Dortmund', 'BVB'],
+            relPath: 'Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png',
+            img: resolveAssetUrl('Equipo - Bundesliga/borussia-dortmund-logo-footylogos.png')
+        },
+        {
+            id: 'atletico-madrid',
+            name: 'Atlético Madrid',
+            aliases: ['Atlético de Madrid', 'Atlético Madrid', 'Atletico de Madrid', 'Atletico Madrid'],
+            relPath: 'Equipos - La Liga/atletico-madrid-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - La Liga/atletico-madrid-logo-footylogos.png')
+        },
+        {
+            id: 'fc-barcelona',
+            name: 'FC Barcelona',
+            aliases: ['FC Barcelona', 'Barcelona', 'Barça'],
+            relPath: 'Equipos - La Liga/fc-barcelona-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - La Liga/fc-barcelona-logo-footylogos.png')
+        },
+        {
+            id: 'real-madrid',
+            name: 'Real Madrid',
+            aliases: ['Real Madrid', 'Real Madrid CF'],
+            relPath: 'Equipos - La Liga/real-madrid-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - La Liga/real-madrid-logo-footylogos.png')
+        },
+        {
+            id: 'arsenal',
+            name: 'Arsenal',
+            aliases: ['Arsenal', 'Arsenal FC'],
+            relPath: 'Equipos - Premier League/arsenal-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Premier League/arsenal-logo-footylogos.png')
+        },
+        {
+            id: 'chelsea',
+            name: 'Chelsea',
+            aliases: ['Chelsea', 'Chelsea FC'],
+            relPath: 'Equipos - Premier League/chelsea-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Premier League/chelsea-logo-footylogos.png')
+        },
+        {
+            id: 'liverpool-fc',
+            name: 'Liverpool FC',
+            aliases: ['Liverpool', 'Liverpool FC'],
+            relPath: 'Equipos - Premier League/liverpool-fc-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Premier League/liverpool-fc-logo-footylogos.png')
+        },
+        {
+            id: 'manchester-city',
+            name: 'Manchester City',
+            aliases: ['Manchester City', 'Man City'],
+            relPath: 'Equipos - Premier League/manchester-city-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Premier League/manchester-city-logo-footylogos.png')
+        },
+        {
+            id: 'manchester-united',
+            name: 'Manchester United',
+            aliases: ['Manchester United', 'Man United', 'Man Utd'],
+            relPath: 'Equipos - Premier League/manchester-united-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Premier League/manchester-united-logo-footylogos.png')
+        },
+        {
+            id: 'tottenham-hotspur',
+            name: 'Tottenham Hotspur',
+            aliases: ['Tottenham', 'Tottenham Hotspur', 'Spurs'],
+            relPath: 'Equipos - Premier League/tottenham-hotspur-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Premier League/tottenham-hotspur-logo-footylogos.png')
+        },
+        {
+            id: 'inter-milan',
+            name: 'Inter de Milán',
+            aliases: ['Inter de Milán', 'Inter de Milan', 'Inter Milan', 'FC Internazionale', 'Internazionale', 'Inter'],
+            relPath: 'Equipos - Serie A/inter-milan-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Serie A/inter-milan-logo-footylogos.png')
+        },
+        {
+            id: 'ac-milan',
+            name: 'AC Milan',
+            aliases: ['AC Milan', 'A.C. Milan', 'AC Milán'],
+            relPath: 'Equipos - Serie A/ac-milan-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Serie A/ac-milan-logo-footylogos.png')
+        },
+        {
+            id: 'juventus',
+            name: 'Juventus',
+            aliases: ['Juventus', 'Juventus FC'],
+            relPath: 'Equipos - Serie A/juventus-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Serie A/juventus-logo-footylogos.png')
+        },
+        {
+            id: 'lazio',
+            name: 'Lazio',
+            aliases: ['Lazio', 'SS Lazio'],
+            relPath: 'Equipos - Serie A/lazio-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Serie A/lazio-logo-footylogos.png')
+        },
+        {
+            id: 'roma',
+            name: 'Roma',
+            aliases: ['AS Roma', 'Roma'],
+            relPath: 'Equipos - Serie A/roma-logo-footylogos.png',
+            img: resolveAssetUrl('Equipos - Serie A/roma-logo-footylogos.png')
+        }
+    ];
+
+    const NATION_CATALOG = [
+        {
+            id: 'argentina',
+            name: 'Argentina',
+            aliases: ['Argentina'],
+            relPath: 'Selecciones/argentina-national-team-logo-footylogos.png',
+            img: resolveAssetUrl('Selecciones/argentina-national-team-logo-footylogos.png')
+        },
+        {
+            id: 'england',
+            name: 'Inglaterra',
+            aliases: ['Inglaterra', 'England'],
+            relPath: 'Selecciones/england-national-team-logo-footylogos.png',
+            img: resolveAssetUrl('Selecciones/england-national-team-logo-footylogos.png')
+        },
+        {
+            id: 'france',
+            name: 'Francia',
+            aliases: ['Francia', 'France'],
+            relPath: 'Selecciones/france-national-team-logo-footylogos.png',
+            img: resolveAssetUrl('Selecciones/france-national-team-logo-footylogos.png')
+        },
+        {
+            id: 'italy',
+            name: 'Italia',
+            aliases: ['Italia', 'Italy'],
+            relPath: 'Selecciones/italy-national-team-logo-footylogos.png',
+            img: resolveAssetUrl('Selecciones/italy-national-team-logo-footylogos.png')
+        },
+        {
+            id: 'spain',
+            name: 'España',
+            aliases: ['España', 'Espana', 'Spain'],
+            relPath: 'Selecciones/spain-national-team-logo-footylogos.png',
+            img: resolveAssetUrl('Selecciones/spain-national-team-logo-footylogos.png')
+        }
+    ];
+
+    /* ─────────────────────────────────────────────
+       3. GAME STATE
+    ───────────────────────────────────────────── */
+    const gameState = {
+        currentPlayer: 1,
+        scoreP1: 0,
+        scoreP2: 0,
+        isGameOver: false,
+        board: [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ]
+    };
+
+    /* ─────────────────────────────────────────────
+       4. DOM REFERENCES
+    ───────────────────────────────────────────── */
+    const dom = {
+        timeText: document.getElementById('time-text'),
+        turnIndicator: document.getElementById('turn-indicator'),
+        cells: document.querySelectorAll('.playable-cell'),
+        playerSearch: document.getElementById('player-search'),
+        btnConfirm: document.getElementById('btn-confirm'),
+        popupSuccess: document.getElementById('popup-success'),
+        popupError: document.getElementById('popup-error'),
+        victoryModal: document.getElementById('modal-victoria'),
+        scoreValueP1El: document.getElementById('score-value-p1'),
+        scoreValueP2El: document.getElementById('score-value-p2'),
+        autocompleteList: document.getElementById('autocomplete-results'),
+        boardLoadingOverlay: document.getElementById('board-loading-overlay'),
+        condTopSlots: [
+            document.getElementById('cond-top-0'),
+            document.getElementById('cond-top-1'),
+            document.getElementById('cond-top-2')
+        ],
+        condLeftSlots: [
+            document.getElementById('cond-left-0'),
+            document.getElementById('cond-left-1'),
+            document.getElementById('cond-left-2')
+        ]
+    };
+
+    const FALLBACK_PLAYERS_ROSTER = [
+        'Fernando Torres', 'Hernán Crespo', 'Frank Lampard', 'Gianfranco Zola', 'Claude Makélélé',
+        'David Silva', 'Sergio Agüero', 'Joe Hart', 'Mario Balotelli', 'Bacary Sagna',
+        'Rodri', 'Nicolás Otamendi', 'Gianluigi Donnarumma', 'Benjamin Mendy', 'Juan Mata',
+        'Juan Sebastián Verón', 'Wayne Rooney', 'Matteo Darmian', 'Patrice Evra', 'Javier Mascherano',
+        'Pepe Reina', 'Steven Gerrard', 'Andrea Dossena', 'Djibril Cissé', 'José Antonio Reyes',
+        'Emiliano Martínez', 'Ian Wright', 'Riccardo Calafiori', 'Thierry Henry', 'Cesc Fàbregas',
+        'Tony Adams', 'Patrick Vieira', 'Roberto Soldado', 'Osvaldo Ardiles', 'Gary Lineker',
+        'Guglielmo Vicario', 'David Ginola', 'Xavi Hernández', 'Lionel Messi', 'Marcus Rashford',
+        'Demetrio Albertini', 'Samuel Umtiti', 'Sergio Ramos', 'Ángel Di María', 'David Beckham',
+        'Fabio Cannavaro', 'Karim Benzema', 'Koke', 'Ángel Correa', 'Kieran Trippier',
+        'Giacomo Raspadori', 'Antoine Griezmann', 'Josep Martínez', 'Javier Zanetti', 'Ashley Young',
+        'Nicolò Barella', 'Marcus Thuram', 'Samu Castillejo', 'Lucas Biglia', 'Alessandro Nesta',
+        'Mathieu Flamini', 'Kyle Walker', 'Álvaro Morata', 'Paulo Dybala', 'Gianluigi Buffon',
+        'Paul Pogba', 'Iago Falque', 'Erik Lamela', 'Chris Smalling', 'Francesco Totti',
+        'Steven Nzonzi', 'Mario Gila', 'Valentín "Taty" Castellanos', 'Paul Gascoigne', 'Ciro Immobile',
+        'Matteo Guendouzi', 'Javi Martínez', 'Martín Demichelis', 'Owen Hargreaves', 'Luca Toni',
+        'Franck Ribéry', 'Paco Alcácer', 'Leonardo Balerdi', 'Jude Bellingham', 'Luca Reggiani',
+        'Ousmane Dembélé', 'Álex Grimaldo', 'Exequiel Palacios', 'Jarell Quansah', 'Andrea Natali',
+        'Martin Terrier'
+    ];
+
+    let availablePlayers = [...FALLBACK_PLAYERS_ROSTER];
+    let autocompleteDebounceId = null;
+
+    /* ─────────────────────────────────────────────
+       5. INITIALIZATION & HELPERS
+    ───────────────────────────────────────────── */
+    function setBoardLoadingState(isLoading) {
+        if (dom.boardLoadingOverlay) {
+            dom.boardLoadingOverlay.classList.toggle('hidden', !isLoading);
+            dom.boardLoadingOverlay.setAttribute('aria-hidden', isLoading ? 'false' : 'true');
+        }
+        if (isLoading) {
+            dom.btnConfirm.disabled = true;
+            dom.playerSearch.disabled = true;
+            closeAutocompleteList();
+        } else if (!gameState.isGameOver) {
+            refreshInputLock();
+        }
+    }
+
+    function warnIfRunningFromFileProtocol() {
+        if (window.location.protocol === 'file:') {
+            console.warn(
+                'This page was opened with file://. Chrome blocks fetch() in this mode — using embedded player catalog and relative paths.'
+            );
+        }
+    }
+
+    function formatBackendError(rawMsg) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+            return window.FootlelPrefs.formatBackendError(rawMsg);
+        }
+        if (!rawMsg) return 'Ocurrió un error inesperado.';
+        let msg = String(rawMsg).trim();
+        if (msg.startsWith('{')) {
+            try {
+                const parsed = JSON.parse(msg);
+                if (parsed && (parsed.detail || parsed.message)) {
+                    msg = String(parsed.detail || parsed.message).trim();
+                }
+            } catch (_) {}
+        }
+        msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+        msg = msg
+            .replace(/\bcontrasenias\b/gi, 'contraseñas')
+            .replace(/\bcontrasenia\b/gi, 'contraseña')
+            .replace(/\binvalidos\b/gi, 'inválidos')
+            .replace(/\binvalidas\b/gi, 'inválidas')
+            .replace(/\binvalido\b/gi, 'inválido')
+            .replace(/\binvalida\b/gi, 'inválida')
+            .replace(/\bcodigos\b/gi, 'códigos')
+            .replace(/\bcodigo\b/gi, 'código')
+            .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+            .replace(/\belectronico\b/gi, 'electrónico')
+            .replace(/\bnumeros\b/gi, 'números')
+            .replace(/\bnumero\b/gi, 'número')
+            .replace(/\btelefono\b/gi, 'teléfono')
+            .replace(/\bsesion\b/gi, 'sesión')
+            .replace(/\bverificacion\b/gi, 'verificación')
+            .replace(/\bautenticacion\b/gi, 'autenticación')
+            .replace(/\bconfiguracion\b/gi, 'configuración')
+            .replace(/\binformacion\b/gi, 'información')
+            .replace(/\bconexion\b/gi, 'conexión')
+            .replace(/\boperacion\b/gi, 'operación')
+            .replace(/\bmanana\b/gi, 'mañana')
+            .replace(/\bminimo\b/gi, 'mínimo')
+            .replace(/\bmaximo\b/gi, 'máximo')
+            .replace(/\bexito\b/gi, 'éxito');
+        if (msg.length > 0) {
+            msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+        }
+        if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+            msg += '.';
+        }
+        return msg;
+    }
+
+    function showFatalStartError(backendDetail) {
+        stopSyncPolling();
+        const main = document.querySelector('.main-content') || document.body;
+        const existing = main.querySelector('.connection-error-notice');
+        if (existing) existing.remove();
+
+        const hasBackendDetail = Boolean(backendDetail && String(backendDetail).trim());
+        const titleText = hasBackendDetail
+            ? 'No se pudo iniciar la partida multijugador'
+            : 'No pudimos conectar con el servidor';
+        const subtitleText = hasBackendDetail
+            ? formatBackendError(backendDetail)
+            : 'Verificá tu conexión o intentá nuevamente desde la pestaña Mis Amigos.';
+
+        const notice = document.createElement('div');
+        notice.className = 'connection-error-notice';
+        notice.setAttribute('role', 'alert');
+        notice.innerHTML = `
+            <div class="connection-error-header">
+                <svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <p class="connection-error-title"></p>
+            </div>
+            <p class="connection-error-subtitle"></p>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+                <button type="button" class="connection-error-btn" onclick="location.reload()">Reintentar</button>
+                <a href="amigos.html" class="connection-error-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.28);">Volver a Amigos</a>
+            </div>
+        `;
+        notice.querySelector('.connection-error-title').textContent = titleText;
+        notice.querySelector('.connection-error-subtitle').textContent = subtitleText;
+        main.prepend(notice);
+    }
+
+    async function ensureAuthToken() {
+        let token = localStorage.getItem('footlel_token');
+        if (token && token !== 'null' && token !== 'undefined') return token;
+        return '';
+    }
+
+    async function safeParseJson(response) {
+        try {
+            return await response.json();
+        } catch {
+            return null;
+        }
+    }
+
+    /* ─────────────────────────────────────────────
+       6. BOARD CONDITIONS (clubs / nations)
+    ───────────────────────────────────────────── */
+    function clearConditionSlots() {
+        [...dom.condTopSlots, ...dom.condLeftSlots].forEach(slot => {
+            if (!slot) return;
+            slot.title = '';
+            const img = slot.querySelector('.cond-img');
+            if (img) {
+                img.onload = null;
+                img.onerror = null;
+                img.removeAttribute('src');
+                img.alt = '';
+                img.style.display = 'none';
+            }
+        });
+    }
+
+    function extractHeadersArray(startData, keys) {
+        if (!startData || typeof startData !== 'object') return null;
+        for (const key of keys) {
+            if (Array.isArray(startData[key]) && startData[key].length === 3) {
+                return startData[key];
+            }
+        }
+        if (startData.data && typeof startData.data === 'object') {
+            for (const key of keys) {
+                if (Array.isArray(startData.data[key]) && startData.data[key].length === 3) {
+                    return startData.data[key];
+                }
+            }
+        }
+        return null;
+    }
+
+    function applyBoardConditions(startData) {
+        if (!startData) {
+            clearConditionSlots();
+            return Promise.resolve();
+        }
+        const rawClubs = extractHeadersArray(startData, ['row_headers', 'clubs', 'teams', 'equipos', 'topConditions']);
+        const rawNations = extractHeadersArray(startData, ['column_headers', 'nations', 'countries', 'paises', 'selecciones', 'leftConditions']);
+
+        const topConditions = resolveConditions(rawClubs, CLUB_CATALOG);
+        const leftConditions = resolveConditions(rawNations, NATION_CATALOG);
+
+        const shieldLoadPromises = [
+            ...topConditions.map((condition, columnIndex) => renderConditionSlot(dom.condTopSlots[columnIndex], condition)),
+            ...leftConditions.map((condition, rowIndex) => renderConditionSlot(dom.condLeftSlots[rowIndex], condition))
+        ];
+
+        dom.cells.forEach(cell => {
+            const row = parseInt(cell.getAttribute('data-row'), 10);
+            const col = parseInt(cell.getAttribute('data-col'), 10);
+            if (topConditions[col]) cell.dataset.clubId = topConditions[col].id;
+            if (leftConditions[row]) cell.dataset.nationId = leftConditions[row].id;
+        });
+
+        return Promise.all(shieldLoadPromises);
+    }
+
+    function slugifyName(rawName) {
+        return String(rawName)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-');
+    }
+
+    function resolveConditions(idsFromServer, catalog) {
+        if (Array.isArray(idsFromServer) && idsFromServer.length === 3) {
+            const matched = idsFromServer.map(raw => resolveSingleCondition(raw, catalog));
+            if (matched.every(Boolean)) return matched;
+        }
+        return pickRandomConditions(catalog, 3);
+    }
+
+    function normalizeForMatch(str) {
+        return String(str)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/\bde\b/g, ' ')
+            .replace(/\b\d+\b/g, ' ')
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    function namesStrictlyMatch(a, b) {
+        const na = normalizeForMatch(a);
+        const nb = normalizeForMatch(b);
+        return Boolean(na && nb && na === nb);
+    }
+
+    function namesLooselyMatch(a, b) {
+        const na = normalizeForMatch(a);
+        const nb = normalizeForMatch(b);
+        if (!na || !nb) return false;
+        if (na === nb) return true;
+        const aHasInter = /\b(inter|internazionale)\b/.test(na);
+        const bHasInter = /\b(inter|internazionale)\b/.test(nb);
+        if (aHasInter !== bHasInter) return false;
+        return na.includes(nb) || nb.includes(na);
+    }
+
+    function buildCatalogEntryCandidates(entry, extraUrl) {
+        const candidates = [];
+        if (extraUrl) candidates.push(extraUrl);
+        if (entry.relPath) {
+            candidates.push(`${IMAGES_BASE_PATH}/${entry.relPath}`);
+            candidates.push(encodeURI(`${IMAGES_BASE_PATH}/${entry.relPath}`));
+        }
+        if (entry.img) {
+            candidates.push(entry.img);
+        }
+        if (entry.relPath) {
+            candidates.push(`/assets/images/${entry.relPath}`);
+            candidates.push(encodeURI(`/assets/images/${entry.relPath}`));
+        }
+        return [...new Set(candidates.filter(Boolean))];
+    }
+
+    function extractConditionInput(raw) {
+        if (raw && typeof raw === 'object') {
+            const rawName = raw.name || raw.nombre || raw.team || raw.equipo || raw.country || raw.pais || raw.title || raw.id || '';
+            const rawImg = raw.img || raw.image || raw.logo || raw.escudo || raw.escudoUrl || raw.escudo_url || raw.bandera || raw.banderaUrl || raw.bandera_url || raw.flag || raw.url || null;
+            return { rawName: String(rawName), rawImg };
+        }
+        return { rawName: String(raw), rawImg: null };
+    }
+
+    function resolveSingleCondition(raw, catalog) {
+        if (!raw) return null;
+        const { rawName, rawImg } = extractConditionInput(raw);
+        if (!rawName && !rawImg) return null;
+        const slug = slugifyName(rawName);
+        const normalizedRaw = normalizeForMatch(rawName);
+
+        if (catalog === CLUB_CATALOG && normalizedRaw) {
+            if (/\b(inter|internazionale)\b/.test(normalizedRaw)) {
+                const interEntry = catalog.find(entry => entry.id === 'inter-milan');
+                if (interEntry) return { ...interEntry, imgCandidates: buildCatalogEntryCandidates(interEntry, rawImg) };
+            }
+            if (/\bmilan\b/.test(normalizedRaw) && !/\b(inter|internazionale)\b/.test(normalizedRaw)) {
+                const acMilanEntry = catalog.find(entry => entry.id === 'ac-milan');
+                if (acMilanEntry) return { ...acMilanEntry, imgCandidates: buildCatalogEntryCandidates(acMilanEntry, rawImg) };
+            }
+            if (/\b(atletico|atleti)\b/.test(normalizedRaw)) {
+                const atletiEntry = catalog.find(entry => entry.id === 'atletico-madrid');
+                if (atletiEntry) return { ...atletiEntry, imgCandidates: buildCatalogEntryCandidates(atletiEntry, rawImg) };
+            }
+            if (/\breal\s+madrid\b/.test(normalizedRaw)) {
+                const realEntry = catalog.find(entry => entry.id === 'real-madrid');
+                if (realEntry) return { ...realEntry, imgCandidates: buildCatalogEntryCandidates(realEntry, rawImg) };
+            }
+            if (/\bmanchester\b/.test(normalizedRaw) || /\bman\b/.test(normalizedRaw)) {
+                if (/\bcity\b/.test(normalizedRaw)) {
+                    const cityEntry = catalog.find(entry => entry.id === 'manchester-city');
+                    if (cityEntry) return { ...cityEntry, imgCandidates: buildCatalogEntryCandidates(cityEntry, rawImg) };
+                }
+                if (/\b(united|utd)\b/.test(normalizedRaw)) {
+                    const utdEntry = catalog.find(entry => entry.id === 'manchester-united');
+                    if (utdEntry) return { ...utdEntry, imgCandidates: buildCatalogEntryCandidates(utdEntry, rawImg) };
+                }
+            }
+        }
+
+        const byId = catalog.find(entry => entry.id === rawName || entry.id === slug);
+        if (byId) {
+            return { ...byId, imgCandidates: buildCatalogEntryCandidates(byId, rawImg) };
+        }
+
+        const byExactNormalized = catalog.find(entry => {
+            if (namesStrictlyMatch(entry.name, rawName)) return true;
+            if (Array.isArray(entry.aliases)) {
+                return entry.aliases.some(alias => namesStrictlyMatch(alias, rawName));
+            }
+            return false;
+        });
+        if (byExactNormalized) {
+            return { ...byExactNormalized, imgCandidates: buildCatalogEntryCandidates(byExactNormalized, rawImg) };
+        }
+
+        const byNameOrAlias = catalog.find(entry => {
+            if (namesLooselyMatch(entry.name, rawName)) return true;
+            if (Array.isArray(entry.aliases)) {
+                return entry.aliases.some(alias => namesLooselyMatch(alias, rawName));
+            }
+            return false;
+        });
+        if (byNameOrAlias) {
+            return { ...byNameOrAlias, imgCandidates: buildCatalogEntryCandidates(byNameOrAlias, rawImg) };
+        }
+
+        const isClub = catalog === CLUB_CATALOG;
+        const fallbackCandidates = isClub
+            ? CLUB_LEAGUE_FOLDERS.flatMap(folder => [
+                `${IMAGES_BASE_PATH}/${folder}/${slug}-logo-footylogos.png`,
+                encodeURI(`${IMAGES_BASE_PATH}/${folder}/${slug}-logo-footylogos.png`),
+                `/assets/images/${folder}/${slug}-logo-footylogos.png`
+            ])
+            : [
+                `${IMAGES_BASE_PATH}/Selecciones/${slug}-national-team-logo-footylogos.png`,
+                encodeURI(`${IMAGES_BASE_PATH}/Selecciones/${slug}-national-team-logo-footylogos.png`),
+                `/assets/images/Selecciones/${slug}-national-team-logo-footylogos.png`
+            ];
+        const imgCandidates = rawImg ? [rawImg, ...fallbackCandidates] : fallbackCandidates;
+
+        return {
+            id: slug,
+            name: rawName,
+            img: imgCandidates[0],
+            imgCandidates
+        };
+    }
+
+    function pickRandomConditions(catalog, count) {
+        const shuffled = [...catalog].sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count).map(entry => ({
+            ...entry,
+            imgCandidates: buildCatalogEntryCandidates(entry)
+        }));
+    }
+
+    function renderConditionSlot(slotElement, condition) {
+        if (!slotElement || !condition) return Promise.resolve();
+        const img = slotElement.querySelector('.cond-img');
+        if (!img) return Promise.resolve();
+
+        const candidates = Array.isArray(condition.imgCandidates) && condition.imgCandidates.length > 0
+            ? condition.imgCandidates
+            : [condition.img];
+
+        img.removeAttribute('onerror');
+        img.style.display = 'block';
+        img.style.opacity = '1';
+        img.alt = condition.name || '';
+        slotElement.title = condition.name || '';
+
+        return new Promise(resolve => {
+            let settled = false;
+            const finish = () => {
+                if (settled) return;
+                settled = true;
+                resolve();
+            };
+            let nextCandidateIndex = 0;
+
+            const tryNextCandidate = () => {
+                if (nextCandidateIndex >= candidates.length) {
+                    img.onerror = null;
+                    img.alt = condition.name || '';
+                    img.src = FALLBACK_SHIELD_IMG;
+                    img.style.opacity = '0.55';
+                    finish();
+                    return;
+                }
+                img.src = candidates[nextCandidateIndex];
+                nextCandidateIndex += 1;
+            };
+
+            img.onload = () => {
+                img.alt = condition.name || '';
+                finish();
+            };
+            img.onerror = tryNextCandidate;
+            setTimeout(finish, 600);
+            tryNextCandidate();
+        });
+    }
+
+    /* ─────────────────────────────────────────────
+       7. BOARD WIN / DRAW CHECK
+    ───────────────────────────────────────────── */
+    function checkWinCondition(player) {
+        const board = gameState.board;
+        for (let row = 0; row < 3; row++) {
+            if (board[row][0] === player && board[row][1] === player && board[row][2] === player) return true;
+        }
+        for (let col = 0; col < 3; col++) {
+            if (board[0][col] === player && board[1][col] === player && board[2][col] === player) return true;
+        }
+        if (board[0][0] === player && board[1][1] === player && board[2][2] === player) return true;
+        if (board[0][2] === player && board[1][1] === player && board[2][0] === player) return true;
+        return false;
+    }
+
+    function checkDrawCondition() {
+        return gameState.board.flat().every(cell => cell !== 0);
+    }
+
+    /* ─────────────────────────────────────────────
+       8. MULTIPLAYER ONLINE SESSION & SYNC
+    ───────────────────────────────────────────── */
+    const MP_SESSION_KEY = 'footlel_mp_session';
+    const MP_SYNC_INTERVAL_MS = 2000;
+    const MP_INIT_MAX_ATTEMPTS = 12;
+    const MP_INIT_RETRY_MS = 1500;
+    const MP_MAX_SYNC_FAILURES = 5;
+    const MP_GAME_OVER_MODAL_DELAY_MS = 1500;
+
+    const online = {
+        role: 'host',            // host = retador (X, jugador 1), guest = invitado (O, jugador 2)
+        gameId: null,
+        myName: '',
+        opponentName: '',
+        isMyTurn: false,
+        syncIntervalId: null,
+        syncInFlight: false,
+        syncFailures: 0
+    };
+
+    function readMpSession() {
+        try {
+            const raw = sessionStorage.getItem(MP_SESSION_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (_) {
+            return null;
+        }
+    }
+
+    function writeMpSession(session) {
+        try { sessionStorage.setItem(MP_SESSION_KEY, JSON.stringify(session)); } catch (_) {}
+    }
+
+    function clearMpSession() {
+        try { sessionStorage.removeItem(MP_SESSION_KEY); } catch (_) {}
+    }
+
+    function cleanName(value) {
+        return String(value === null || value === undefined ? '' : value).trim().replace(/^@+/, '');
+    }
+
+    function onlineMyNumber() {
+        return online.role === 'host' ? 1 : 2;
+    }
+
+    function onlineOpponentNumber() {
+        return onlineMyNumber() === 1 ? 2 : 1;
+    }
+
+    function toGameId(value) {
+        const n = Number(value);
+        return (value !== null && value !== undefined && value !== '' && Number.isFinite(n)) ? n : null;
+    }
+
+    function extractGameId(data) {
+        if (!data || typeof data !== 'object') return null;
+        const candidates = [data.game_id, data.data && data.data.game_id, data.id];
+        for (const candidate of candidates) {
+            const id = toGameId(candidate);
+            if (id !== null) return id;
+        }
+        return null;
+    }
+
+    function extractBackendDetail(data) {
+        if (!data) return '';
+        if (typeof data === 'string') return data;
+        if (typeof data.detail === 'string') return data.detail;
+        if (Array.isArray(data.detail) && data.detail.length > 0 && data.detail[0] && typeof data.detail[0].msg === 'string') {
+            return data.detail[0].msg;
+        }
+        if (typeof data.message === 'string') return data.message;
+        return '';
+    }
+
+    function pickPayloadValue(data, keys) {
+        if (!data || typeof data !== 'object') return undefined;
+        const sources = [data];
+        if (data.data && typeof data.data === 'object') sources.push(data.data);
+        for (const source of sources) {
+            for (const key of keys) {
+                if (source[key] !== undefined && source[key] !== null) return source[key];
+            }
+        }
+        return undefined;
+    }
+
+    async function postMultiplayer(url, body) {
+        const token = await ensureAuthToken();
+        const headers = { 'Authorization': 'Bearer ' + token };
+        const options = { method: 'POST', headers };
+        if (body !== undefined) {
+            headers['Content-Type'] = 'application/json';
+            options.body = JSON.stringify(body);
+        }
+        try {
+            const response = await fetch(url, options);
+            const data = await safeParseJson(response);
+            return { ok: response.ok, status: response.status, data, detail: extractBackendDetail(data) };
+        } catch (error) {
+            console.warn('Multiplayer request failed:', url, error);
+            return { ok: false, status: 0, data: null, detail: '', isNetworkError: true };
+        }
+    }
+
+    async function requestWithRetry(requestFn) {
+        let last = { detail: '' };
+        for (let attempt = 1; attempt <= MP_INIT_MAX_ATTEMPTS; attempt++) {
+            const res = await requestFn();
+            const gameId = res.ok ? extractGameId(res.data) : null;
+            if (res.ok && gameId !== null) return { ok: true, data: res.data, gameId };
+            last = res.ok ? { ...res, detail: 'El servidor no devolvió el game_id de la partida.' } : res;
+            if (res.status === 401 || res.status === 403) break;
+            if (attempt < MP_INIT_MAX_ATTEMPTS) {
+                await new Promise(resolve => setTimeout(resolve, MP_INIT_RETRY_MS));
+            }
+        }
+        return { ok: false, detail: last.detail || '' };
+    }
+
+    async function loadOnlineGameBoard() {
+        const session = readMpSession();
+        if (!session || (session.role !== 'host' && session.role !== 'guest')) {
+            setBoardLoadingState(false);
+            showFatalStartError('No hay una partida online activa. Desafiá a un amigo desde "Mis Amigos".');
+            return false;
+        }
+
+        online.role = session.role;
+        online.myName = cleanName(localStorage.getItem('footlel_username'));
+        online.opponentName = cleanName(session.opponent);
+        online.isMyTurn = online.role === 'host';
+        gameState.currentPlayer = onlineMyNumber();
+
+        let startData = session.startData || null;
+        let gameId = toGameId(session.gameId);
+
+        if (!startData || gameId === null) {
+            let result;
+            if (online.role === 'host') {
+                if (!online.opponentName) {
+                    setBoardLoadingState(false);
+                    showFatalStartError('No se indicó a qué amigo desafiaste.');
+                    return false;
+                }
+                result = await requestWithRetry(() => postMultiplayer(API_ENDPOINTS.MP_START, {
+                    friend_name: String(online.opponentName)
+                }));
+            } else {
+                result = await requestWithRetry(() => postMultiplayer(API_ENDPOINTS.MP_JOIN));
+            }
+            if (!result.ok) {
+                setBoardLoadingState(false);
+                showFatalStartError(result.detail);
+                return false;
+            }
+            startData = result.data;
+            gameId = result.gameId;
+            writeMpSession({ ...session, gameId, startData });
+        }
+
+        const hasClubs = extractHeadersArray(startData, ['row_headers', 'clubs', 'teams', 'equipos', 'topConditions']);
+        const hasNations = extractHeadersArray(startData, ['column_headers', 'nations', 'countries', 'paises', 'selecciones', 'leftConditions']);
+        if (!hasClubs || !hasNations) {
+            setBoardLoadingState(false);
+            showFatalStartError('El servidor no devolvió los equipos y países del tablero.');
+            return false;
+        }
+
+        online.gameId = gameId;
+        await applyBoardConditions(startData);
+
+        const initialBoard = extractServerBoard(startData);
+        if (initialBoard) syncBoardFromServer(initialBoard);
+        applyTurnFromData(startData);
+
+        setBoardLoadingState(false);
+        return true;
+    }
+
+    function compareIdentity(rawValue) {
+        let value = rawValue;
+        if (value && typeof value === 'object') {
+            value = value.user_name || value.username || value.name || value.user_id || value.id;
+        }
+        if (value === null || value === undefined || value === '' || typeof value === 'boolean') return null;
+
+        const norm = normalizeSearchText(cleanName(value));
+        if (norm && online.myName && norm === normalizeSearchText(online.myName)) return true;
+        if (norm && online.opponentName && norm === normalizeSearchText(online.opponentName)) return false;
+
+        const myId = localStorage.getItem('footlel_user_id');
+        if (myId && String(value) === String(myId)) return true;
+
+        if (/^-?\d+$/.test(String(value))) {
+            const n = Number(value);
+            if (n === 1) return onlineMyNumber() === 1;
+            if (n === 2 || n === -1) return onlineMyNumber() === 2;
+        }
+        return null;
+    }
+
+    function extractMyTurn(data) {
+        const booleanKeys = ['local_player_turn', 'is_my_turn', 'my_turn', 'your_turn', 'is_player_turn', 'player_turn'];
+        for (const key of booleanKeys) {
+            const value = pickPayloadValue(data, [key]);
+            if (typeof value === 'boolean') return value;
+        }
+        const identity = pickPayloadValue(data, [
+            'current_turn', 'turn', 'current_player', 'current_player_name',
+            'turn_player', 'turn_user', 'current_turn_name', 'player_turn_name'
+        ]);
+        return identity === undefined ? null : compareIdentity(identity);
+    }
+
+    function applyTurnFromData(data) {
+        const myTurn = extractMyTurn(data);
+        if (myTurn !== null) online.isMyTurn = myTurn;
+        return myTurn;
+    }
+
+    function extractServerBoard(data) {
+        const board = pickPayloadValue(data, ['board', 'game_board', 'player_slots_matrix', 'matrix', 'cells', 'tablero']);
+        if (Array.isArray(board) && board.length === 3 && board.every(row => Array.isArray(row))) return board;
+        return null;
+    }
+
+    function winnerToPlayerNumber(rawWinner) {
+        let value = rawWinner;
+        if (value && typeof value === 'object') {
+            value = value.user_name || value.username || value.name || value.user_id || value.id;
+        }
+        if (value === null || value === undefined || value === '' || typeof value === 'boolean') return 0;
+
+        const norm = normalizeSearchText(cleanName(value));
+        if (/^(draw|tie|empate)$/.test(norm)) return 0;
+        if (norm && online.myName && norm === normalizeSearchText(online.myName)) return onlineMyNumber();
+        if (norm && online.opponentName && norm === normalizeSearchText(online.opponentName)) return onlineOpponentNumber();
+
+        const myId = localStorage.getItem('footlel_user_id');
+        if (myId && String(value) === String(myId)) return onlineMyNumber();
+
+        if (/^-?\d+$/.test(String(value))) {
+            const n = Number(value);
+            if (n === 1) return 1;
+            if (n === 2 || n === -1) return 2;
+        }
+        return 0;
+    }
+
+    function evaluateOutcome(data) {
+        const overRaw = pickPayloadValue(data, [
+            'is_game_over', 'game_over', 'game_finished', 'is_finished', 'finished', 'ended', 'is_over', 'game_ended'
+        ]);
+        const winnerRaw = pickPayloadValue(data, ['winner', 'winner_name', 'winner_username', 'winner_id', 'winning_player']);
+        const drawRaw = pickPayloadValue(data, ['is_draw', 'draw', 'tie']);
+
+        let over = overRaw === true || overRaw === 'true';
+        let winnerNum = 0;
+        if (checkWinCondition(1)) winnerNum = 1;
+        else if (checkWinCondition(2)) winnerNum = 2;
+        else if (winnerRaw !== undefined) winnerNum = winnerToPlayerNumber(winnerRaw);
+
+        let draw = drawRaw === true || (typeof winnerRaw === 'string' && /^(draw|tie|empate)$/i.test(winnerRaw.trim()));
+        if (winnerNum) {
+            over = true;
+            draw = false;
+        } else if (checkDrawCondition()) {
+            over = true;
+            draw = true;
+        } else if (draw) {
+            over = true;
+        }
+        return { over, winnerNum, draw };
+    }
+
+    function startSyncPolling() {
+        stopSyncPolling();
+        online.syncIntervalId = setInterval(syncOnlineGame, MP_SYNC_INTERVAL_MS);
+        syncOnlineGame();
+    }
+
+    function stopSyncPolling() {
+        if (online.syncIntervalId !== null) {
+            clearInterval(online.syncIntervalId);
+            online.syncIntervalId = null;
+        }
+    }
+
+    async function syncOnlineGame() {
+        if (online.syncInFlight || online.gameId === null || gameState.isGameOver) return;
+        if (isGuessInFlight) return;
+        online.syncInFlight = true;
+        try {
+            const res = await postMultiplayer(API_ENDPOINTS.MP_SYNC, { game_id: Number(online.gameId) });
+            if (!res.ok) {
+                online.syncFailures += 1;
+                if (online.syncFailures >= MP_MAX_SYNC_FAILURES) {
+                    dom.turnIndicator.textContent = 'Reconectando con la partida...';
+                    dom.turnIndicator.style.color = '#FFB300';
+                }
+                return;
+            }
+            online.syncFailures = 0;
+            applyOnlineState(res.data);
+        } finally {
+            online.syncInFlight = false;
+        }
+    }
+
+    function applyOnlineState(data) {
+        if (!data || typeof data !== 'object' || gameState.isGameOver) return;
+
+        const serverBoard = extractServerBoard(data);
+        if (serverBoard) syncBoardFromServer(serverBoard);
+        applyTurnFromData(data);
+        updateScoreDisplay();
+
+        const outcome = evaluateOutcome(data);
+        if (outcome.over) {
+            handleOnlineGameOver(outcome);
+            return;
+        }
+        renderTurnIndicator();
+        refreshInputLock();
+    }
+
+    function refreshInputLock() {
+        const canPlay = online.isMyTurn && !gameState.isGameOver && !isGuessInFlight;
+        dom.btnConfirm.disabled = !canPlay;
+        dom.playerSearch.disabled = !canPlay;
+        dom.playerSearch.placeholder = online.isMyTurn
+            ? 'Buscar futbolista...'
+            : `Esperando a ${online.opponentName || 'tu rival'}...`;
+        if (!canPlay) closeAutocompleteList();
+    }
+
+    function countCells(player) {
+        return gameState.board.flat().filter(value => value === player).length;
+    }
+
+    function setupOnlineLabels() {
+        const myName = cleanName(localStorage.getItem('footlel_username')) || 'Vos';
+        const session = readMpSession();
+        const opponent = cleanName(session && session.opponent) || 'Rival';
+        const isHost = !session || session.role !== 'guest';
+        const team1 = document.getElementById('score-team-1');
+        const team2 = document.getElementById('score-team-2');
+        if (team1) team1.textContent = `${isHost ? myName : opponent} (X)`;
+        if (team2) team2.textContent = `${isHost ? opponent : myName} (O)`;
+        if (dom.timeText) dom.timeText.textContent = '1v1 Online';
+        dom.turnIndicator.textContent = 'Conectando con la partida...';
+    }
+
+    function renderTurnIndicator() {
+        if (gameState.isGameOver) return;
+        const currentNumber = online.isMyTurn ? onlineMyNumber() : onlineOpponentNumber();
+        gameState.currentPlayer = currentNumber;
+        dom.turnIndicator.textContent = online.isMyTurn
+            ? '¡Es tu turno!'
+            : `Turno de ${online.opponentName || 'tu rival'}`;
+        dom.turnIndicator.style.color = currentNumber === 1
+            ? 'var(--color-brand-green)'
+            : '#2196F3';
+    }
+
+    function updateScoreDisplay() {
+        gameState.scoreP1 = countCells(1);
+        gameState.scoreP2 = countCells(2);
+        dom.scoreValueP1El.textContent = gameState.scoreP1;
+        dom.scoreValueP2El.textContent = gameState.scoreP2;
+    }
+
+    function handleOnlineGameOver(outcome) {
+        if (gameState.isGameOver) return;
+        gameState.isGameOver = true;
+        stopSyncPolling();
+        clearMpSession();
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+        closeAutocompleteList();
+
+        let title;
+        let icon;
+        if (outcome.winnerNum) {
+            const iWon = outcome.winnerNum === onlineMyNumber();
+            title = iWon ? '¡Ganaste la partida!' : `¡Ganó ${online.opponentName || 'tu rival'}!`;
+            icon = iWon ? '🏆' : '😔';
+        } else if (outcome.draw) {
+            title = '¡Empate!';
+            icon = '🤝';
+        } else {
+            title = 'Partida finalizada';
+            icon = '🏁';
+        }
+        dom.turnIndicator.textContent = title;
+
+        setTimeout(() => {
+            document.body.style.overflow = 'hidden';
+            dom.victoryModal.classList.remove('hidden');
+            dom.victoryModal.querySelector('.modal-title').textContent = title;
+            dom.victoryModal.querySelector('.modal-icon').textContent = icon;
+            const label = dom.victoryModal.querySelector('.endgame-label');
+            if (label) label.textContent = 'Casillas conquistadas';
+            dom.victoryModal.querySelector('.score-display').textContent = `${gameState.scoreP1} — ${gameState.scoreP2}`;
+        }, MP_GAME_OVER_MODAL_DELAY_MS);
+    }
+
+    /* ─────────────────────────────────────────────
+       9. CELL MARKING & BOARD SYNC
+    ───────────────────────────────────────────── */
+    function resolveTargetCellFromResponse(data, player) {
+        if (!data) return null;
+
+        const backendIndex = [data.cell_index, data.position, data.celda]
+            .find(value => typeof value === 'number');
+
+        if (typeof backendIndex === 'number') {
+            return placePlayerMarkByIndex(backendIndex, player);
+        }
+
+        if (Array.isArray(data.board)) {
+            return syncBoardFromServer(data.board);
+        }
+
+        return null;
+    }
+
+    function placePlayerMarkByIndex(index, player) {
+        const cell = document.querySelector(`[data-index="${index}"]`);
+        if (!cell) {
+            console.error(`No se encontró ninguna celda con data-index="${index}"`);
+            return null;
+        }
+
+        const row = Math.floor(index / 3);
+        const col = index % 3;
+        if (gameState.board[row]?.[col] !== 0) {
+            return null;
+        }
+        gameState.board[row][col] = player;
+        renderPlayerMark(cell, player);
+        cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
+        return cell;
+    }
+
+    function syncBoardFromServer(serverBoard) {
+        if (!Array.isArray(serverBoard)) return null;
+
+        let changedCell = null;
+        for (let row = 0; row < 3; row++) {
+            for (let col = 0; col < 3; col++) {
+                const serverValue = normalizeServerCellValue(serverBoard?.[col]?.[row]);
+                if (serverValue !== 0 && gameState.board[row][col] === 0) {
+                    changedCell = placePlayerMarkAt(row, col, serverValue) || changedCell;
+                }
+            }
+        }
+        return changedCell;
+    }
+
+    function normalizeServerCellValue(value) {
+        if (value === 1 || value === '1' || value === 'X' || value === 'x') return 1;
+        if (value === -1 || value === 2 || value === '-1' || value === '2' || value === 'O' || value === 'o') return 2;
+        return 0;
+    }
+
+    function placePlayerMarkAt(row, col, player) {
+        const cell = document.querySelector(`.playable-cell[data-row="${row}"][data-col="${col}"]`);
+        if (!cell) return null;
+
+        gameState.board[row][col] = player;
+        renderPlayerMark(cell, player);
+        cell.classList.add(player === 1 ? 'conquered-p1' : 'conquered-p2');
+        return cell;
+    }
+
+    function renderPlayerMark(cell, player) {
+        const existing = cell.querySelector('.cell-mark');
+        if (existing) return;
+        const mark = document.createElement('span');
+        mark.className = `cell-mark ${player === 1 ? 'mark-x' : 'mark-o'}`;
+        mark.textContent = player === 1 ? 'X' : 'O';
+        cell.appendChild(mark);
+    }
+
+    /* ─────────────────────────────────────────────
+       10. POPUPS & BUTTON FEEDBACK
+    ───────────────────────────────────────────── */
+    const SUCCESS_REACTIONS = [
+        { src: '../../assets/images/Festejo/CR7-festejo.png', text: '¡SIUUU! Adentro y a cobrar' },
+        { src: '../../assets/images/Festejo/Julian-festejo.png', text: '¡Pica la Araña! Qué pedazo de acierto' },
+        { src: '../../assets/images/Festejo/Messi-festejo.png', text: '¡Golazo! La clavaste en el ángulo' },
+        { src: '../../assets/images/Festejo/Neymar-festejo.png', text: '¡Ousadia e Alegria! Adentro' },
+        { src: '../../assets/images/Festejo/Riquelme-festejo.png', text: '¡Fútbol champagne! Qué bien la viste' }
+    ];
+
+    const ERROR_REACTIONS = [
+        { src: '../../assets/images/Errado/Asamoah-erra.png', text: '¡Nooo Gyan! Reventaste el travesaño...' },
+        { src: '../../assets/images/Errado/Baggio-erra.png', text: '¡La mandaste a las nubes como Baggio!' },
+        { src: '../../assets/images/Errado/Cavani-erra.png', text: '¡No se puede creer el gol que erraste abajo del arco!' },
+        { src: '../../assets/images/Errado/Fabbiani-erra.png', text: '¡Ta tan ta tan... Nooo Fabbiani!' },
+        { src: '../../assets/images/Errado/Higuan-erra.png', text: '¡Nooo Pipa! Era por abajo...' }
+    ];
+
+    function getRandomReaction(reactionsArray) {
+        return reactionsArray[Math.floor(Math.random() * reactionsArray.length)];
+    }
+
+    function showReactionPopup(popupElement) {
+        const isSuccess = popupElement === dom.popupSuccess || popupElement.classList.contains('success');
+        const reaction = getRandomReaction(isSuccess ? SUCCESS_REACTIONS : ERROR_REACTIONS);
+        const imgElement = popupElement.querySelector('.reaction-img');
+        const textElement = popupElement.querySelector('.reaction-text');
+
+        if (textElement && reaction) {
+            textElement.textContent = reaction.text;
+        }
+
+        const revealPopup = () => {
+            popupElement.classList.add('show');
+            setTimeout(() => {
+                popupElement.classList.remove('show');
+                if (imgElement) {
+                    imgElement.onload = null;
+                    imgElement.onerror = null;
+                    imgElement.removeAttribute('src');
+                }
+            }, REACTION_POPUP_DURATION_MS);
+        };
+
+        if (imgElement && reaction) {
+            imgElement.onload = () => {
+                imgElement.style.display = '';
+                revealPopup();
+            };
+            imgElement.onerror = () => {
+                imgElement.style.display = 'none';
+                revealPopup();
+            };
+            imgElement.src = reaction.src;
+        } else {
+            revealPopup();
+        }
+    }
+
+    function showButtonError(message) {
+        const originalText = dom.btnConfirm.textContent;
+        dom.btnConfirm.textContent = message;
+        dom.btnConfirm.style.backgroundColor = '#F44336';
+        dom.btnConfirm.style.transform = 'scale(1.05)';
+
+        setTimeout(() => {
+            dom.btnConfirm.textContent = originalText;
+            dom.btnConfirm.style.backgroundColor = '';
+            dom.btnConfirm.style.transform = '';
+        }, BUTTON_ERROR_DURATION_MS);
+    }
+
+    /* ─────────────────────────────────────────────
+       11. GUESS SUBMISSION (POST /game/multiplayer-guess)
+    ───────────────────────────────────────────── */
+    async function submitPlayerGuess(playerName) {
+        const trimmedGuess = String(playerName).trim();
+
+        const res = await postMultiplayer(API_ENDPOINTS.MP_GUESS, {
+            game_id: Number(online.gameId),
+            player_guess: String(trimmedGuess)
+        });
+
+        if (res.isNetworkError) {
+            return { isCorrect: false, data: null, isNetworkError: true };
+        }
+
+        if (!res.ok) {
+            const backendErrorMsg = res.detail ? formatBackendError(res.detail) : null;
+            if (/turno|turn/i.test(res.detail || '')) {
+                return { isCorrect: false, data: res.data, isNetworkError: true, backendErrorMsg, resync: true };
+            }
+            if (res.status === 400 || res.status === 422) {
+                return { isCorrect: false, data: res.data, backendErrorMsg };
+            }
+            return { isCorrect: false, data: res.data, isNetworkError: true, backendErrorMsg };
+        }
+
+        const isCorrect = res.data && typeof res.data.correct_answer === 'boolean'
+            ? res.data.correct_answer
+            : true;
+        return { isCorrect, data: res.data };
+    }
+
+    let isGuessInFlight = false;
+
+    async function handleConfirmClick() {
+        if (isGuessInFlight || dom.btnConfirm.disabled) return;
+        if (gameState.isGameOver) return;
+        if (!online.isMyTurn) {
+            showButtonError('Es el turno de tu rival');
+            return;
+        }
+
+        const playerName = dom.playerSearch.value.trim();
+        if (playerName.length === 0) {
+            showButtonError('¡Escribí un jugador!');
+            dom.playerSearch.focus();
+            return;
+        }
+
+        dom.btnConfirm.disabled = true;
+        dom.playerSearch.disabled = true;
+        dom.playerSearch.value = '';
+
+        isGuessInFlight = true;
+        let guessResult;
+        try {
+            guessResult = await submitPlayerGuess(playerName);
+        } finally {
+            isGuessInFlight = false;
+        }
+
+        if (guessResult.isNetworkError) {
+            showButtonError(guessResult.backendErrorMsg || 'Error de conexión, reintentá');
+            if (guessResult.resync) await syncOnlineGame();
+            refreshInputLock();
+            return;
+        }
+
+        const { isCorrect, data } = guessResult;
+
+        if (!isCorrect) {
+            showReactionPopup(dom.popupError);
+            setTimeout(() => {
+                dom.playerSearch.value = '';
+                refreshInputLock();
+                if (online.isMyTurn && !dom.playerSearch.disabled) dom.playerSearch.focus();
+                syncOnlineGame();
+            }, RESULT_DISPLAY_DELAY_MS);
+            return;
+        }
+
+        resolveTargetCellFromResponse(data, onlineMyNumber());
+        showReactionPopup(dom.popupSuccess);
+        updateScoreDisplay();
+
+        const outcome = evaluateOutcome(data);
+        if (outcome.over) {
+            handleOnlineGameOver(outcome);
+            return;
+        }
+
+        online.isMyTurn = false;
+        renderTurnIndicator();
+        refreshInputLock();
+        syncOnlineGame();
+    }
+
+    /* ─────────────────────────────────────────────
+       12. AUTOCOMPLETE (PLAYER SEARCH)
+    ───────────────────────────────────────────── */
+    function normalizeSearchText(str) {
+        return String(str)
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    function parsePlayerRosterText(rawText) {
+        return [...new Set(
+            String(rawText)
+                .split(/\r?\n/)
+                .map(line => {
+                    const trimmedLine = line.trim();
+                    if (!trimmedLine) return '';
+                    const firstCol = trimmedLine.includes(',')
+                        ? trimmedLine.split(',')[0]
+                        : trimmedLine;
+                    return firstCol.trim().replace(/^"|"$/g, '').trim();
+                })
+                .filter(name => name.length > 0 && !name.toLowerCase().startsWith('player_name'))
+        )];
+    }
+
+    async function loadPlayerRoster() {
+        availablePlayers = [...FALLBACK_PLAYERS_ROSTER];
+        if (window.location.protocol === 'file:') return;
+
+        const candidateUrls = [...new Set([
+            PLAYERS_CSV_URL,
+            PLAYERS_CSV_PATH,
+            PLAYERS_CSV_ALT_URL,
+            PLAYERS_CSV_ALT_PATH,
+            '/assets/data/data-jugadores.txt',
+            '/assets/data/data-1790367964874.csv'
+        ])];
+
+        for (const url of candidateUrls) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) continue;
+
+                const csvText = await response.text();
+                if (csvText.trim().startsWith('<')) continue;
+
+                const parsed = parsePlayerRosterText(csvText);
+                if (parsed.length > 0) {
+                    availablePlayers = parsed;
+                    return;
+                }
+            } catch (error) {
+                console.warn(`Error al cargar catálogo desde ${url}:`, error);
+            }
+        }
+    }
+
+    function handleSearchInput() {
+        clearTimeout(autocompleteDebounceId);
+        autocompleteDebounceId = setTimeout(renderAutocompleteResults, AUTOCOMPLETE_DEBOUNCE_MS);
+    }
+
+    function renderAutocompleteResults() {
+        if (!online.isMyTurn || gameState.isGameOver) {
+            closeAutocompleteList();
+            return;
+        }
+        const rawQuery = dom.playerSearch.value.trim();
+        const normalizedQuery = normalizeSearchText(rawQuery);
+        dom.autocompleteList.innerHTML = '';
+
+        if (normalizedQuery.length < AUTOCOMPLETE_MIN_CHARS) {
+            closeAutocompleteList();
+            return;
+        }
+
+        const roster = Array.isArray(availablePlayers) && availablePlayers.length > 0
+            ? availablePlayers
+            : FALLBACK_PLAYERS_ROSTER;
+        const matches = roster.filter(name => normalizeSearchText(name).includes(normalizedQuery));
+
+        if (matches.length === 0) {
+            closeAutocompleteList();
+            return;
+        }
+
+        const fragment = document.createDocumentFragment();
+        matches.slice(0, AUTOCOMPLETE_MAX_RESULTS).forEach(playerName => {
+            const listItem = document.createElement('li');
+            listItem.textContent = playerName;
+            listItem.setAttribute('role', 'option');
+            listItem.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                selectAutocompleteResult(playerName);
+            });
+            listItem.addEventListener('click', () => selectAutocompleteResult(playerName));
+            fragment.appendChild(listItem);
+        });
+
+        dom.autocompleteList.appendChild(fragment);
+        dom.autocompleteList.style.zIndex = '9999';
+        dom.autocompleteList.style.display = 'block';
+        dom.playerSearch.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeAutocompleteList() {
+        dom.autocompleteList.style.display = 'none';
+        dom.playerSearch.setAttribute('aria-expanded', 'false');
+    }
+
+    function selectAutocompleteResult(playerName) {
+        dom.playerSearch.value = playerName;
+        closeAutocompleteList();
+        dom.btnConfirm.focus();
+    }
+
+    function handleOutsideAutocompleteClick(event) {
+        const clickedInsideSearch = dom.playerSearch.contains(event.target);
+        const clickedInsideResults = dom.autocompleteList.contains(event.target);
+        if (!clickedInsideSearch && !clickedInsideResults) {
+            closeAutocompleteList();
+        }
+    }
+
+    function bindEventListeners() {
+        dom.btnConfirm.addEventListener('click', handleConfirmClick);
+        dom.playerSearch.addEventListener('input', handleSearchInput);
+        dom.playerSearch.addEventListener('focus', renderAutocompleteResults);
+        document.addEventListener('click', handleOutsideAutocompleteClick);
+    }
+
+    /* ─────────────────────────────────────────────
+       13. GAME START
+    ───────────────────────────────────────────── */
+    async function initGame() {
+        warnIfRunningFromFileProtocol();
+        bindEventListeners();
+
+        clearConditionSlots();
+        setBoardLoadingState(true);
+        setupOnlineLabels();
+
+        loadPlayerRoster().catch(err => console.warn('Catálogo de respaldo activo:', err));
+
+        const loaded = await loadOnlineGameBoard();
+        if (!loaded) return;
+
+        renderTurnIndicator();
+        updateScoreDisplay();
+        refreshInputLock();
+        startSyncPolling();
+    }
+
+    initGame();
+    });
+})();
+</script>
+<script type="module" src="../../services/apiConfig.js"></script>
+</body>
+</html>

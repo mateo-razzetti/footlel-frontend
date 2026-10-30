@@ -263,6 +263,262 @@
         });
     }
 
+    /* ── 1v1 MATCH REQUESTS (invitaciones de partida multijugador) ──────
+       Endpoints (todos con Authorization: Bearer <token>):
+         GET  /user/get-user-match-requests
+         POST /user/reply-user-match-request  { friend_name, reply }
+         POST /game/join-multiplayer-game     (sin body)
+       La sesión de la partida se guarda en sessionStorage[MP_SESSION_KEY]
+       y la consume tateti-online.html. */
+    var MP_SESSION_KEY = 'footlel_mp_session';
+    var MP_BOARD_PAGE = 'tateti-online.html';
+    var MP_JOIN_MAX_ATTEMPTS = 12;
+    var MP_JOIN_RETRY_MS = 1500;
+    var NOTIFICATIONS_POLL_MS = 10000;
+
+    function getAuthToken() {
+        var t = (readStorage('footlel_token') || '').trim();
+        return (!t || t === 'null' || t === 'undefined') ? '' : t;
+    }
+
+    function extractErrorDetail(data) {
+        if (!data) return '';
+        if (typeof data === 'string') return data;
+        if (typeof data.detail === 'string') return data.detail;
+        if (Array.isArray(data.detail) && data.detail.length > 0) {
+            var first = data.detail[0];
+            if (first && typeof first.msg === 'string') return first.msg;
+        }
+        if (typeof data.message === 'string') return data.message;
+        return '';
+    }
+
+    /* JSON request helper. Always resolves: { ok, status, data, detail }. */
+    function mpRequest(method, path, body) {
+        var headers = { 'Authorization': 'Bearer ' + getAuthToken() };
+        var opts = { method: method, headers: headers };
+        if (body !== undefined) {
+            headers['Content-Type'] = 'application/json';
+            opts.body = JSON.stringify(body);
+        }
+        return fetch(getApiBaseUrl() + path, opts).then(function (resp) {
+            return resp.text().then(function (txt) {
+                var data = null;
+                try { data = txt ? JSON.parse(txt) : null; } catch (e) {}
+                return { ok: resp.ok, status: resp.status, data: data, detail: extractErrorDetail(data) };
+            });
+        }).catch(function () {
+            return { ok: false, status: 0, data: null, detail: 'No pudimos conectar con el servidor.' };
+        });
+    }
+
+    function matchEntryName(entry) {
+        if (entry && typeof entry === 'object') {
+            return cleanUsername(entry.user_name || entry.username || entry.friend_name ||
+                entry.sender_name || entry.challenger_name || entry.name || '');
+        }
+        return cleanUsername(entry);
+    }
+
+    /* Accepts parallel arrays (match_request_names / friend_request_names) or
+       an array of strings/objects. Returns a de-duplicated array of names. */
+    function parseMatchRequestNames(data) {
+        if (!data) return [];
+        var list = null;
+        if (Array.isArray(data)) {
+            list = data;
+        } else if (typeof data === 'object') {
+            var keys = ['match_request_names', 'friend_request_names', 'match_requests', 'match_invitations', 'requests'];
+            for (var i = 0; i < keys.length; i++) {
+                if (Array.isArray(data[keys[i]])) { list = data[keys[i]]; break; }
+            }
+            if (!list && data.data && typeof data.data === 'object') return parseMatchRequestNames(data.data);
+        }
+        if (!list) return [];
+        var seen = {};
+        var names = [];
+        list.forEach(function (entry) {
+            var n = matchEntryName(entry);
+            if (n && !seen[n.toLowerCase()]) {
+                seen[n.toLowerCase()] = true;
+                names.push(n);
+            }
+        });
+        return names;
+    }
+
+    /* GET /user/get-user-match-requests -> Promise<string[] | null> (null on failure). */
+    function fetchMatchRequests() {
+        if (!getAuthToken() || isGuestSession()) return Promise.resolve(null);
+        return mpRequest('GET', '/user/get-user-match-requests').then(function (res) {
+            if (res.ok) return parseMatchRequestNames(res.data);
+            if (res.status === 404) return [];
+            return null;
+        });
+    }
+
+    /* POST /user/reply-user-match-request { friend_name, reply } */
+    function replyMatchRequest(challengerName, accept) {
+        return mpRequest('POST', '/user/reply-user-match-request', {
+            friend_name: String(challengerName),
+            reply: Boolean(accept)
+        });
+    }
+
+    function extractGameId(data) {
+        if (!data || typeof data !== 'object') return null;
+        var raw = data.game_id;
+        if ((raw === undefined || raw === null) && data.data && typeof data.data === 'object') raw = data.data.game_id;
+        if ((raw === undefined || raw === null)) raw = data.id;
+        var n = Number(raw);
+        return (raw !== undefined && raw !== null && raw !== '' && isFinite(n)) ? n : null;
+    }
+
+    function saveMatchSession(session) {
+        try { sessionStorage.setItem(MP_SESSION_KEY, JSON.stringify(session)); } catch (e) {}
+    }
+
+    function clearMatchSession() {
+        try { sessionStorage.removeItem(MP_SESSION_KEY); } catch (e) {}
+    }
+
+    function readMatchSession() {
+        try {
+            var raw = sessionStorage.getItem(MP_SESSION_KEY);
+            return raw ? JSON.parse(raw) : null;
+        } catch (e) { return null; }
+    }
+
+    /* POST /game/join-multiplayer-game (no body). The host may not have
+       started the game yet, so retry for a while before giving up. */
+    function joinMultiplayerGame(maxAttempts, retryMs) {
+        var attempts = maxAttempts || MP_JOIN_MAX_ATTEMPTS;
+        var delay = retryMs || MP_JOIN_RETRY_MS;
+        function attempt(n) {
+            return mpRequest('POST', '/game/join-multiplayer-game').then(function (res) {
+                var gameId = res.ok ? extractGameId(res.data) : null;
+                if (res.ok && gameId !== null) return { ok: true, gameId: gameId, data: res.data };
+                if (res.status === 401 || res.status === 403 || n >= attempts) {
+                    return { ok: false, detail: res.detail || (res.ok ? 'El servidor no devolvió el game_id.' : '') };
+                }
+                return new Promise(function (resolve) { setTimeout(resolve, delay); })
+                    .then(function () { return attempt(n + 1); });
+            });
+        }
+        return attempt(1);
+    }
+
+    /* Accept flow: reply(true) -> join -> persist session -> go to the board.
+       Resolves { ok:false, detail } on failure (never redirects in that case). */
+    function acceptMatchAndJoin(challengerName) {
+        var name = String(challengerName);
+        return replyMatchRequest(name, true).then(function (reply) {
+            if (!reply.ok) {
+                return { ok: false, detail: reply.detail || 'No se pudo aceptar el desafío.' };
+            }
+            return joinMultiplayerGame().then(function (join) {
+                if (!join.ok) {
+                    return { ok: false, detail: join.detail || 'No pudimos unirte a la partida. Intentá de nuevo.' };
+                }
+                saveMatchSession({
+                    role: 'guest',
+                    opponent: name,
+                    gameId: join.gameId,
+                    startData: join.data,
+                    createdAt: Date.now()
+                });
+                window.location.href = MP_BOARD_PAGE;
+                return { ok: true };
+            });
+        });
+    }
+
+    function notifyMatchRequestsChanged(names) {
+        try {
+            window.dispatchEvent(new CustomEvent('footlel:match-requests-updated', { detail: { names: names || [] } }));
+        } catch (e) {}
+    }
+
+    function buildMatchInviteNotification(notif) {
+        var wrap = document.createElement('div');
+        wrap.className = 'notif-item notif-item--match';
+
+        var dot = document.createElement('span');
+        dot.className = 'notif-item-dot';
+        dot.setAttribute('aria-hidden', 'true');
+
+        var body = document.createElement('div');
+        body.className = 'notif-match-body';
+
+        var textSpan = document.createElement('span');
+        textSpan.className = 'notif-item-text';
+        textSpan.textContent = notif.text;
+
+        var errorSpan = document.createElement('span');
+        errorSpan.className = 'notif-match-error';
+        errorSpan.hidden = true;
+
+        var actions = document.createElement('div');
+        actions.className = 'notif-actions';
+
+        var acceptBtn = document.createElement('button');
+        acceptBtn.type = 'button';
+        acceptBtn.className = 'notif-match-btn notif-match-btn--accept';
+        acceptBtn.textContent = 'Aceptar';
+
+        var rejectBtn = document.createElement('button');
+        rejectBtn.type = 'button';
+        rejectBtn.className = 'notif-match-btn notif-match-btn--reject';
+        rejectBtn.textContent = 'Rechazar';
+
+        function setBusy(busy, label) {
+            acceptBtn.disabled = busy;
+            rejectBtn.disabled = busy;
+            if (label) acceptBtn.textContent = label;
+        }
+
+        function showError(msg) {
+            errorSpan.textContent = formatBackendError(msg);
+            errorSpan.hidden = false;
+        }
+
+        acceptBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            errorSpan.hidden = true;
+            setBusy(true, 'Uniéndote...');
+            acceptMatchAndJoin(notif.name).then(function (res) {
+                if (!res.ok) {
+                    acceptBtn.textContent = 'Aceptar';
+                    setBusy(false);
+                    showError(res.detail);
+                }
+            });
+        });
+
+        rejectBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            errorSpan.hidden = true;
+            setBusy(true);
+            replyMatchRequest(notif.name, false).then(function (res) {
+                if (!res.ok) {
+                    setBusy(false);
+                    showError(res.detail || 'No se pudo rechazar el desafío.');
+                    return;
+                }
+                refreshHeaderNotifications();
+            });
+        });
+
+        actions.appendChild(acceptBtn);
+        actions.appendChild(rejectBtn);
+        body.appendChild(textSpan);
+        body.appendChild(errorSpan);
+        body.appendChild(actions);
+        wrap.appendChild(dot);
+        wrap.appendChild(body);
+        return wrap;
+    }
+
     function renderHeaderNotifications(friendReqs) {
         var notifList  = document.getElementById('notifList');
         var notifBadge = document.getElementById('notifBadge');
@@ -306,7 +562,8 @@
                 if (cName) {
                     items.push({
                         type: 'match_invite',
-                        text: 'El usuario ' + cName + ' te invitó a jugar una partida',
+                        name: cName,
+                        text: '¡' + cName + ' te invitó a jugar una partida 1v1!',
                         href: 'amigos.html'
                     });
                 }
@@ -334,6 +591,12 @@
         items.forEach(function (notif) {
             var li = document.createElement('li');
             li.className = 'notif-list-item';
+
+            if (notif.type === 'match_invite') {
+                li.appendChild(buildMatchInviteNotification(notif));
+                notifList.appendChild(li);
+                return;
+            }
 
             var link = document.createElement('a');
             link.href = notif.href;
@@ -375,15 +638,26 @@
         if (!token || token === 'null' || token === 'undefined' || isGuestSession()) {
             return Promise.resolve(null);
         }
-        return fetch(getApiBaseUrl() + '/user/get-user-friend-requests', {
+        var friendReqPromise = fetch(getApiBaseUrl() + '/user/get-user-friend-requests', {
             headers: { 'Authorization': 'Bearer ' + token }
         })
         .then(function (r) { return r.ok ? r.json() : null; })
-        .then(function (data) {
-            if (data) renderHeaderNotifications(data);
-            return data;
-        })
         .catch(function () { return null; });
+
+        return Promise.all([friendReqPromise, fetchMatchRequests()]).then(function (results) {
+            var friendData = results[0];
+            var matchNames = results[1];
+            if (!friendData && matchNames === null) return null;
+
+            var combined = (friendData && typeof friendData === 'object' && !Array.isArray(friendData))
+                ? Object.assign({}, friendData)
+                : { friend_request_names: Array.isArray(friendData) ? friendData : [] };
+            // Match invitations come exclusively from GET /user/get-user-match-requests
+            combined.match_request_names = matchNames || [];
+            renderHeaderNotifications(combined);
+            notifyMatchRequestsChanged(matchNames || []);
+            return combined;
+        });
     }
 
     function setupHeaderNotifications() {
@@ -443,6 +717,12 @@
         }
 
         refreshHeaderNotifications();
+
+        if (!window.__footlelNotifPollId) {
+            window.__footlelNotifPollId = setInterval(function () {
+                if (!document.hidden) refreshHeaderNotifications();
+            }, NOTIFICATIONS_POLL_MS);
+        }
     }
 
     window.FootlelPrefs = {
@@ -461,6 +741,16 @@
         renderErrorAlert: renderErrorAlert,
         renderHeaderNotifications: renderHeaderNotifications,
         refreshHeaderNotifications: refreshHeaderNotifications,
+        mpRequest: mpRequest,
+        parseMatchRequestNames: parseMatchRequestNames,
+        fetchMatchRequests: fetchMatchRequests,
+        replyMatchRequest: replyMatchRequest,
+        joinMultiplayerGame: joinMultiplayerGame,
+        acceptMatchAndJoin: acceptMatchAndJoin,
+        saveMatchSession: saveMatchSession,
+        readMatchSession: readMatchSession,
+        clearMatchSession: clearMatchSession,
+        extractGameId: extractGameId,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
         setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }
