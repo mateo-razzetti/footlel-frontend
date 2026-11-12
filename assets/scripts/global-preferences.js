@@ -16,8 +16,548 @@
 (function applyGlobalPreferences() {
     'use strict';
 
-    var THEME_KEY = 'footlel_theme';
-    var ANIM_KEY  = 'pref_toggle-animaciones';
+    var THEME_KEY      = 'footlel_theme';
+    var ANIM_KEY       = 'pref_toggle-animaciones';
+    var LANG_KEY       = 'footlel_lang';
+    var IS_ENGLISH_KEY = 'footlel_is_english';
+
+    /* ════════════════════════════════════════════════════════════════
+       I18N ENGINE — Dynamic ES / EN Translation (RNF5)
+       Never translates usernames, footballer names, club names, or JSON keys.
+       ════════════════════════════════════════════════════════════════ */
+    var I18N_PAIRS = [
+        // ── Document Titles ──
+        ['Footlel - Iniciar Sesión', 'Footlel - Log In'],
+        ['Footlel - Crear Cuenta', 'Footlel - Create Account'],
+        ['Footlel - Recuperar Cuenta', 'Footlel - Recover Account'],
+        ['Footlel - Verificar Identidad', 'Footlel - Verify Identity'],
+        ['Footlel - Nueva Contraseña', 'Footlel - New Password'],
+        ['Footlel - Correo Enviado', 'Footlel - Email Sent'],
+        ['Footlel — Menú Principal', 'Footlel — Main Menu'],
+        ['Footlel — Elegí tu modo', 'Footlel — Choose Mode'],
+        ['Footlel — Configuración', 'Footlel — Settings'],
+        ['Footlel — Editar Cuenta', 'Footlel — Edit Account'],
+        ['Footlel — Confirmá tus cambios', 'Footlel — Confirm Changes'],
+        ['Footlel — Centro de Ayuda', 'Footlel — Help Center'],
+        ['Footlel — Ayuda', 'Footlel — Help'],
+        ['Footlel — Tabla de Posiciones', 'Footlel — Leaderboard'],
+        ['Footlel — Mis Amigos', 'Footlel — My Friends'],
+        ['Footlel — Tateti (1v1 Local)', 'Footlel — Tic-Tac-Toe (1v1 Local)'],
+        ['Footlel — Tateti (Desafío Diario)', 'Footlel — Tic-Tac-Toe (Daily Challenge)'],
+        ['Footlel — Tateti (1v1 Online)', 'Footlel — Tic-Tac-Toe (1v1 Online)'],
+
+        // ── Shared Header & Notifications Dropdown ──
+        ['Notificaciones', 'Notifications'],
+        ['No tienes notificaciones nuevas', 'You have no new notifications'],
+        ['Configuración', 'Settings'],
+        ['Editar Cuenta', 'Edit Account'],
+        ['Mis Amigos', 'My Friends'],
+        ['Tabla de Posiciones', 'Leaderboard'],
+        ['Ayuda', 'Help'],
+        ['Cerrar Sesión', 'Log Out'],
+        ['Iniciar Sesión', 'Log In'],
+        ['Aceptar', 'Accept'],
+        ['Rechazar', 'Decline'],
+        ['Uniéndote...', 'Joining...'],
+        ['Sala de espera', 'Waiting Room'],
+        ['Esperando confirmación...', 'Waiting for confirmation...'],
+        ['Conectando a la partida...', 'Connecting to match...'],
+        ['Cancelar', 'Cancel'],
+
+        // ── login.html ──
+        ['Ingresá tu usuario', 'Enter your username'],
+        ['Contraseña', 'Password'],
+        ['Mostrar contraseña', 'Show password'],
+        ['Ocultar contraseña', 'Hide password'],
+        ['Olvidé mi contraseña', 'Forgot my password'],
+        ['Registrarse', 'Sign Up'],
+        ['Continuar como invitado', 'Continue as guest'],
+        ['Falta ingresar el usuario.', 'Please enter your username.'],
+        ['Falta ingresar la contraseña.', 'Please enter your password.'],
+        ['Error al iniciar sesión.', 'Error logging in.'],
+        ['No se pudo conectar con el servidor. Intentá más tarde.', 'Could not connect to the server. Please try again later.'],
+
+        // ── registro.html ──
+        ['CREÁ TU CUENTA', 'CREATE YOUR ACCOUNT'],
+        ['Correo electrónico', 'Email address'],
+        ['Usuario', 'Username'],
+        ['Confirmar Contraseña', 'Confirm Password'],
+        ['Ingresá un correo válido.', 'Enter a valid email address.'],
+        ['Ingresá un correo electrónico válido.', 'Enter a valid email address.'],
+        ['Las contraseñas no coinciden.', 'Passwords do not match.'],
+        ['¿Ya tenés cuenta? Iniciá sesión', 'Already have an account? Log in'],
+        ['Falta ingresar el correo.', 'Please enter your email address.'],
+        ['Falta crear un usuario.', 'Please create a username.'],
+        ['Falta confirmar la contraseña.', 'Please confirm your password.'],
+        ['La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.', 'Password must be at least 8 characters and include an uppercase letter, a lowercase letter, and a number.'],
+
+        // ── recuperar.html ──
+        ['Recuperar cuenta', 'Recover Account'],
+        ['Ingresá tu correo electrónico y te enviaremos un código de seguridad', 'Enter your email address and we will send you a security code'],
+        ['ejemplo@correo.com', 'example@email.com'],
+        ['Enviar código', 'Send Code'],
+        ['Volver al Login', 'Back to Login'],
+
+        // ── verificar.html & verificar-edicion.html ──
+        ['Verificá tu identidad', 'Verify Your Identity'],
+        ['Ingresá el código de 6 dígitos que enviamos a tu correo', 'Enter the 6-digit code we sent to your email'],
+        ['Ingresá los 6 dígitos del código de verificación.', 'Please enter all 6 digits of the verification code.'],
+        ['Verificar', 'Verify'],
+        ['¿No recibiste el código?', "Didn't receive the code?"],
+        ['Reenviar en', 'Resend in'],
+        ['Reenviar código', 'Resend code'],
+        ['Confirmá tus cambios', 'Confirm Your Changes'],
+        ['Ingresá el código de 6 dígitos que enviamos a tu correo para autorizar la actualización de tu perfil.', 'Enter the 6-digit code we sent to your email to authorize your profile update.'],
+        ['Confirmar Cambios', 'Confirm Changes'],
+
+        // ── nueva-clave.html ──
+        ['Cambiar Contraseña', 'Change Password'],
+        ['Nueva contraseña', 'New password'],
+        ['Nueva Contraseña', 'New Password'],
+        ['Ingresá tu nueva clave', 'Enter your new password'],
+        ['Reescriba la contraseña', 'Retype password'],
+        ['Guardar', 'Save'],
+        ['Falta ingresar la nueva contraseña.', 'Please enter the new password.'],
+
+        // ── correo-enviado.html ──
+        ['¡Revisá tu correo!', 'Check your email!'],
+        ['Te enviamos un enlace de confirmación.', 'We sent you a confirmation link.'],
+        ['Hacé clic en él para activar tu cuenta', 'Click on it to activate your account'],
+        ['y empezar a jugar.', 'and start playing.'],
+
+        // ── menu.html ──
+        ['Bienvenido', 'Welcome'],
+        ['Elegí un modo de juego y comenzá a dominar las canchas de trivia.', 'Choose a game mode and start dominating the trivia pitch.'],
+        ['Jugar Tateti', 'Play Tic-Tac-Toe'],
+        ['El modo estrella de Footlel. Respondé preguntas de fútbol y conquistá el tablero 3×3 antes que tu rival. ¡Estrategia y conocimiento en cada jugada!', 'The signature mode of Footlel. Answer football trivia and conquer the 3×3 board before your rival. Strategy and knowledge in every move!'],
+        ['JUGAR AHORA', 'PLAY NOW'],
+        ['Tabla de Ranking', 'Leaderboard'],
+        ['Mirá en qué posición estás entre todos los jugadores de Footlel. Escalá puestos respondiendo bien y manteniendo tu racha.', 'Check your rank among all Footlel players. Climb the standings by answering correctly and keeping your streak alive.'],
+        ['VER MIS PUNTOS', 'VIEW MY POINTS'],
+        ['Desafiar Amigos', 'Challenge Friends'],
+        ['Invitá a tus amigos a un duelo privado de Tateti y demostrá quién sabe más de fútbol. Compartí el código de partida y a jugar.', 'Invite your friends to a private Tic-Tac-Toe duel and prove who knows more about football.'],
+        ['INVITAR AMIGO', 'INVITE FRIEND'],
+        ['PORCENTAJE DE ACIERTOS', 'ACCURACY RATE'],
+        ['Porcentaje de Aciertos =', 'Accuracy Rate ='],
+        ['TU RACHA', 'YOUR STREAK'],
+        ['Tu racha aumenta por cada día consecutivo que juegues. ¡Recibís +10 puntos extra por cada día de racha acumulado!', 'Your streak increases for every consecutive day you play. You earn +10 bonus points for each accumulated streak day!'],
+        ['PUNTOS TOTALES', 'TOTAL POINTS'],
+        ['Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.', 'Total sum of points earned across all your matches and bonuses.'],
+        ['PORCENTAJE DE VICTORIAS', 'WIN RATE'],
+        ['Porcentaje de Victorias =', 'Win Rate ='],
+        ['¡Sumate a la cancha!', 'Join the pitch!'],
+        ['Iniciá sesión o creá tu cuenta gratis para desafiar a otros jugadores y guardar tus estadísticas diarias.', 'Log in or create a free account to challenge other players and save your daily stats.'],
+
+        // ── modalidades.html ──
+        ['Elegí tu modo de juego', 'Choose your game mode'],
+        ['Demostrá cuánto sabés sobre el fútbol nacional e internacional.', 'Show how much you know about national and international football.'],
+        ['Desafío Diario', 'Daily Challenge'],
+        ['Una partida exclusiva por día. Juga el Tateti del dia, sumá puntos al ranking global y mantené tu racha activa.', 'One exclusive match per day. Play the daily Tic-Tac-Toe, earn global ranking points, and keep your streak alive.'],
+        ['1v1 Local', '1v1 Local'],
+        ['Jugá en el mismo dispositivo con un amigo. Turno a turno, en el Tateti y demostrá quién sabe más de fútbol.', 'Play on the same device with a friend. Take turns in Tic-Tac-Toe and prove who knows more about football.'],
+        ['1v1 Online', '1v1 Online'],
+        ['Desafiá a un amigo real a una partida 1v1 en tiempo real. Enviale el desafío desde "Mis Amigos" y jueguen apenas lo acepte.', 'Challenge a real friend to a real-time 1v1 match. Send the challenge from "My Friends" and play as soon as they accept.'],
+        ['INGRESAR', 'ENTER'],
+        ['Iniciá sesión o registrate gratis para competir online, jugar con amigos y guardar tus estadísticas diarias.', 'Log in or sign up for free to compete online, play with friends, and save your daily stats.'],
+
+        // ── configuracion.html ──
+        ['Jugador Invitado', 'Guest Player'],
+        ['Invitado', 'Guest'],
+        ['Configuración de Cuenta', 'Account Settings'],
+        ['Eliminar animaciones', 'Disable animations'],
+        ['Reduce el movimiento para mejorar el rendimiento.', 'Reduces motion to improve performance.'],
+        ['Modo Oscuro', 'Dark Mode'],
+        ['Activa el tema oscuro en toda la aplicación.', 'Enables the dark theme across the entire app.'],
+        ['Modo Compatibilidad', 'Compatibility Mode'],
+        ['Optimiza Footlel para dispositivos más antiguos.', 'Optimizes Footlel for older devices.'],
+        ['Idioma Inglés', 'English Language'],
+        ['Cambia el idioma de la interfaz entre español e inglés.', 'Switches the interface language between Spanish and English.'],
+        ['Idioma', 'Language'],
+        ['Alterna el idioma de la interfaz entre español e inglés.', 'Switches the interface language between Spanish and English.'],
+        ['No se pudo sincronizar el idioma.', 'Could not sync language preference.'],
+        ['Eliminar Cuenta', 'Delete Account'],
+        ['Guardá tu progreso y competí', 'Save your progress and compete'],
+        ['Creá una cuenta gratuita para guardar tus estadísticas, subir en el ranking y desafiar amigos.', 'Create a free account to save your stats, climb the leaderboard, and challenge friends.'],
+        ['¿Estás seguro?', 'Are you sure?'],
+        ['Escribe la palabra', 'Type the word'],
+        ["'eliminar'", "'delete'"],
+        ['para confirmar la destrucción de tu cuenta.', 'to confirm the permanent deletion of your account.'],
+        ['Escribe aquí...', 'Type here...'],
+        ['Palabra incorrecta, intenta de nuevo.', 'Incorrect word, please try again.'],
+        ["Palabra incorrecta, escribe 'eliminar'.", "Incorrect word, type 'delete'."],
+        ['Eliminar', 'Delete'],
+        ['Cuenta eliminada con éxito. Redirigiendo...', 'Account successfully deleted. Redirecting...'],
+        ['Error al eliminar la cuenta.', 'Error deleting account.'],
+        ['No se pudo conectar con el servidor.', 'Could not connect to the server.'],
+        ['Ingresá el código que enviamos a tu correo para confirmar los cambios.', 'Enter the code we sent to your email to confirm the changes.'],
+        ['Confirmar', 'Confirm'],
+        ['Ingresá el código completo.', 'Please enter the full code.'],
+        ['✓ Cambios guardados correctamente', '✓ Changes saved successfully'],
+
+        // ── editar-cuenta.html ──
+        ['Subir imagen', 'Upload image'],
+        ['O elegí un avatar base:', 'Or choose a base avatar:'],
+        ['Nombre de Usuario', 'Username'],
+        ['Tu nombre de usuario', 'Your username'],
+        ['Correo Electrónico', 'Email Address'],
+        ['tu@correo.com', 'your@email.com'],
+        ['Dejá en blanco para no cambiarla', 'Leave blank to keep current password'],
+        ['Guardar Cambios', 'Save Changes'],
+
+        // ── ayuda.html ──
+        ['Centro de Ayuda', 'Help Center'],
+        ['Resolvemos tus dudas sobre las reglas y tu cuenta.', 'Answers to your questions about the rules and your account.'],
+        ['¿Cómo se juega a Footlel?', 'How do you play Footlel?'],
+        ['Buscá un futbolista que cumpla la condición del club y la nacionalidad. Las partidas se juegan al mejor de 3 rondas: ¡el primero en conseguir 2 rondas se lleva la victoria!', 'Find a footballer who matches both the club and nationality condition. Matches are played as best of 3 rounds: the first to win 2 rounds takes the victory!'],
+        ['¿Cómo se calculan los puntos del ranking?', 'How are leaderboard points calculated?'],
+        ['Ganás puntos por cada partida que ganadás. Tu posición en el ranking global depende de la cantidad de victorias acumuladas y de mantener una racha activa. Cuanto más jugás y ganás, más alto subís.', 'You earn points for every match you win. Your global leaderboard rank depends on your total wins and keeping an active streak. The more you play and win, the higher you climb.'],
+        ['¿Qué pasa si se acaba mi tiempo?', 'What happens if my time runs out?'],
+        ['Si el tiempo de una ronda expira sin que hayas respondido, perdés esa ronda automáticamente. Tu rival puede aprovechar para avanzar, así que prestá atención al cronómetro.', 'If the turn timer expires before you answer, you lose your turn automatically. Your rival can take advantage to get ahead, so keep an eye on the clock.'],
+        ['¿Cómo desafío a un amigo?', 'How do I challenge a friend?'],
+        ['Desde el Menú Principal, hacé clic en "Desafiar Amigos". El sistema generará un código de partida único que podés compartirle a tu amigo para que se una a la sala privada.', 'From the Main Menu, click "Challenge Friends" or go to "My Friends" to send a 1v1 challenge invitation and play in real time.'],
+        ['¿Puedo guardar mi progreso como invitado?', 'Can I save my progress as a guest?'],
+        ['No. Los jugadores invitados pueden explorar el menú y ver el juego, pero el progreso, el ranking y las estadísticas solo se guardan para usuarios registrados. Creá una cuenta gratuita para no perder tus logros.', 'No. Guest players can explore the menu and try the game, but progress, rankings, and stats are only saved for registered users. Create a free account so you do not lose your achievements.'],
+
+        // ── leaderboard.html ──
+        ['Global', 'Global'],
+        ['Amigos', 'Friends'],
+        ['Cargando ranking...', 'Loading leaderboard...'],
+        ['No hay datos de ranking disponibles.', 'No leaderboard data available.'],
+        ['Aún no tienes amigos agregados. ¡Ve a buscar rivales!', 'You have no friends added yet. Go find some rivals!'],
+        ['Registrate gratis para guardar tus estadísticas, rachas y subir en el ranking mundial.', 'Sign up for free to save your stats, streaks, and climb the global leaderboard.'],
+        ['© 2026 Footlel · Todos los derechos reservados', '© 2026 Footlel · All rights reserved'],
+
+        // ── amigos.html ──
+        ['Solicitudes', 'Requests'],
+        ['Buscar', 'Search'],
+        ['Buscar jugador...', 'Search player...'],
+        ['Cargando tus amigos...', 'Loading your friends...'],
+        ['Aún no tienes amigos agregados. ¡Busca jugadores en la pestaña Buscar!', 'You have no friends added yet. Find players in the Search tab!'],
+        ['No se encontraron amigos con ese nombre.', 'No friends found with that name.'],
+        ['Amigo en Footlel', 'Friend on Footlel'],
+        ['Desafiar 1v1', 'Challenge 1v1'],
+        ['Desafíos 1v1', '1v1 Challenges'],
+        ['Cargando desafíos...', 'Loading challenges...'],
+        ['No tienes desafíos 1v1 pendientes', 'You have no pending 1v1 challenges'],
+        ['Aceptar 1v1', 'Accept 1v1'],
+        ['Solicitudes de Amistad', 'Friend Requests'],
+        ['Cargando solicitudes...', 'Loading requests...'],
+        ['Cargando solicitudes de amistad...', 'Loading friend requests...'],
+        ['No tienes solicitudes de amistad pendientes', 'You have no pending friend requests'],
+        ['Solicitud de amistad recibida', 'Incoming friend request'],
+        ['Solicitudes Enviadas', 'Sent Requests'],
+        ['No tenés solicitudes enviadas pendientes.', 'You have no pending sent requests.'],
+        ['Solicitud enviada · Pendiente', 'Request sent · Pending'],
+        ['Buscar Usuarios', 'Search Users'],
+        ['Encontrá a otros fanáticos y amigos para competir en duelos de trivia.', 'Find other fans and friends to compete in trivia duels.'],
+        ['Ingresá el usuario...', 'Enter username...'],
+        ['JUGADORES SUGERIDOS', 'SUGGESTED PLAYERS'],
+        ['RESULTADOS DE BÚSQUEDA', 'SEARCH RESULTS'],
+        ['Cargando jugadores...', 'Loading players...'],
+        ['No se encontraron usuarios con ese nombre.', 'No users found with that name.'],
+        ['No hay jugadores sugeridos disponibles en este momento.', 'No suggested players available right now.'],
+        ['+ Agregar', '+ Add'],
+        ['✓ ¡Solicitud Enviada!', '✓ Request Sent!'],
+        ['✓ ¡Solicitud aceptada!', '✓ Request accepted!'],
+        ['Solicitud rechazada', 'Request declined'],
+
+        // ── tateti-local.html, tateti-diario.html & tateti-online.html ──
+        ['Generando Tatetí...', 'Generating Tic-Tac-Toe...'],
+        ['Armando el tablero...', 'Building the board...'],
+        ['Cargando Partida 1v1...', 'Loading 1v1 Match...'],
+        ['Sincronizando el tablero con tu rival...', 'Syncing board with your rival...'],
+        ['Esperando inicio de partida...', 'Waiting for match to start...'],
+        ['Buscar futbolista...', 'Search footballer...'],
+        ['Confirmar Jugada', 'Confirm Move'],
+        ['¡Escribí un jugador!', 'Type a player!'],
+        ['Es el turno de tu rival', "It is your rival's turn"],
+        ['¡Es tu turno!', 'It is your turn!'],
+        ['Conectando con la partida...', 'Connecting to match...'],
+        ['Reconectando con la partida...', 'Reconnecting to match...'],
+        ['Jugador 1', 'Player 1'],
+        ['Jugador 2', 'Player 2'],
+        ['Bot Footlel', 'Footlel Bot'],
+        ['Turno: Jugador 1', 'Turn: Player 1'],
+        ['Turno: Jugador 2', 'Turn: Player 2'],
+        ['Turno: Bot Footlel', 'Turn: Footlel Bot'],
+        ['Mejor de 3 · gana quien llegue primero a 2 rondas', 'Best of 3 · first to win 2 rounds wins'],
+        ['Partida 1v1 Online en tiempo real', 'Real-time 1v1 Online Match'],
+        ['¡Golazo! La clavaste en el ángulo', 'What a goal! Top corner!'],
+        ['¡Ta tan ta tan... Nooo Fabbiani!', 'Oh no... Missed it!'],
+        ['Siguiente Ronda', 'Next Round'],
+        ['¡Ganaste!', 'You Won!'],
+        ['¡Perdiste!', 'You Lost!'],
+        ['¡Ganaste la partida!', 'You won the match!'],
+        ['¡Empate!', 'Draw!'],
+        ['Partida finalizada', 'Match finished'],
+        ['Resultado final', 'Final Score'],
+        ['Casillas conquistadas', 'Cells conquered'],
+        ['+10 Puntos de Ranking', '+10 Ranking Points'],
+        ['+2 Puntos de Ranking', '+2 Ranking Points'],
+        ['Jugar de nuevo', 'Play Again'],
+        ['Jugar revancha', 'Play Rematch'],
+        ['Volver al Menú', 'Back to Menu'],
+        ['Volver a Amigos', 'Back to Friends'],
+        ['Elegir otro modo', 'Choose Another Mode'],
+        ['¡Desafío completado!', 'Challenge Completed!'],
+        ['Ya completaste el desafío diario de hoy. ¡Volvé mañana para jugar una nueva partida y seguir sumando racha! El próximo desafío se desbloquea en:', 'You already completed today\'s daily challenge. Come back tomorrow to play a new match and keep your streak going! Next challenge unlocks in:']
+    ];
+
+    var ES_TO_EN = Object.create(null);
+    var EN_TO_ES = Object.create(null);
+    function normalizeI18nKey(str) {
+        return String(str || '').replace(/\s+/g, ' ').trim();
+    }
+    I18N_PAIRS.forEach(function (pair) {
+        var esKey = normalizeI18nKey(pair[0]);
+        var enKey = normalizeI18nKey(pair[1]);
+        ES_TO_EN[esKey] = pair[1];
+        EN_TO_ES[enKey] = pair[0];
+    });
+
+    function isEnglishStored() {
+        var isEng = readStorage(IS_ENGLISH_KEY);
+        if (isEng === 'true') return true;
+        if (isEng === 'false') return false;
+        return readStorage(LANG_KEY) === 'en';
+    }
+
+    function getLanguage() {
+        return isEnglishStored() ? 'en' : 'es';
+    }
+
+    function translateDynamicPattern(normStr, targetLang) {
+        var m;
+        if (targetLang === 'en') {
+            // Streak: "🔥 5 Días" / "🔥 1 Día"
+            if ((m = normStr.match(/^(🔥\s*\d+)\s+D[ií]as?$/i))) return m[1] + ' Days';
+            // Accuracy / Wins tooltips
+            if ((m = normStr.match(/^(\d+)\s+aciertos?$/i))) return m[1] + ' hits';
+            if ((m = normStr.match(/^(\d+)\s+intentos?$/i))) return m[1] + ' attempts';
+            if ((m = normStr.match(/^(\d+)\s+ganadas?$/i))) return m[1] + ' won';
+            if ((m = normStr.match(/^(\d+)\s+jugadas?$/i))) return m[1] + ' played';
+            // Turn indicators & round titles
+            if ((m = normStr.match(/^Turno:\s*Jugador\s+(\d+)$/i))) return 'Turn: Player ' + m[1];
+            if ((m = normStr.match(/^¡?Jugador\s+(\d+)\s+ganó\s+la\s+ronda!?$/i))) return 'Player ' + m[1] + ' won the round!';
+            if ((m = normStr.match(/^¡?Ganó\s+el\s+Jugador\s+(\d+)!?$/i))) return 'Player ' + m[1] + ' won!';
+            if ((m = normStr.match(/^Jugador\s+1\s+(\d+)\s*-\s*(\d+)\s+Jugador\s+2$/i))) return 'Player 1  ' + m[1] + ' - ' + m[2] + '  Player 2';
+            // Online / Notifications with dynamic username (preserves username intact)
+            if ((m = normStr.match(/^¡Tenes una nueva solicitud de amistad de (.+)!$/))) return 'You have a new friend request from ' + m[1] + '!';
+            if ((m = normStr.match(/^¡(.+) te invitó a jugar una partida 1v1!$/))) return m[1] + ' invited you to play a 1v1 match!';
+            if ((m = normStr.match(/^Esperando a que (.+) acepte el desafío\.\.\.$/))) return 'Waiting for ' + m[1] + ' to accept the challenge...';
+            if ((m = normStr.match(/^Esperando confirmación \((.+)\)\.\.\.$/))) return 'Waiting for confirmation (' + m[1] + ')...';
+            if ((m = normStr.match(/^Esperando a (.+)\.\.\.$/))) return 'Waiting for ' + m[1] + '...';
+            if ((m = normStr.match(/^Turno de (.+)$/))) return m[1] + "'s turn";
+            if ((m = normStr.match(/^¡Ganó (.+)!$/))) return m[1] + ' won!';
+        } else {
+            if ((m = normStr.match(/^(🔥\s*\d+)\s+Days?$/i))) return m[1] + ' Días';
+            if ((m = normStr.match(/^(\d+)\s+hits?$/i))) return m[1] + ' aciertos';
+            if ((m = normStr.match(/^(\d+)\s+attempts?$/i))) return m[1] + ' intentos';
+            if ((m = normStr.match(/^(\d+)\s+won$/i))) return m[1] + ' ganadas';
+            if ((m = normStr.match(/^(\d+)\s+played$/i))) return m[1] + ' jugadas';
+            if ((m = normStr.match(/^Turn:\s*Player\s+(\d+)$/i))) return 'Turno: Jugador ' + m[1];
+            if ((m = normStr.match(/^Player\s+(\d+)\s+won\s+the\s+round!$/i))) return '¡Jugador ' + m[1] + ' ganó la ronda!';
+            if ((m = normStr.match(/^Player\s+(\d+)\s+won!$/i))) return '¡Ganó el Jugador ' + m[1] + '!';
+            if ((m = normStr.match(/^Player\s+1\s+(\d+)\s*-\s*(\d+)\s+Player\s+2$/i))) return 'Jugador 1  ' + m[1] + ' - ' + m[2] + '  Jugador 2';
+            if ((m = normStr.match(/^You have a new friend request from (.+)!$/))) return '¡Tenes una nueva solicitud de amistad de ' + m[1] + '!';
+            if ((m = normStr.match(/^(.+) invited you to play a 1v1 match!$/))) return '¡' + m[1] + ' te invitó a jugar una partida 1v1!';
+            if ((m = normStr.match(/^Waiting for (.+) to accept the challenge\.\.\.$/))) return 'Esperando a que ' + m[1] + ' acepte el desafío...';
+            if ((m = normStr.match(/^Waiting for confirmation \((.+)\)\.\.\.$/))) return 'Esperando confirmación (' + m[1] + ')...';
+            if ((m = normStr.match(/^Waiting for (.+)\.\.\.$/))) return 'Esperando a ' + m[1] + '...';
+            if ((m = normStr.match(/^(.+)'s turn$/))) return 'Turno de ' + m[1];
+            if ((m = normStr.match(/^(.+) won!$/))) return '¡Ganó ' + m[1] + '!';
+        }
+        return null;
+    }
+
+    function translateTextString(rawStr, targetLang) {
+        if (!rawStr) return null;
+        var norm = normalizeI18nKey(rawStr);
+        if (!norm) return null;
+
+        var dict = targetLang === 'en' ? ES_TO_EN : EN_TO_ES;
+        var translated = dict[norm];
+        if (!translated) {
+            translated = translateDynamicPattern(norm, targetLang);
+        }
+        if (!translated) return null;
+
+        // Preserve leading and trailing whitespace around the text node
+        var leadMatch = String(rawStr).match(/^\s*/);
+        var trailMatch = String(rawStr).match(/\s*$/);
+        var lead = leadMatch ? leadMatch[0] : '';
+        var trail = trailMatch ? trailMatch[0] : '';
+        return lead + translated + trail;
+    }
+
+    function shouldSkipElementForI18n(el) {
+        if (!el || el.nodeType !== 1) return false;
+        var tag = el.tagName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'SVG') return true;
+        // CRITICAL RULE: Never translate usernames, footballer names, or club names
+        var id = el.id || '';
+        if (id === 'profileUsername' || id === 'config-username' || id === 'user-display' ||
+            id === 'autocomplete-results' || id === 'language-selector' ||
+            id === 'score-team-1' || id === 'score-team-2') {
+            return true;
+        }
+        if (el.classList && (
+            el.classList.contains('friend-name') ||
+            el.classList.contains('lb-username') ||
+            el.classList.contains('profile-username') ||
+            el.classList.contains('username-highlight') ||
+            el.classList.contains('autocomplete-results') ||
+            el.classList.contains('cell-mark') ||
+            el.classList.contains('cond-top') ||
+            el.classList.contains('cond-left') ||
+            el.classList.contains('lang-segmented') ||
+            el.classList.contains('lang-seg-btn')
+        )) {
+            return true;
+        }
+        if (el.closest && el.closest('#autocomplete-results, .friend-name, .lb-username, #profileUsername, #config-username, #user-display, #language-selector')) {
+            return true;
+        }
+        return false;
+    }
+
+    var isApplyingI18n = false;
+
+    function applyLanguageToRoot(rootEl, lang) {
+        var targetLang = lang === 'en' ? 'en' : 'es';
+        if (!rootEl) return;
+
+        isApplyingI18n = true;
+        try {
+            document.documentElement.lang = targetLang;
+
+            // 1. Translate document.title
+            var newTitle = translateTextString(document.title, targetLang);
+            if (newTitle) document.title = newTitle.trim();
+
+            // 2. Walk text nodes without destroying child elements or event listeners
+            var walker = document.createTreeWalker(
+                rootEl,
+                NodeFilter.SHOW_TEXT,
+                {
+                    acceptNode: function (node) {
+                        if (!node.nodeValue || !node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                        var parent = node.parentElement;
+                        if (!parent || shouldSkipElementForI18n(parent)) return NodeFilter.FILTER_REJECT;
+                        return NodeFilter.FILTER_ACCEPT;
+                    }
+                },
+                false
+            );
+
+            var textNodes = [];
+            var current;
+            while ((current = walker.nextNode())) {
+                textNodes.push(current);
+            }
+
+            for (var i = 0; i < textNodes.length; i++) {
+                var tNode = textNodes[i];
+                var updated = translateTextString(tNode.nodeValue, targetLang);
+                if (updated !== null && updated !== tNode.nodeValue) {
+                    tNode.nodeValue = updated;
+                }
+            }
+
+            // 3. Translate input/textarea placeholders & aria-labels
+            var inputs = rootEl.querySelectorAll ? rootEl.querySelectorAll('input[placeholder], textarea[placeholder]') : [];
+            for (var j = 0; j < inputs.length; j++) {
+                var inp = inputs[j];
+                var ph = inp.getAttribute('placeholder');
+                var newPh = translateTextString(ph, targetLang);
+                if (newPh !== null && newPh.trim() !== ph) {
+                    inp.setAttribute('placeholder', newPh.trim());
+                }
+            }
+
+            // 4. Sync #toggle-english switch & #language-selector UI if present
+            var toggleEng = document.getElementById('toggle-english');
+            if (toggleEng) {
+                toggleEng.checked = (targetLang === 'en');
+            }
+            var selector = document.getElementById('language-selector');
+            if (selector) {
+                selector.dataset.value = targetLang;
+                var btns = selector.querySelectorAll('.lang-seg-btn[data-lang]');
+                for (var k = 0; k < btns.length; k++) {
+                    var isActive = btns[k].getAttribute('data-lang') === targetLang;
+                    btns[k].classList.toggle('is-active', isActive);
+                    btns[k].setAttribute('aria-pressed', String(isActive));
+                }
+            }
+        } finally {
+            isApplyingI18n = false;
+        }
+    }
+
+    function applyLanguage(lang) {
+        var isEng = (lang === true || lang === 'en' || (lang === undefined && isEnglishStored()));
+        var targetLang = isEng ? 'en' : 'es';
+        document.documentElement.lang = targetLang;
+        if (document.body) {
+            applyLanguageToRoot(document.body, targetLang);
+        }
+    }
+
+    function setLanguage(lang) {
+        var isEng = (lang === true || lang === 'en');
+        var normLang = isEng ? 'en' : 'es';
+        try {
+            localStorage.setItem(IS_ENGLISH_KEY, String(isEng));
+            localStorage.setItem(LANG_KEY, normLang);
+        } catch (e) {}
+        applyLanguage(normLang);
+        try {
+            window.dispatchEvent(new CustomEvent('footlel:language-changed', {
+                detail: { lang: normLang, isEnglish: isEng }
+            }));
+        } catch (e) {}
+        return normLang;
+    }
+
+    function translateHelper(text) {
+        var lang = getLanguage();
+        var res = translateTextString(text, lang);
+        return res !== null ? res.trim() : text;
+    }
+
+    function setupLanguageObserver() {
+        if (!document.body || window.__footlelI18nObserver) return;
+        var observer = new MutationObserver(function (mutations) {
+            if (isApplyingI18n) return;
+            var currentLang = getLanguage();
+            if (currentLang !== 'en') return;
+            for (var i = 0; i < mutations.length; i++) {
+                var m = mutations[i];
+                if (m.type === 'childList' && m.addedNodes && m.addedNodes.length > 0) {
+                    applyLanguageToRoot(document.body, 'en');
+                    return;
+                }
+                if (m.type === 'characterData' && m.target && m.target.nodeType === 3) {
+                    var parent = m.target.parentElement;
+                    if (parent && !shouldSkipElementForI18n(parent)) {
+                        var tr = translateTextString(m.target.nodeValue, 'en');
+                        if (tr !== null && tr !== m.target.nodeValue) {
+                            isApplyingI18n = true;
+                            m.target.nodeValue = tr;
+                            isApplyingI18n = false;
+                        }
+                    }
+                }
+            }
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            characterData: true
+        });
+        window.__footlelI18nObserver = observer;
+    }
 
     /* ── Logo paths ──────────────────────────────────────────────
        Resolved relative to THIS script (assets/scripts/), not to the
@@ -65,6 +605,7 @@
     function applyFromStorage() {
         applyTheme(isLightStored());
         applyAnimations(isAnimDisabledStored());
+        applyLanguage(getLanguage());
     }
 
     function getApiBaseUrl() {
@@ -89,10 +630,11 @@
           .catch(function () { return null; });
     }
 
-    /* PATCH /config/set-user-config, always sends the full object with the 3 states. */
-    function saveUserConfig(darkModeState, animationState, compatibilityState) {
+    /* PATCH /config/set-user-config, always sends the full object with the 4 states. */
+    function saveUserConfig(darkModeState, animationState, compatibilityState, isEnglishState) {
         var token = readStorage('footlel_token');
         if (!token || isGuestSession()) return Promise.resolve(null);
+        var resolvedIsEnglish = (typeof isEnglishState === 'boolean') ? isEnglishState : isEnglishStored();
         return fetch(getApiBaseUrl() + '/config/set-user-config', {
             method: 'PATCH',
             headers: {
@@ -102,7 +644,8 @@
             body: JSON.stringify({
                 dark_mode: Boolean(darkModeState),
                 animation_state: Boolean(animationState),
-                compatibility_mode: Boolean(compatibilityState)
+                compatibility_mode: Boolean(compatibilityState),
+                is_english: Boolean(resolvedIsEnglish)
             })
         });
     }
@@ -113,7 +656,8 @@
         var dark = ('dark' in o) ? o.dark : !isLightStored();
         var anim = ('anim' in o) ? o.anim : isAnimDisabledStored();
         var compat = ('compat' in o) ? o.compat : readCompatStored();
-        return saveUserConfig(dark, anim, compat);
+        var isEnglish = ('is_english' in o) ? o.is_english : (('isEnglish' in o) ? o.isEnglish : isEnglishStored());
+        return saveUserConfig(dark, anim, compat, isEnglish);
     }
 
     /* Pulls the backend config into localStorage and applies it. */
@@ -129,8 +673,13 @@
                 if (typeof cfg.animation_state === 'boolean') localStorage.setItem(ANIM_KEY, String(cfg.animation_state));
                 // Save compatibility_mode boolean from backend as string in localStorage
                 if (typeof cfg.compatibility_mode === 'boolean') localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+                // Save is_english boolean from backend in localStorage (RNF5)
+                if (typeof cfg.is_english === 'boolean') {
+                    localStorage.setItem(IS_ENGLISH_KEY, String(cfg.is_english));
+                    localStorage.setItem(LANG_KEY, cfg.is_english ? 'en' : 'es');
+                }
             } catch (e) {}
-            // Re-apply CSS classes (.light-mode, .disable-animations) and logo from updated localStorage
+            // Re-apply CSS classes (.light-mode, .disable-animations), logo and language from updated localStorage
             applyFromStorage();
             // Return the configuration object for any caller awaiting it
             return cfg;
@@ -937,9 +1486,14 @@
         readMatchSession: readMatchSession,
         clearMatchSession: clearMatchSession,
         extractGameId: extractGameId,
+        getLanguage: getLanguage,
+        setLanguage: setLanguage,
+        applyLanguage: applyLanguage,
+        t: translateHelper,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
-        setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }
+        setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); },
+        setEnglishState: function (state) { return saveCurrentConfig({ is_english: state }); }
     };
 
     /* Immediately (<html> always exists, avoids flash of wrong theme). */
@@ -949,6 +1503,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         // 1. Apply stored preferences immediately once body is available (zero flicker)
         applyFromStorage();
+        // 1b. Observe dynamic DOM text updates for active language (RNF5)
+        setupLanguageObserver();
         // 2. Bind logout buttons so token is cleared on sign-out
         bindSessionCleanup();
         // 3. Setup header notifications bell & dropdown on any page with the header
@@ -962,6 +1518,6 @@
 
     /* Changes made in another tab. */
     window.addEventListener('storage', function (e) {
-        if (e.key === THEME_KEY || e.key === ANIM_KEY || e.key === null) applyFromStorage();
+        if (e.key === THEME_KEY || e.key === ANIM_KEY || e.key === LANG_KEY || e.key === IS_ENGLISH_KEY || e.key === null) applyFromStorage();
     });
 })();

@@ -189,7 +189,7 @@
         <div class="config-main">
 
             <!-- Preferences card -->
-            <div class="prefs-card" role="region" aria-label="Preferencias de cuenta">
+            <div class="prefs-card config-card" role="region" aria-label="Preferencias de cuenta">
                 <p class="prefs-card-title">Configuración de Cuenta</p>
 
                 <!-- Row 1: Disable animations -->
@@ -224,6 +224,18 @@
                     </div>
                     <label class="toggle-switch" aria-label="Modo Compatibilidad">
                         <input type="checkbox" id="toggle-compat">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Row 4: English Language / Idioma Inglés (RNF5) -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Idioma Inglés</span>
+                        <span class="pref-desc">Cambia el idioma de la interfaz entre español e inglés.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Idioma Inglés">
+                        <input type="checkbox" id="toggle-english">
                         <span class="toggle-track"></span>
                     </label>
                 </div>
@@ -653,24 +665,26 @@
     });
 
     /* ──────────────────────────────────────────
-       6. TOGGLES: DARK MODE + DISABLE ANIMATIONS
+       6. TOGGLES: DARK MODE, ANIMATIONS, COMPATIBILITY & ENGLISH (RNF5)
     ────────────────────────────────────────── */
 
-    const toggleDark  = $('toggle-dark');
-    const toggleAnim  = $('toggle-animaciones');
-    const toggleCompat = $('toggle-compat');
+    const toggleDark    = $('toggle-dark');
+    const toggleAnim    = $('toggle-animaciones');
+    const toggleCompat  = $('toggle-compat');
+    const toggleEnglish = $('toggle-english');
 
     /* Theme/animations logic (incl. logo src) lives in global-preferences.js
        so every page uses the exact same code and image paths. */
     function applyTheme(isLight) { window.FootlelPrefs.applyTheme(isLight); }
     function applyAnimations(disabled) { window.FootlelPrefs.applyAnimations(disabled); }
 
-    /* PATCH /config/set-user-config with the 3 current states (full object). */
+    /* PATCH /config/set-user-config with the 4 current states (full object). */
     function saveUserConfig() {
         return window.FootlelPrefs.saveUserConfig(
             Boolean(toggleDark && toggleDark.checked),
             Boolean(toggleAnim && toggleAnim.checked),
-            Boolean(toggleCompat && toggleCompat.checked)
+            Boolean(toggleCompat && toggleCompat.checked),
+            Boolean(toggleEnglish && toggleEnglish.checked)
         );
     }
 
@@ -703,6 +717,16 @@
                 }
             });
         }
+
+        // English language (RNF5): INACTIVE by default (Spanish)
+        if (toggleEnglish) {
+            const savedIsEnglish = localStorage.getItem('footlel_is_english') === 'true' ||
+                                   localStorage.getItem('footlel_lang') === 'en';
+            toggleEnglish.checked = savedIsEnglish;
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.applyLanguage === 'function') {
+                window.FootlelPrefs.applyLanguage(savedIsEnglish ? 'en' : 'es');
+            }
+        }
     })();
 
     /* Sync switches from GET /config/get-user-config (registered users). */
@@ -722,6 +746,14 @@
             if (typeof cfg.compatibility_mode === 'boolean') {
                 if (toggleCompat) toggleCompat.checked = cfg.compatibility_mode;
                 localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+            }
+            if (typeof cfg.is_english === 'boolean') {
+                if (toggleEnglish) toggleEnglish.checked = cfg.is_english;
+                localStorage.setItem('footlel_is_english', String(cfg.is_english));
+                localStorage.setItem('footlel_lang', cfg.is_english ? 'en' : 'es');
+                if (window.FootlelPrefs && typeof window.FootlelPrefs.applyLanguage === 'function') {
+                    window.FootlelPrefs.applyLanguage(cfg.is_english ? 'en' : 'es');
+                }
             }
         });
     }
@@ -762,6 +794,37 @@
             }
         });
     }
+
+    /* ── Listener: English Language Toggle (RNF5) ── */
+    if (toggleEnglish) {
+        toggleEnglish.addEventListener('change', async function () {
+            const isEnglish = Boolean(toggleEnglish.checked);
+            const targetLang = isEnglish ? 'en' : 'es';
+            localStorage.setItem('footlel_is_english', String(isEnglish));
+            localStorage.setItem('footlel_lang', targetLang);
+
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.setLanguage === 'function') {
+                window.FootlelPrefs.setLanguage(targetLang);
+            }
+
+            // Sync with the backend
+            if (localStorage.getItem('footlel_token') && !isGuest) {
+                try {
+                    await saveUserConfig();
+                } catch (e) {
+                    showToast('No se pudo sincronizar el idioma.');
+                }
+            }
+        });
+
+        window.addEventListener('footlel:language-changed', function (ev) {
+            if (ev && ev.detail && typeof ev.detail.isEnglish === 'boolean') {
+                toggleEnglish.checked = ev.detail.isEnglish;
+            } else if (ev && ev.detail && ev.detail.lang) {
+                toggleEnglish.checked = ev.detail.lang === 'en';
+            }
+        });
+    }
         /* ──────────────────────────────────────────
        7. DELETE ACCOUNT (MODAL AND FETCH)
     ────────────────────────────────────────── */
@@ -799,7 +862,7 @@
             
             const keyword = keywordInput.value.toLowerCase().trim();
             
-            if (keyword === "eliminar") {
+            if (keyword === "eliminar" || keyword === "delete") {
                 const token = localStorage.getItem('footlel_token');
                 
                 try {

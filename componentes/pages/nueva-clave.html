@@ -80,7 +80,10 @@
 
     </main>
 
+    <script type="module" src="../../services/apiConfig.js"></script>
     <script>
+        const API_BASE_URL = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
         const EYE_CLOSED = `
             <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
             <line x1="1" y1="1" x2="23" y2="23"/>`;
@@ -102,21 +105,42 @@
             });
         });
 
-        /* ── Sequential validation on submit ── */
+        function extractBackendErrorDetail(data, fallbackMsg) {
+            if (!data) return fallbackMsg;
+            if (typeof data.detail === 'string' && data.detail.trim()) {
+                return data.detail.trim();
+            }
+            if (Array.isArray(data.detail) && data.detail.length > 0) {
+                const first = data.detail[0];
+                if (typeof first === 'string') return first;
+                if (first && typeof first.msg === 'string') return first.msg;
+            }
+            if (typeof data.message === 'string' && data.message.trim()) {
+                return data.message.trim();
+            }
+            return fallbackMsg;
+        }
+
+        /* ── Sequential validation & Backend PATCH on submit ── */
         const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
         const PASSWORD_ERROR_MSG = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.';
 
-        document.getElementById('new-password-form').addEventListener('submit', (e) => {
+        document.getElementById('new-password-form').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const pwdVal     = document.getElementById('new-password').value.trim();
             const confirmVal = document.getElementById('confirm-new-password').value.trim();
             const error      = document.getElementById('mismatch-error');
+            const submitBtn  = e.target.querySelector('button[type="submit"]');
 
             function showError(msg, focusId) {
                 error.textContent = msg;
+                error.style.color = '#ff5252';
                 error.hidden = false;
-                document.getElementById(focusId).focus();
+                if (focusId) {
+                    const el = document.getElementById(focusId);
+                    if (el) el.focus();
+                }
             }
 
             // ── 1. Empty new password ──
@@ -133,7 +157,6 @@
 
             // ── 3. Secure password rule ──
             if (!PASSWORD_REGEX.test(pwdVal)) {
-                e.preventDefault();
                 showError(PASSWORD_ERROR_MSG, 'new-password');
                 return;
             }
@@ -144,9 +167,68 @@
                 return;
             }
 
-            // ── All OK ──
+            // ── 5. Send new password to Backend (/user/change-user-password) ──
             error.hidden = true;
-            window.location.href = 'login.html';
+            if (submitBtn) submitBtn.disabled = true;
+
+            const recoveryEmail = (
+                sessionStorage.getItem('recovery_email') ||
+                localStorage.getItem('recovery_email') ||
+                localStorage.getItem('pending_user_email') ||
+                localStorage.getItem('footlel_email') ||
+                ''
+            ).trim();
+
+            try {
+                const payload = JSON.stringify({
+                    user_email: recoveryEmail,
+                    user_password: pwdVal
+                });
+
+                let response = await fetch(`${API_BASE_URL}/user/change-user-password`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload
+                });
+
+                if (response.status === 405) {
+                    response = await fetch(`${API_BASE_URL}/user/change-user-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    });
+                }
+
+                if (response.ok) {
+                    if (recoveryEmail) {
+                        localStorage.setItem('footlel_email', recoveryEmail);
+                    }
+
+                    // Clean up temporary recovery state
+                    sessionStorage.removeItem('recovery_email');
+                    sessionStorage.removeItem('recovery_user_name');
+                    sessionStorage.removeItem('recovery_otp');
+                    sessionStorage.removeItem('recovery_token');
+                    localStorage.removeItem('recovery_email');
+                    localStorage.removeItem('recovery_user_name');
+                    localStorage.removeItem('recovery_otp');
+                    localStorage.removeItem('recovery_token');
+
+                    window.location.href = 'login.html';
+                } else {
+                    let errData = null;
+                    try { errData = await response.json(); } catch (_) {}
+                    const detailMsg = extractBackendErrorDetail(
+                        errData,
+                        `Error al actualizar la contraseña (HTTP ${response.status}).`
+                    );
+                    showError(detailMsg, 'new-password');
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            } catch (networkErr) {
+                showError('No se pudo conectar con el servidor. Intentá más tarde.', 'new-password');
+                if (submitBtn) submitBtn.disabled = false;
+            }
         });
 
         /* ── Real-time cleanup: hides the error while the user types ── */

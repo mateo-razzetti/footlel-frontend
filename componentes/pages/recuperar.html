@@ -58,27 +58,50 @@
 
     <script>
         const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,8}$/;
+        const recoveryEmailInput = document.getElementById('recovery-email');
+
+        // Pre-cargar correo si ya se había ingresado en este flujo o sesión
+        const savedRecoveryEmail = sessionStorage.getItem('recovery_email')
+            || localStorage.getItem('recovery_email')
+            || localStorage.getItem('footlel_email')
+            || '';
+        if (savedRecoveryEmail && recoveryEmailInput && !recoveryEmailInput.value) {
+            recoveryEmailInput.value = savedRecoveryEmail;
+        }
 
         /* ── Email validation on submit ── */
         document.getElementById('recover-form').addEventListener('submit', (e) => {
             e.preventDefault();
 
-            const email      = document.getElementById('recovery-email').value.trim();
+            const email      = recoveryEmailInput.value.trim();
             const emailError = document.getElementById('email-error');
 
             if (!EMAIL_REGEX.test(email)) {
                 emailError.hidden = false;
-                document.getElementById('recovery-email').focus();
+                recoveryEmailInput.focus();
             } else {
                 emailError.hidden = true;
+                // Guardar correo temporalmente para el paso final en nueva-clave.html
+                sessionStorage.setItem('recovery_email', email);
+                localStorage.setItem('recovery_email', email);
+
+                const existingUser = sessionStorage.getItem('recovery_user_name')
+                    || localStorage.getItem('recovery_user_name')
+                    || localStorage.getItem('footlel_username')
+                    || '';
+                if (existingUser && !/^invitado$/i.test(existingUser) && !/^guest_/i.test(existingUser)) {
+                    sessionStorage.setItem('recovery_user_name', existingUser.replace(/^@+/, '').trim());
+                    localStorage.setItem('recovery_user_name', existingUser.replace(/^@+/, '').trim());
+                }
+
                 window.location.href = 'verificar.html';
             }
         });
 
         /* ── Real-time cleanup ── */
-        document.getElementById('recovery-email').addEventListener('input', () => {
+        recoveryEmailInput.addEventListener('input', () => {
             const emailError = document.getElementById('email-error');
-            if (!emailError.hidden && EMAIL_REGEX.test(document.getElementById('recovery-email').value.trim())) {
+            if (!emailError.hidden && EMAIL_REGEX.test(recoveryEmailInput.value.trim())) {
                 emailError.hidden = true;
             }
         });

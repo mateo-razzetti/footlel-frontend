@@ -27,7 +27,7 @@
             </div>
         </header>
 
-        <form class="login-form" action="nueva-clave.html" method="GET" novalidate>
+        <form class="login-form" id="verify-form" action="nueva-clave.html" method="GET" novalidate>
             <!-- OTP input boxes -->
             <div class="otp-container" role="group" aria-label="Código de verificación de 6 dígitos">
                 <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
@@ -43,6 +43,10 @@
                 <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
                        pattern="[0-9]" aria-label="Dígito 6" required>
             </div>
+
+            <p class="field-error" id="otp-error" aria-live="polite" hidden style="color: #ff5252; text-align: center; margin-bottom: 12px;">
+                Ingresá los 6 dígitos del código de verificación.
+            </p>
 
             <button type="submit" class="btn-primary">Verificar</button>
         </form>
@@ -94,6 +98,31 @@
 
         // Initial focus on the first box
         otpInputs[0].focus();
+
+        /* ── OTP validation & persistence on submit ── */
+        const verifyForm = document.getElementById('verify-form');
+        const otpError   = document.getElementById('otp-error');
+
+        verifyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = Array.from(otpInputs).map(inp => inp.value.trim()).join('');
+            if (!/^\d{6}$/.test(code)) {
+                otpError.hidden = false;
+                const firstEmpty = Array.from(otpInputs).find(inp => !inp.value.trim()) || otpInputs[0];
+                firstEmpty.focus();
+                return;
+            }
+            otpError.hidden = true;
+            sessionStorage.setItem('recovery_otp', code);
+            localStorage.setItem('recovery_otp', code);
+            window.location.href = 'nueva-clave.html';
+        });
+
+        otpInputs.forEach(inp => {
+            inp.addEventListener('input', () => {
+                if (!otpError.hidden) otpError.hidden = true;
+            });
+        });
 
         /* ── Resend countdown ── */
         const countdownEl  = document.getElementById('countdown');

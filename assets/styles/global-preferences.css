@@ -180,6 +180,22 @@ html.light-mode .stat-label { color: #616161; }
 /* ── Toggle track in light mode ───────────────────────────────── */
 html.light-mode .toggle-track { background: rgba(0, 0, 0, 0.18); }
 
+/* ── Language selector in light mode (RNF5) ───────────────────── */
+html.light-mode .lang-segmented {
+    background: #EEEEEE;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+html.light-mode .lang-seg-btn {
+    color: #616161;
+}
+html.light-mode .lang-seg-btn:hover:not(.is-active) {
+    color: #1A1A1A;
+}
+html.light-mode .lang-seg-btn.is-active {
+    background: #4CAF50;
+    color: #FFFFFF;
+}
+
 /* ── Logo: src is managed exclusively by global-preferences.js (syncLogo). ── */
 
 /* ── Background footballs (visible in light mode) ────────────────── */
