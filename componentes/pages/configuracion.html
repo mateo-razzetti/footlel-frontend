@@ -668,15 +668,28 @@
        6. TOGGLES: DARK MODE, ANIMATIONS, COMPATIBILITY & ENGLISH (RNF5)
     ────────────────────────────────────────── */
 
-    const toggleDark    = $('toggle-dark');
-    const toggleAnim    = $('toggle-animaciones');
-    const toggleCompat  = $('toggle-compat');
+    const toggleDark    = $('toggle-dark') || $('toggle-dark-mode');
+    const toggleAnim    = $('toggle-animaciones') || $('toggle-animations');
+    const toggleCompat  = $('toggle-compat') || $('toggle-compatibility');
     const toggleEnglish = $('toggle-english');
 
     /* Theme/animations logic (incl. logo src) lives in global-preferences.js
        so every page uses the exact same code and image paths. */
     function applyTheme(isLight) { window.FootlelPrefs.applyTheme(isLight); }
     function applyAnimations(disabled) { window.FootlelPrefs.applyAnimations(disabled); }
+    function applyCompatibility(enabled) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.applyCompatibility === 'function') {
+            window.FootlelPrefs.applyCompatibility(enabled);
+        } else {
+            document.documentElement.classList.toggle('compatibility-mode', Boolean(enabled));
+            if (document.body) document.body.classList.toggle('compatibility-mode', Boolean(enabled));
+        }
+    }
+
+    function hasValidToken() {
+        const t = (localStorage.getItem('footlel_token') || '').trim();
+        return Boolean(t && t !== 'null' && t !== 'undefined');
+    }
 
     /* PATCH /config/set-user-config with the 4 current states (full object). */
     function saveUserConfig() {
@@ -693,32 +706,38 @@
         // Dark mode: ACTIVE by default ('dark')
         const savedTheme = localStorage.getItem('footlel_theme') || 'dark';
         const isLight    = savedTheme === 'light';
-        if (toggleDark) toggleDark.checked = !isLight;   // checked = dark active
+        if (toggleDark) toggleDark.checked = !isLight;   // checked = dark active (dark_mode: true)
         applyTheme(isLight);
 
-        // Disable animations: INACTIVE by default
+        // Disable animations: INACTIVE by default (animation_state: false)
         const animDisabled = localStorage.getItem('pref_toggle-animaciones') === 'true';
         if (toggleAnim) toggleAnim.checked = animDisabled;
         applyAnimations(animDisabled);
 
         // Compatibility (persistence + backend sync)
         if (toggleCompat) {
-            const saved = localStorage.getItem('pref_toggle-compat');
-            if (saved !== null) toggleCompat.checked = saved === 'true';
+            const savedCompat = localStorage.getItem('pref_toggle-compat') === 'true';
+            toggleCompat.checked = savedCompat;
+            applyCompatibility(savedCompat);
             toggleCompat.addEventListener('change', async function () {
-                const state = toggleCompat.checked;
+                const state = Boolean(toggleCompat.checked);
+                applyCompatibility(state);
                 localStorage.setItem('pref_toggle-compat', String(state));
-                if (localStorage.getItem('footlel_token') && !isGuest) {
+                localStorage.setItem('footlel_compatibility_mode', String(state));
+                if (hasValidToken()) {
                     try {
-                        await saveUserConfig();
+                        const resp = await saveUserConfig();
+                        if (resp && !resp.ok && !isGuest) {
+                            showToast('No se pudo sincronizar el modo compatibilidad.');
+                        }
                     } catch (e) {
-                        showToast('No se pudo sincronizar el modo compatibilidad.');
+                        if (!isGuest) showToast('No se pudo sincronizar el modo compatibilidad.');
                     }
                 }
             });
         }
 
-        // English language (RNF5): INACTIVE by default (Spanish)
+        // English language (RNF5): INACTIVE by default (Spanish, is_english: false)
         if (toggleEnglish) {
             const savedIsEnglish = localStorage.getItem('footlel_is_english') === 'true' ||
                                    localStorage.getItem('footlel_lang') === 'en';
@@ -729,23 +748,27 @@
         }
     })();
 
-    /* Sync switches from GET /config/get-user-config (registered users). */
-    if (localStorage.getItem('footlel_token') && !isGuest) {
+    /* Sync switches from GET /config/get-user-config (source of truth when footlel_token exists). */
+    if (hasValidToken()) {
         window.FootlelPrefs.fetchUserConfig().then(function (cfg) {
             if (!cfg) return;
             if (typeof cfg.dark_mode === 'boolean') {
                 if (toggleDark) toggleDark.checked = cfg.dark_mode;
                 localStorage.setItem('footlel_theme', cfg.dark_mode ? 'dark' : 'light');
+                localStorage.setItem('footlel_dark_mode', String(cfg.dark_mode));
                 applyTheme(!cfg.dark_mode);
             }
             if (typeof cfg.animation_state === 'boolean') {
                 if (toggleAnim) toggleAnim.checked = cfg.animation_state;
                 localStorage.setItem('pref_toggle-animaciones', String(cfg.animation_state));
+                localStorage.setItem('footlel_animation_state', String(cfg.animation_state));
                 applyAnimations(cfg.animation_state);
             }
             if (typeof cfg.compatibility_mode === 'boolean') {
                 if (toggleCompat) toggleCompat.checked = cfg.compatibility_mode;
                 localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+                localStorage.setItem('footlel_compatibility_mode', String(cfg.compatibility_mode));
+                applyCompatibility(cfg.compatibility_mode);
             }
             if (typeof cfg.is_english === 'boolean') {
                 if (toggleEnglish) toggleEnglish.checked = cfg.is_english;
@@ -761,17 +784,22 @@
     /* ── Listener: Dark Mode ── */
     if (toggleDark) {
         toggleDark.addEventListener('change', async function () {
-            // checked = true → dark mode active
-            const isLight = !toggleDark.checked;
+            // checked = true → dark mode active (dark_mode: true)
+            const isDark  = Boolean(toggleDark.checked);
+            const isLight = !isDark;
             applyTheme(isLight);
             localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
+            localStorage.setItem('footlel_dark_mode', String(isDark));
 
             // Sync with the backend
-            if (localStorage.getItem('footlel_token') && !isGuest) {
+            if (hasValidToken()) {
                 try {
-                    await saveUserConfig();
+                    const resp = await saveUserConfig();
+                    if (resp && !resp.ok && !isGuest) {
+                        showToast('No se pudo sincronizar el modo oscuro.');
+                    }
                 } catch (e) {
-                    showToast('No se pudo sincronizar el modo oscuro.');
+                    if (!isGuest) showToast('No se pudo sincronizar el modo oscuro.');
                 }
             }
         });
@@ -780,16 +808,20 @@
     /* ── Listener: Disable Animations ── */
     if (toggleAnim) {
         toggleAnim.addEventListener('change', async function () {
-            const disabled = toggleAnim.checked;
+            const disabled = Boolean(toggleAnim.checked);
             applyAnimations(disabled);
             localStorage.setItem('pref_toggle-animaciones', String(disabled));
+            localStorage.setItem('footlel_animation_state', String(disabled));
 
             // Sync with the backend
-            if (localStorage.getItem('footlel_token') && !isGuest) {
+            if (hasValidToken()) {
                 try {
-                    await saveUserConfig();
+                    const resp = await saveUserConfig();
+                    if (resp && !resp.ok && !isGuest) {
+                        showToast('No se pudo sincronizar las animaciones.');
+                    }
                 } catch (e) {
-                    showToast('No se pudo sincronizar las animaciones.');
+                    if (!isGuest) showToast('No se pudo sincronizar las animaciones.');
                 }
             }
         });
@@ -808,11 +840,14 @@
             }
 
             // Sync with the backend
-            if (localStorage.getItem('footlel_token') && !isGuest) {
+            if (hasValidToken()) {
                 try {
-                    await saveUserConfig();
+                    const resp = await saveUserConfig();
+                    if (resp && !resp.ok && !isGuest) {
+                        showToast('No se pudo sincronizar el idioma.');
+                    }
                 } catch (e) {
-                    showToast('No se pudo sincronizar el idioma.');
+                    if (!isGuest) showToast('No se pudo sincronizar el idioma.');
                 }
             }
         });

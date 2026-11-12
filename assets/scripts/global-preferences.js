@@ -585,19 +585,35 @@
         if (logo.src !== target) logo.src = target;
     }
 
-    /* Applies a theme to <html> and <body> (if it already exists) + logo. */
+    /* Applies a theme to <html> and <body> (if it already exists) + logo + toggle. */
     function applyTheme(isLight) {
-        document.documentElement.classList.toggle('light-mode', isLight);
+        var light = Boolean(isLight);
+        document.documentElement.classList.toggle('light-mode', light);
         if (document.body) {
-            document.body.classList.toggle('light-mode', isLight);
-            syncLogo(isLight);
+            document.body.classList.toggle('light-mode', light);
+            syncLogo(light);
+            var toggleDark = document.getElementById('toggle-dark') || document.getElementById('toggle-dark-mode');
+            if (toggleDark) toggleDark.checked = !light;
         }
     }
 
     function applyAnimations(disabled) {
-        document.documentElement.classList.toggle('disable-animations', disabled);
+        var off = Boolean(disabled);
+        document.documentElement.classList.toggle('disable-animations', off);
         if (document.body) {
-            document.body.classList.toggle('disable-animations', disabled);
+            document.body.classList.toggle('disable-animations', off);
+            var toggleAnim = document.getElementById('toggle-animaciones') || document.getElementById('toggle-animations');
+            if (toggleAnim) toggleAnim.checked = off;
+        }
+    }
+
+    function applyCompatibility(enabled) {
+        var on = Boolean(enabled);
+        document.documentElement.classList.toggle('compatibility-mode', on);
+        if (document.body) {
+            document.body.classList.toggle('compatibility-mode', on);
+            var toggleCompat = document.getElementById('toggle-compat') || document.getElementById('toggle-compatibility');
+            if (toggleCompat) toggleCompat.checked = on;
         }
     }
 
@@ -605,6 +621,7 @@
     function applyFromStorage() {
         applyTheme(isLightStored());
         applyAnimations(isAnimDisabledStored());
+        applyCompatibility(readCompatStored());
         applyLanguage(getLanguage());
     }
 
@@ -620,10 +637,10 @@
         return readStorage('pref_toggle-compat') === 'true';
     }
 
-    /* GET /config/get-user-config (registered users with token). */
+    /* GET /config/get-user-config (whenever footlel_token exists). */
     function fetchUserConfig() {
-        var token = readStorage('footlel_token');
-        if (!token || isGuestSession()) return Promise.resolve(null);
+        var token = (readStorage('footlel_token') || '').trim();
+        if (!token || token === 'null' || token === 'undefined') return Promise.resolve(null);
         return fetch(getApiBaseUrl() + '/config/get-user-config', {
             headers: { 'Authorization': 'Bearer ' + token }
         }).then(function (r) { return r.ok ? r.json() : null; })
@@ -632,8 +649,8 @@
 
     /* PATCH /config/set-user-config, always sends the full object with the 4 states. */
     function saveUserConfig(darkModeState, animationState, compatibilityState, isEnglishState) {
-        var token = readStorage('footlel_token');
-        if (!token || isGuestSession()) return Promise.resolve(null);
+        var token = (readStorage('footlel_token') || '').trim();
+        if (!token || token === 'null' || token === 'undefined') return Promise.resolve(null);
         var resolvedIsEnglish = (typeof isEnglishState === 'boolean') ? isEnglishState : isEnglishStored();
         return fetch(getApiBaseUrl() + '/config/set-user-config', {
             method: 'PATCH',
@@ -664,22 +681,31 @@
     function syncConfigFromBackend() {
         // Call fetchUserConfig() which performs GET /config/get-user-config with Bearer token
         return fetchUserConfig().then(function (cfg) {
-            // If no config returned (guest or network error), exit gracefully
+            // If no config returned (no token or network error), exit gracefully
             if (!cfg) return null;
             try {
                 // Save dark_mode boolean from backend as 'dark' or 'light' in localStorage
-                if (typeof cfg.dark_mode === 'boolean') localStorage.setItem(THEME_KEY, cfg.dark_mode ? 'dark' : 'light');
+                if (typeof cfg.dark_mode === 'boolean') {
+                    localStorage.setItem(THEME_KEY, cfg.dark_mode ? 'dark' : 'light');
+                    localStorage.setItem('footlel_dark_mode', String(cfg.dark_mode));
+                }
                 // Save animation_state boolean from backend as string in localStorage
-                if (typeof cfg.animation_state === 'boolean') localStorage.setItem(ANIM_KEY, String(cfg.animation_state));
+                if (typeof cfg.animation_state === 'boolean') {
+                    localStorage.setItem(ANIM_KEY, String(cfg.animation_state));
+                    localStorage.setItem('footlel_animation_state', String(cfg.animation_state));
+                }
                 // Save compatibility_mode boolean from backend as string in localStorage
-                if (typeof cfg.compatibility_mode === 'boolean') localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+                if (typeof cfg.compatibility_mode === 'boolean') {
+                    localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+                    localStorage.setItem('footlel_compatibility_mode', String(cfg.compatibility_mode));
+                }
                 // Save is_english boolean from backend in localStorage (RNF5)
                 if (typeof cfg.is_english === 'boolean') {
                     localStorage.setItem(IS_ENGLISH_KEY, String(cfg.is_english));
                     localStorage.setItem(LANG_KEY, cfg.is_english ? 'en' : 'es');
                 }
             } catch (e) {}
-            // Re-apply CSS classes (.light-mode, .disable-animations), logo and language from updated localStorage
+            // Re-apply CSS classes (.light-mode, .disable-animations, .compatibility-mode), logo, language and toggles from updated localStorage
             applyFromStorage();
             // Return the configuration object for any caller awaiting it
             return cfg;
@@ -1461,6 +1487,7 @@
     window.FootlelPrefs = {
         applyTheme: applyTheme,
         applyAnimations: applyAnimations,
+        applyCompatibility: applyCompatibility,
         applyFromStorage: applyFromStorage,
         fetchUserConfig: fetchUserConfig,
         saveUserConfig: saveUserConfig,
