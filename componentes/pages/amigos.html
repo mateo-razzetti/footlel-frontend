@@ -536,7 +536,21 @@
     }
 
     function cleanUsername(str) {
-        return String(str || '').replace(/^@+/, '').trim();
+        if (str === null || str === undefined) return '';
+        var s = String(str).replace(/^@+/, '').trim();
+        if (!s || /^(null|undefined|none)$/i.test(s) || /^usuario[\s_#]*\d+$/i.test(s)) {
+            return '';
+        }
+        return s;
+    }
+
+    function extractValidUsername(item) {
+        if (item === null || item === undefined) return '';
+        if (typeof item === 'string') return cleanUsername(item);
+        if (typeof item === 'object') {
+            return cleanUsername(item.user_name ?? item.friend_name ?? item.username ?? item.sender_name ?? item.challenger_name ?? item.name ?? '');
+        }
+        return '';
     }
 
     function registerUserInDirectory(userObj) {
@@ -548,7 +562,11 @@
         var pts = Number(userObj.points ?? userObj.score ?? userObj.wins ?? 0) || 0;
 
         if (!clean && numId !== null && state.userDirectoryById[numId]) {
-            clean = state.userDirectoryById[numId].username;
+            clean = cleanUsername(state.userDirectoryById[numId].username);
+        }
+        // Filtro defensivo: ignorar registros huérfanos sin user_name / friend_name válido
+        if (!clean) {
+            return null;
         }
         if (numId === null && clean && state.userDirectoryByName[normalizeText(clean)]) {
             numId = state.userDirectoryByName[normalizeText(clean)].user_id;
@@ -556,7 +574,7 @@
 
         var record = {
             user_id:  numId,
-            username: clean || (numId !== null ? ('Usuario_' + numId) : ''),
+            username: clean,
             points:   pts
         };
 
@@ -572,7 +590,7 @@
         if (record.user_id !== null) {
             var existingById = state.userDirectoryById[record.user_id];
             if (existingById) {
-                if ((!record.username || /^Usuario_\d+$/.test(record.username)) && existingById.username) {
+                if (!record.username && existingById.username) {
                     record.username = existingById.username;
                 }
                 if (!record.points && existingById.points) record.points = existingById.points;
@@ -649,57 +667,47 @@
                     tuplePts = Number(item[1]) || 0;
                     if (item.length >= 3 && item[2] !== null && item[2] !== undefined && !isNaN(Number(item[2]))) {
                         tupleId = Number(item[2]);
-                    } else if (tupleId === null && /^\d+$/.test(tupleName)) {
-                        tupleId = Number(tupleName);
                     }
                 } else if (typeof item[0] === 'string') {
                     tupleName = cleanUsername(item[0]);
-                    if (tupleId === null && /^\d+$/.test(tupleName)) {
-                        tupleId = Number(tupleName);
-                    }
-                } else if (typeof item[0] === 'number') {
-                    tupleId = Number(item[0]);
                 }
+                if (!tupleName) return;
                 var recTuple = registerUserInDirectory({ user_id: tupleId, username: tupleName, points: tuplePts });
-                if (recTuple && (recTuple.username || recTuple.user_id !== null)) {
+                if (recTuple && recTuple.username) {
                     normalized.push(recTuple);
                 }
                 return;
             }
 
-            // Case 2: Primitive number (user_id) or string (username)
+            // Case 2: Primitive number (ignore orphan ID without username) or string (username)
             if (typeof item === 'number') {
-                var recNum = registerUserInDirectory({ user_id: item });
-                if (recNum) normalized.push(recNum);
                 return;
             }
             if (typeof item === 'string') {
-                var trimmed = item.trim();
-                if (/^\d+$/.test(trimmed) && pairedId === null) {
-                    var recStrId = registerUserInDirectory({ user_id: Number(trimmed) });
-                    if (recStrId) normalized.push(recStrId);
-                } else {
-                    var recStrName = registerUserInDirectory({ user_id: pairedId, username: trimmed });
-                    if (recStrName && (recStrName.username || recStrName.user_id !== null)) {
-                        if (pairedId !== null) {
-                            recStrName.user_id = pairedId;
-                            recStrName.user_id_request = pairedId;
-                        }
-                        normalized.push(recStrName);
+                var trimmed = cleanUsername(item);
+                if (!trimmed) return;
+                var recStrName = registerUserInDirectory({ user_id: pairedId, username: trimmed });
+                if (recStrName && recStrName.username) {
+                    if (pairedId !== null) {
+                        recStrName.user_id = pairedId;
+                        recStrName.user_id_request = pairedId;
                     }
+                    normalized.push(recStrName);
                 }
                 return;
             }
 
-            // Case 3: Object { user_id / id / friend_id / user_id_request, user_name / username / ... }
+            // Case 3: Object { user_id / id / friend_id / user_id_request, user_name / friend_name / username / ... }
             if (typeof item === 'object') {
+                var validObjName = extractValidUsername(item);
+                if (!validObjName) return;
                 var objWithId = Object.assign({}, item);
                 if (pairedId !== null && objWithId.user_id === undefined && objWithId.user_id_request === undefined && objWithId.id === undefined) {
                     objWithId.user_id = pairedId;
                     objWithId.user_id_request = pairedId;
                 }
                 var recObj = registerUserInDirectory(objWithId);
-                if (recObj && (recObj.username || recObj.user_id !== null)) {
+                if (recObj && recObj.username) {
                     normalized.push(recObj);
                 }
             }
@@ -719,27 +727,25 @@
             var list = [];
             for (var i = 0; i < namesArr.length; i++) {
                 var rawName = namesArr[i];
+                if (rawName === null || rawName === undefined) continue;
                 var rawId   = (Array.isArray(idsArr) && i < idsArr.length) ? idsArr[i] : null;
-                var cleanName = cleanUsername(
-                    (typeof rawName === 'object' && rawName !== null)
-                        ? (rawName.user_name || rawName.username || rawName.friend_name || rawName.sender_name || rawName.name || '')
-                        : rawName
-                );
+                var cleanName = extractValidUsername(rawName);
+                // Filtro defensivo: ignorar cualquier registro nulo o cuyo user_name / friend_name venga vacío o null
+                if (!cleanName) continue;
+
                 var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
                     ? Number(rawId)
                     : ((typeof rawName === 'object' && rawName !== null && !isNaN(Number(rawName.user_id_request ?? rawName.user_id ?? rawName.request_id ?? rawName.id)))
                         ? Number(rawName.user_id_request ?? rawName.user_id ?? rawName.request_id ?? rawName.id)
                         : null);
 
-                if (cleanName || numId !== null) {
-                    registerUserInDirectory({ user_id: numId, username: cleanName });
-                    list.push({
-                        user_id:         numId,
-                        user_id_request: numId,
-                        request_id:      numId,
-                        username:        cleanName || ('Usuario #' + numId)
-                    });
-                }
+                registerUserInDirectory({ user_id: numId, username: cleanName });
+                list.push({
+                    user_id:         numId,
+                    user_id_request: numId,
+                    request_id:      numId,
+                    username:        cleanName
+                });
             }
             return list;
         }
@@ -760,24 +766,22 @@
             var list = [];
             for (var i = 0; i < namesArr.length; i++) {
                 var rawName = namesArr[i];
+                if (rawName === null || rawName === undefined) continue;
                 var rawId   = (Array.isArray(idsArr) && i < idsArr.length) ? idsArr[i] : null;
-                var cleanName = cleanUsername(
-                    (typeof rawName === 'object' && rawName !== null)
-                        ? (rawName.user_name || rawName.username || rawName.friend_name || rawName.name || '')
-                        : rawName
-                );
+                var cleanName = extractValidUsername(rawName);
+                // Filtro defensivo: ignorar cualquier registro nulo o cuyo user_name / friend_name venga vacío o null
+                if (!cleanName) continue;
+
                 var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
                     ? Number(rawId)
                     : null;
 
-                if (cleanName || numId !== null) {
-                    var rec = registerUserInDirectory({ user_id: numId, username: cleanName });
-                    list.push({
-                        user_id:  numId !== null ? numId : (rec ? rec.user_id : null),
-                        username: cleanName || (rec ? rec.username : ('Usuario #' + numId)),
-                        points:   rec ? rec.points : 0
-                    });
-                }
+                var rec = registerUserInDirectory({ user_id: numId, username: cleanName });
+                list.push({
+                    user_id:  numId !== null ? numId : (rec ? rec.user_id : null),
+                    username: cleanName,
+                    points:   rec ? rec.points : 0
+                });
             }
             return list;
         }
@@ -910,7 +914,11 @@
             return;
         }
 
-        if (state.friends.length === 0) {
+        var validFriends = state.friends.filter(function (f) {
+            return Boolean(extractValidUsername(f));
+        });
+
+        if (validFriends.length === 0) {
             var emptyAllLi = document.createElement('li');
             emptyAllLi.className = 'friend-row friend-row--empty';
             emptyAllLi.textContent = 'Aún no tienes amigos agregados. ¡Busca jugadores en la pestaña Buscar!';
@@ -919,9 +927,11 @@
         }
 
         var query = normalizeText(searchFriendsInput ? searchFriendsInput.value : '');
-        var filtered = state.friends.filter(function (f) {
+        var filtered = validFriends.filter(function (f) {
+            var uName = extractValidUsername(f);
+            if (!uName) return false;
             if (!query) return true;
-            return normalizeText(f.username).includes(query);
+            return normalizeText(uName).includes(query);
         });
 
         if (filtered.length === 0) {
@@ -933,7 +943,8 @@
         }
 
         filtered.forEach(function (friend) {
-            var displayUsername = cleanUsername(friend.username) || ('Usuario #' + friend.user_id);
+            var displayUsername = extractValidUsername(friend);
+            if (!displayUsername) return;
             var li = document.createElement('li');
             li.className = 'friend-row';
             li.dataset.username = displayUsername;
@@ -1140,8 +1151,10 @@
                 friendRequestsContainer.appendChild(loadingLi);
             } else {
                 var visibleFriendReqs = state.friendRequests.filter(function (req) {
+                    var reqName = extractValidUsername(req);
+                    if (!reqName) return false;
                     if (!query) return true;
-                    return normalizeText(req.username).includes(query);
+                    return normalizeText(reqName).includes(query);
                 });
 
                 if (visibleFriendReqs.length === 0) {
@@ -1151,7 +1164,8 @@
                     friendRequestsContainer.appendChild(emptyReqLi);
                 } else {
                     visibleFriendReqs.forEach(function (req) {
-                        var displayUsername = cleanUsername(req.username) || ('Usuario #' + req.user_id);
+                        var displayUsername = extractValidUsername(req);
+                        if (!displayUsername) return;
                         var reqId = req.user_id_request ?? req.request_id ?? req.user_id ?? null;
                         var li = document.createElement('li');
                         li.className = 'friend-row';
@@ -1221,7 +1235,8 @@
         if (sentRequestsContainer) {
             sentRequestsContainer.innerHTML = '';
             var visibleSent = state.sentRequests.filter(function (sentItem) {
-                var name = typeof sentItem === 'object' ? sentItem.username : sentItem;
+                var name = extractValidUsername(sentItem);
+                if (!name) return false;
                 if (!query) return true;
                 return normalizeText(name).includes(query);
             });
@@ -1233,8 +1248,8 @@
                 sentRequestsContainer.appendChild(emptySentLi);
             } else {
                 visibleSent.forEach(function (sentItem) {
-                    var sentUsername = typeof sentItem === 'object' ? sentItem.username : sentItem;
-                    var clean = cleanUsername(sentUsername);
+                    var clean = extractValidUsername(sentItem);
+                    if (!clean) return;
                     var li = document.createElement('li');
                     li.className = 'friend-row';
 
@@ -1641,8 +1656,10 @@
             return;
         }
 
-        var visible = state.matchRequests.filter(function (name) {
-            return !query || normalizeText(name).includes(query);
+        var visible = state.matchRequests.filter(function (item) {
+            var validName = extractValidUsername(item);
+            if (!validName) return false;
+            return !query || normalizeText(validName).includes(query);
         });
 
         if (visible.length === 0) {
@@ -1653,7 +1670,9 @@
             return;
         }
 
-        visible.forEach(function (challengerName) {
+        visible.forEach(function (challengerItem) {
+            var challengerName = extractValidUsername(challengerItem);
+            if (!challengerName) return;
             var li = document.createElement('li');
             li.className = 'friend-row';
             li.dataset.username = challengerName;

@@ -160,6 +160,21 @@
             errorEl.hidden = false;
         }
 
+        /* ── Save typed username when clicking "Olvidé mi contraseña" ── */
+        const forgotPasswordLink = document.querySelector('.forgot-password');
+        if (forgotPasswordLink) {
+            forgotPasswordLink.addEventListener('click', () => {
+                const usernameInput = document.getElementById('username');
+                const typedUsername = usernameInput ? usernameInput.value.trim().replace(/^@+/, '') : '';
+                const fallbackUsername = (localStorage.getItem('footlel_username') || '').trim().replace(/^@+/, '');
+                const userToRecover = typedUsername || fallbackUsername;
+                if (userToRecover && !/^invitado$/i.test(userToRecover) && !/^guest_/i.test(userToRecover)) {
+                    sessionStorage.setItem('recovery_user_name', userToRecover);
+                    localStorage.setItem('recovery_user_name', userToRecover);
+                }
+            });
+        }
+
         /* ── Log in (registered user) ──────────────────── */
         const loginForm = document.querySelector('.login-form');
         loginForm.addEventListener('submit', async function (e) {

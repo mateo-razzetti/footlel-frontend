@@ -337,6 +337,24 @@
             '</div>';
     }
 
+    function cleanValidUsername(raw) {
+        if (raw === null || raw === undefined) return '';
+        var s = String(raw).trim().replace(/^@+/, '').trim();
+        if (!s || /^(null|undefined|none)$/i.test(s) || /^usuario[\s_#]*\d+$/i.test(s)) {
+            return '';
+        }
+        return s;
+    }
+
+    function extractValidAccountName(entry) {
+        if (entry === null || entry === undefined) return '';
+        if (typeof entry === 'string') return cleanValidUsername(entry);
+        if (typeof entry === 'object' && !Array.isArray(entry)) {
+            return cleanValidUsername(entry.user_name ?? entry.friend_name ?? entry.username ?? entry.name ?? '');
+        }
+        return '';
+    }
+
     function parseGlobalLeaderboardEntries(lbData) {
         var list = [];
         var rawArray = null;
@@ -351,7 +369,7 @@
         if (!Array.isArray(rawArray)) return list;
 
         rawArray.forEach(function (entry) {
-            if (!entry) return;
+            if (entry === null || entry === undefined) return;
             var rawId = null;
             var rawName = '';
             var rawVal = 0;
@@ -370,17 +388,17 @@
                 }
             } else if (typeof entry === 'object') {
                 rawId = entry.user_id ?? entry.friend_id ?? entry.id ?? null;
-                rawName = entry.user_name ?? entry.username ?? entry.name ?? '';
+                rawName = entry.user_name ?? entry.friend_name ?? entry.username ?? entry.name ?? '';
                 rawVal = Number(entry.points ?? entry.score ?? entry.wins ?? 0) || 0;
             }
 
-            var cleanName = String(rawName || '').trim().replace(/^@+/, '');
-            if (!cleanName && rawId !== null) cleanName = String(rawId);
+            // Filtro defensivo: ignorar registros nulos o cuyo user_name / friend_name venga vacío o null
+            var cleanName = cleanValidUsername(rawName);
             if (!cleanName) return;
 
             var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
                 ? Number(rawId)
-                : (/^\d+$/.test(cleanName) ? Number(cleanName) : null);
+                : null;
 
             list.push({
                 user_id:  numId,
@@ -426,35 +444,35 @@
             if (Array.isArray(item)) {
                 if (typeof item[0] === 'number' && typeof item[1] === 'string') {
                     fId = Number(item[0]);
-                    fName = String(item[1] || '').trim().replace(/^@+/, '');
+                    fName = cleanValidUsername(item[1]);
                     fPts = Number(item[2]) || 0;
                 } else {
-                    fName = String(item[0] || '').trim().replace(/^@+/, '');
+                    fName = cleanValidUsername(item[0]);
                     fPts = Number(item[1]) || 0;
                     if (item.length >= 3 && !isNaN(Number(item[2]))) fId = Number(item[2]);
                 }
             } else if (typeof item === 'number') {
-                fId = Number(item);
+                // Ignorar IDs numéricos huérfanos sin nombre de usuario
+                return;
             } else if (typeof item === 'string') {
-                var trimmed = item.trim().replace(/^@+/, '');
-                if (/^\d+$/.test(trimmed)) fId = Number(trimmed);
-                fName = trimmed;
+                fName = cleanValidUsername(item);
             } else if (typeof item === 'object') {
                 var rawId = item.user_id ?? item.friend_id ?? item.id ?? null;
                 if (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId))) {
                     fId = Number(rawId);
                 }
-                fName = String(item.user_name ?? item.username ?? item.friend_name ?? item.name ?? '').trim().replace(/^@+/, '');
+                fName = extractValidAccountName(item);
                 fPts = Number(item.points ?? item.score ?? item.wins ?? 0) || 0;
             }
 
-            if (fName || fId !== null) {
-                parsed.push({
-                    user_id:  fId,
-                    username: fName,
-                    points:   fPts
-                });
-            }
+            // Filtro defensivo: ignorar cualquier registro nulo o cuyo user_name / friend_name venga vacío o null
+            if (!fName) return;
+
+            parsed.push({
+                user_id:  fId,
+                username: fName,
+                points:   fPts
+            });
         });
         return parsed;
     }
@@ -464,7 +482,7 @@
         var entries = parseGlobalLeaderboardEntries(lbData);
 
         entries.forEach(function (item) {
-            var cleanName = item.username;
+            var cleanName = cleanValidUsername(item && item.username);
             if (!cleanName) return;
             var key = cleanName.toLowerCase();
 
@@ -492,25 +510,25 @@
         var confirmedFriends = Array.isArray(friendsList) ? friendsList : [];
 
         // Build set of normalized friend usernames from GET /user/get-user-friends
+        // Ignorando registros nulos o cuyo user_name / friend_name venga vacío o null
         var friendNamesSet = new Set();
         confirmedFriends.forEach(function (f) {
-            var rawFriendName = typeof f === 'string'
-                ? f
-                : (f && (f.username || f.user_name || f.friend_name || f.name || ''));
-            var cleanFriendName = String(rawFriendName || '').trim().replace(/^@+/, '');
+            if (f === null || f === undefined) return;
+            var cleanFriendName = extractValidAccountName(f);
             if (cleanFriendName) {
                 friendNamesSet.add(cleanFriendName.toLowerCase());
             }
         });
 
-        var cleanCurrentUser = String(currentUsername || '').trim().replace(/^@+/, '');
+        var cleanCurrentUser = cleanValidUsername(currentUsername);
         var normCurrentUser  = cleanCurrentUser.toLowerCase();
 
         // Filter global leaderboard by comparing username strings directly
         var filteredMap = new Map();
 
         allLbEntries.forEach(function (entry) {
-            var entryCleanName = String(entry.username || '').trim().replace(/^@+/, '');
+            if (!entry) return;
+            var entryCleanName = extractValidAccountName(entry);
             if (!entryCleanName) return;
             var entryNameLower = entryCleanName.toLowerCase();
 
@@ -528,10 +546,8 @@
 
         // Also include confirmed friends who might have 0 points and not yet appear in global leaderboard
         confirmedFriends.forEach(function (f) {
-            var rawFriendName = typeof f === 'string'
-                ? f
-                : (f && (f.username || f.user_name || f.friend_name || f.name || ''));
-            var cName = String(rawFriendName || '').trim().replace(/^@+/, '');
+            if (f === null || f === undefined) return;
+            var cName = extractValidAccountName(f);
             if (!cName) return;
             var lower = cName.toLowerCase();
             if (!filteredMap.has(lower)) {
