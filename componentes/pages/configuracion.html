@@ -189,7 +189,7 @@
         <div class="config-main">
 
             <!-- Preferences card -->
-            <div class="prefs-card" role="region" aria-label="Preferencias de cuenta">
+            <div class="prefs-card config-card" role="region" aria-label="Preferencias de cuenta">
                 <p class="prefs-card-title">Configuración de Cuenta</p>
 
                 <!-- Row 1: Disable animations -->
@@ -226,6 +226,18 @@
                         <input type="checkbox" id="toggle-compat">
                         <span class="toggle-track"></span>
                     </label>
+                </div>
+
+                <!-- Row 4: Language / Idioma (RNF5) -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Idioma</span>
+                        <span class="pref-desc">Alterna el idioma de la interfaz entre español e inglés.</span>
+                    </div>
+                    <div class="lang-segmented" id="language-selector" role="group" aria-label="Idioma">
+                        <button type="button" class="lang-seg-btn is-active" data-lang="es" aria-pressed="true">ES</button>
+                        <button type="button" class="lang-seg-btn" data-lang="en" aria-pressed="false">EN</button>
+                    </div>
                 </div>
             </div><!-- /prefs-card -->
 
@@ -762,6 +774,44 @@
             }
         });
     }
+
+    /* ── Listener: Language Selector (RNF5) ── */
+    const langSelector = $('language-selector');
+    if (langSelector) {
+        const langButtons = Array.from(langSelector.querySelectorAll('.lang-seg-btn[data-lang]'));
+
+        function syncLanguageSelectorUI(activeLang) {
+            const normLang = activeLang === 'en' ? 'en' : 'es';
+            langSelector.dataset.value = normLang;
+            langButtons.forEach(function (btn) {
+                const isSelected = btn.getAttribute('data-lang') === normLang;
+                btn.classList.toggle('is-active', isSelected);
+                btn.setAttribute('aria-pressed', String(isSelected));
+            });
+        }
+
+        const initialLang = (window.FootlelPrefs && typeof window.FootlelPrefs.getLanguage === 'function')
+            ? window.FootlelPrefs.getLanguage()
+            : (localStorage.getItem('footlel_lang') === 'en' ? 'en' : 'es');
+        syncLanguageSelectorUI(initialLang);
+
+        langButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const chosenLang = btn.getAttribute('data-lang') === 'en' ? 'en' : 'es';
+                localStorage.setItem('footlel_lang', chosenLang);
+                syncLanguageSelectorUI(chosenLang);
+                if (window.FootlelPrefs && typeof window.FootlelPrefs.setLanguage === 'function') {
+                    window.FootlelPrefs.setLanguage(chosenLang);
+                }
+            });
+        });
+
+        window.addEventListener('footlel:language-changed', function (ev) {
+            if (ev && ev.detail && ev.detail.lang) {
+                syncLanguageSelectorUI(ev.detail.lang);
+            }
+        });
+    }
         /* ──────────────────────────────────────────
        7. DELETE ACCOUNT (MODAL AND FETCH)
     ────────────────────────────────────────── */
@@ -799,7 +849,7 @@
             
             const keyword = keywordInput.value.toLowerCase().trim();
             
-            if (keyword === "eliminar") {
+            if (keyword === "eliminar" || keyword === "delete") {
                 const token = localStorage.getItem('footlel_token');
                 
                 try {
