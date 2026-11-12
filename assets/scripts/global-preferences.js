@@ -16,9 +16,10 @@
 (function applyGlobalPreferences() {
     'use strict';
 
-    var THEME_KEY = 'footlel_theme';
-    var ANIM_KEY  = 'pref_toggle-animaciones';
-    var LANG_KEY  = 'footlel_lang';
+    var THEME_KEY      = 'footlel_theme';
+    var ANIM_KEY       = 'pref_toggle-animaciones';
+    var LANG_KEY       = 'footlel_lang';
+    var IS_ENGLISH_KEY = 'footlel_is_english';
 
     /* ════════════════════════════════════════════════════════════════
        I18N ENGINE — Dynamic ES / EN Translation (RNF5)
@@ -169,8 +170,11 @@
         ['Activa el tema oscuro en toda la aplicación.', 'Enables the dark theme across the entire app.'],
         ['Modo Compatibilidad', 'Compatibility Mode'],
         ['Optimiza Footlel para dispositivos más antiguos.', 'Optimizes Footlel for older devices.'],
+        ['Idioma Inglés', 'English Language'],
+        ['Cambia el idioma de la interfaz entre español e inglés.', 'Switches the interface language between Spanish and English.'],
         ['Idioma', 'Language'],
         ['Alterna el idioma de la interfaz entre español e inglés.', 'Switches the interface language between Spanish and English.'],
+        ['No se pudo sincronizar el idioma.', 'Could not sync language preference.'],
         ['Eliminar Cuenta', 'Delete Account'],
         ['Guardá tu progreso y competí', 'Save your progress and compete'],
         ['Creá una cuenta gratuita para guardar tus estadísticas, subir en el ranking y desafiar amigos.', 'Create a free account to save your stats, climb the leaderboard, and challenge friends.'],
@@ -311,9 +315,15 @@
         EN_TO_ES[enKey] = pair[0];
     });
 
+    function isEnglishStored() {
+        var isEng = readStorage(IS_ENGLISH_KEY);
+        if (isEng === 'true') return true;
+        if (isEng === 'false') return false;
+        return readStorage(LANG_KEY) === 'en';
+    }
+
     function getLanguage() {
-        var saved = readStorage(LANG_KEY);
-        return saved === 'en' ? 'en' : 'es';
+        return isEnglishStored() ? 'en' : 'es';
     }
 
     function translateDynamicPattern(normStr, targetLang) {
@@ -465,7 +475,11 @@
                 }
             }
 
-            // 4. Sync #language-selector UI if present
+            // 4. Sync #toggle-english switch & #language-selector UI if present
+            var toggleEng = document.getElementById('toggle-english');
+            if (toggleEng) {
+                toggleEng.checked = (targetLang === 'en');
+            }
             var selector = document.getElementById('language-selector');
             if (selector) {
                 selector.dataset.value = targetLang;
@@ -482,7 +496,8 @@
     }
 
     function applyLanguage(lang) {
-        var targetLang = (lang === 'en' || (lang === undefined && getLanguage() === 'en')) ? 'en' : 'es';
+        var isEng = (lang === true || lang === 'en' || (lang === undefined && isEnglishStored()));
+        var targetLang = isEng ? 'en' : 'es';
         document.documentElement.lang = targetLang;
         if (document.body) {
             applyLanguageToRoot(document.body, targetLang);
@@ -490,11 +505,17 @@
     }
 
     function setLanguage(lang) {
-        var normLang = lang === 'en' ? 'en' : 'es';
-        try { localStorage.setItem(LANG_KEY, normLang); } catch (e) {}
+        var isEng = (lang === true || lang === 'en');
+        var normLang = isEng ? 'en' : 'es';
+        try {
+            localStorage.setItem(IS_ENGLISH_KEY, String(isEng));
+            localStorage.setItem(LANG_KEY, normLang);
+        } catch (e) {}
         applyLanguage(normLang);
         try {
-            window.dispatchEvent(new CustomEvent('footlel:language-changed', { detail: { lang: normLang } }));
+            window.dispatchEvent(new CustomEvent('footlel:language-changed', {
+                detail: { lang: normLang, isEnglish: isEng }
+            }));
         } catch (e) {}
         return normLang;
     }
@@ -609,10 +630,11 @@
           .catch(function () { return null; });
     }
 
-    /* PATCH /config/set-user-config, always sends the full object with the 3 states. */
-    function saveUserConfig(darkModeState, animationState, compatibilityState) {
+    /* PATCH /config/set-user-config, always sends the full object with the 4 states. */
+    function saveUserConfig(darkModeState, animationState, compatibilityState, isEnglishState) {
         var token = readStorage('footlel_token');
         if (!token || isGuestSession()) return Promise.resolve(null);
+        var resolvedIsEnglish = (typeof isEnglishState === 'boolean') ? isEnglishState : isEnglishStored();
         return fetch(getApiBaseUrl() + '/config/set-user-config', {
             method: 'PATCH',
             headers: {
@@ -622,7 +644,8 @@
             body: JSON.stringify({
                 dark_mode: Boolean(darkModeState),
                 animation_state: Boolean(animationState),
-                compatibility_mode: Boolean(compatibilityState)
+                compatibility_mode: Boolean(compatibilityState),
+                is_english: Boolean(resolvedIsEnglish)
             })
         });
     }
@@ -633,7 +656,8 @@
         var dark = ('dark' in o) ? o.dark : !isLightStored();
         var anim = ('anim' in o) ? o.anim : isAnimDisabledStored();
         var compat = ('compat' in o) ? o.compat : readCompatStored();
-        return saveUserConfig(dark, anim, compat);
+        var isEnglish = ('is_english' in o) ? o.is_english : (('isEnglish' in o) ? o.isEnglish : isEnglishStored());
+        return saveUserConfig(dark, anim, compat, isEnglish);
     }
 
     /* Pulls the backend config into localStorage and applies it. */
@@ -649,8 +673,13 @@
                 if (typeof cfg.animation_state === 'boolean') localStorage.setItem(ANIM_KEY, String(cfg.animation_state));
                 // Save compatibility_mode boolean from backend as string in localStorage
                 if (typeof cfg.compatibility_mode === 'boolean') localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+                // Save is_english boolean from backend in localStorage (RNF5)
+                if (typeof cfg.is_english === 'boolean') {
+                    localStorage.setItem(IS_ENGLISH_KEY, String(cfg.is_english));
+                    localStorage.setItem(LANG_KEY, cfg.is_english ? 'en' : 'es');
+                }
             } catch (e) {}
-            // Re-apply CSS classes (.light-mode, .disable-animations) and logo from updated localStorage
+            // Re-apply CSS classes (.light-mode, .disable-animations), logo and language from updated localStorage
             applyFromStorage();
             // Return the configuration object for any caller awaiting it
             return cfg;
@@ -1463,7 +1492,8 @@
         t: translateHelper,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
-        setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); }
+        setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); },
+        setEnglishState: function (state) { return saveCurrentConfig({ is_english: state }); }
     };
 
     /* Immediately (<html> always exists, avoids flash of wrong theme). */
@@ -1488,6 +1518,6 @@
 
     /* Changes made in another tab. */
     window.addEventListener('storage', function (e) {
-        if (e.key === THEME_KEY || e.key === ANIM_KEY || e.key === LANG_KEY || e.key === null) applyFromStorage();
+        if (e.key === THEME_KEY || e.key === ANIM_KEY || e.key === LANG_KEY || e.key === IS_ENGLISH_KEY || e.key === null) applyFromStorage();
     });
 })();

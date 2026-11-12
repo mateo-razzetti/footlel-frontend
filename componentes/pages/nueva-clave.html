@@ -167,7 +167,7 @@
                 return;
             }
 
-            // ── 5. Send new password to Backend (PATCH /user/edit-user-info) ──
+            // ── 5. Send new password to Backend (/user/change-user-password) ──
             error.hidden = true;
             if (submitBtn) submitBtn.disabled = true;
 
@@ -179,51 +179,27 @@
                 ''
             ).trim();
 
-            let recoveryUsername = (
-                sessionStorage.getItem('recovery_user_name') ||
-                localStorage.getItem('recovery_user_name') ||
-                localStorage.getItem('pending_user_name') ||
-                localStorage.getItem('footlel_username') ||
-                ''
-            ).trim().replace(/^@+/, '');
-
-            if ((!recoveryUsername || /^invitado$/i.test(recoveryUsername) || /^guest_/i.test(recoveryUsername)) && recoveryEmail.includes('@')) {
-                recoveryUsername = recoveryEmail.split('@')[0].trim();
-            }
-
-            const token = (
-                sessionStorage.getItem('recovery_token') ||
-                localStorage.getItem('recovery_token') ||
-                localStorage.getItem('footlel_token') ||
-                ''
-            ).trim();
-
             try {
-                const headers = { 'Content-Type': 'application/json' };
-                if (token && token !== 'null' && token !== 'undefined') {
-                    headers['Authorization'] = 'Bearer ' + token;
-                }
-
-                const response = await fetch(`${API_BASE_URL}/user/edit-user-info`, {
-                    method: 'PATCH',
-                    headers,
-                    body: JSON.stringify({
-                        user_name: recoveryUsername,
-                        user_email: recoveryEmail,
-                        user_password: pwdVal
-                    })
+                const payload = JSON.stringify({
+                    user_email: recoveryEmail,
+                    user_password: pwdVal
                 });
 
-                if (response.ok) {
-                    let data = null;
-                    try { data = await response.json(); } catch (_) {}
+                let response = await fetch(`${API_BASE_URL}/user/change-user-password`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload
+                });
 
-                    if (data && (data.access_token || data.token)) {
-                        localStorage.setItem('footlel_token', data.access_token || data.token);
-                    }
-                    if (recoveryUsername) {
-                        localStorage.setItem('footlel_username', recoveryUsername);
-                    }
+                if (response.status === 405) {
+                    response = await fetch(`${API_BASE_URL}/user/change-user-password`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: payload
+                    });
+                }
+
+                if (response.ok) {
                     if (recoveryEmail) {
                         localStorage.setItem('footlel_email', recoveryEmail);
                     }
