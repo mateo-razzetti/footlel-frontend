@@ -18,7 +18,7 @@
     <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
 
     <!-- Global script (theme + logo swap) -->
-    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <script src="../../assets/scripts/global-preferences.js"></script>
 </head>
 <body>
 
@@ -282,9 +282,9 @@
         <div class="stat-col">
             <div class="stat-label-row">
                 <span class="stat-label">PUNTOS TOTALES</span>
-                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">i<span class="stat-tooltip" role="tooltip">Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.</span></span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">i<span class="stat-tooltip" role="tooltip">Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.<br><span class="tooltip-ranks-scale">Rangos: Madera (0-299), Hierro (300-599), Bronce (600-899), Plata (900-1199), Oro (1200-1499), Diamante (1500+).</span></span></span>
             </div>
-            <span class="stat-value" id="statPoints">⭐ 0 pts</span>
+            <span class="stat-value stat-value--rank" id="statPoints"><svg class="rank-shield-svg rank-shield--wood" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2L4 5.5v6.1C4 16.9 7.4 21.6 12 23c4.6-1.4 8-6.1 8-11.4V5.5L12 2z" fill="#8D5B4C" stroke="#5D3A2E" stroke-width="1.6"/><path d="M12 4.2L6.2 6.8v4.7c0 4.1 2.5 7.9 5.8 9.1 3.3-1.2 5.8-5 5.8-9.1V6.8L12 4.2z" fill="#A4705E" opacity="0.55"/><path d="M9.5 5.8v13.2M14.5 5.8v13.2M12 4.2v16.4" stroke="#5D3A2E" stroke-width="1" stroke-linecap="round" opacity="0.65"/></svg><span class="rank-stat-text">0 pts · Madera III</span></span>
         </div>
 
         <!-- Column 4: Porcentaje de Victorias -->
@@ -422,7 +422,18 @@
 
     function formatTotalPoints(pts) {
         var n = Math.max(0, Math.round(Number(pts) || 0));
-        return '⭐ ' + n.toLocaleString('en-US') + ' pts';
+        var isEng = localStorage.getItem('footlel_is_english') === 'true' || localStorage.getItem('footlel_lang') === 'en';
+        if (typeof window.getRankInfo === 'function') {
+            var rank = window.getRankInfo(n, isEng);
+            return rank.svg + '<span class="rank-stat-text">' + n.toLocaleString('en-US') + ' pts · ' + rank.name + '</span>';
+        }
+        return n.toLocaleString('en-US') + ' pts · ' + (isEng ? 'Wood III' : 'Madera III');
+    }
+
+    function renderStatPoints(pts) {
+        if (!statPoints || isGuest) return;
+        statPoints.dataset.points = String(Math.max(0, Math.round(Number(pts) || 0)));
+        statPoints.innerHTML = formatTotalPoints(pts);
     }
 
     var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
@@ -643,10 +654,16 @@
         var initialStats = mapUserStatsPayload(null, null, null, savedUsername);
         statAccuracy.textContent = '🎯 ' + formatPercentage(initialStats.accuracy);
         statStreak.textContent   = formatStreakText(initialStats.streak);
-        statPoints.textContent   = formatTotalPoints(initialStats.totalPoints);
+        renderStatPoints(initialStats.totalPoints);
         statWins.textContent     = '📈 ' + formatPercentage(initialStats.winPercentage);
         // Populate fraction tooltips with cached numerator/denominator values
         updateFractionTooltips(initialStats);
+
+        window.addEventListener('footlel:language-changed', function () {
+            if (statPoints && statPoints.dataset.points !== undefined) {
+                renderStatPoints(Number(statPoints.dataset.points) || 0);
+            }
+        });
 
         (async function loadUserFooterStats() {
             var token = localStorage.getItem('footlel_token');
@@ -678,7 +695,7 @@
             var mapped = mapUserStatsPayload(statsPayload, userInfo, lbData, savedUsername);
             statAccuracy.textContent = '🎯 ' + formatPercentage(mapped.accuracy);
             statStreak.textContent   = formatStreakText(mapped.streak);
-            statPoints.textContent   = formatTotalPoints(mapped.totalPoints);
+            renderStatPoints(mapped.totalPoints);
             statWins.textContent     = '📈 ' + formatPercentage(mapped.winPercentage);
             // Update fraction tooltips with fresh numbers from /stat/get-user-stats
             updateFractionTooltips(mapped);
@@ -759,22 +776,15 @@
         }
     });
 
-    // 1v1 Online (blocked for guests). Registered users either resume the active
-    // multiplayer session (tateti-online.html) or go to "Mis Amigos" to challenge someone.
+    // 1v1 Online (blocked for guests). Logged-in users are always redirected to Mis Amigos (?tab=friends).
     $('btn-online').addEventListener('click', function (e) {
         if (isGuest) {
             e.preventDefault();
             openModal(guestModal);
             return;
         }
-        var activeSession = null;
-        try { activeSession = JSON.parse(sessionStorage.getItem('footlel_mp_session') || 'null'); } catch (_) {}
-        if (activeSession && activeSession.gameId !== undefined && activeSession.gameId !== null) {
-            window.location.href = 'tateti-online.html';
-            return;
-        }
         try { sessionStorage.setItem('footlel_open_tab', 'amigos'); } catch (_) {}
-        window.location.href = 'amigos.html';
+        window.location.href = 'amigos.html?tab=friends';
     });
 })();
 </script>

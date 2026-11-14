@@ -596,3 +596,387 @@ html.light-mode .notif-match-btn--reject:hover:not(:disabled) { background: rgba
 .match-wait-cancel:hover { background: rgba(158, 158, 158, 0.15); }
 html.light-mode .match-wait-card { background: #fff; color: #1A1A1A; }
 html.light-mode .match-wait-cancel { color: #1A1A1A; border-color: rgba(0, 0, 0, 0.2); }
+
+/* ════════════════════════════════════════════════════════════════
+   RANK SYSTEM SHIELDS & BADGES (Menu, Modalidades, Leaderboard)
+   ════════════════════════════════════════════════════════════════ */
+.rank-shield-svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.stat-value--rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: clamp(14px, 1.45vw, 18px);
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.rank-stat-text {
+    display: inline-block;
+    line-height: 1.2;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COMPATIBILITY MODE — html.compatibility-mode / body.compatibility-mode (RNF7)
+   High-compatibility, low-resource classic rendering for older
+   browsers and devices:
+   - Disables all animations, transitions, floating balls, filters,
+     shadows, and complex gradients.
+   - Forces native system fonts (Arial, Helvetica, sans-serif).
+   - Applies solid high-contrast borders (2px solid #4CAF50 / #777),
+     flat solid backgrounds, and reduced border-radius (2px / 0px).
+   ════════════════════════════════════════════════════════════════ */
+html.compatibility-mode,
+body.compatibility-mode {
+    --font-heading: Arial, Helvetica, sans-serif;
+    --font-body:    Arial, Helvetica, sans-serif;
+    --card-radius:  2px;
+    --btn-radius:   2px;
+    font-family: Arial, Helvetica, sans-serif !important;
+    background-color: #121212 !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    scroll-behavior: auto !important;
+}
+
+html.light-mode.compatibility-mode,
+html.light-mode body.compatibility-mode,
+body.light-mode.compatibility-mode {
+    background-color: #F0F0F0 !important;
+    background-image: none !important;
+    color: #111111 !important;
+}
+
+/* 1. Native system font, no animations/transitions, no filters, no shadows */
+html.compatibility-mode *,
+html.compatibility-mode *::before,
+html.compatibility-mode *::after,
+body.compatibility-mode *,
+body.compatibility-mode *::before,
+body.compatibility-mode *::after {
+    font-family: Arial, Helvetica, sans-serif !important;
+    animation: none !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    scroll-behavior: auto !important;
+}
+
+/* 2. Hide decorative floating background balls completely */
+html.compatibility-mode .floating-balls,
+html.compatibility-mode .bg-balls,
+html.compatibility-mode .bg-ball,
+body.compatibility-mode .floating-balls,
+body.compatibility-mode .bg-balls,
+body.compatibility-mode .bg-ball {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+}
+
+/* 3. Headers & Footers: flat solid background + high-contrast border */
+html.compatibility-mode .site-header,
+html.compatibility-mode .game-header,
+html.compatibility-mode .stats-bar,
+html.compatibility-mode .game-footer,
+html.compatibility-mode .lb-footer,
+body.compatibility-mode .site-header,
+body.compatibility-mode .game-header,
+body.compatibility-mode .stats-bar,
+body.compatibility-mode .game-footer,
+body.compatibility-mode .lb-footer {
+    background: #1A1A1A !important;
+    background-color: #1A1A1A !important;
+    background-image: none !important;
+    border-color: #4CAF50 !important;
+    border-width: 2px !important;
+}
+
+html.light-mode.compatibility-mode .site-header,
+html.light-mode.compatibility-mode .game-header,
+html.light-mode.compatibility-mode .stats-bar,
+html.light-mode.compatibility-mode .game-footer,
+html.light-mode.compatibility-mode .lb-footer,
+body.light-mode.compatibility-mode .site-header,
+body.light-mode.compatibility-mode .game-header,
+body.light-mode.compatibility-mode .stats-bar,
+body.light-mode.compatibility-mode .game-footer,
+body.light-mode.compatibility-mode .lb-footer {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border-color: #4CAF50 !important;
+}
+
+html.compatibility-mode .stat-col,
+body.compatibility-mode .stat-col {
+    border-right: 2px solid #777777 !important;
+}
+html.compatibility-mode .stat-col:last-child,
+body.compatibility-mode .stat-col:last-child {
+    border-right: none !important;
+}
+
+/* 4. Cards, Modals, Dropdowns, Rows, Panels: flat solid background, 2px solid border, 2px radius */
+html.compatibility-mode .login-card,
+html.compatibility-mode .prefs-card,
+html.compatibility-mode .config-card,
+html.compatibility-mode .modal-card,
+html.compatibility-mode .game-card,
+html.compatibility-mode .mode-card,
+html.compatibility-mode .edit-account-card,
+html.compatibility-mode .verify-card,
+html.compatibility-mode .faq-item,
+html.compatibility-mode #zona-invitado,
+html.compatibility-mode .guest-cta-bar,
+html.compatibility-mode .lb-guest-cta,
+html.compatibility-mode .lb-row,
+html.compatibility-mode .lb-row--gold,
+html.compatibility-mode .lb-row--silver,
+html.compatibility-mode .lb-row--bronze,
+html.compatibility-mode .lb-loading,
+html.compatibility-mode .friend-row,
+html.compatibility-mode .profile-dropdown,
+html.compatibility-mode .notif-dropdown,
+html.compatibility-mode .match-wait-card,
+html.compatibility-mode .board-loading-card,
+html.compatibility-mode .loading-card,
+html.compatibility-mode .reaction-popup,
+html.compatibility-mode .stat-tooltip,
+html.compatibility-mode .autocomplete-results,
+body.compatibility-mode .login-card,
+body.compatibility-mode .prefs-card,
+body.compatibility-mode .config-card,
+body.compatibility-mode .modal-card,
+body.compatibility-mode .game-card,
+body.compatibility-mode .mode-card,
+body.compatibility-mode .edit-account-card,
+body.compatibility-mode .verify-card,
+body.compatibility-mode .faq-item,
+body.compatibility-mode #zona-invitado,
+body.compatibility-mode .guest-cta-bar,
+body.compatibility-mode .lb-guest-cta,
+body.compatibility-mode .lb-row,
+body.compatibility-mode .lb-row--gold,
+body.compatibility-mode .lb-row--silver,
+body.compatibility-mode .lb-row--bronze,
+body.compatibility-mode .lb-loading,
+body.compatibility-mode .friend-row,
+body.compatibility-mode .profile-dropdown,
+body.compatibility-mode .notif-dropdown,
+body.compatibility-mode .match-wait-card,
+body.compatibility-mode .board-loading-card,
+body.compatibility-mode .loading-card,
+body.compatibility-mode .reaction-popup,
+body.compatibility-mode .stat-tooltip,
+body.compatibility-mode .autocomplete-results {
+    background: #222222 !important;
+    background-color: #222222 !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+}
+
+html.light-mode.compatibility-mode .login-card,
+html.light-mode.compatibility-mode .prefs-card,
+html.light-mode.compatibility-mode .config-card,
+html.light-mode.compatibility-mode .modal-card,
+html.light-mode.compatibility-mode .game-card,
+html.light-mode.compatibility-mode .mode-card,
+html.light-mode.compatibility-mode .edit-account-card,
+html.light-mode.compatibility-mode .verify-card,
+html.light-mode.compatibility-mode .faq-item,
+html.light-mode.compatibility-mode #zona-invitado,
+html.light-mode.compatibility-mode .guest-cta-bar,
+html.light-mode.compatibility-mode .lb-guest-cta,
+html.light-mode.compatibility-mode .lb-row,
+html.light-mode.compatibility-mode .lb-row--gold,
+html.light-mode.compatibility-mode .lb-row--silver,
+html.light-mode.compatibility-mode .lb-row--bronze,
+html.light-mode.compatibility-mode .lb-loading,
+html.light-mode.compatibility-mode .friend-row,
+html.light-mode.compatibility-mode .profile-dropdown,
+html.light-mode.compatibility-mode .notif-dropdown,
+html.light-mode.compatibility-mode .match-wait-card,
+html.light-mode.compatibility-mode .board-loading-card,
+html.light-mode.compatibility-mode .loading-card,
+html.light-mode.compatibility-mode .reaction-popup,
+html.light-mode.compatibility-mode .autocomplete-results {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+    color: #111111 !important;
+}
+
+/* 5. Inputs, Search Bars, Buttons, Badges & Tabs */
+html.compatibility-mode input:not([type="checkbox"]):not([type="radio"]),
+html.compatibility-mode textarea,
+html.compatibility-mode select,
+html.compatibility-mode .form-input,
+html.compatibility-mode .modal-input,
+html.compatibility-mode .otp-input,
+html.compatibility-mode .search-bar,
+html.compatibility-mode .search-input,
+html.compatibility-mode #input-palabra-clave,
+body.compatibility-mode input:not([type="checkbox"]):not([type="radio"]),
+body.compatibility-mode textarea,
+body.compatibility-mode select,
+body.compatibility-mode .form-input,
+body.compatibility-mode .modal-input,
+body.compatibility-mode .otp-input,
+body.compatibility-mode .search-bar,
+body.compatibility-mode .search-input,
+body.compatibility-mode #input-palabra-clave {
+    background: #141414 !important;
+    background-color: #141414 !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    border: 2px solid #777777 !important;
+    border-radius: 2px !important;
+}
+
+html.light-mode.compatibility-mode input:not([type="checkbox"]):not([type="radio"]),
+html.light-mode.compatibility-mode textarea,
+html.light-mode.compatibility-mode select,
+html.light-mode.compatibility-mode .form-input,
+html.light-mode.compatibility-mode .modal-input,
+html.light-mode.compatibility-mode .otp-input,
+html.light-mode.compatibility-mode .search-bar,
+html.light-mode.compatibility-mode .search-input,
+html.light-mode.compatibility-mode #input-palabra-clave {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #111111 !important;
+    border: 2px solid #555555 !important;
+    border-radius: 2px !important;
+}
+
+html.compatibility-mode input:focus,
+html.compatibility-mode .search-input:focus,
+html.compatibility-mode .search-bar:focus,
+body.compatibility-mode input:focus,
+body.compatibility-mode .search-input:focus,
+body.compatibility-mode .search-bar:focus {
+    border-color: #4CAF50 !important;
+}
+
+html.compatibility-mode .btn-outline,
+html.compatibility-mode .btn-primary,
+html.compatibility-mode .btn-mode,
+html.compatibility-mode .btn-confirm,
+html.compatibility-mode .btn-cta,
+html.compatibility-mode .btn-cta-green,
+html.compatibility-mode .btn-cta-ghost,
+html.compatibility-mode .btn-cta-solid,
+html.compatibility-mode .modal-btn-primary,
+html.compatibility-mode .modal-btn-secondary,
+html.compatibility-mode .btn-add,
+html.compatibility-mode .btn-req,
+html.compatibility-mode .notif-match-btn,
+html.compatibility-mode .profile-btn,
+html.compatibility-mode .notif-btn,
+html.compatibility-mode .lb-tabs,
+html.compatibility-mode .lb-tab,
+html.compatibility-mode .amigos-tab,
+html.compatibility-mode .lb-rank-badge,
+body.compatibility-mode .btn-outline,
+body.compatibility-mode .btn-primary,
+body.compatibility-mode .btn-mode,
+body.compatibility-mode .btn-confirm,
+body.compatibility-mode .btn-cta,
+body.compatibility-mode .btn-cta-green,
+body.compatibility-mode .btn-cta-ghost,
+body.compatibility-mode .btn-cta-solid,
+body.compatibility-mode .modal-btn-primary,
+body.compatibility-mode .modal-btn-secondary,
+body.compatibility-mode .btn-add,
+body.compatibility-mode .btn-req,
+body.compatibility-mode .notif-match-btn,
+body.compatibility-mode .profile-btn,
+body.compatibility-mode .notif-btn,
+body.compatibility-mode .lb-tabs,
+body.compatibility-mode .lb-tab,
+body.compatibility-mode .amigos-tab,
+body.compatibility-mode .lb-rank-badge {
+    border-radius: 2px !important;
+    border: 2px solid #4CAF50 !important;
+    background-image: none !important;
+}
+
+/* 6. Ta-Te-Ti Board cells & Timer: classic solid flat look */
+html.compatibility-mode .playable-cell,
+body.compatibility-mode .playable-cell {
+    background: #1B1B1B !important;
+    background-color: #1B1B1B !important;
+    background-image: none !important;
+    border: 2px solid #777777 !important;
+    border-radius: 2px !important;
+}
+
+html.light-mode.compatibility-mode .playable-cell,
+body.light-mode.compatibility-mode .playable-cell {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 2px solid #555555 !important;
+}
+
+html.compatibility-mode .playable-cell:hover,
+html.compatibility-mode .playable-cell.active-selection,
+body.compatibility-mode .playable-cell:hover,
+body.compatibility-mode .playable-cell.active-selection {
+    border: 2px solid #4CAF50 !important;
+    background: #253826 !important;
+    transform: none !important;
+}
+
+html.light-mode.compatibility-mode .playable-cell:hover,
+html.light-mode.compatibility-mode .playable-cell.active-selection,
+body.light-mode.compatibility-mode .playable-cell:hover,
+body.light-mode.compatibility-mode .playable-cell.active-selection {
+    border: 2px solid #4CAF50 !important;
+    background: #E8F5E9 !important;
+    transform: none !important;
+}
+
+html.compatibility-mode .cond-top,
+html.compatibility-mode .cond-left,
+body.compatibility-mode .cond-top,
+body.compatibility-mode .cond-left {
+    background: #FFFFFF !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+}
+
+html.compatibility-mode .timer-display,
+body.compatibility-mode .timer-display {
+    background: #1A1A1A !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+}
+
+html.compatibility-mode .game-card:hover,
+html.compatibility-mode .mode-card:hover,
+html.compatibility-mode .lb-row:hover,
+html.compatibility-mode .btn-confirm:hover,
+body.compatibility-mode .game-card:hover,
+body.compatibility-mode .mode-card:hover,
+body.compatibility-mode .lb-row:hover,
+body.compatibility-mode .btn-confirm:hover {
+    transform: none !important;
+}

@@ -143,6 +143,29 @@
         ['Tu racha aumenta por cada día consecutivo que juegues. ¡Recibís +10 puntos extra por cada día de racha acumulado!', 'Your streak increases for every consecutive day you play. You earn +10 bonus points for each accumulated streak day!'],
         ['PUNTOS TOTALES', 'TOTAL POINTS'],
         ['Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.', 'Total sum of points earned across all your matches and bonuses.'],
+        ['Rangos: Madera (0-299), Hierro (300-599), Bronce (600-899), Plata (900-1199), Oro (1200-1499), Diamante (1500+).', 'Ranks: Wood (0-299), Iron (300-599), Bronze (600-899), Silver (900-1199), Gold (1200-1499), Diamond (1500+).'],
+        ['Suma total de los puntos obtenidos en todas tus partidas y bonificaciones. Rangos: Madera (0-299), Hierro (300-599), Bronce (600-899), Plata (900-1199), Oro (1200-1499), Diamante (1500+).', 'Total sum of points earned across all your matches and bonuses. Ranks: Wood (0-299), Iron (300-599), Bronze (600-899), Silver (900-1199), Gold (1200-1499), Diamond (1500+).'],
+        ['Madera III', 'Wood III'],
+        ['Madera II', 'Wood II'],
+        ['Madera I', 'Wood I'],
+        ['Madera', 'Wood'],
+        ['Hierro III', 'Iron III'],
+        ['Hierro II', 'Iron II'],
+        ['Hierro I', 'Iron I'],
+        ['Hierro', 'Iron'],
+        ['Bronce III', 'Bronze III'],
+        ['Bronce II', 'Bronze II'],
+        ['Bronce I', 'Bronze I'],
+        ['Bronce', 'Bronze'],
+        ['Plata III', 'Silver III'],
+        ['Plata II', 'Silver II'],
+        ['Plata I', 'Silver I'],
+        ['Plata', 'Silver'],
+        ['Oro III', 'Gold III'],
+        ['Oro II', 'Gold II'],
+        ['Oro I', 'Gold I'],
+        ['Oro', 'Gold'],
+        ['Diamante', 'Diamond'],
         ['PORCENTAJE DE VICTORIAS', 'WIN RATE'],
         ['Porcentaje de Victorias =', 'Win Rate ='],
         ['¡Sumate a la cancha!', 'Join the pitch!'],
@@ -349,6 +372,13 @@
             if ((m = normStr.match(/^Esperando a (.+)\.\.\.$/))) return 'Waiting for ' + m[1] + '...';
             if ((m = normStr.match(/^Turno de (.+)$/))) return m[1] + "'s turn";
             if ((m = normStr.match(/^¡Ganó (.+)!$/))) return m[1] + ' won!';
+            // Points + Rank: "0 pts · Madera III" -> "0 pts · Wood III"
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Madera(\s+(?:III|II|I))?$/i))) return m[1] + 'Wood' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Hierro(\s+(?:III|II|I))?$/i))) return m[1] + 'Iron' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Bronce(\s+(?:III|II|I))?$/i))) return m[1] + 'Bronze' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Plata(\s+(?:III|II|I))?$/i))) return m[1] + 'Silver' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Oro(\s+(?:III|II|I))?$/i))) return m[1] + 'Gold' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Diamante$/i))) return m[1] + 'Diamond';
         } else {
             if ((m = normStr.match(/^(🔥\s*\d+)\s+Days?$/i))) return m[1] + ' Días';
             if ((m = normStr.match(/^(\d+)\s+hits?$/i))) return m[1] + ' aciertos';
@@ -366,6 +396,12 @@
             if ((m = normStr.match(/^Waiting for (.+)\.\.\.$/))) return 'Esperando a ' + m[1] + '...';
             if ((m = normStr.match(/^(.+)'s turn$/))) return 'Turno de ' + m[1];
             if ((m = normStr.match(/^(.+) won!$/))) return '¡Ganó ' + m[1] + '!';
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Wood(\s+(?:III|II|I))?$/i))) return m[1] + 'Madera' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Iron(\s+(?:III|II|I))?$/i))) return m[1] + 'Hierro' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Bronze(\s+(?:III|II|I))?$/i))) return m[1] + 'Bronce' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Silver(\s+(?:III|II|I))?$/i))) return m[1] + 'Plata' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Gold(\s+(?:III|II|I))?$/i))) return m[1] + 'Oro' + (m[2] || '');
+            if ((m = normStr.match(/^([\d,.]+\s*pts\s*·\s*)Diamond$/i))) return m[1] + 'Diamante';
         }
         return null;
     }
@@ -392,8 +428,9 @@
 
     function shouldSkipElementForI18n(el) {
         if (!el || el.nodeType !== 1) return false;
-        var tag = el.tagName;
+        var tag = String(el.tagName || '').toUpperCase();
         if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT' || tag === 'SVG') return true;
+        if (el.closest && el.closest('svg')) return true;
         // CRITICAL RULE: Never translate usernames, footballer names, or club names
         var id = el.id || '';
         if (id === 'profileUsername' || id === 'config-username' || id === 'user-display' ||
@@ -610,6 +647,7 @@
     function applyCompatibility(enabled) {
         var on = Boolean(enabled);
         document.documentElement.classList.toggle('compatibility-mode', on);
+        document.documentElement.setAttribute('data-compatibility-mode', on ? 'true' : 'false');
         if (document.body) {
             document.body.classList.toggle('compatibility-mode', on);
             var toggleCompat = document.getElementById('toggle-compat') || document.getElementById('toggle-compatibility');
@@ -634,8 +672,118 @@
     }
 
     function readCompatStored() {
-        return readStorage('pref_toggle-compat') === 'true';
+        var v = readStorage('pref_toggle-compat');
+        if (v === 'true') return true;
+        if (v === 'false') return false;
+        return readStorage('footlel_compatibility_mode') === 'true';
     }
+
+    /* ════════════════════════════════════════════════════════════════
+       RANK SYSTEM WITH DISTINCTIVE SVG SHIELDS (getRankInfo)
+       Scale:
+         0-299    : Madera / Wood    (#8D5B4C) -> III (0-99), II (100-199), I (200-299)
+         300-599  : Hierro / Iron    (#78909C) -> III (300-399), II (400-499), I (500-599)
+         600-899  : Bronce / Bronze  (#CD7F32) -> III (600-699), II (700-799), I (800-899)
+         900-1199 : Plata / Silver   (#E0E0E0) -> III (900-999), II (1000-1099), I (1100-1199)
+         1200-1499: Oro / Gold       (#FFD700) -> III (1200-1299), II (1300-1399), I (1400-1499)
+         1500+    : Diamante / Diamond (#00E5FF)
+       ════════════════════════════════════════════════════════════════ */
+    var RANK_SHIELD_SVGS = {
+        wood: '<svg class="rank-shield-svg rank-shield--wood" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+              '<path d="M12 2L4 5.5v6.1C4 16.9 7.4 21.6 12 23c4.6-1.4 8-6.1 8-11.4V5.5L12 2z" fill="#8D5B4C" stroke="#5D3A2E" stroke-width="1.6"/>' +
+              '<path d="M12 4.2L6.2 6.8v4.7c0 4.1 2.5 7.9 5.8 9.1 3.3-1.2 5.8-5 5.8-9.1V6.8L12 4.2z" fill="#A4705E" opacity="0.55"/>' +
+              '<path d="M9.5 5.8v13.2M14.5 5.8v13.2M12 4.2v16.4" stroke="#5D3A2E" stroke-width="1" stroke-linecap="round" opacity="0.65"/>' +
+              '</svg>',
+        iron: '<svg class="rank-shield-svg rank-shield--iron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+              '<path d="M12 2L3.8 5.2v6.4C3.8 17 7.3 21.7 12 23c4.7-1.3 8.2-6 8.2-11.4V5.2L12 2z" fill="#78909C" stroke="#37474F" stroke-width="1.6"/>' +
+              '<path d="M12 3.8v17.4c3.6-1.1 6.4-4.9 6.4-9.6V6.4L12 3.8z" fill="#90A4AE" opacity="0.55"/>' +
+              '<path d="M7.5 11.5L12 7.5l4.5 4-4.5 4-4.5-4z" fill="#CFD8DC" stroke="#455A64" stroke-width="1"/>' +
+              '</svg>',
+        bronze: '<svg class="rank-shield-svg rank-shield--bronze" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+                '<path d="M12 2L4 5.3v6.3C4 16.9 7.4 21.6 12 23c4.6-1.4 8-6.1 8-11.4V5.3L12 2z" fill="#CD7F32" stroke="#7A4414" stroke-width="1.6"/>' +
+                '<path d="M12 4.1L6.2 6.6v4.9c0 4.1 2.5 7.8 5.8 9 3.3-1.2 5.8-4.9 5.8-9V6.6L12 4.1z" fill="#E39A54" opacity="0.45"/>' +
+                '<path d="M7.5 13l4.5-4.2L16.5 13M8.5 16l3.5-3.2 3.5 3.2" fill="none" stroke="#FFF3E0" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>' +
+                '</svg>',
+        silver: '<svg class="rank-shield-svg rank-shield--silver" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+                '<path d="M12 1.8L3.5 5.2v6.4c0 5.5 3.6 10.3 8.5 11.6 4.9-1.3 8.5-6.1 8.5-11.6V5.2L12 1.8z" fill="#E0E0E0" stroke="#757575" stroke-width="1.6"/>' +
+                '<path d="M12 3.6L5.8 6.2v5.3c0 4.3 2.7 8.1 6.2 9.3V3.6z" fill="#FFFFFF" opacity="0.65"/>' +
+                '<polygon points="12,6.5 13.5,10 17.2,10.3 14.4,12.7 15.2,16.4 12,14.5 8.8,16.4 9.6,12.7 6.8,10.3 10.5,10" fill="#757575"/>' +
+                '</svg>',
+        gold: '<svg class="rank-shield-svg rank-shield--gold" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+              '<path d="M12 1.6L3.4 5v6.6c0 5.6 3.7 10.4 8.6 11.8 4.9-1.4 8.6-6.2 8.6-11.8V5L12 1.6z" fill="#FFD700" stroke="#B8860B" stroke-width="1.6"/>' +
+              '<path d="M12 3.5L5.6 6.1v5.4c0 4.4 2.7 8.3 6.4 9.5 3.7-1.2 6.4-5.1 6.4-9.5V6.1L12 3.5z" fill="#FFF59D" opacity="0.5"/>' +
+              '<path d="M7.5 14.5l1.2-5.2 3.3 2.6 3.3-2.6 1.2 5.2H7.5z" fill="#8C6200" stroke="#FFFDE7" stroke-width="0.9" stroke-linejoin="round"/>' +
+              '</svg>',
+        diamond: '<svg class="rank-shield-svg rank-shield--diamond" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">' +
+                 '<path d="M12 1.5L3.2 5v6.6c0 5.7 3.8 10.5 8.8 11.9 5-1.4 8.8-6.2 8.8-11.9V5L12 1.5z" fill="#00E5FF" stroke="#00838F" stroke-width="1.6"/>' +
+                 '<path d="M12 3.3L5.5 6v5.5c0 4.5 2.8 8.4 6.5 9.6V3.3z" fill="#B2FFFF" opacity="0.55"/>' +
+                 '<polygon points="12,5.8 16.8,11.5 12,17.8 7.2,11.5" fill="#E0FFFF" stroke="#006064" stroke-width="1.1"/>' +
+                 '</svg>'
+    };
+
+    function getRankInfo(points, isEnglish) {
+        var eng = (typeof isEnglish === 'boolean') ? isEnglish : isEnglishStored();
+        var num = Number(points);
+        var pts = (!isFinite(num) || num < 0) ? 0 : Math.floor(num);
+
+        var tiers = [
+            { key: 'wood',    es: 'Madera',   en: 'Wood',    color: '#8D5B4C' },
+            { key: 'iron',    es: 'Hierro',   en: 'Iron',    color: '#78909C' },
+            { key: 'bronze',  es: 'Bronce',   en: 'Bronze',  color: '#CD7F32' },
+            { key: 'silver',  es: 'Plata',    en: 'Silver',  color: '#E0E0E0' },
+            { key: 'gold',    es: 'Oro',      en: 'Gold',    color: '#FFD700' },
+            { key: 'diamond', es: 'Diamante', en: 'Diamond', color: '#00E5FF' }
+        ];
+
+        var tier;
+        var division = null;
+
+        if (pts >= 1500) {
+            tier = tiers[5];
+            division = null;
+        } else {
+            var tierIndex = Math.min(4, Math.floor(pts / 300));
+            tier = tiers[tierIndex];
+            var rem = pts % 300;
+            if (rem < 100) {
+                division = 'III';
+            } else if (rem < 200) {
+                division = 'II';
+            } else {
+                division = 'I';
+            }
+        }
+
+        var nameEs = division ? (tier.es + ' ' + division) : tier.es;
+        var nameEn = division ? (tier.en + ' ' + division) : tier.en;
+        var rankName = eng ? nameEn : nameEs;
+        var svgMarkup = RANK_SHIELD_SVGS[tier.key];
+
+        return {
+            points: pts,
+            key: tier.key,
+            tier: tier.key,
+            material: eng ? tier.en : tier.es,
+            materialEs: tier.es,
+            materialEn: tier.en,
+            division: division,
+            name: rankName,
+            label: rankName,
+            nameEs: nameEs,
+            nameEn: nameEn,
+            color: tier.color,
+            svg: svgMarkup,
+            shieldSvg: svgMarkup
+        };
+    }
+
+    function formatPointsWithRank(points, isEnglish) {
+        var info = getRankInfo(points, isEnglish);
+        var formattedPts = info.points.toLocaleString('en-US') + ' pts';
+        return info.svg + '<span class="rank-stat-text">' + formattedPts + ' · ' + info.name + '</span>';
+    }
+
+    window.getRankInfo = getRankInfo;
 
     /* GET /config/get-user-config (whenever footlel_token exists). */
     function fetchUserConfig() {
@@ -1517,6 +1665,9 @@
         setLanguage: setLanguage,
         applyLanguage: applyLanguage,
         t: translateHelper,
+        getRankInfo: getRankInfo,
+        formatPointsWithRank: formatPointsWithRank,
+        RANK_SHIELD_SVGS: RANK_SHIELD_SVGS,
         setDarkModeState: function (state) { return saveCurrentConfig({ dark: state }); },
         setAnimationState: function (state) { return saveCurrentConfig({ anim: state }); },
         setCompatibilityState: function (state) { return saveCurrentConfig({ compat: state }); },
@@ -1545,6 +1696,6 @@
 
     /* Changes made in another tab. */
     window.addEventListener('storage', function (e) {
-        if (e.key === THEME_KEY || e.key === ANIM_KEY || e.key === LANG_KEY || e.key === IS_ENGLISH_KEY || e.key === null) applyFromStorage();
+        if (e.key === THEME_KEY || e.key === ANIM_KEY || e.key === 'pref_toggle-compat' || e.key === 'footlel_compatibility_mode' || e.key === LANG_KEY || e.key === IS_ENGLISH_KEY || e.key === null) applyFromStorage();
     });
 })();

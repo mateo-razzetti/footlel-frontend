@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <script src="../../assets/scripts/global-preferences.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footlel — Tabla de Posiciones</title>
@@ -640,7 +640,18 @@
 
             var ptsSpan = document.createElement('span');
             ptsSpan.className = 'lb-points';
-            ptsSpan.textContent = formatPoints(item.points);
+            var isEng = localStorage.getItem('footlel_is_english') === 'true' || localStorage.getItem('footlel_lang') === 'en';
+            if (typeof window.getRankInfo === 'function') {
+                var rInfo = window.getRankInfo(item.points, isEng);
+                ptsSpan.innerHTML =
+                    '<span class="lb-rank-badge lb-rank-badge--' + rInfo.key + '" style="--rank-color:' + rInfo.color + ';">' +
+                        rInfo.svg +
+                        '<span class="lb-rank-name">' + rInfo.name + '</span>' +
+                    '</span>' +
+                    '<span class="lb-points-val">' + formatPoints(item.points) + '</span>';
+            } else {
+                ptsSpan.textContent = formatPoints(item.points);
+            }
 
             row.appendChild(rankCol);
             row.appendChild(avatarImg);
@@ -650,6 +661,12 @@
             lbList.appendChild(row);
         }
     }
+
+    window.addEventListener('footlel:language-changed', function () {
+        if (!isLoadingRanking) {
+            renderActiveTab();
+        }
+    });
 
     function renderActiveTab() {
         if (isLoadingRanking || (activeTab === 'amigos' && isLoadingFriendsList)) {
