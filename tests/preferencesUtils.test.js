@@ -19,6 +19,8 @@ import {
     parseMatchRequestNames,
     resolveThemeState,
     resolveAnimationState,
+    resolveCompatibilityState,
+    getRankInfo,
     getOrAssignAvatar
 } from '../services/preferencesUtils.js';
 
@@ -282,6 +284,49 @@ describe('Suite de Preferencias y Estado de Partida (preferencesUtils.js)', () =
             test('[Camino de Error] Storage no disponible: retorna fallback sin lanzar excepción', () => {
                 const result = getOrAssignAvatar('usuario', false, null);
                 expect(result).toBe(BASE_ROBOT_AVATARS[0]);
+            });
+        });
+
+        describe('Sistema de Rangos con Escudos SVG (getRankInfo) y Modo Compatibilidad (resolveCompatibilityState)', () => {
+            test('[Escala Completa Español e Inglés] Verifica divisiones III, II, I y colores de escudo SVG por material', () => {
+                expect(getRankInfo(0, false)).toMatchObject({ name: 'Madera III', color: '#8D5B4C', division: 'III' });
+                expect(getRankInfo(99, true)).toMatchObject({ name: 'Wood III', color: '#8D5B4C', division: 'III' });
+                expect(getRankInfo(100, false)).toMatchObject({ name: 'Madera II', color: '#8D5B4C', division: 'II' });
+                expect(getRankInfo(250, true)).toMatchObject({ name: 'Wood I', color: '#8D5B4C', division: 'I' });
+
+                expect(getRankInfo(300, false)).toMatchObject({ name: 'Hierro III', color: '#78909C', division: 'III' });
+                expect(getRankInfo(450, true)).toMatchObject({ name: 'Iron II', color: '#78909C', division: 'II' });
+                expect(getRankInfo(599, false)).toMatchObject({ name: 'Hierro I', color: '#78909C', division: 'I' });
+
+                expect(getRankInfo(600, false)).toMatchObject({ name: 'Bronce III', color: '#CD7F32', division: 'III' });
+                expect(getRankInfo(750, true)).toMatchObject({ name: 'Bronze II', color: '#CD7F32', division: 'II' });
+                expect(getRankInfo(899, false)).toMatchObject({ name: 'Bronce I', color: '#CD7F32', division: 'I' });
+
+                expect(getRankInfo(900, false)).toMatchObject({ name: 'Plata III', color: '#E0E0E0', division: 'III' });
+                expect(getRankInfo(1050, true)).toMatchObject({ name: 'Silver II', color: '#E0E0E0', division: 'II' });
+                expect(getRankInfo(1199, false)).toMatchObject({ name: 'Plata I', color: '#E0E0E0', division: 'I' });
+
+                expect(getRankInfo(1200, false)).toMatchObject({ name: 'Oro III', color: '#FFD700', division: 'III' });
+                expect(getRankInfo(1350, true)).toMatchObject({ name: 'Gold II', color: '#FFD700', division: 'II' });
+                expect(getRankInfo(1499, false)).toMatchObject({ name: 'Oro I', color: '#FFD7F00'.replace('F00', '00'), division: 'I' });
+
+                const diamondEs = getRankInfo(1500, false);
+                expect(diamondEs).toMatchObject({ name: 'Diamante', color: '#00E5FF', division: null });
+                expect(diamondEs.svg).toContain('#00E5FF');
+
+                const diamondEn = getRankInfo(2400, true);
+                expect(diamondEn).toMatchObject({ name: 'Diamond', color: '#00E5FF', division: null });
+            });
+
+            test('[Modo Compatibilidad RNF7] Resuelve clase CSS compatibility-mode correctamente', () => {
+                expect(resolveCompatibilityState('true')).toEqual({
+                    compatibilityEnabled: true,
+                    compatClass: 'compatibility-mode'
+                });
+                expect(resolveCompatibilityState('false')).toEqual({
+                    compatibilityEnabled: false,
+                    compatClass: ''
+                });
             });
         });
     });

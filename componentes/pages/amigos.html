@@ -10,7 +10,7 @@
             }
         })();
     </script>
-    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <script src="../../assets/scripts/global-preferences.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Footlel — Mis Amigos</title>
@@ -1889,15 +1889,26 @@
     renderRequestsTab();
     renderSearchUsers();
 
-    // If redirected from the header notifications bell, open "Solicitudes" tab automatically
+    // Check URL query parameter (?tab=friends) or sessionStorage tab request, defaulting to "Mis Amigos" ("amigos")
     try {
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlTab = (urlParams.get('tab') || '').trim().toLowerCase();
         var requestedTab = sessionStorage.getItem('footlel_open_tab');
         if (requestedTab) {
             sessionStorage.removeItem('footlel_open_tab');
-            var matchingTabBtn = document.querySelector('.amigos-tab[data-tab="' + requestedTab + '"]');
-            if (matchingTabBtn) {
-                activateTab(matchingTabBtn);
-            }
+        }
+        var rawTarget = urlTab || (requestedTab ? String(requestedTab).trim().toLowerCase() : 'amigos');
+        var resolvedTab = 'amigos';
+        if (rawTarget === 'friends' || rawTarget === 'amigos') {
+            resolvedTab = 'amigos';
+        } else if (rawTarget === 'requests' || rawTarget === 'solicitudes') {
+            resolvedTab = 'solicitudes';
+        } else if (rawTarget === 'search' || rawTarget === 'buscar') {
+            resolvedTab = 'buscar';
+        }
+        var matchingTabBtn = document.querySelector('.amigos-tab[data-tab="' + resolvedTab + '"]');
+        if (matchingTabBtn) {
+            activateTab(matchingTabBtn);
         }
     } catch (_) {}
 

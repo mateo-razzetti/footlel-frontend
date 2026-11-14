@@ -359,8 +359,11 @@ body {
     white-space: nowrap;
 }
 
-/* ── Puntos ────────────────────────────────────────────────────── */
+/* ── Puntos y Rango ───────────────────────────────────────────── */
 .lb-points {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
     font-family: var(--font-heading);
     font-size: 13px;
     font-weight: 700;
@@ -371,6 +374,31 @@ body {
 .lb-row--gold   .lb-points { color: var(--color-gold);   }
 .lb-row--silver .lb-points { color: var(--color-silver); }
 .lb-row--bronze .lb-points { color: var(--color-bronze); }
+
+.lb-rank-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 9px 3px 6px;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--rank-color, rgba(158, 158, 158, 0.35));
+    font-family: var(--font-body);
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+.lb-rank-badge .rank-shield-svg {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    display: inline-block;
+}
+html.light-mode .lb-rank-badge {
+    background: rgba(0, 0, 0, 0.04);
+    color: #1A1A1A;
+}
 
 /* ════════════════════════════════════════════════════════════════
    GUEST CTA
