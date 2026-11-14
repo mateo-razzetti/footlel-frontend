@@ -656,15 +656,27 @@
         return msg;
     }
 
-    function isDailyChallengeCompletedError(detailText) {
+    const GUEST_DAILY_ERROR_MESSAGE =
+        'El Desafío Diario es exclusivo para usuarios registrados. Iniciá sesión o creá tu cuenta gratis para jugar.';
+
+    function isDailyChallengeStateError(detailText) {
         if (!detailText) return false;
         const norm = String(detailText).toLowerCase();
         return (
-            norm.includes('daily challenge') ||
+            norm.includes('error al obtener el estado del daily challenge') ||
+            norm.includes('obtener el estado del daily')
+        );
+    }
+
+    function isDailyChallengeCompletedError(detailText) {
+        if (!detailText) return false;
+        if (isDailyChallengeStateError(detailText)) return false;
+        const norm = String(detailText).toLowerCase();
+        return (
             norm.includes('vuelve mañana') ||
             norm.includes('vuelve manana') ||
-            norm.includes('completado el daily') ||
-            norm.includes('ya ha completado')
+            norm.includes('ya ha completado') ||
+            norm.includes('completado el daily')
         );
     }
 
@@ -816,21 +828,29 @@
 
                 if (!response.ok) {
                     const rawErrorText = await response.text();
+                    let data = null;
                     let extractedDetail = rawErrorText;
                     try {
-                        const errJson = JSON.parse(rawErrorText);
-                        if (errJson && (errJson.detail || errJson.message)) {
-                            extractedDetail = String(errJson.detail || errJson.message);
+                        data = JSON.parse(rawErrorText);
+                        if (data && (data.detail || data.message)) {
+                            extractedDetail = String(data.detail || data.message);
                         }
                     } catch (_) {}
                     lastStartBackendDetail = extractedDetail;
 
-                    // Si el backend informa que ya completó el desafío diario hoy, abrimos el modal de inmediato sin reintentar
+                    // 1) Si data.detail incluye "vuelve mañana" o "ya ha completado", mostramos el modal #modal-desafio con la cuenta regresiva
                     if (isDailyChallengeCompletedError(extractedDetail)) {
                         return { dailyAlreadyCompleted: true, detail: extractedDetail };
                     }
-                    // Si es otro error de negocio (4xx) con detail explícito del backend, lo mostramos directo
-                    if (response.status >= 400 && response.status < 500 && extractedDetail) {
+
+                    // 2) Si data.detail incluye "error al obtener el estado del daily challenge" (usuario Invitado), devolvemos el error amigable sin reintentar ni abrir el modal de completado
+                    if (isDailyChallengeStateError(extractedDetail)) {
+                        lastStartBackendDetail = GUEST_DAILY_ERROR_MESSAGE;
+                        return { backendError: true, isGuestError: true, detail: GUEST_DAILY_ERROR_MESSAGE };
+                    }
+
+                    // 3) Cualquier otro error de negocio con detail del backend: cartel de error estilizado en la interfaz
+                    if (extractedDetail && ((response.status >= 400 && response.status < 500) || (data && data.detail))) {
                         return { backendError: true, detail: extractedDetail };
                     }
                     throw new Error(`Status ${response.status}: ${rawErrorText}`);
@@ -860,12 +880,22 @@
         if (existing) existing.remove();
 
         const hasBackendDetail = Boolean(backendDetail && String(backendDetail).trim());
+        const isGuestDailyError =
+            hasBackendDetail &&
+            (backendDetail === GUEST_DAILY_ERROR_MESSAGE || isDailyChallengeStateError(backendDetail));
+
         const titleText = hasBackendDetail
             ? 'No se pudo iniciar la partida'
             : 'No pudimos conectar con el servidor';
-        const subtitleText = hasBackendDetail
-            ? formatBackendError(backendDetail)
-            : 'Probá recargar la página en unos segundos.';
+        const subtitleText = isGuestDailyError
+            ? GUEST_DAILY_ERROR_MESSAGE
+            : hasBackendDetail
+                ? formatBackendError(backendDetail)
+                : 'Probá recargar la página en unos segundos.';
+
+        const primaryActionHtml = isGuestDailyError
+            ? '<a href="login.html" class="connection-error-btn">Iniciar Sesión</a>'
+            : '<button type="button" class="connection-error-btn" onclick="location.reload()">Reintentar</button>';
 
         const notice = document.createElement('div');
         notice.className = 'connection-error-notice';
@@ -881,7 +911,7 @@
             </div>
             <p class="connection-error-subtitle"></p>
             <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
-                <button type="button" class="connection-error-btn" onclick="location.reload()">Reintentar</button>
+                ${primaryActionHtml}
                 <a href="modalidades.html" class="connection-error-btn" style="background:transparent;border:1px solid rgba(255,255,255,0.28);">Volver</a>
             </div>
         `;
