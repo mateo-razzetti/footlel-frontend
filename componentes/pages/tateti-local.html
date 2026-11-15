@@ -1525,7 +1525,9 @@
         const textElement = popupElement.querySelector('.reaction-text');
 
         if (textElement && reaction) {
-            textElement.textContent = reaction.text;
+            textElement.textContent = (window.FootlelPrefs && typeof window.FootlelPrefs.t === 'function')
+                ? window.FootlelPrefs.t(reaction.text)
+                : reaction.text;
         }
 
         const revealPopup = () => {
@@ -1556,13 +1558,17 @@
     }
 
     function showButtonError(message) {
-        const originalText = dom.btnConfirm.textContent;
-        dom.btnConfirm.textContent = message;
+        const translatedMsg = (window.FootlelPrefs && typeof window.FootlelPrefs.t === 'function')
+            ? window.FootlelPrefs.t(message)
+            : message;
+        dom.btnConfirm.textContent = translatedMsg;
         dom.btnConfirm.style.backgroundColor = '#F44336';
         dom.btnConfirm.style.transform = 'scale(1.05)';
 
         setTimeout(() => {
-            dom.btnConfirm.textContent = originalText;
+            dom.btnConfirm.textContent = (window.FootlelPrefs && typeof window.FootlelPrefs.t === 'function')
+                ? window.FootlelPrefs.t('Confirmar Jugada')
+                : 'Confirmar Jugada';
             dom.btnConfirm.style.backgroundColor = '';
             dom.btnConfirm.style.transform = '';
         }, BUTTON_ERROR_DURATION_MS);

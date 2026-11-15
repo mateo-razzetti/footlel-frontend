@@ -726,12 +726,18 @@
     // Returns true on success, false if aborted (see showFatalStartError / openDailyCompletedModal).
     // Used both at game start (initGame) and when advancing rounds
     // (resetBoardState) — see rationale in resetBoardState comment.
-    async function loadFreshGameBoard() {
+    async function loadFreshGameBoard(isAdvancingRound = false) {
         setBoardLoadingState(true);
         lastStartBackendDetail = null;
-        const startData = await fetchGameStartData();
+        const isMidMatch =
+            Boolean(isAdvancingRound) ||
+            ((gameState.scoreP1 > 0 || gameState.scoreP2 > 0) &&
+                gameState.scoreP1 < ROUNDS_TO_WIN &&
+                gameState.scoreP2 < ROUNDS_TO_WIN);
 
-        if (startData && startData.dailyAlreadyCompleted) {
+        const startData = await fetchGameStartData(isMidMatch);
+
+        if (startData && startData.dailyAlreadyCompleted && !isMidMatch) {
             setBoardLoadingState(false);
             openDailyCompletedModal();
             return false;
@@ -754,10 +760,13 @@
         return true;
     }
 
-    // Determines if the upcoming round can decide the match (either player is 1 win away from ROUNDS_TO_WIN).
+    // Determines if the upcoming round is the decisive 1-1 tiebreaker round
+    // (both players are 1 win away from ROUNDS_TO_WIN = 2).
+    // IMPORTANT: Must use && (not ||), otherwise Round 2 at 1-0 sends is_last_round: true
+    // and if the rival ties 1-1, the backend prematurely closes the Daily Challenge.
     function isDecisiveRound() {
         return (
-            gameState.scoreP1 >= ROUNDS_TO_WIN - 1 ||
+            gameState.scoreP1 >= ROUNDS_TO_WIN - 1 &&
             gameState.scoreP2 >= ROUNDS_TO_WIN - 1
         );
     }
@@ -797,7 +806,7 @@
         return response;
     }
 
-    async function fetchGameStartData() {
+    async function fetchGameStartData(isMidMatch = false) {
         // Retry because on Render cold-starts / CORS hiccups are common on
         // the first request. If NO attempt fetches a real board, it is better
         // to pause the game (see showFatalStartError) than to run with a mocked
@@ -838,8 +847,27 @@
                     } catch (_) {}
                     lastStartBackendDetail = extractedDetail;
 
-                    // 1) Si data.detail incluye "vuelve mañana" o "ya ha completado", mostramos el modal #modal-desafio con la cuenta regresiva
+                    // Si estamos en medio de la partida (ej. empate 1-1 pasando al desempate) y el backend
+                    // devolvió bloqueo de daily challenge antes de que alguien llegue a 2 puntos, pedimos
+                    // el tablero de desempate sin abortar la partida prematuramente.
                     if (isDailyChallengeCompletedError(extractedDetail)) {
+                        if (isMidMatch && gameState.scoreP1 < ROUNDS_TO_WIN && gameState.scoreP2 < ROUNDS_TO_WIN) {
+                            const tiebreakRes = await postStartGame({
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': 'Bearer ' + token
+                                },
+                                body: JSON.stringify({ is_last_round: Boolean(isLastRound), is_daily_challenge: false })
+                            });
+                            if (tiebreakRes.ok) {
+                                const tiebreakData = await tiebreakRes.json();
+                                if (typeof tiebreakData.local_player_turn === 'boolean') {
+                                    gameState.currentPlayer = tiebreakData.local_player_turn ? 1 : 2;
+                                }
+                                return tiebreakData;
+                            }
+                        }
                         return { dailyAlreadyCompleted: true, detail: extractedDetail };
                     }
 
@@ -1324,6 +1352,8 @@
     // setting is_playing to False. Previously, this function only cleared board
     // on client side and kept sending guesses against closed match — causing 500.
     // Now requests a new /game/start before continuing.
+    let isRoundTransitioning = false;
+
     async function resetBoardState() {
         stopRoundTimer();
         dom.btnConfirm.disabled = true;
@@ -1337,7 +1367,8 @@
         dom.playerSearch.value = '';
         clearConditionSlots();
 
-        const loaded = await loadFreshGameBoard();
+        const loaded = await loadFreshGameBoard(true);
+        isRoundTransitioning = false;
         if (!loaded) return;
 
         dom.btnConfirm.disabled = false;
@@ -1707,7 +1738,9 @@
         const textElement = popupElement.querySelector('.reaction-text');
 
         if (textElement && reaction) {
-            textElement.textContent = reaction.text;
+            textElement.textContent = (window.FootlelPrefs && typeof window.FootlelPrefs.t === 'function')
+                ? window.FootlelPrefs.t(reaction.text)
+                : reaction.text;
         }
 
         const revealPopup = () => {
@@ -1738,13 +1771,17 @@
     }
 
     function showButtonError(message) {
-        const originalText = dom.btnConfirm.textContent;
-        dom.btnConfirm.textContent = message;
+        const translatedMsg = (window.FootlelPrefs && typeof window.FootlelPrefs.t === 'function')
+            ? window.FootlelPrefs.t(message)
+            : message;
+        dom.btnConfirm.textContent = translatedMsg;
         dom.btnConfirm.style.backgroundColor = '#F44336';
         dom.btnConfirm.style.transform = 'scale(1.05)';
 
         setTimeout(() => {
-            dom.btnConfirm.textContent = originalText;
+            dom.btnConfirm.textContent = (window.FootlelPrefs && typeof window.FootlelPrefs.t === 'function')
+                ? window.FootlelPrefs.t('Confirmar Jugada')
+                : 'Confirmar Jugada';
             dom.btnConfirm.style.backgroundColor = '';
             dom.btnConfirm.style.transform = '';
         }, BUTTON_ERROR_DURATION_MS);
@@ -1850,24 +1887,32 @@
     // ONLY called after a valid hit (200 OK with valid cell) or 00:00 timeout
     // (see resumeRoundTimer). Incorrect guesses no longer route here.
     function resolveTurnOutcome() {
-        dom.playerSearch.disabled = false;
-        dom.btnConfirm.disabled = false;
-        dom.playerSearch.value = '';
+        if (gameState.isGameOver || isRoundTransitioning) return;
 
+        dom.playerSearch.value = '';
         const winningPlayer = gameState.currentPlayer;
 
         if (checkWinCondition(winningPlayer)) {
+            isRoundTransitioning = true;
             if (winningPlayer === 1) gameState.scoreP1 += 1; else gameState.scoreP2 += 1;
             updateScoreDisplay();
 
-            if (gameState.scoreP1 >= ROUNDS_TO_WIN || gameState.scoreP2 >= ROUNDS_TO_WIN) {
-                endGameMatch(winningPlayer);
+            const puntosJugador = gameState.scoreP1;
+            const puntosBot = gameState.scoreP2;
+
+            // "Al mejor de 3": la partida completa SOLO termina si alguien llega a >= 2 puntos.
+            // Con empate 1-1 (o 1-0 / 0-1) se muestra el modal de Fin de Ronda para jugar la siguiente ronda.
+            if (puntosJugador >= ROUNDS_TO_WIN || puntosBot >= ROUNDS_TO_WIN) {
+                endGameMatch(puntosJugador >= ROUNDS_TO_WIN ? 1 : 2);
             } else {
                 showRoundModal(winningPlayer, resetBoardState);
             }
         } else if (checkDrawCondition()) {
+            isRoundTransitioning = true;
             showRoundModal(null, resetBoardState);
         } else {
+            dom.playerSearch.disabled = false;
+            dom.btnConfirm.disabled = false;
             switchActivePlayer();
         }
     }
