@@ -270,6 +270,7 @@
     const API_ENDPOINTS = {
         START_GAME: `${API_BASE_URL}/game/start`,
         START_GAME_ALT: `${API_BASE_URL}/game/start-game`,
+        FINISH_GAME: `${API_BASE_URL}/game/finish`,
         PLAYER_ONE_GUESS: `${API_BASE_URL}/game/player-guess`,
         PLAYER_TWO_GUESS: `${API_BASE_URL}/game/player2-guess`,
         AI_GUESS: `${API_BASE_URL}/game/ai-guess`
@@ -477,6 +478,7 @@
             [0, 0, 0]
         ]
     };
+    let matchFinishSent = false;
 
     /* ─────────────────────────────────────────────
        4. DOM REFERENCES
@@ -760,17 +762,6 @@
         return true;
     }
 
-    // Determines if the upcoming round is the decisive 1-1 tiebreaker round
-    // (both players are 1 win away from ROUNDS_TO_WIN = 2).
-    // IMPORTANT: Must use && (not ||), otherwise Round 2 at 1-0 sends is_last_round: true
-    // and if the rival ties 1-1, the backend prematurely closes the Daily Challenge.
-    function isDecisiveRound() {
-        return (
-            gameState.scoreP1 >= ROUNDS_TO_WIN - 1 &&
-            gameState.scoreP2 >= ROUNDS_TO_WIN - 1
-        );
-    }
-
     // Ensures a valid JWT is present in localStorage before calling /game/* endpoints.
     async function ensureAuthToken() {
         let token = localStorage.getItem('footlel_token');
@@ -806,34 +797,87 @@
         return response;
     }
 
+    async function startRoundRequest(token, isDailyChallenge) {
+        let response = await postStartGame({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ is_last_round: false, is_daily_challenge: Boolean(isDailyChallenge) })
+        });
+
+        // Fallback 1: Backend removed is_last_round from StartGameOptions with strict schema validation
+        if (response.status === 422) {
+            console.warn('/game/start returned 422 with is_last_round, retrying with { is_daily_challenge }');
+            response = await postStartGame({
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ is_daily_challenge: Boolean(isDailyChallenge) })
+            });
+        }
+
+        // Fallback 2: Legacy schema without body
+        if (response.status === 422) {
+            console.warn('/game/start returned 422 with body, retrying immediately without body');
+            response = await postStartGame({
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+        }
+
+        return response;
+    }
+
+    async function notifyMatchFinished(playerWon) {
+        if (matchFinishSent) return;
+        matchFinishSent = true;
+
+        try {
+            const token = await ensureAuthToken();
+            if (!token) {
+                console.warn('No hay token disponible para notificar POST /game/finish.');
+                return;
+            }
+            const response = await fetch(API_ENDPOINTS.FINISH_GAME, {
+                method: 'POST',
+                keepalive: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({
+                    is_daily_challenge: true,
+                    player_won: Boolean(playerWon)
+                })
+            });
+
+            if (response.status === 404) {
+                console.warn('POST /game/finish devolvió 404 (endpoint aún no desplegado en Backend).');
+                return;
+            }
+            if (!response.ok) {
+                console.warn(`POST /game/finish devolvió status ${response.status}.`);
+            }
+        } catch (error) {
+            console.warn('Error de red al notificar POST /game/finish:', error);
+        }
+    }
+
     async function fetchGameStartData(isMidMatch = false) {
         // Retry because on Render cold-starts / CORS hiccups are common on
         // the first request. If NO attempt fetches a real board, it is better
         // to pause the game (see showFatalStartError) than to run with a mocked
         // catalog without warning.
-        const isLastRound = isDecisiveRound();
-        gameState.isLastRound = isLastRound;
+        gameState.isLastRound = false;
 
         for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
             try {
                 const token = await ensureAuthToken();
-                let response = await postStartGame({
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ is_last_round: Boolean(isLastRound), is_daily_challenge: true })
-                });
-
-                // Immediate fallback without body if Render deploy hasn't updated schema yet
-                if (response.status === 422) {
-                    console.warn('/game/start returned 422 with body, retrying immediately without body');
-                    response = await postStartGame({
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                }
+                const response = await startRoundRequest(token, true);
 
                 if (!response.ok) {
                     const rawErrorText = await response.text();
@@ -852,14 +896,7 @@
                     // el tablero de desempate sin abortar la partida prematuramente.
                     if (isDailyChallengeCompletedError(extractedDetail)) {
                         if (isMidMatch && gameState.scoreP1 < ROUNDS_TO_WIN && gameState.scoreP2 < ROUNDS_TO_WIN) {
-                            const tiebreakRes = await postStartGame({
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'Authorization': 'Bearer ' + token
-                                },
-                                body: JSON.stringify({ is_last_round: Boolean(isLastRound), is_daily_challenge: false })
-                            });
+                            const tiebreakRes = await startRoundRequest(token, false);
                             if (tiebreakRes.ok) {
                                 const tiebreakData = await tiebreakRes.json();
                                 if (typeof tiebreakData.local_player_turn === 'boolean') {
@@ -1465,6 +1502,9 @@
         gameState.isGameOver = true;
         stopRoundTimer();
         document.body.style.overflow = 'hidden';
+
+        const playerWon = gameState.scoreP1 > gameState.scoreP2;
+        notifyMatchFinished(playerWon);
 
         if (winner === 1) {
             updateDailyStreakForLoggedUser();

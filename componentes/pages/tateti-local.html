@@ -659,14 +659,6 @@
         return true;
     }
 
-    // Determines if the upcoming round can decide the match (either player is 1 win away from ROUNDS_TO_WIN).
-    function isDecisiveRound() {
-        return (
-            gameState.scoreP1 >= ROUNDS_TO_WIN - 1 ||
-            gameState.scoreP2 >= ROUNDS_TO_WIN - 1
-        );
-    }
-
     // Ensures a valid JWT is present in localStorage before calling /game/* endpoints.
     async function ensureAuthToken() {
         let token = localStorage.getItem('footlel_token');
@@ -702,34 +694,52 @@
         return response;
     }
 
+    async function startRoundRequest(token, isDailyChallenge) {
+        let response = await postStartGame({
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ is_last_round: false, is_daily_challenge: Boolean(isDailyChallenge) })
+        });
+
+        // Fallback 1: Backend removed is_last_round from StartGameOptions with strict schema validation
+        if (response.status === 422) {
+            console.warn('/game/start returned 422 with is_last_round, retrying with { is_daily_challenge }');
+            response = await postStartGame({
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ is_daily_challenge: Boolean(isDailyChallenge) })
+            });
+        }
+
+        // Fallback 2: Legacy schema without body
+        if (response.status === 422) {
+            console.warn('/game/start returned 422 with body, retrying immediately without body');
+            response = await postStartGame({
+                method: 'POST',
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+        }
+
+        return response;
+    }
+
     async function fetchGameStartData() {
         // Retry because on Render cold-starts / CORS hiccups are common on
         // the first request. If NO attempt fetches a real board, it is better
         // to pause the game (see showFatalStartError) than to run with a mocked
         // catalog without warning.
-        const isLastRound = isDecisiveRound();
-        gameState.isLastRound = isLastRound;
+        gameState.isLastRound = false;
 
         for (let attempt = 1; attempt <= START_GAME_MAX_ATTEMPTS; attempt++) {
             try {
                 const token = await ensureAuthToken();
-                let response = await postStartGame({
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': 'Bearer ' + token
-                    },
-                    body: JSON.stringify({ is_last_round: Boolean(isLastRound), is_daily_challenge: false })
-                });
-
-                // Immediate fallback without body if Render deploy hasn't updated schema yet
-                if (response.status === 422) {
-                    console.warn('/game/start returned 422 with body, retrying immediately without body');
-                    response = await postStartGame({
-                        method: 'POST',
-                        headers: { 'Authorization': 'Bearer ' + token }
-                    });
-                }
+                const response = await startRoundRequest(token, false);
 
                 if (!response.ok) {
                     const rawErrorText = await response.text();

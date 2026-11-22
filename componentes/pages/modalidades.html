@@ -438,6 +438,21 @@
 
     var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
 
+    var sessionExpiredRedirecting = false;
+    function handleExpiredSession() {
+        if (sessionExpiredRedirecting) return;
+        sessionExpiredRedirecting = true;
+        try {
+            localStorage.removeItem('footlel_token');
+            localStorage.removeItem('footlel_guest');
+            localStorage.removeItem('footlel_username');
+            localStorage.removeItem('footlel_user_id');
+            localStorage.removeItem('footlel_user_strid');
+            localStorage.removeItem('footlel_email');
+        } catch (_) {}
+        window.location.replace('login.html?expired=1');
+    }
+
     // GET /stat/get-user-stats with JWT (registered users only).
     async function fetchUserStatsFromEndpoint() {
         var token = localStorage.getItem('footlel_token');
@@ -446,6 +461,10 @@
             var res = await fetch(apiBaseUrl + '/stat/get-user-stats', {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
+            if (res.status === 401) {
+                handleExpiredSession();
+                return null;
+            }
             if (res.ok) {
                 var data = await res.json();
                 if (data && typeof data === 'object') {
@@ -671,10 +690,18 @@
                 fetchUserStatsFromEndpoint(),
                 // Updated to match Swagger: GET /user/get-user-info with Authorization Bearer header
                 token
-                    ? fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) { return r.ok ? r.json() : null; })
+                    ? fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) {
+                        if (r.status === 401) {
+                            handleExpiredSession();
+                            return null;
+                        }
+                        return r.ok ? r.json() : null;
+                    })
                     : Promise.resolve(null),
                 fetch(apiBaseUrl + '/stat/get-global-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
             ]);
+
+            if (sessionExpiredRedirecting) return;
 
             var statsPayload = results[0].status === 'fulfilled' ? results[0].value : null;
             var userInfo     = results[1].status === 'fulfilled' ? results[1].value : null;

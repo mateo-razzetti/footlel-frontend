@@ -463,6 +463,21 @@
     ────────────────────────────────────────── */
     const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
 
+    let sessionExpiredRedirecting = false;
+    function handleExpiredSession() {
+        if (sessionExpiredRedirecting) return;
+        sessionExpiredRedirecting = true;
+        try {
+            localStorage.removeItem('footlel_token');
+            localStorage.removeItem('footlel_guest');
+            localStorage.removeItem('footlel_username');
+            localStorage.removeItem('footlel_user_id');
+            localStorage.removeItem('footlel_user_strid');
+            localStorage.removeItem('footlel_email');
+        } catch (_) {}
+        window.location.replace('login.html?expired=1');
+    }
+
     // GET /stat/get-user-stats with JWT (registered users only).
     async function fetchUserStatsFromEndpoint() {
         const token = localStorage.getItem('footlel_token');
@@ -471,6 +486,10 @@
             const res = await fetch(`${apiBaseUrl}/stat/get-user-stats`, {
                 headers: { 'Authorization': 'Bearer ' + token }
             });
+            if (res.status === 401) {
+                handleExpiredSession();
+                return null;
+            }
             if (res.ok) {
                 const data = await res.json();
                 if (data && typeof data === 'object') {
@@ -830,17 +849,25 @@
 
         (async function loadUserFooterStats() {
             const token = localStorage.getItem('footlel_token');
+            const fetchProtectedJson = (path) => token
+                ? fetch(`${apiBaseUrl}${path}`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => {
+                    if (r.status === 401) {
+                        handleExpiredSession();
+                        return null;
+                    }
+                    return r.ok ? r.json() : null;
+                })
+                : Promise.resolve(null);
+
             const [statsResult, infoResult, lbResult, friendReqsResult] = await Promise.allSettled([
                 fetchUserStatsFromEndpoint(),
                 // Updated to match Swagger: GET /user/get-user-info with Authorization Bearer header
-                token
-                    ? fetch(`${apiBaseUrl}/user/get-user-info`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.ok ? r.json() : null)
-                    : Promise.resolve(null),
+                fetchProtectedJson('/user/get-user-info'),
                 fetch(`${apiBaseUrl}/stat/get-global-leaderboard`).then(r => r.ok ? r.json() : null),
-                token
-                    ? fetch(`${apiBaseUrl}/user/get-user-friend-requests`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => r.ok ? r.json() : null)
-                    : Promise.resolve(null)
+                fetchProtectedJson('/user/get-user-friend-requests')
             ]);
+
+            if (sessionExpiredRedirecting) return;
 
             const statsPayload = statsResult.status === 'fulfilled' ? statsResult.value : null;
             const userInfo     = infoResult.status === 'fulfilled' ? infoResult.value : null;
