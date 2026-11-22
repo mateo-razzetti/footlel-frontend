@@ -160,6 +160,22 @@
             errorEl.hidden = false;
         }
 
+        (function showExpiredSessionNoticeIfNeeded() {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                if (params.get('expired') === '1') {
+                    const loginErrorEl = document.getElementById('login-error');
+                    if (loginErrorEl) {
+                        showLoginError(loginErrorEl, 'Tu sesión expiró. Volvé a iniciar sesión.');
+                    }
+                    params.delete('expired');
+                    const remaining = params.toString();
+                    const cleanUrl = window.location.pathname + (remaining ? ('?' + remaining) : '') + window.location.hash;
+                    window.history.replaceState(null, '', cleanUrl);
+                }
+            } catch (_) {}
+        })();
+
         /* ── Save typed username when clicking "Olvidé mi contraseña" ── */
         const forgotPasswordLink = document.querySelector('.forgot-password');
         if (forgotPasswordLink) {
