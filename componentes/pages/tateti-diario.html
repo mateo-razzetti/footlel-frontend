@@ -832,7 +832,33 @@
         return response;
     }
 
-    async function notifyMatchFinished(playerWon) {
+    function clearCachedUserStats() {
+        try {
+            const rawUser = (localStorage.getItem('footlel_username') || '').trim();
+            if (!rawUser) return;
+            const cleanUser = rawUser.replace(/^@+/, '');
+            const candidates = cleanUser && cleanUser !== rawUser ? [rawUser, cleanUser] : [cleanUser || rawUser];
+            const statPrefixes = [
+                'footlel_streak_',
+                'footlel_wins_',
+                'footlel_points_',
+                'footlel_accuracy_',
+                'footlel_win_pct_',
+                'footlel_correct_guesses_',
+                'footlel_guesses_made_',
+                'footlel_matches_played_'
+            ];
+            candidates.forEach(user => {
+                statPrefixes.forEach(prefix => {
+                    localStorage.removeItem(prefix + user);
+                });
+            });
+        } catch (err) {
+            console.warn('No se pudo limpiar la caché de estadísticas en localStorage:', err);
+        }
+    }
+
+    async function notifyMatchFinished() {
         if (matchFinishSent) return;
         matchFinishSent = true;
 
@@ -850,8 +876,8 @@
                     'Authorization': 'Bearer ' + token
                 },
                 body: JSON.stringify({
-                    is_daily_challenge: true,
-                    player_won: Boolean(playerWon)
+                    is_last_round: true,
+                    is_daily_challenge: true
                 })
             });
 
@@ -861,7 +887,9 @@
             }
             if (!response.ok) {
                 console.warn(`POST /game/finish devolvió status ${response.status}.`);
+                return;
             }
+            clearCachedUserStats();
         } catch (error) {
             console.warn('Error de red al notificar POST /game/finish:', error);
         }
@@ -1503,8 +1531,7 @@
         stopRoundTimer();
         document.body.style.overflow = 'hidden';
 
-        const playerWon = gameState.scoreP1 > gameState.scoreP2;
-        notifyMatchFinished(playerWon);
+        notifyMatchFinished();
 
         if (winner === 1) {
             updateDailyStreakForLoggedUser();
