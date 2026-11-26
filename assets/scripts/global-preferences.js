@@ -1898,8 +1898,41 @@
     /* Immediately (<html> always exists, avoids flash of wrong theme). */
     applyFromStorage();
 
+    /* Highlights the dropdown item of the current page (Verde Cancha via .active).
+       Uses pathname.includes() WITHOUT requiring '.html' so it also works with
+       Netlify clean URLs (e.g. /componentes/pages/editar-cuenta). */
+    function markActiveDropdownItem() {
+        var dropdown = document.getElementById('profileDropdown');
+        if (!dropdown) return;
+        var path = String(window.location.pathname || '').toLowerCase();
+        var routes = [
+            { key: 'configuracion', href: 'configuracion' },
+            { key: 'editar-cuenta', href: 'editar-cuenta' },
+            { key: 'verificar-edicion', href: 'editar-cuenta' },
+            { key: 'amigos', href: 'amigos' },
+            { key: 'ayuda', href: 'ayuda' }
+        ];
+        var activeHref = null;
+        for (var i = 0; i < routes.length; i++) {
+            if (path.includes(routes[i].key)) { activeHref = routes[i].href; break; }
+        }
+        dropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
+            if (item.classList.contains('item-danger')) return;
+            var href = String(item.getAttribute('href') || '').toLowerCase();
+            var isActive = Boolean(activeHref) && href.includes(activeHref);
+            item.classList.toggle('active', isActive);
+            if (isActive) {
+                item.setAttribute('aria-current', 'page');
+            } else {
+                item.removeAttribute('aria-current');
+            }
+        });
+    }
+
     /* Once <body> exists. */
     document.addEventListener('DOMContentLoaded', function () {
+        // 0. Highlight the current page in the profile dropdown
+        markActiveDropdownItem();
         // 1. Apply stored preferences immediately once body is available (zero flicker)
         applyFromStorage();
         // 1b. Observe dynamic DOM text updates for active language (RNF5)

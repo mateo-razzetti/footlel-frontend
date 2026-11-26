@@ -2,6 +2,16 @@
 <html lang="es">
 
 <head>
+    <script>
+        /* Guard de acceso: invitados o usuarios sin token válido no pueden confirmar ediciones */
+        (function () {
+            var isGuest = localStorage.getItem('footlel_guest') === 'true';
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            if (isGuest || !token || token === 'null' || token === 'undefined') {
+                window.location.replace('menu.html');
+            }
+        })();
+    </script>
     <!-- global-preferences.js goes FIRST, same as in menu.html, to read the prefs before render -->
     <script src="../../assets/scripts/global-preferences.js" defer></script>
     <meta charset="UTF-8">
@@ -250,6 +260,14 @@
         import { API_BASE_URL } from '../../services/apiConfig.js';
         (function () {
             'use strict';
+
+            /* ── Validación de sesión / modo invitado (defensa adicional) ── */
+            const isGuestUser = localStorage.getItem('footlel_guest') === 'true';
+            const authToken = (localStorage.getItem('footlel_token') || '').trim();
+            if (isGuestUser || !authToken || authToken === 'null' || authToken === 'undefined') {
+                window.location.replace('menu.html');
+                return;
+            }
 
             /* ── OTP: auto-advance, backspace and paste ── */
             const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
