@@ -132,6 +132,27 @@ html.light-mode .dropdown-item         { color: #1A1A1A; }
 html.light-mode .dropdown-item:hover   { background: rgba(0, 0, 0, 0.05); }
 html.light-mode .dropdown-divider      { background: rgba(0, 0, 0, 0.08); }
 
+/* ── Active dropdown item (current page) — Verde Cancha ─────────
+   Unified for ALL pages (configuracion, editar-cuenta, amigos, ayuda).
+   !important so page-level `.dropdown-item` / light-mode rules
+   and base link styles never override it. */
+.profile-dropdown .dropdown-item.active,
+.profile-dropdown a.active,
+.profile-dropdown .dropdown-item[aria-current="page"],
+html.light-mode .profile-dropdown .dropdown-item.active,
+html.light-mode .profile-dropdown a.active,
+html.light-mode .profile-dropdown .dropdown-item[aria-current="page"] {
+    color: #4CAF50 !important;
+    font-weight: 600 !important;
+}
+
+.profile-dropdown .dropdown-item.active svg,
+.profile-dropdown a.active svg,
+.profile-dropdown .dropdown-item[aria-current="page"] svg {
+    color: #4CAF50 !important;
+    stroke: #4CAF50 !important;
+}
+
 /* ── Cards and forms in light mode ─────────────────────── */
 html.light-mode .login-card,
 html.light-mode .prefs-card,

@@ -2,6 +2,16 @@
 <html lang="es">
 
 <head>
+    <script>
+        /* Guard de acceso: invitados o usuarios sin token válido no pueden editar la cuenta */
+        (function () {
+            var isGuest = localStorage.getItem('footlel_guest') === 'true';
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            if (isGuest || !token || token === 'null' || token === 'undefined') {
+                window.location.replace('menu.html');
+            }
+        })();
+    </script>
     <script src="../../assets/scripts/global-preferences.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -82,7 +92,7 @@
                         </svg>
                         Configuración
                     </a>
-                    <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                    <a href="editar-cuenta.html" class="dropdown-item active" role="menuitem" id="ddEditAccount" aria-current="page">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -230,6 +240,14 @@
         import { API_BASE_URL } from '../../services/apiConfig.js';
         (function () {
             'use strict';
+
+            /* Validación de sesión / modo invitado (defensa adicional) */
+            const isGuestUser = localStorage.getItem('footlel_guest') === 'true';
+            const authToken = (localStorage.getItem('footlel_token') || '').trim();
+            if (isGuestUser || !authToken || authToken === 'null' || authToken === 'undefined') {
+                window.location.replace('menu.html');
+                return;
+            }
 
             /* Dropdown Logic */
             const profileBtn = document.getElementById('profileBtn');
