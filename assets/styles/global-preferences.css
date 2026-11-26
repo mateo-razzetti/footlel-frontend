@@ -1,0 +1,1003 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — User Global Preferences
+   assets/styles/global-preferences.css
+
+   Applies Light Mode and Disable Animations styles
+   to ALL pages across the application.
+   Must be loaded in the <head> of every HTML file.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ══════════════════════════════════════════════════════════════
+   GLOBAL LAYOUT, BOX-SIZING & CUSTOM SCROLLBAR
+   ══════════════════════════════════════════════════════════════ */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html {
+    overflow-x: hidden;
+    overflow-y: auto;
+    max-width: 100%;
+    box-sizing: border-box;
+    scrollbar-width: thin;
+    scrollbar-color: #333333 transparent;
+}
+
+body {
+    overflow-x: hidden;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* ── Custom Webkit Scrollbar (Dark Theme Default) ───────────── */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #333333;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #4CAF50;
+}
+
+::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+}
+
+/* ── Custom Scrollbar in Light Mode ─────────────────────────── */
+html.light-mode,
+body.light-mode {
+    scrollbar-width: thin;
+    scrollbar-color: #BDBDBD transparent;
+}
+
+html.light-mode ::-webkit-scrollbar-track,
+body.light-mode ::-webkit-scrollbar-track {
+    background: #F5F5F5;
+}
+
+html.light-mode ::-webkit-scrollbar-thumb,
+body.light-mode ::-webkit-scrollbar-thumb {
+    background-color: #BDBDBD;
+    border-radius: 4px;
+}
+
+html.light-mode ::-webkit-scrollbar-thumb:hover,
+body.light-mode ::-webkit-scrollbar-thumb:hover {
+    background-color: #4CAF50;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT MODE — html.light-mode
+   Overrides dark system tokens with light values.
+   ══════════════════════════════════════════════════════════════ */
+html.light-mode,
+html.light-mode body {
+    /* Inverted color tokens */
+    --color-bg-page:       #F5F5F5;
+    --color-surface-card:  #FFFFFF;
+    --color-surface-input: #EEEEEE;
+    --color-text-primary:  #1A1A1A;
+    --color-text-muted:    #616161;
+    --color-border-subtle: rgba(0, 0, 0, 0.10);
+
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+}
+
+/* ── Dropdown hover in DARK MODE (base) ──────────────────── */
+.dropdown-item:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 6px;
+}
+
+/* ── Header in light mode ─────────────────────────────────────── */
+html.light-mode .site-header {
+    background: rgba(245, 245, 245, 0.95);
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+html.light-mode .logo-text,
+html.light-mode .back-link,
+html.light-mode .profile-username,
+html.light-mode .profile-chevron {
+    color: #1A1A1A;
+}
+
+html.light-mode .profile-btn:hover,
+html.light-mode .back-link:hover {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* ── Dropdown in light mode ───────────────────────────────────── */
+html.light-mode .profile-dropdown {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+html.light-mode .dropdown-item         { color: #1A1A1A; }
+html.light-mode .dropdown-item:hover   { background: rgba(0, 0, 0, 0.05); }
+html.light-mode .dropdown-divider      { background: rgba(0, 0, 0, 0.08); }
+
+/* ── Active dropdown item (current page) — Verde Cancha ─────────
+   Unified for ALL pages (configuracion, editar-cuenta, amigos, ayuda).
+   !important so page-level `.dropdown-item` / light-mode rules
+   and base link styles never override it. */
+.profile-dropdown .dropdown-item.active,
+.profile-dropdown a.active,
+.profile-dropdown .dropdown-item[aria-current="page"],
+html.light-mode .profile-dropdown .dropdown-item.active,
+html.light-mode .profile-dropdown a.active,
+html.light-mode .profile-dropdown .dropdown-item[aria-current="page"] {
+    color: #4CAF50 !important;
+    font-weight: 600 !important;
+}
+
+.profile-dropdown .dropdown-item.active svg,
+.profile-dropdown a.active svg,
+.profile-dropdown .dropdown-item[aria-current="page"] svg {
+    color: #4CAF50 !important;
+    stroke: #4CAF50 !important;
+}
+
+/* ── Cards and forms in light mode ─────────────────────── */
+html.light-mode .login-card,
+html.light-mode .prefs-card,
+html.light-mode .modal-card,
+html.light-mode .game-card,
+html.light-mode .mode-card,
+html.light-mode .edit-account-card,
+html.light-mode .verify-card,
+html.light-mode .faq-item,
+html.light-mode #zona-invitado {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+html.light-mode .form-input,
+html.light-mode .modal-input,
+html.light-mode .otp-input {
+    background: #EEEEEE;
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #1A1A1A;
+}
+
+html.light-mode .form-input::placeholder,
+html.light-mode .modal-input::placeholder {
+    color: #9E9E9E;
+}
+
+/* Icons inside inputs (magnifiers, envelopes, locks) */
+html.light-mode .input-icon { color: #616161; }
+
+/* Horizontal section divider */
+html.light-mode .pref-row    { border-color: rgba(0, 0, 0, 0.08); }
+html.light-mode .pref-section { border-color: rgba(0, 0, 0, 0.08); }
+html.light-mode .section-divider,
+html.light-mode hr            { border-color: rgba(0, 0, 0, 0.08); }
+
+/* ── Stats bar in light mode (menu.html) ──────────────────────── */
+html.light-mode .stats-bar {
+    background: rgba(245, 245, 245, 0.95);
+    border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+html.light-mode .stat-value { color: #1A1A1A; }
+html.light-mode .stat-label { color: #616161; }
+
+/* ── Toggle track in light mode ───────────────────────────────── */
+html.light-mode .toggle-track { background: rgba(0, 0, 0, 0.18); }
+
+/* ── Language selector in light mode (RNF5) ───────────────────── */
+html.light-mode .lang-segmented {
+    background: #EEEEEE;
+    border-color: rgba(0, 0, 0, 0.12);
+}
+html.light-mode .lang-seg-btn {
+    color: #616161;
+}
+html.light-mode .lang-seg-btn:hover:not(.is-active) {
+    color: #1A1A1A;
+}
+html.light-mode .lang-seg-btn.is-active {
+    background: #4CAF50;
+    color: #FFFFFF;
+}
+
+/* ── Logo: src is managed exclusively by global-preferences.js (syncLogo). ── */
+
+/* ── Background footballs (visible in light mode) ────────────────── */
+html.light-mode {
+    --ball-opacity: 0.15;
+}
+html.light-mode .bg-ball {
+    filter: grayscale(1) brightness(0);
+}
+
+
+
+
+/* ══════════════════════════════════════════════════════════════
+   DISABLE ANIMATIONS — html.disable-animations
+
+   Toggle structure in configuracion.html:
+     label.toggle-switch
+       input[type="checkbox"]   ← the checkbox
+       span.toggle-track        ← switch background
+         ::after                ← the white knob
+
+   The :not() selector excludes ALL switch elements so
+   they remain visually animated even when mode is active.
+   ══════════════════════════════════════════════════════════════ */
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"]),
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::before,
+html.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::after,
+body.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"]),
+body.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::before,
+body.disable-animations *:not(.toggle-switch):not(.toggle-track):not(input[type="checkbox"])::after {
+    transition: none !important;
+    animation:  none !important;
+    animation-delay: 0s !important;
+    scroll-behavior: auto !important;
+}
+
+/* Floating background footballs (menu.html, modalidades.html): fully stopped.
+   !important beats the `animation: ballFloat ... infinite` in menu.css. */
+html.disable-animations .bg-ball,
+body.disable-animations .bg-ball {
+    animation: none !important;
+    transition: none !important;
+    will-change: auto !important;
+}
+
+/* ── Global Backend Error Alert Box ─────────────────────────── */
+@keyframes errorFadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.field-error,
+.error-alert-box {
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px 14px;
+    background-color: rgba(239, 83, 80, 0.12);
+    border: 1px solid rgba(239, 83, 80, 0.4);
+    border-radius: 8px;
+    font-family: var(--font-body, 'Poppins', sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+    color: #ff6b6b;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: errorFadeIn 0.25s ease forwards;
+}
+
+.field-error[hidden],
+.error-alert-box[hidden] {
+    display: none !important;
+}
+
+.error-alert-icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: #ff6b6b;
+}
+
+.error-alert-text {
+    flex: 1;
+}
+
+html.light-mode .field-error,
+html.light-mode .error-alert-box {
+    background-color: rgba(239, 83, 80, 0.10);
+    border-color: rgba(239, 83, 80, 0.45);
+    color: #d32f2f;
+}
+
+html.light-mode .error-alert-icon {
+    color: #d32f2f;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SHARED HEADER NOTIFICATIONS BELL & DROPDOWN (ALL PAGES)
+   ════════════════════════════════════════════════════════════════ */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.notif-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.notif-btn {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid var(--color-border-subtle, rgba(158, 158, 158, 0.18));
+    background: var(--color-surface-card, #292929);
+    color: var(--color-text-primary, #FFFFFF);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: border-color 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+
+.notif-btn:hover,
+.notif-btn[aria-expanded="true"] {
+    border-color: var(--color-brand-green, #4CAF50);
+    background: rgba(76, 175, 80, 0.08);
+    color: var(--color-brand-green, #4CAF50);
+}
+
+.notif-bell-icon {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+}
+
+.notif-badge {
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 50px;
+    background: #ef5350;
+    color: #FFFFFF;
+    font-family: var(--font-body, 'Poppins', sans-serif);
+    font-size: 10.5px;
+    font-weight: 700;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--color-surface-bg, #1A1A1A);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+    pointer-events: none;
+}
+
+.notif-badge[hidden] {
+    display: none !important;
+}
+
+.notif-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 320px;
+    max-width: calc(100vw - 24px);
+    background: var(--color-surface-card, #292929);
+    border: 1px solid var(--color-border-subtle, rgba(158, 158, 158, 0.18));
+    border-radius: var(--card-radius, 12px);
+    box-shadow: var(--shadow-dropdown, 0 8px 32px rgba(0, 0, 0, 0.65));
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.18s ease, visibility 0.18s ease, transform 0.18s ease;
+    z-index: 210;
+    overflow: hidden;
+}
+
+.notif-dropdown.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.notif-dropdown-header {
+    padding: 13px 16px;
+    border-bottom: 1px solid var(--color-border-subtle, rgba(158, 158, 158, 0.18));
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notif-dropdown-title {
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--color-text-primary, #FFFFFF);
+    letter-spacing: 0.4px;
+}
+
+.notif-list {
+    list-style: none;
+    margin: 0;
+    padding: 4px 0;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notif-list-item {
+    border-bottom: 1px solid var(--color-border-subtle, rgba(158, 158, 158, 0.18));
+}
+
+.notif-list-item:last-child {
+    border-bottom: none;
+}
+
+.notif-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    width: 100%;
+    padding: 13px 16px;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--color-text-primary, #FFFFFF);
+    text-decoration: none;
+    transition: background 0.18s ease;
+    cursor: pointer;
+}
+
+.notif-item:hover {
+    background: rgba(76, 175, 80, 0.10);
+}
+
+.notif-item-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--color-brand-green, #4CAF50);
+    flex-shrink: 0;
+    margin-top: 5px;
+}
+
+.notif-item-text {
+    flex: 1;
+}
+
+.notif-empty {
+    padding: 22px 16px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--color-text-muted, #9E9E9E);
+}
+
+/* Light mode overrides for notifications */
+html.light-mode .notif-btn {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+    color: #1A1A1A;
+}
+
+html.light-mode .notif-btn:hover,
+html.light-mode .notif-btn[aria-expanded="true"] {
+    background: rgba(76, 175, 80, 0.08);
+    border-color: #4CAF50;
+    color: #4CAF50;
+}
+
+html.light-mode .notif-badge {
+    border-color: #F5F5F5;
+}
+
+html.light-mode .notif-dropdown {
+    background: #FFFFFF;
+    border-color: rgba(0, 0, 0, 0.10);
+}
+
+html.light-mode .notif-dropdown-header {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+html.light-mode .notif-dropdown-title,
+html.light-mode .notif-item {
+    color: #1A1A1A;
+}
+
+html.light-mode .notif-list-item {
+    border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+
+
+
+/* 1v1 match invitation items in the notifications dropdown */
+.notif-item--match {
+    cursor: default;
+    align-items: flex-start;
+}
+.notif-match-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+.notif-actions {
+    display: flex;
+    gap: 8px;
+}
+.notif-match-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 0.15s ease, transform 0.1s ease;
+}
+.notif-match-btn:active { transform: scale(0.96); }
+.notif-match-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+.notif-match-btn--accept { background: #4CAF50; color: #fff; }
+.notif-match-btn--accept:hover:not(:disabled) { background: #43a047; }
+.notif-match-btn--reject {
+    background: rgba(80, 80, 80, 0.55);
+    color: #cfcfcf;
+    border-color: rgba(158, 158, 158, 0.25);
+}
+.notif-match-btn--reject:hover:not(:disabled) { background: rgba(100, 100, 100, 0.65); color: #fff; }
+.notif-match-error {
+    font-size: 12px;
+    color: #ef5350;
+}
+html.light-mode .notif-match-btn--reject {
+    background: rgba(0, 0, 0, 0.08);
+    color: #616161;
+    border-color: rgba(0, 0, 0, 0.1);
+}
+html.light-mode .notif-match-btn--reject:hover:not(:disabled) { background: rgba(0, 0, 0, 0.14); color: #1A1A1A; }
+/* 1v1 waiting room overlay (shared) */
+.match-wait-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.72);
+    padding: 16px;
+}
+.match-wait-overlay[hidden] { display: none; }
+.match-wait-card {
+    width: 100%;
+    max-width: 380px;
+    background: #292929;
+    color: #FFFFFF;
+    border-radius: 16px;
+    padding: 28px 24px;
+    text-align: center;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.match-wait-spinner {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 16px;
+    border-radius: 50%;
+    border: 4px solid rgba(255, 255, 255, 0.12);
+    border-top: 4px solid #4CAF50;
+    border-right: 4px solid #4CAF50;
+    box-shadow: 0 0 14px rgba(76, 175, 80, 0.5);
+    box-sizing: border-box;
+    display: block;
+    will-change: transform;
+    animation: matchWaitSpin 0.85s linear infinite;
+}
+@keyframes matchWaitSpin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+.match-wait-title { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+.match-wait-text { font-size: 14px; color: #9E9E9E; margin: 0 0 20px; }
+.match-wait-cancel {
+    padding: 9px 20px;
+    border-radius: 10px;
+    border: 1px solid rgba(158, 158, 158, 0.35);
+    background: transparent;
+    color: #FFFFFF;
+    font-weight: 600;
+    cursor: pointer;
+}
+.match-wait-cancel:hover { background: rgba(158, 158, 158, 0.15); }
+html.light-mode .match-wait-card { background: #fff; color: #1A1A1A; }
+html.light-mode .match-wait-cancel { color: #1A1A1A; border-color: rgba(0, 0, 0, 0.2); }
+
+/* ════════════════════════════════════════════════════════════════
+   RANK SYSTEM SHIELDS & BADGES (Menu, Modalidades, Leaderboard)
+   ════════════════════════════════════════════════════════════════ */
+.rank-shield-svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.stat-value--rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    font-size: clamp(14px, 1.45vw, 18px);
+    flex-wrap: wrap;
+    text-align: center;
+}
+
+.rank-stat-text {
+    display: inline-block;
+    line-height: 1.2;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   COMPATIBILITY MODE — html.compatibility-mode / body.compatibility-mode (RNF7)
+   High-compatibility, low-resource classic rendering for older
+   browsers and devices:
+   - Disables all animations, transitions, floating balls, filters,
+     shadows, and complex gradients.
+   - Forces native system fonts (Arial, Helvetica, sans-serif).
+   - Applies solid high-contrast borders (2px solid #4CAF50 / #777),
+     flat solid backgrounds, and reduced border-radius (2px / 0px).
+   ════════════════════════════════════════════════════════════════ */
+html.compatibility-mode,
+body.compatibility-mode {
+    --font-heading: Arial, Helvetica, sans-serif;
+    --font-body:    Arial, Helvetica, sans-serif;
+    --card-radius:  2px;
+    --btn-radius:   2px;
+    font-family: Arial, Helvetica, sans-serif !important;
+    background-color: #121212 !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    scroll-behavior: auto !important;
+}
+
+html.light-mode.compatibility-mode,
+html.light-mode body.compatibility-mode,
+body.light-mode.compatibility-mode {
+    background-color: #F0F0F0 !important;
+    background-image: none !important;
+    color: #111111 !important;
+}
+
+/* 1. Native system font, no animations/transitions, no filters, no shadows */
+html.compatibility-mode *,
+html.compatibility-mode *::before,
+html.compatibility-mode *::after,
+body.compatibility-mode *,
+body.compatibility-mode *::before,
+body.compatibility-mode *::after {
+    font-family: Arial, Helvetica, sans-serif !important;
+    animation: none !important;
+    animation-delay: 0s !important;
+    transition: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    scroll-behavior: auto !important;
+}
+
+/* 2. Hide decorative floating background balls completely */
+html.compatibility-mode .floating-balls,
+html.compatibility-mode .bg-balls,
+html.compatibility-mode .bg-ball,
+body.compatibility-mode .floating-balls,
+body.compatibility-mode .bg-balls,
+body.compatibility-mode .bg-ball {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    animation: none !important;
+}
+
+/* 3. Headers & Footers: flat solid background + high-contrast border */
+html.compatibility-mode .site-header,
+html.compatibility-mode .game-header,
+html.compatibility-mode .stats-bar,
+html.compatibility-mode .game-footer,
+html.compatibility-mode .lb-footer,
+body.compatibility-mode .site-header,
+body.compatibility-mode .game-header,
+body.compatibility-mode .stats-bar,
+body.compatibility-mode .game-footer,
+body.compatibility-mode .lb-footer {
+    background: #1A1A1A !important;
+    background-color: #1A1A1A !important;
+    background-image: none !important;
+    border-color: #4CAF50 !important;
+    border-width: 2px !important;
+}
+
+html.light-mode.compatibility-mode .site-header,
+html.light-mode.compatibility-mode .game-header,
+html.light-mode.compatibility-mode .stats-bar,
+html.light-mode.compatibility-mode .game-footer,
+html.light-mode.compatibility-mode .lb-footer,
+body.light-mode.compatibility-mode .site-header,
+body.light-mode.compatibility-mode .game-header,
+body.light-mode.compatibility-mode .stats-bar,
+body.light-mode.compatibility-mode .game-footer,
+body.light-mode.compatibility-mode .lb-footer {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border-color: #4CAF50 !important;
+}
+
+html.compatibility-mode .stat-col,
+body.compatibility-mode .stat-col {
+    border-right: 2px solid #777777 !important;
+}
+html.compatibility-mode .stat-col:last-child,
+body.compatibility-mode .stat-col:last-child {
+    border-right: none !important;
+}
+
+/* 4. Cards, Modals, Dropdowns, Rows, Panels: flat solid background, 2px solid border, 2px radius */
+html.compatibility-mode .login-card,
+html.compatibility-mode .prefs-card,
+html.compatibility-mode .config-card,
+html.compatibility-mode .modal-card,
+html.compatibility-mode .game-card,
+html.compatibility-mode .mode-card,
+html.compatibility-mode .edit-account-card,
+html.compatibility-mode .verify-card,
+html.compatibility-mode .faq-item,
+html.compatibility-mode #zona-invitado,
+html.compatibility-mode .guest-cta-bar,
+html.compatibility-mode .lb-guest-cta,
+html.compatibility-mode .lb-row,
+html.compatibility-mode .lb-row--gold,
+html.compatibility-mode .lb-row--silver,
+html.compatibility-mode .lb-row--bronze,
+html.compatibility-mode .lb-loading,
+html.compatibility-mode .friend-row,
+html.compatibility-mode .profile-dropdown,
+html.compatibility-mode .notif-dropdown,
+html.compatibility-mode .match-wait-card,
+html.compatibility-mode .board-loading-card,
+html.compatibility-mode .loading-card,
+html.compatibility-mode .reaction-popup,
+html.compatibility-mode .stat-tooltip,
+html.compatibility-mode .autocomplete-results,
+body.compatibility-mode .login-card,
+body.compatibility-mode .prefs-card,
+body.compatibility-mode .config-card,
+body.compatibility-mode .modal-card,
+body.compatibility-mode .game-card,
+body.compatibility-mode .mode-card,
+body.compatibility-mode .edit-account-card,
+body.compatibility-mode .verify-card,
+body.compatibility-mode .faq-item,
+body.compatibility-mode #zona-invitado,
+body.compatibility-mode .guest-cta-bar,
+body.compatibility-mode .lb-guest-cta,
+body.compatibility-mode .lb-row,
+body.compatibility-mode .lb-row--gold,
+body.compatibility-mode .lb-row--silver,
+body.compatibility-mode .lb-row--bronze,
+body.compatibility-mode .lb-loading,
+body.compatibility-mode .friend-row,
+body.compatibility-mode .profile-dropdown,
+body.compatibility-mode .notif-dropdown,
+body.compatibility-mode .match-wait-card,
+body.compatibility-mode .board-loading-card,
+body.compatibility-mode .loading-card,
+body.compatibility-mode .reaction-popup,
+body.compatibility-mode .stat-tooltip,
+body.compatibility-mode .autocomplete-results {
+    background: #222222 !important;
+    background-color: #222222 !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+}
+
+html.light-mode.compatibility-mode .login-card,
+html.light-mode.compatibility-mode .prefs-card,
+html.light-mode.compatibility-mode .config-card,
+html.light-mode.compatibility-mode .modal-card,
+html.light-mode.compatibility-mode .game-card,
+html.light-mode.compatibility-mode .mode-card,
+html.light-mode.compatibility-mode .edit-account-card,
+html.light-mode.compatibility-mode .verify-card,
+html.light-mode.compatibility-mode .faq-item,
+html.light-mode.compatibility-mode #zona-invitado,
+html.light-mode.compatibility-mode .guest-cta-bar,
+html.light-mode.compatibility-mode .lb-guest-cta,
+html.light-mode.compatibility-mode .lb-row,
+html.light-mode.compatibility-mode .lb-row--gold,
+html.light-mode.compatibility-mode .lb-row--silver,
+html.light-mode.compatibility-mode .lb-row--bronze,
+html.light-mode.compatibility-mode .lb-loading,
+html.light-mode.compatibility-mode .friend-row,
+html.light-mode.compatibility-mode .profile-dropdown,
+html.light-mode.compatibility-mode .notif-dropdown,
+html.light-mode.compatibility-mode .match-wait-card,
+html.light-mode.compatibility-mode .board-loading-card,
+html.light-mode.compatibility-mode .loading-card,
+html.light-mode.compatibility-mode .reaction-popup,
+html.light-mode.compatibility-mode .autocomplete-results {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+    color: #111111 !important;
+}
+
+/* 5. Inputs, Search Bars, Buttons, Badges & Tabs */
+html.compatibility-mode input:not([type="checkbox"]):not([type="radio"]),
+html.compatibility-mode textarea,
+html.compatibility-mode select,
+html.compatibility-mode .form-input,
+html.compatibility-mode .modal-input,
+html.compatibility-mode .otp-input,
+html.compatibility-mode .search-bar,
+html.compatibility-mode .search-input,
+html.compatibility-mode #input-palabra-clave,
+body.compatibility-mode input:not([type="checkbox"]):not([type="radio"]),
+body.compatibility-mode textarea,
+body.compatibility-mode select,
+body.compatibility-mode .form-input,
+body.compatibility-mode .modal-input,
+body.compatibility-mode .otp-input,
+body.compatibility-mode .search-bar,
+body.compatibility-mode .search-input,
+body.compatibility-mode #input-palabra-clave {
+    background: #141414 !important;
+    background-color: #141414 !important;
+    background-image: none !important;
+    color: #FFFFFF !important;
+    border: 2px solid #777777 !important;
+    border-radius: 2px !important;
+}
+
+html.light-mode.compatibility-mode input:not([type="checkbox"]):not([type="radio"]),
+html.light-mode.compatibility-mode textarea,
+html.light-mode.compatibility-mode select,
+html.light-mode.compatibility-mode .form-input,
+html.light-mode.compatibility-mode .modal-input,
+html.light-mode.compatibility-mode .otp-input,
+html.light-mode.compatibility-mode .search-bar,
+html.light-mode.compatibility-mode .search-input,
+html.light-mode.compatibility-mode #input-palabra-clave {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #111111 !important;
+    border: 2px solid #555555 !important;
+    border-radius: 2px !important;
+}
+
+html.compatibility-mode input:focus,
+html.compatibility-mode .search-input:focus,
+html.compatibility-mode .search-bar:focus,
+body.compatibility-mode input:focus,
+body.compatibility-mode .search-input:focus,
+body.compatibility-mode .search-bar:focus {
+    border-color: #4CAF50 !important;
+}
+
+html.compatibility-mode .btn-outline,
+html.compatibility-mode .btn-primary,
+html.compatibility-mode .btn-mode,
+html.compatibility-mode .btn-confirm,
+html.compatibility-mode .btn-cta,
+html.compatibility-mode .btn-cta-green,
+html.compatibility-mode .btn-cta-ghost,
+html.compatibility-mode .btn-cta-solid,
+html.compatibility-mode .modal-btn-primary,
+html.compatibility-mode .modal-btn-secondary,
+html.compatibility-mode .btn-add,
+html.compatibility-mode .btn-req,
+html.compatibility-mode .notif-match-btn,
+html.compatibility-mode .profile-btn,
+html.compatibility-mode .notif-btn,
+html.compatibility-mode .lb-tabs,
+html.compatibility-mode .lb-tab,
+html.compatibility-mode .amigos-tab,
+html.compatibility-mode .lb-rank-badge,
+body.compatibility-mode .btn-outline,
+body.compatibility-mode .btn-primary,
+body.compatibility-mode .btn-mode,
+body.compatibility-mode .btn-confirm,
+body.compatibility-mode .btn-cta,
+body.compatibility-mode .btn-cta-green,
+body.compatibility-mode .btn-cta-ghost,
+body.compatibility-mode .btn-cta-solid,
+body.compatibility-mode .modal-btn-primary,
+body.compatibility-mode .modal-btn-secondary,
+body.compatibility-mode .btn-add,
+body.compatibility-mode .btn-req,
+body.compatibility-mode .notif-match-btn,
+body.compatibility-mode .profile-btn,
+body.compatibility-mode .notif-btn,
+body.compatibility-mode .lb-tabs,
+body.compatibility-mode .lb-tab,
+body.compatibility-mode .amigos-tab,
+body.compatibility-mode .lb-rank-badge {
+    border-radius: 2px !important;
+    border: 2px solid #4CAF50 !important;
+    background-image: none !important;
+}
+
+/* 6. Ta-Te-Ti Board cells & Timer: classic solid flat look */
+html.compatibility-mode .playable-cell,
+body.compatibility-mode .playable-cell {
+    background: #1B1B1B !important;
+    background-color: #1B1B1B !important;
+    background-image: none !important;
+    border: 2px solid #777777 !important;
+    border-radius: 2px !important;
+}
+
+html.light-mode.compatibility-mode .playable-cell,
+body.light-mode.compatibility-mode .playable-cell {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    border: 2px solid #555555 !important;
+}
+
+html.compatibility-mode .playable-cell:hover,
+html.compatibility-mode .playable-cell.active-selection,
+body.compatibility-mode .playable-cell:hover,
+body.compatibility-mode .playable-cell.active-selection {
+    border: 2px solid #4CAF50 !important;
+    background: #253826 !important;
+    transform: none !important;
+}
+
+html.light-mode.compatibility-mode .playable-cell:hover,
+html.light-mode.compatibility-mode .playable-cell.active-selection,
+body.light-mode.compatibility-mode .playable-cell:hover,
+body.light-mode.compatibility-mode .playable-cell.active-selection {
+    border: 2px solid #4CAF50 !important;
+    background: #E8F5E9 !important;
+    transform: none !important;
+}
+
+html.compatibility-mode .cond-top,
+html.compatibility-mode .cond-left,
+body.compatibility-mode .cond-top,
+body.compatibility-mode .cond-left {
+    background: #FFFFFF !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+}
+
+html.compatibility-mode .timer-display,
+body.compatibility-mode .timer-display {
+    background: #1A1A1A !important;
+    background-image: none !important;
+    border: 2px solid #4CAF50 !important;
+    border-radius: 2px !important;
+}
+
+html.compatibility-mode .game-card:hover,
+html.compatibility-mode .mode-card:hover,
+html.compatibility-mode .lb-row:hover,
+html.compatibility-mode .btn-confirm:hover,
+body.compatibility-mode .game-card:hover,
+body.compatibility-mode .mode-card:hover,
+body.compatibility-mode .lb-row:hover,
+body.compatibility-mode .btn-confirm:hover {
+    transform: none !important;
+}

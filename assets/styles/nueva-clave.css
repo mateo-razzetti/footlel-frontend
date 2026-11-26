@@ -1,0 +1,86 @@
+/* =========================================================
+   nueva-clave.css — New Password Screen | Footlel
+   Minimal overrides over login.css.
+   :root variables inherited from login.css.
+   ========================================================= */
+
+/* ── Centered title, adjusted size to fit single line ── */
+.new-password-title {
+    font-size: 22px;
+    letter-spacing: 1px;
+}
+
+/* ── Label above each input ── */
+.form-label {
+    display: block;
+    width: 100%;
+    margin-bottom: 8px;
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-align: left;
+}
+
+/* ── Wrapper for input + eye button ── */
+.input-toggle-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+/* Input gets right padding to avoid overlapping eye button */
+.input-toggle-wrapper .form-input {
+    padding-right: 44px;
+}
+
+/* ── Show/hide password button ── */
+.toggle-visibility {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    padding: 4px;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+    line-height: 1;
+}
+.toggle-visibility:hover { color: var(--color-text-primary); }
+
+.eye-icon {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+/* ── Match error message ── */
+.field-error {
+    width: 100%;
+    margin-top: 8px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    color: #ef5350;       /* error red, without adding new variable */
+    text-align: left;
+}
+
+/* ── "Cancel" link ── */
+.link-cancel {
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+.link-cancel:hover { color: var(--color-text-primary); }
+
+/* ── Responsive ── */
+@media (max-width: 420px) {
+    .new-password-title { font-size: 18px; }
+}

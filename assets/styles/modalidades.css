@@ -1,0 +1,339 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Game Mode Selection
+   assets/styles/modalidades.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Hero: uses the shared .hero / .hero-title / .hero-subtitle from menu.css ── */
+
+/* ── Cards Grid: identical to .cards-grid in menu.css ───────────── */
+.mode-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    width: 100%;
+    max-width: 100%;
+}
+
+/* ── Base card: identical to .game-card in menu.css ─────────────── */
+.mode-card {
+    background: var(--color-surface-card);
+    border-radius: var(--card-radius);
+    border: 1px solid var(--color-border-subtle);
+    padding: 32px 28px;
+    min-height: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-card);
+    transition:
+        transform    var(--transition-fast),
+        border-color var(--transition-fast);
+}
+
+.mode-card:hover {
+    border-color: var(--color-brand-green);
+    transform: translateY(-2px);
+}
+/* ── Icon ────────────────────────────────────────────────────── */
+.mode-icon {
+    font-size: 36px;
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+/* ── Typography ───────────────────────────────────────────────────── */
+.mode-title {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.mode-desc {
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    flex: 1;   /* pushes button to bottom, same as .card-desc */
+    margin: 0;
+}
+
+/* ── Card ghost buttons ────────────────────────────────────── */
+.btn-mode {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px 24px;
+    background: transparent;
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-brand-green);
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease, transform 0.1s ease;
+}
+.btn-mode:hover  { background: var(--color-brand-green); color: #fff; }
+.btn-mode:active { transform: scale(0.98); }
+
+/* "DAILY" badge on featured card */
+.mode-badge {
+    display: inline-block;
+    font-family: var(--font-body);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--color-brand-green);
+    background: rgba(76, 175, 80, 0.12);
+    border: 1px solid rgba(76, 175, 80, 0.30);
+    border-radius: 4px;
+    padding: 2px 8px;
+    margin-bottom: 2px;
+    align-self: flex-start;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MODALS
+   ══════════════════════════════════════════════════════════════ */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 500;
+    background: rgba(10, 10, 10, 0.80);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    animation: backdropIn 0.2s ease forwards;
+}
+
+@keyframes backdropIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.modal-card {
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    padding: 32px 28px 28px;
+    width: 100%;
+    max-width: 360px;
+    position: relative;
+    animation: cardIn 0.25s ease forwards;
+}
+
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Close button (X) */
+.modal-close {
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: 20px;
+    line-height: 1;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: color var(--transition-fast), background var(--transition-fast);
+}
+.modal-close:hover {
+    color: var(--color-text-primary);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.modal-icon { font-size: 38px; margin-bottom: 10px; }
+
+.modal-title {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    letter-spacing: 0.3px;
+}
+
+.modal-text {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+    margin-bottom: 22px;
+}
+
+/* Completed challenge clock */
+.modal-clock {
+    font-family: var(--font-heading);
+    font-size: 38px;
+    font-weight: 700;
+    color: var(--color-brand-green);
+    text-align: center;
+    letter-spacing: 3px;
+    margin: 0 0 24px;
+}
+
+/* Modal buttons */
+.modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-btn-primary {
+    display: block;
+    width: 100%;
+    padding: 13px 16px;
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: background var(--transition-fast), transform 0.1s ease;
+}
+.modal-btn-primary:hover  { background: var(--color-brand-green-dk); }
+.modal-btn-primary:active { transform: scale(0.98); }
+
+.modal-btn-secondary {
+    display: block;
+    width: 100%;
+    padding: 12px 16px;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.modal-btn-secondary:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+}
+
+/* ── .hidden Utility ─────────────────────────────────────────── */
+.hidden { display: none !important; }
+
+/* ── Responsive (same breakpoints as menu.css .cards-grid) ───── */
+@media (max-width: 900px) {
+    .mode-grid { grid-template-columns: 1fr 1fr; }
+    .mode-grid .mode-card:first-child { grid-column: 1 / -1; }
+}
+@media (max-width: 600px) {
+    .mode-grid { grid-template-columns: 1fr; }
+    .mode-grid .mode-card:first-child { grid-column: auto; }
+}
+@media (max-width: 760px) {
+    .modal-card { padding: 28px 20px 22px; }
+}
+/* == GUEST CTA (below grid) =============================== */
+.guest-cta-bar {
+    width: 100%;
+    max-width: 100%;
+    margin: 32px auto 16px;
+    padding: 18px 28px;
+    background: var(--color-surface-card);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--card-radius);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.guest-cta-bar__text {
+    font-family: var(--font-body);
+    font-size: 14px;
+    color: var(--color-text-muted);
+    line-height: 1.65;
+    flex: 1;
+    min-width: 200px;
+    margin: 0;
+}
+.guest-cta-bar__actions {
+    display: flex;
+    gap: 10px;
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+.btn-cta-green {
+    display: inline-block;
+    padding: 11px 22px;
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background var(--transition-fast), transform 0.1s ease;
+}
+.btn-cta-green:hover  { background: var(--color-brand-green-dk); }
+.btn-cta-green:active { transform: scale(0.98); }
+
+.btn-cta-ghost {
+    display: inline-block;
+    padding: 11px 22px;
+    background: transparent;
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--btn-radius);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color var(--transition-fast), color var(--transition-fast);
+}
+.btn-cta-ghost:hover {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary);
+}
+
+@media (max-width: 600px) {
+    .guest-cta-bar { flex-direction: column; align-items: stretch; padding: 20px 16px; }
+    .guest-cta-bar__actions { flex-direction: column; }
+    .btn-cta-green, .btn-cta-ghost { text-align: center; }
+}
+
+
+/* ── Stat info icon override ─────────────────────────────────── */
+.stat-info {
+    font-style: normal !important;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

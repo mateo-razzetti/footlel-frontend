@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Crear Cuenta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/styles/registro.css">
+    <!-- Global preferences (theme + animations) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card">
+
+        <header class="card-header">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
+            <h1 class="brand-title">CREÁ TU CUENTA</h1>
+        </header>
+
+        <form class="login-form" id="register-form" action="#" method="POST" novalidate>
+            <div class="field-error error-alert-box" id="general-error" role="alert" aria-live="polite" style="margin-bottom: 12px;" hidden></div>
+
+            <!-- Email -->
+            <div class="form-group">
+                <input
+                    class="form-input"
+                    type="email"
+                    id="email"
+                    name="email"
+                    placeholder="Correo electrónico"
+                    autocomplete="email"
+                    required
+                >
+                <!-- Email validation error (hidden by default) -->
+                <div class="field-error error-alert-box" id="email-error" aria-live="polite" hidden>
+                    <svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="error-alert-text">Ingresá un correo válido.</span>
+                </div>
+            </div>
+
+            <!-- Username -->
+            <div class="form-group">
+                <input
+                    class="form-input"
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Usuario"
+                    autocomplete="username"
+                    required
+                >
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <div class="input-toggle-wrapper">
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Contraseña"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button type="button" class="toggle-visibility" aria-label="Mostrar contraseña" data-target="password">
+                        <!-- Single SVG; JS mutates its innerHTML on click -->
+                        <svg class="eye-icon" id="eye-password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Confirm password -->
+            <div class="form-group">
+                <div class="input-toggle-wrapper">
+                    <input
+                        class="form-input"
+                        type="password"
+                        id="confirm-password"
+                        name="confirm-password"
+                        placeholder="Confirmar Contraseña"
+                        autocomplete="new-password"
+                        required
+                    >
+                    <button type="button" class="toggle-visibility" aria-label="Mostrar contraseña" data-target="confirm-password">
+                        <!-- Single SVG; JS mutates its innerHTML on click -->
+                        <svg class="eye-icon" id="eye-confirm-password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+                            <line x1="1" y1="1" x2="23" y2="23"/>
+                        </svg>
+                    </button>
+                </div>
+                <!-- Error message: hidden by default, shown if passwords do not match -->
+                <div class="field-error error-alert-box" id="password-mismatch-error" aria-live="polite" hidden>
+                    <svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                    <span class="error-alert-text">Las contraseñas no coinciden.</span>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Registrarse</button>
+        </form>
+
+        <nav class="secondary-links">
+            <a href="login.html" class="link-login">¿Ya tenés cuenta? Iniciá sesión</a>
+        </nav>
+
+    </main>
+
+    <script type="module">
+
+        import { API_BASE_URL } from '../../services/apiConfig.js';
+        /* ================================================================
+           Reusable SVG paths
+           EYE_CLOSED → crossed-out eye with diagonal line (password hidden)
+           EYE_OPEN   → open eye with pupil                (password visible)
+        ================================================================ */
+        const EYE_CLOSED = `
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/>
+            <line x1="1" y1="1" x2="23" y2="23"/>`;
+
+        const EYE_OPEN = `
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>`;
+
+        /* ================================================================
+           Show / hide password toggle
+           A single SVG per button; mutates its innerHTML based on state.
+        ================================================================ */
+        document.querySelectorAll('.toggle-visibility').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const input   = document.getElementById(btn.dataset.target);
+                const svgId   = `eye-${btn.dataset.target}`;   // e.g. "eye-password"
+                const svg     = document.getElementById(svgId);
+                const showing = input.type === 'text';          // already visible?
+
+                // Toggle the input type
+                input.type = showing ? 'password' : 'text';
+
+                // Mutate the SVG drawing
+                svg.innerHTML = showing ? EYE_CLOSED : EYE_OPEN;
+
+                // Update aria-label for screen readers
+                btn.setAttribute(
+                    'aria-label',
+                    showing ? 'Mostrar contraseña' : 'Ocultar contraseña'
+                );
+            });
+        });
+
+        /* ================================================================
+           Email validation regex
+           Requires: local chars @ domain . extension (2-8 letters)
+        ================================================================ */
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,8}$/;
+
+        /* Secure password: min 8 chars, 1 uppercase, 1 lowercase, 1 digit */
+        const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const PASSWORD_ERROR_MSG = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.';
+
+        /* ── Base Robot Avatars & Backend Error Formatter ──────── */
+        const BASE_ROBOT_AVATARS = [
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+            'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+        ];
+
+        function assignRandomAvatarForNewUser(username) {
+            const cleanUser = String(username || '').trim().replace(/^@+/, '');
+            const randomAvatar = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (cleanUser) {
+                localStorage.setItem('footlel_avatar_' + cleanUser, randomAvatar);
+            }
+            localStorage.setItem('footlel_avatar', randomAvatar);
+            return randomAvatar;
+        }
+
+        const ALERT_ICON_SVG = `<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+
+        function formatBackendError(rawMsg) {
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+                return window.FootlelPrefs.formatBackendError(rawMsg);
+            }
+            if (!rawMsg) return 'Ocurrió un error inesperado.';
+            let msg = String(rawMsg).trim();
+            if (msg.startsWith('{')) {
+                try {
+                    const parsed = JSON.parse(msg);
+                    if (parsed && (parsed.detail || parsed.message)) {
+                        msg = String(parsed.detail || parsed.message).trim();
+                    }
+                } catch (_) {}
+            }
+            msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+            msg = msg
+                .replace(/\bcontrasenias\b/gi, 'contraseñas')
+                .replace(/\bcontrasenia\b/gi, 'contraseña')
+                .replace(/\binvalidos\b/gi, 'inválidos')
+                .replace(/\binvalidas\b/gi, 'inválidas')
+                .replace(/\binvalido\b/gi, 'inválido')
+                .replace(/\binvalida\b/gi, 'inválida')
+                .replace(/\bcodigos\b/gi, 'códigos')
+                .replace(/\bcodigo\b/gi, 'código')
+                .replace(/\bcorreo\s+electronico\b/gi, 'correo electrónico')
+                .replace(/\belectronico\b/gi, 'electrónico')
+                .replace(/\bnumeros\b/gi, 'números')
+                .replace(/\bnumero\b/gi, 'número')
+                .replace(/\btelefono\b/gi, 'teléfono')
+                .replace(/\bsesion\b/gi, 'sesión')
+                .replace(/\bverificacion\b/gi, 'verificación')
+                .replace(/\bautenticacion\b/gi, 'autenticación')
+                .replace(/\bconfiguracion\b/gi, 'configuración')
+                .replace(/\binformacion\b/gi, 'información')
+                .replace(/\bconexion\b/gi, 'conexión')
+                .replace(/\boperacion\b/gi, 'operación')
+                .replace(/\bmanana\b/gi, 'mañana')
+                .replace(/\bminimo\b/gi, 'mínimo')
+                .replace(/\bmaximo\b/gi, 'máximo')
+                .replace(/\bexito\b/gi, 'éxito');
+            if (msg.length > 0) {
+                msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+            }
+            if (msg.length > 0 && !/[.!?]$/.test(msg)) {
+                msg += '.';
+            }
+            return msg;
+        }
+
+        /* ================================================================
+           Submit validation:
+             0. Empty fields — sequential, with a field-specific message
+             1. Email regex
+             2. Secure password regex
+             3. Matching passwords
+             4. Fetch to the API → redirects to correo-enviado.html only if response.ok
+        ================================================================ */
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email           = document.getElementById('email').value.trim();
+            const user_name       = document.getElementById('username').value.trim();
+            const password        = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            // ── Reusable error element (created only once) ──
+            let generalError = document.getElementById('general-error');
+            if (!generalError) {
+                generalError = document.createElement('div');
+                generalError.id = 'general-error';
+                generalError.className = 'field-error error-alert-box';
+                generalError.style.marginBottom = '12px';
+                document.getElementById('register-form').prepend(generalError);
+            }
+
+            function showError(msg, focusId) {
+                const cleanText = formatBackendError(msg);
+                generalError.innerHTML = `${ALERT_ICON_SVG}<span class="error-alert-text"></span>`;
+                generalError.querySelector('.error-alert-text').textContent = cleanText;
+                generalError.hidden = false;
+                if (focusId) document.getElementById(focusId).focus();
+            }
+
+            // ── 0. Sequential empty-field validation ──
+            if (!email) {
+                showError('Falta ingresar el correo.', 'email');
+                return;
+            }
+            if (!user_name) {
+                showError('Falta crear un usuario.', 'username');
+                return;
+            }
+            if (!password) {
+                showError('Falta ingresar la contraseña.', 'password');
+                return;
+            }
+            if (!confirmPassword) {
+                showError('Falta confirmar la contraseña.', 'confirm-password');
+                return;
+            }
+
+            // ── 1. Email regex validation ──
+            if (!EMAIL_REGEX.test(email)) {
+                showError('Ingresá un correo electrónico válido.', 'email');
+                return;
+            }
+
+            // ── 2. Secure password validation ──
+            if (!PASSWORD_REGEX.test(password)) {
+                e.preventDefault();
+                showError(PASSWORD_ERROR_MSG, 'password');
+                return;
+            }
+
+            // ── 3. Matching passwords validation ──
+            if (password !== confirmPassword) {
+                showError('Las contraseñas no coinciden.', 'confirm-password');
+                return;
+            }
+
+            generalError.hidden = true;
+
+            // ── 4. Fetch and redirect only if response.ok ──
+            const payload = {
+                user_name: user_name,
+                user_email: email,
+                user_password: password
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/user-register`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    // Asignar automáticamente uno de los 6 avatares robot aleatorio al nuevo usuario
+                    assignRandomAvatarForNewUser(user_name);
+                    window.location.href = 'correo-enviado.html';
+                } else {
+                    const data = await response.json();
+                    showError(data.detail || data.message || 'Ocurrió un error. Intentá de nuevo.');
+                }
+            } catch (error) {
+                console.error(error);
+                showError('No se pudo conectar con el servidor. Intentá más tarde.');
+            }
+        });
+
+        /* ── Real-time cleanup ── */
+
+        // Email: clears the error when the user types something valid
+        document.getElementById('email').addEventListener('input', () => {
+            const emailError = document.getElementById('email-error');
+            if (!emailError.hidden && EMAIL_REGEX.test(document.getElementById('email').value.trim())) {
+                emailError.hidden = true;
+            }
+        });
+
+        // Confirmation: clears the error once the passwords match
+        document.getElementById('confirm-password').addEventListener('input', () => {
+            const mismatchError = document.getElementById('password-mismatch-error');
+            if (!mismatchError.hidden) {
+                const pwd     = document.getElementById('password').value;
+                const confirm = document.getElementById('confirm-password').value;
+                if (pwd === confirm) mismatchError.hidden = true;
+            }
+        });
+    </script>
+
+</body>
+</html>

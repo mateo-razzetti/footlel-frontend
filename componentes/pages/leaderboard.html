@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="../../assets/scripts/global-preferences.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Tabla de Posiciones</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/styles/leaderboard.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Logo -->
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Central title -->
+        <span class="header-page-title">Tabla de Posiciones</span>
+
+        <!-- Header Actions: Notifications + Profile -->
+        <div class="header-actions">
+
+            <!-- Notifications Bell + Dropdown -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button
+                    class="notif-btn"
+                    id="notifBtn"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notifDropdown"
+                    aria-label="Notificaciones"
+                >
+                    <svg class="notif-bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge" hidden style="display: none;"></span>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div
+                    class="notif-dropdown"
+                    id="notifDropdown"
+                    role="region"
+                    aria-label="Notificaciones"
+                >
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notificaciones</span>
+                    </div>
+                    <ul class="notif-list" id="notifList">
+                        <li class="notif-empty">No tienes notificaciones nuevas</li>
+                    </ul>
+                </div>
+            </div><!-- /notif-wrapper -->
+
+            <!-- Profile + Dropdown -->
+            <div class="profile-wrapper" id="profileWrapper">
+            <button
+                class="profile-btn"
+                id="profileBtn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profileDropdown"
+                type="button"
+            >
+                <img
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                    alt="Avatar de usuario"
+                    class="profile-avatar"
+                    id="profileAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+                <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+                <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Configuración
+                </a>
+                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Cuenta
+                </a>
+                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Mis Amigos
+                </a>
+                <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Ayuda
+                </a>
+                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span id="ddSessionLabel">Cerrar Sesión</span>
+                </a>
+            </nav>
+            </div><!-- /profile-wrapper -->
+        </div><!-- /header-actions -->
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════ -->
+    <main class="main-content" role="main">
+
+        <!-- Heading + Tabs (Only "Global" and "Amigos") -->
+        <div class="lb-header">
+            <h1 class="lb-title">Tabla de Posiciones</h1>
+
+            <nav class="lb-tabs" role="tablist" aria-label="Filtros de ranking">
+                <button class="lb-tab is-active" role="tab" aria-selected="true" data-tab="global" id="tabGlobal">Global</button>
+                <button class="lb-tab" role="tab" aria-selected="false" data-tab="amigos" id="tabAmigos">Amigos</button>
+            </nav>
+        </div>
+
+        <!-- Standings table (Shows loading state until fetch resolves) -->
+        <section class="lb-list" id="lbList" aria-label="Ranking de jugadores" aria-live="polite">
+            <div class="lb-loading" role="status">
+                <div class="lb-spinner" aria-hidden="true"></div>
+                <span>Cargando ranking...</span>
+            </div>
+        </section><!-- /lb-list -->
+
+        <!-- Guest CTA (hidden by default, shown via JS) -->
+        <div class="lb-guest-cta" id="guestCta" aria-hidden="true" hidden>
+            <h2 class="cta-title">Guardá tu progreso y competí</h2>
+            <p class="cta-desc">Registrate gratis para guardar tus estadísticas, rachas y subir en el ranking mundial.</p>
+            <div class="cta-actions">
+                <a href="login.html" class="btn-cta btn-cta--primary">Iniciar Sesión</a>
+                <a href="registro.html" class="btn-cta btn-cta--outline">Registrarse</a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="lb-footer" role="contentinfo">
+        <p>© 2026 Footlel · Todos los derechos reservados</p>
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ─────────────────────────────────────────
+       1. STATE DETECTION (Guest vs Logged in) & AVATAR ROBOT
+    ───────────────────────────────────────── */
+    var BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            var guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.indexOf('avatar-default.png') !== -1 || guestAv.indexOf('data:image/svg+xml') === 0) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        var userKey = username ? ('footlel_avatar_' + username) : null;
+        var savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.indexOf('avatar-default.png') !== -1 || savedAv.indexOf('seed=footlel-default') !== -1) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
+    var isGuest = localStorage.getItem('footlel_guest') === 'true';
+
+    var GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
+
+    /* ─────────────────────────────────────────
+       2. HEADER — user / avatar & GUEST TABS
+    ───────────────────────────────────────── */
+    var profileUser     = document.getElementById('profileUsername');
+    var profileAvatar   = document.getElementById('profileAvatar');
+    var ddEditAccount   = document.getElementById('ddEditAccount');
+    var ddFriends       = document.getElementById('ddFriends');
+    var ddSessionAction = document.getElementById('ddSessionAction');
+    var ddSessionLabel  = document.getElementById('ddSessionLabel');
+    var ddSessionIcon   = document.getElementById('ddSessionIcon');
+    var tabAmigos       = document.getElementById('tabAmigos');
+    var guestCta        = document.getElementById('guestCta');
+    var lbList          = document.getElementById('lbList');
+
+    // Strip any leading '@' from stored username
+    var savedUser   = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim().replace(/^@+/, '');
+    var savedAvatar = getOrAssignAvatar(savedUser, isGuest);
+
+    if (isGuest) {
+        var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim().replace(/^@+/, '');
+        var guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
+        profileUser.textContent     = guestName;
+        profileAvatar.src           = getOrAssignAvatar(guestName, true);
+        profileAvatar.alt           = 'Avatar invitado';
+        ddEditAccount.style.display = 'none';
+        ddFriends.style.display     = 'none';
+        ddSessionLabel.textContent  = 'Iniciar Sesión';
+        ddSessionAction.href        = 'login.html';
+        ddSessionAction.classList.remove('item-danger');
+        ddSessionIcon.innerHTML     = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+
+        // Hide "Amigos" tab completely for guests
+        if (tabAmigos) {
+            tabAmigos.style.display = 'none';
+            tabAmigos.hidden = true;
+            tabAmigos.setAttribute('aria-hidden', 'true');
+        }
+
+        // Show Guest CTA block
+        if (guestCta) {
+            guestCta.hidden = false;
+            guestCta.removeAttribute('aria-hidden');
+        }
+    } else {
+        if (savedAvatar) {
+            profileAvatar.src = savedAvatar;
+        }
+        // Display clean username in header without '@' prefix
+        profileUser.textContent = savedUser;
+    }
+
+    /* ─────────────────────────────────────────
+       3. RANKING DATA & BUILDERS (GLOBAL / AMIGOS)
+    ───────────────────────────────────────── */
+    var cachedBackendLb      = null;
+    var cachedUserFriends    = [];
+    var isLoadingRanking     = true;
+    var isLoadingFriendsList = false;
+    var activeTab            = 'global'; // Global active by default
+    var currentUserId        = Number(localStorage.getItem('footlel_user_id')) || null;
+
+    function getDeterministicRobotForUser(username) {
+        var clean = String(username || '').trim().toLowerCase();
+        if (!clean) return BASE_ROBOT_AVATARS[0];
+        var hash = 0;
+        for (var i = 0; i < clean.length; i++) {
+            hash = ((hash << 5) - hash) + clean.charCodeAt(i);
+            hash |= 0;
+        }
+        return BASE_ROBOT_AVATARS[Math.abs(hash) % BASE_ROBOT_AVATARS.length];
+    }
+
+    function getAvatarForPlayer(username, isCurrentUser) {
+        if (isCurrentUser && savedAvatar) return savedAvatar;
+        var clean = String(username || '').trim().replace(/^@+/, '');
+        if (!clean) return BASE_ROBOT_AVATARS[0];
+        var stored = localStorage.getItem('footlel_avatar_' + clean);
+        if (stored && stored.indexOf('avatar-default.png') === -1) return stored;
+        return getDeterministicRobotForUser(clean);
+    }
+
+    function renderLoadingState(message) {
+        lbList.innerHTML =
+            '<div class="lb-loading" role="status">' +
+                '<div class="lb-spinner" aria-hidden="true"></div>' +
+                '<span>' + (message || 'Cargando ranking...') + '</span>' +
+            '</div>';
+    }
+
+    function renderEmptyMessageState(message) {
+        lbList.innerHTML =
+            '<div class="lb-loading" role="status">' +
+                '<span>' + message + '</span>' +
+            '</div>';
+    }
+
+    function cleanValidUsername(raw) {
+        if (raw === null || raw === undefined) return '';
+        var s = String(raw).trim().replace(/^@+/, '').trim();
+        if (!s || /^(null|undefined|none)$/i.test(s) || /^usuario[\s_#]*\d+$/i.test(s)) {
+            return '';
+        }
+        return s;
+    }
+
+    function extractValidAccountName(entry) {
+        if (entry === null || entry === undefined) return '';
+        if (typeof entry === 'string') return cleanValidUsername(entry);
+        if (typeof entry === 'object' && !Array.isArray(entry)) {
+            return cleanValidUsername(entry.user_name ?? entry.friend_name ?? entry.username ?? entry.name ?? '');
+        }
+        return '';
+    }
+
+    function parseGlobalLeaderboardEntries(lbData) {
+        var list = [];
+        var rawArray = null;
+        if (Array.isArray(lbData)) {
+            rawArray = lbData;
+        } else if (lbData && Array.isArray(lbData.leaderboard)) {
+            rawArray = lbData.leaderboard;
+        } else if (lbData && lbData.data && Array.isArray(lbData.data.leaderboard)) {
+            rawArray = lbData.data.leaderboard;
+        }
+
+        if (!Array.isArray(rawArray)) return list;
+
+        rawArray.forEach(function (entry) {
+            if (entry === null || entry === undefined) return;
+            var rawId = null;
+            var rawName = '';
+            var rawVal = 0;
+
+            if (Array.isArray(entry)) {
+                if (entry.length >= 3 && typeof entry[0] === 'number' && typeof entry[1] === 'string') {
+                    rawId = Number(entry[0]);
+                    rawName = entry[1];
+                    rawVal = Number(entry[2]) || 0;
+                } else {
+                    rawName = entry[0];
+                    rawVal = Number(entry[1]) || 0;
+                    if (entry.length >= 3 && entry[2] !== null && entry[2] !== undefined && !isNaN(Number(entry[2]))) {
+                        rawId = Number(entry[2]);
+                    }
+                }
+            } else if (typeof entry === 'object') {
+                rawId = entry.user_id ?? entry.friend_id ?? entry.id ?? null;
+                rawName = entry.user_name ?? entry.friend_name ?? entry.username ?? entry.name ?? '';
+                rawVal = Number(entry.points ?? entry.score ?? entry.wins ?? 0) || 0;
+            }
+
+            // Filtro defensivo: ignorar registros nulos o cuyo user_name / friend_name venga vacío o null
+            var cleanName = cleanValidUsername(rawName);
+            if (!cleanName) return;
+
+            var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
+                ? Number(rawId)
+                : null;
+
+            list.push({
+                user_id:  numId,
+                username: cleanName,
+                points:   rawVal
+            });
+        });
+
+        return list;
+    }
+
+    function parseUserFriendsResponse(friendsData) {
+        if (!friendsData) return [];
+        var rawList = null;
+        if (Array.isArray(friendsData)) {
+            rawList = friendsData;
+        } else if (typeof friendsData === 'object') {
+            var keys = ['friend_names', 'user_friend_names', 'friends_names', 'friends', 'user_friends', 'data', 'items', 'results', 'users'];
+            for (var i = 0; i < keys.length; i++) {
+                if (Array.isArray(friendsData[keys[i]])) {
+                    rawList = friendsData[keys[i]];
+                    break;
+                }
+            }
+            if (!rawList && friendsData.data && typeof friendsData.data === 'object') {
+                for (var j = 0; j < keys.length; j++) {
+                    if (Array.isArray(friendsData.data[keys[j]])) {
+                        rawList = friendsData.data[keys[j]];
+                        break;
+                    }
+                }
+            }
+        }
+        if (!Array.isArray(rawList)) return [];
+
+        var parsed = [];
+        rawList.forEach(function (item) {
+            if (item === null || item === undefined) return;
+            var fId = null;
+            var fName = '';
+            var fPts = 0;
+
+            if (Array.isArray(item)) {
+                if (typeof item[0] === 'number' && typeof item[1] === 'string') {
+                    fId = Number(item[0]);
+                    fName = cleanValidUsername(item[1]);
+                    fPts = Number(item[2]) || 0;
+                } else {
+                    fName = cleanValidUsername(item[0]);
+                    fPts = Number(item[1]) || 0;
+                    if (item.length >= 3 && !isNaN(Number(item[2]))) fId = Number(item[2]);
+                }
+            } else if (typeof item === 'number') {
+                // Ignorar IDs numéricos huérfanos sin nombre de usuario
+                return;
+            } else if (typeof item === 'string') {
+                fName = cleanValidUsername(item);
+            } else if (typeof item === 'object') {
+                var rawId = item.user_id ?? item.friend_id ?? item.id ?? null;
+                if (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId))) {
+                    fId = Number(rawId);
+                }
+                fName = extractValidAccountName(item);
+                fPts = Number(item.points ?? item.score ?? item.wins ?? 0) || 0;
+            }
+
+            // Filtro defensivo: ignorar cualquier registro nulo o cuyo user_name / friend_name venga vacío o null
+            if (!fName) return;
+
+            parsed.push({
+                user_id:  fId,
+                username: fName,
+                points:   fPts
+            });
+        });
+        return parsed;
+    }
+
+    function buildGlobalStandings(lbData) {
+        var map = new Map();
+        var entries = parseGlobalLeaderboardEntries(lbData);
+
+        entries.forEach(function (item) {
+            var cleanName = cleanValidUsername(item && item.username);
+            if (!cleanName) return;
+            var key = cleanName.toLowerCase();
+
+            if (/^guest_/i.test(cleanName) && (isGuest || !savedUser || key !== savedUser.toLowerCase())) {
+                return;
+            }
+
+            map.set(key, {
+                user_id:  item.user_id,
+                username: cleanName,
+                points:   item.points
+            });
+        });
+
+        var sorted = Array.from(map.values()).sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
+        });
+
+        return sorted.slice(0, 10);
+    }
+
+    function buildFriendsStandingsFromBackend(lbData, friendsList, currentUsername) {
+        var allLbEntries = parseGlobalLeaderboardEntries(lbData);
+        var confirmedFriends = Array.isArray(friendsList) ? friendsList : [];
+
+        // Build set of normalized friend usernames from GET /user/get-user-friends
+        // Ignorando registros nulos o cuyo user_name / friend_name venga vacío o null
+        var friendNamesSet = new Set();
+        confirmedFriends.forEach(function (f) {
+            if (f === null || f === undefined) return;
+            var cleanFriendName = extractValidAccountName(f);
+            if (cleanFriendName) {
+                friendNamesSet.add(cleanFriendName.toLowerCase());
+            }
+        });
+
+        var cleanCurrentUser = cleanValidUsername(currentUsername);
+        var normCurrentUser  = cleanCurrentUser.toLowerCase();
+
+        // Filter global leaderboard by comparing username strings directly
+        var filteredMap = new Map();
+
+        allLbEntries.forEach(function (entry) {
+            if (!entry) return;
+            var entryCleanName = extractValidAccountName(entry);
+            if (!entryCleanName) return;
+            var entryNameLower = entryCleanName.toLowerCase();
+
+            var isSelf   = Boolean(normCurrentUser && entryNameLower === normCurrentUser);
+            var isFriend = friendNamesSet.has(entryNameLower);
+
+            if (isSelf || isFriend) {
+                filteredMap.set(entryNameLower, {
+                    username: isSelf ? cleanCurrentUser : entryCleanName,
+                    points:   Number(entry.points) || 0,
+                    isSelf:   isSelf
+                });
+            }
+        });
+
+        // Also include confirmed friends who might have 0 points and not yet appear in global leaderboard
+        confirmedFriends.forEach(function (f) {
+            if (f === null || f === undefined) return;
+            var cName = extractValidAccountName(f);
+            if (!cName) return;
+            var lower = cName.toLowerCase();
+            if (!filteredMap.has(lower)) {
+                filteredMap.set(lower, {
+                    username: cName,
+                    points:   Number(f && f.points) || 0,
+                    isSelf:   false
+                });
+            }
+        });
+
+        // Ensure logged-in user is present in the filtered standings
+        if (normCurrentUser && !filteredMap.has(normCurrentUser)) {
+            filteredMap.set(normCurrentUser, {
+                username: cleanCurrentUser,
+                points:   0,
+                isSelf:   true
+            });
+        }
+
+        var sorted = Array.from(filteredMap.values()).sort(function (a, b) {
+            if (b.points !== a.points) return b.points - a.points;
+            return a.username.localeCompare(b.username);
+        });
+
+        return {
+            entries: sorted,
+            hasFriends: friendNamesSet.size > 0 && sorted.length > 1
+        };
+    }
+
+    function formatPoints(pts) {
+        var n = Math.round(Number(pts) || 0);
+        return n.toLocaleString('en-US') + ' pts';
+    }
+
+    function renderStandingsRows(entries) {
+        lbList.innerHTML = '';
+
+        if (!entries || entries.length === 0) {
+            renderEmptyMessageState('No hay datos de ranking disponibles.');
+            return;
+        }
+
+        var maxRows = isGuest ? Math.min(5, entries.length) : entries.length;
+
+        for (var i = 0; i < maxRows; i++) {
+            var item = entries[i];
+            var rank = i + 1;
+            var isCurrentUser = !isGuest && (item.isSelf || (savedUser && item.username.toLowerCase() === savedUser.toLowerCase()));
+
+            var row = document.createElement('div');
+            var classes = ['lb-row'];
+            if (rank === 1) classes.push('lb-row--gold');
+            else if (rank === 2) classes.push('lb-row--silver');
+            else if (rank === 3) classes.push('lb-row--bronze');
+            if (rank >= 6) classes.push('lb-row--logged');
+            row.className = classes.join(' ');
+            row.setAttribute('data-rank', String(rank));
+
+            if (isCurrentUser) {
+                row.style.borderColor = 'var(--color-brand-green)';
+            }
+
+            var rankCol = document.createElement('div');
+            rankCol.className = 'lb-rank';
+            if (rank === 1 || rank === 2 || rank === 3) {
+                var medal = document.createElement('span');
+                medal.className = 'lb-medal ' + (rank === 1 ? 'lb-medal--gold' : rank === 2 ? 'lb-medal--silver' : 'lb-medal--bronze');
+                medal.setAttribute('aria-label', rank === 1 ? 'Primer lugar' : rank === 2 ? 'Segundo lugar' : 'Tercer lugar');
+                medal.textContent = '★';
+                rankCol.appendChild(medal);
+            }
+            var posSpan = document.createElement('span');
+            posSpan.className = 'lb-pos';
+            posSpan.textContent = String(rank);
+            rankCol.appendChild(posSpan);
+
+            var avatarImg = document.createElement('img');
+            avatarImg.className = 'lb-avatar';
+            avatarImg.src = getAvatarForPlayer(item.username, isCurrentUser);
+            avatarImg.alt = 'Avatar ' + item.username;
+            avatarImg.onerror = function () {
+                this.src = GUEST_AVATAR;
+            };
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'lb-username';
+            nameSpan.textContent = item.username;
+
+            var ptsSpan = document.createElement('span');
+            ptsSpan.className = 'lb-points';
+            var isEng = localStorage.getItem('footlel_is_english') === 'true' || localStorage.getItem('footlel_lang') === 'en';
+            if (typeof window.getRankInfo === 'function') {
+                var rInfo = window.getRankInfo(item.points, isEng);
+                ptsSpan.innerHTML =
+                    '<span class="lb-rank-badge lb-rank-badge--' + rInfo.key + '" style="--rank-color:' + rInfo.color + ';">' +
+                        rInfo.svg +
+                        '<span class="lb-rank-name">' + rInfo.name + '</span>' +
+                    '</span>' +
+                    '<span class="lb-points-val">' + formatPoints(item.points) + '</span>';
+            } else {
+                ptsSpan.textContent = formatPoints(item.points);
+            }
+
+            row.appendChild(rankCol);
+            row.appendChild(avatarImg);
+            row.appendChild(nameSpan);
+            row.appendChild(ptsSpan);
+
+            lbList.appendChild(row);
+        }
+    }
+
+    window.addEventListener('footlel:language-changed', function () {
+        if (!isLoadingRanking) {
+            renderActiveTab();
+        }
+    });
+
+    function renderActiveTab() {
+        if (isLoadingRanking || (activeTab === 'amigos' && isLoadingFriendsList)) {
+            renderLoadingState('Cargando ranking...');
+            return;
+        }
+        if (activeTab === 'amigos' && !isGuest) {
+            var friendsResult = buildFriendsStandingsFromBackend(cachedBackendLb, cachedUserFriends, savedUser);
+            if (!friendsResult.hasFriends || friendsResult.entries.length <= 1) {
+                renderEmptyMessageState('Aún no tienes amigos agregados. ¡Ve a buscar rivales!');
+                return;
+            }
+            renderStandingsRows(friendsResult.entries);
+        } else {
+            var globalData = buildGlobalStandings(cachedBackendLb);
+            renderStandingsRows(globalData);
+        }
+    }
+
+    // Show "Cargando ranking..." while the backend promise is pending
+    renderLoadingState('Cargando ranking...');
+
+    var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    async function fetchUserFriendsFromBackend() {
+        if (isGuest) return [];
+        var token = (localStorage.getItem('footlel_token') || '').trim();
+        if (!token || token === 'null' || token === 'undefined') return [];
+
+        try {
+            var resp = await fetch(apiBaseUrl + '/user/get-user-friends', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+            if (resp.ok) {
+                var data = await resp.json();
+                var parsed = parseUserFriendsResponse(data);
+                cachedUserFriends = parsed;
+                return parsed;
+            }
+            cachedUserFriends = [];
+            return [];
+        } catch (err) {
+            console.warn('No se pudo obtener la lista de amigos del backend:', err);
+            cachedUserFriends = [];
+            return [];
+        }
+    }
+
+    async function refreshFriendsRankingTab() {
+        isLoadingFriendsList = true;
+        renderActiveTab();
+        try {
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            var lbPromise = fetch(apiBaseUrl + '/stat/get-global-leaderboard', {
+                headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+            }).then(function (r) { return r.ok ? r.json() : cachedBackendLb; }).catch(function () { return cachedBackendLb; });
+
+            var results = await Promise.all([
+                lbPromise,
+                fetchUserFriendsFromBackend()
+            ]);
+            if (results[0]) {
+                cachedBackendLb = results[0];
+            }
+        } finally {
+            isLoadingRanking = false;
+            isLoadingFriendsList = false;
+            renderActiveTab();
+        }
+    }
+
+    (async function fetchBackendLeaderboard() {
+        try {
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            var requests = [
+                fetch(apiBaseUrl + '/stat/get-global-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
+            ];
+            if (!isGuest && token) {
+                requests.push(fetchUserFriendsFromBackend());
+            }
+            var results = await Promise.all(requests);
+            cachedBackendLb = results[0];
+        } catch (err) {
+            console.warn('No se pudo obtener el leaderboard del backend:', err);
+            cachedBackendLb = null;
+        } finally {
+            isLoadingRanking = false;
+            renderActiveTab();
+        }
+    })();
+
+    /* ─────────────────────────────────────────
+       4. PROFILE DROPDOWN TOGGLE
+    ───────────────────────────────────────── */
+    var profileBtn      = document.getElementById('profileBtn');
+    var profileDropdown = document.getElementById('profileDropdown');
+
+    function openDropdown()  { profileDropdown.classList.add('is-open');    profileBtn.setAttribute('aria-expanded', 'true');  }
+    function closeDropdown() { profileDropdown.classList.remove('is-open'); profileBtn.setAttribute('aria-expanded', 'false'); }
+
+    profileBtn.addEventListener('click', function (e) { e.stopPropagation(); profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown(); });
+    document.addEventListener('click', function (e) { if (!document.getElementById('profileWrapper').contains(e.target)) closeDropdown(); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDropdown(); });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
+
+    /* ─────────────────────────────────────────
+       5. RANKING TABS ("Global" and "Amigos")
+    ───────────────────────────────────────── */
+    var tabs = document.querySelectorAll('.lb-tab');
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            if (isGuest && tab.dataset.tab === 'amigos') return;
+            tabs.forEach(function (t) {
+                t.classList.remove('is-active');
+                t.setAttribute('aria-selected', 'false');
+            });
+            tab.classList.add('is-active');
+            tab.setAttribute('aria-selected', 'true');
+            activeTab = tab.dataset.tab;
+            if (activeTab === 'amigos') {
+                refreshFriendsRankingTab();
+            } else {
+                renderActiveTab();
+            }
+        });
+    });
+
+})();
+</script>
+
+</body>
+</html>

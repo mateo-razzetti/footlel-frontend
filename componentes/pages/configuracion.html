@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Configuración</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles: tokens + shared header, then page-specific -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <link rel="stylesheet" href="../../assets/styles/configuracion.css">
+
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js"></script>
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Left: Logo (acts as a back button to menu.html) -->
+        <a href="menu.html" class="logo-link" aria-label="Volver a Footlel">
+            <img
+                src="../../assets/images/logo-oscuro.png"
+                alt="Logo Footlel"
+                class="logo-img"
+                id="main-logo"
+            >
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Derecha: Notificaciones + Perfil + Dropdown -->
+        <div class="header-actions">
+
+            <!-- Notifications Bell + Dropdown -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button
+                    class="notif-btn"
+                    id="notifBtn"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notifDropdown"
+                    aria-label="Notificaciones"
+                >
+                    <svg class="notif-bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge" hidden style="display: none;"></span>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div
+                    class="notif-dropdown"
+                    id="notifDropdown"
+                    role="region"
+                    aria-label="Notificaciones"
+                >
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notificaciones</span>
+                    </div>
+                    <ul class="notif-list" id="notifList">
+                        <li class="notif-empty">No tienes notificaciones nuevas</li>
+                    </ul>
+                </div>
+            </div><!-- /notif-wrapper -->
+
+            <div class="profile-wrapper" id="profileWrapper">
+            <button
+                class="profile-btn"
+                id="profileBtn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profileDropdown"
+                type="button"
+            >
+                <img
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                    alt="Avatar de usuario"
+                    class="profile-avatar"
+                    id="profileAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+                <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+                <!-- Settings (active) -->
+                <a href="configuracion.html" class="dropdown-item active" role="menuitem" aria-current="page">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Configuración
+                </a>
+                <!-- Editar Cuenta -->
+                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Cuenta
+                </a>
+                <!-- My Friends -->
+                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Mis Amigos
+                </a>
+                <!-- Ayuda -->
+                <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Ayuda
+                </a>
+                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span id="ddSessionLabel">Cerrar Sesión</span>
+                </a>
+            </nav>
+            </div>
+        </div><!-- /header-actions -->
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         CONTENIDO PRINCIPAL
+    ═══════════════════════════════════════ -->
+    <main role="main">
+
+        <!-- Perfil Central -->
+        <section class="config-profile" aria-label="Perfil de usuario">
+            <div class="config-avatar-wrapper">
+                <img
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                    alt="Avatar de usuario"
+                    class="config-avatar"
+                    id="configAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 90 90%22%3E%3Ccircle cx=%2245%22 cy=%2245%22 r=%2245%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2245%22 cy=%2234%22 r=%2214%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2245%22 cy=%2272%22 rx=%2223%22 ry=%2218%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+            </div>
+            <div class="config-username-row">
+                <span id="config-username">nombre_usuario</span>
+            </div>
+        </section>
+
+        <!-- Contenido scrollable -->
+        <div class="config-main">
+
+            <!-- Preferences card -->
+            <div class="prefs-card config-card" role="region" aria-label="Preferencias de cuenta">
+                <p class="prefs-card-title">Configuración de Cuenta</p>
+
+                <!-- Row 1: Disable animations -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Eliminar animaciones</span>
+                        <span class="pref-desc">Reduce el movimiento para mejorar el rendimiento.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Eliminar animaciones">
+                        <input type="checkbox" id="toggle-animaciones">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Row 2: Dark Mode -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Modo Oscuro</span>
+                        <span class="pref-desc">Activa el tema oscuro en toda la aplicación.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Modo Oscuro">
+                        <input type="checkbox" id="toggle-dark" checked>
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Row 3: Compatibility Mode -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Modo Compatibilidad</span>
+                        <span class="pref-desc">Optimiza Footlel para dispositivos más antiguos.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Modo Compatibilidad">
+                        <input type="checkbox" id="toggle-compat">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+
+                <!-- Row 4: English Language / Idioma Inglés (RNF5) -->
+                <div class="pref-row">
+                    <div class="pref-info">
+                        <span class="pref-label">Idioma Inglés</span>
+                        <span class="pref-desc">Cambia el idioma de la interfaz entre español e inglés.</span>
+                    </div>
+                    <label class="toggle-switch" aria-label="Idioma Inglés">
+                        <input type="checkbox" id="toggle-english">
+                        <span class="toggle-track"></span>
+                    </label>
+                </div>
+            </div><!-- /prefs-card -->
+
+            <!-- ── Registered zone ── -->
+            <div id="zona-registrado">
+                <button type="button" class="link-logout" id="btn-logout">
+                    Cerrar Sesión
+                </button>
+                <button type="button" class="link-delete" id="btn-delete">
+                    Eliminar Cuenta
+                </button>
+            </div>
+
+            <!-- ── Guest zone (hidden by default) ── -->
+            <div id="zona-invitado" class="hidden" aria-live="polite">
+                <p class="guest-cta-title">Guardá tu progreso y competí</p>
+                <p class="guest-cta-desc">
+                    Creá una cuenta gratuita para guardar tus estadísticas,
+                    subir en el ranking y desafiar amigos.
+                </p>
+                <div class="guest-cta-actions">
+                    <a href="login.html" class="btn-cta-solid">Iniciar Sesión</a>
+                    <a href="registro.html" class="btn-cta-ghost">Registrarse</a>
+                </div>
+            </div>
+
+        </div><!-- /config-main -->
+
+    </main>
+
+</div><!-- /page-shell -->
+
+<!-- ═══════════════════════════════════════
+     MODAL: Delete Account
+═══════════════════════════════════════ -->
+<style>
+    /* Specific styles for the Delete Modal */
+    #modal-eliminar .modal-card {
+        position: relative;
+        max-width: 450px; /* Makes the pop-up a bit wider */
+        padding-top: 40px; /* Space for the close cross */
+    }
+    
+    #btn-cerrar-eliminar {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: #9e9e9e;
+        font-size: 1.2rem;
+        cursor: pointer;
+        transition: color 0.2s;
+    }
+    
+    #btn-cerrar-eliminar:hover {
+        color: #fff;
+    }
+
+    #input-palabra-clave {
+        width: 100%;
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 2px solid #444; /* Gives it the requested box outline */
+        background: #1a1a1a;
+        color: white;
+        margin-bottom: 10px;
+        outline: none;
+        font-family: inherit;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+    }
+    
+    #input-palabra-clave:focus {
+        border-color: #ff4c4c; /* Turns red when clicked inside */
+    }
+
+    #btn-confirmar-eliminar {
+        flex: 1; 
+        background: #ff4c4c; 
+        color: white;
+        border: 2px solid transparent; 
+        transition: all 0.2s ease;
+    }
+    
+    #btn-confirmar-eliminar:hover {
+        background: #e63939; /* Slightly darker red */
+        border: 2px solid white; /* White outline on hover, as requested */
+    }
+</style>
+
+<div class="modal-backdrop hidden" id="modal-eliminar" role="dialog" aria-modal="true">
+    <div class="modal-card">
+        <button class="modal-close" id="btn-cerrar-eliminar" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true" style="font-size: 2.5rem; margin-bottom: 10px;">⚠️</div>
+        <h2 class="modal-title">¿Estás seguro?</h2>
+        <p class="modal-text" style="margin-bottom: 20px;">
+           Escribe la palabra <strong>'eliminar'</strong> para confirmar la destrucción de tu cuenta.
+        </p>
+        
+        <input type="text" id="input-palabra-clave" placeholder="Escribe aquí..." autocomplete="off">
+        <p id="error-palabra" style="color: #ff4c4c; font-size: 0.9rem; margin-bottom: 15px; height: 20px;" hidden>Palabra incorrecta, intenta de nuevo.</p>
+        
+        <div class="botones-modal" style="display: flex; gap: 10px;">
+            <button id="btn-cancelar-eliminar" class="btn-cta-ghost" style="flex: 1;">Cancelar</button>
+            <button id="btn-confirmar-eliminar" class="btn-cta-solid">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL: Verificar Cambios (OTP)
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-verificar" role="dialog"
+     aria-modal="true" aria-labelledby="modal-verificar-title">
+    <div class="modal-card">
+        <h2 class="modal-title" id="modal-verificar-title">Verificá tu identidad</h2>
+        <p class="modal-subtitle">
+            Ingresá el código que enviamos a tu correo para confirmar los cambios.
+        </p>
+        <!-- 6 inputs OTP -->
+        <div class="otp-row" id="otp-row" aria-label="Código de verificación de 6 dígitos">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 1" autocomplete="one-time-code">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 2">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 3">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 4">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 5">
+            <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                   aria-label="Dígito 6">
+        </div>
+        <button type="button" class="modal-btn-primary" id="btn-confirmar-otp">
+            Confirmar
+        </button>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     TOAST
+═══════════════════════════════════════ -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script type="module">
+    import { API_BASE_URL } from '../../services/apiConfig.js';
+(function () {
+    'use strict';
+
+    /* ──────────────────────────────────────────
+       HELPERS
+    ────────────────────────────────────────── */
+    function $(id) { return document.getElementById(id); }
+
+    let toastTimer = null;
+    function showToast(msg, duration) {
+        duration = duration || 2800;
+        const toast = $('toast');
+        toast.textContent = msg;
+        toast.classList.add('show');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () {
+            toast.classList.remove('show');
+        }, duration);
+    }
+
+    /* Helper: get the user_id (via get-user-info) */
+    async function getUserId() {
+        var token = localStorage.getItem('footlel_token');
+        if (!token) return Number(localStorage.getItem('footlel_user_id')) || null;
+        try {
+            var resp = await fetch(`${API_BASE_URL}/user/get-user-info`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (!resp.ok) return Number(localStorage.getItem('footlel_user_id')) || null;
+            var info = await resp.json();
+            var resolvedId = info.user_id ?? info.id ?? localStorage.getItem('footlel_user_id');
+            if (resolvedId) {
+                localStorage.setItem('footlel_user_id', String(resolvedId));
+                localStorage.setItem('footlel_user_strid', String(resolvedId));
+            }
+            if (info.user_email) {
+                localStorage.setItem('footlel_email', info.user_email);
+            }
+            return Number(resolvedId) || null;
+        } catch (e) { return Number(localStorage.getItem('footlel_user_id')) || null; }
+    }
+
+    function openModal(id) {
+        $(id).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        // Focus the first input if it exists
+        const first = $(id).querySelector('input, button');
+        if (first) setTimeout(function () { first.focus(); }, 80);
+    }
+
+    function closeModal(id) {
+        $(id).classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    /* ──────────────────────────────────────────
+       1. GUEST / REGISTERED STATE & AVATAR ROBOT
+    ────────────────────────────────────────── */
+    const BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            let guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.includes('avatar-default.png') || guestAv.startsWith('data:image/svg+xml')) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        const userKey = username ? ('footlel_avatar_' + username) : null;
+        let savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.includes('avatar-default.png') || savedAv.includes('seed=footlel-default')) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
+    const isGuest = localStorage.getItem('footlel_guest') === 'true';
+    // Strip any leading '@' from stored username
+    const savedUsername = (localStorage.getItem('footlel_username') || 'Jugador').trim().replace(/^@+/, '');
+    const savedAvatar   = getOrAssignAvatar(savedUsername, isGuest);
+    if (savedAvatar) {
+        const headerAv = document.getElementById('profileAvatar');
+        if (headerAv) headerAv.src = savedAvatar;
+        const centralAv = document.getElementById('configAvatar');
+        if (centralAv) centralAv.src = savedAvatar;
+    }
+
+    const configUsernameEl  = $('config-username');
+    const profileUsernameEl = $('profileUsername');
+    const profileAvatarEl   = $('profileAvatar');
+    const configAvatarEl    = $('configAvatar');
+    const ddEditAccount     = $('ddEditAccount');
+    const ddFriends         = $('ddFriends');
+    const ddSessionAction   = $('ddSessionAction');
+    const ddSessionLabel    = $('ddSessionLabel');
+    const ddSessionIcon     = $('ddSessionIcon');
+    const zonaRegistrado    = $('zona-registrado');
+    const zonaInvitado      = $('zona-invitado');
+
+    const LOGIN_ICON_SVG = `
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+    `;
+
+    if (isGuest) {
+        // Guest display name
+        const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
+        configUsernameEl.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
+        profileUsernameEl.textContent = guestName;
+
+        // Avatars: show assigned random robot avatar in both Header and large central profile
+        const guestRobotAvatar = getOrAssignAvatar(guestName, true);
+        profileAvatarEl.src = guestRobotAvatar;
+        configAvatarEl.src  = guestRobotAvatar;
+
+        // Dropdown: hide registration options (Editar Cuenta & Mis Amigos remain hidden/blocked for guests)
+        ddEditAccount.style.display = 'none';
+        ddFriends.style.display     = 'none';
+
+        // Replace logout action with login action
+        ddSessionLabel.textContent = 'Iniciar Sesión';
+        ddSessionAction.classList.remove('item-danger');
+        ddSessionIcon.innerHTML    = LOGIN_ICON_SVG;
+
+        // Zones
+        zonaRegistrado.classList.add('hidden');
+        zonaInvitado.classList.remove('hidden');
+
+    } else {
+        // Registered user
+        const regRobotAvatar = getOrAssignAvatar(savedUsername, false);
+        profileAvatarEl.src = regRobotAvatar;
+        configAvatarEl.src  = regRobotAvatar;
+        configUsernameEl.textContent  = savedUsername;
+        profileUsernameEl.textContent = savedUsername;
+    }
+
+    /* ──────────────────────────────────────────
+       2. PROFILE DROPDOWN
+    ────────────────────────────────────────── */
+    const profileBtn      = $('profileBtn');
+    const profileDropdown = $('profileDropdown');
+
+    function openDropdown() {
+        profileDropdown.classList.add('is-open');
+        profileBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeDropdown() {
+        profileDropdown.classList.remove('is-open');
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown();
+    });
+    document.addEventListener('click', function (e) {
+        if (!$('profileWrapper').contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeDropdown();
+            closeModal('modal-verificar');
+        }
+    });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', closeDropdown);
+    });
+
+    /* ──────────────────────────────────────────
+       3. LOG OUT
+    ────────────────────────────────────────── */
+    const btnLogout = $('btn-logout');
+    if (btnLogout) {
+        btnLogout.addEventListener('click', function () {
+            localStorage.removeItem('footlel_token');
+            localStorage.removeItem('footlel_guest');
+            localStorage.removeItem('footlel_username');
+            window.location.href = 'login.html';
+        });
+    }
+    if (ddSessionAction) {
+        ddSessionAction.addEventListener('click', function () {
+            localStorage.removeItem('footlel_token');
+        });
+    }
+
+    /* ──────────────────────────────────────────
+       4. MODALS FLOW
+    ────────────────────────────────────────── */
+
+    // Close modal on backdrop click
+    $('modal-verificar').addEventListener('click', function (e) {
+        if (e.target === this) closeModal('modal-verificar');
+    });
+
+    // 4d. Confirm OTP
+    let pendingUsername = '';
+
+    $('btn-confirmar-otp').addEventListener('click', function () {
+        // Read complete OTP
+        const otp = Array.from(document.querySelectorAll('.otp-input'))
+            .map(function (i) { return i.value; })
+            .join('');
+
+        // Minimal validation: all 6 digits filled
+        if (otp.length < 6) {
+            showToast('Ingresá el código completo.');
+            return;
+        }
+
+        // Apply changes to the DOM
+        if (pendingUsername) {
+            configUsernameEl.textContent  = pendingUsername;
+            profileUsernameEl.textContent = pendingUsername;
+            localStorage.setItem('footlel_username', pendingUsername);
+        }
+
+        closeModal('modal-verificar');
+        showToast('✓ Cambios guardados correctamente');
+    });
+
+    /* ──────────────────────────────────────────
+       5. OTP BEHAVIOR: auto-advance and backspace
+    ────────────────────────────────────────── */
+    const otpInputs = Array.from(document.querySelectorAll('.otp-input'));
+
+    otpInputs.forEach(function (inp, idx) {
+        inp.addEventListener('input', function () {
+            // Accept digits only
+            inp.value = inp.value.replace(/\D/g, '').slice(-1);
+            if (inp.value && idx < otpInputs.length - 1) {
+                otpInputs[idx + 1].focus();
+            }
+        });
+
+        inp.addEventListener('keydown', function (e) {
+            if (e.key === 'Backspace' && !inp.value && idx > 0) {
+                otpInputs[idx - 1].focus();
+            }
+        });
+
+        // Paste the full code
+        inp.addEventListener('paste', function (e) {
+            e.preventDefault();
+            const pasted = (e.clipboardData || window.clipboardData)
+                .getData('text').replace(/\D/g, '').slice(0, 6);
+            pasted.split('').forEach(function (char, i) {
+                if (otpInputs[i]) otpInputs[i].value = char;
+            });
+            const lastFilled = Math.min(pasted.length, otpInputs.length - 1);
+            otpInputs[lastFilled].focus();
+        });
+    });
+
+    /* ──────────────────────────────────────────
+       6. TOGGLES: DARK MODE, ANIMATIONS, COMPATIBILITY & ENGLISH (RNF5)
+    ────────────────────────────────────────── */
+
+    const toggleDark    = $('toggle-dark') || $('toggle-dark-mode');
+    const toggleAnim    = $('toggle-animaciones') || $('toggle-animations');
+    const toggleCompat  = $('toggle-compat') || $('toggle-compatibility');
+    const toggleEnglish = $('toggle-english');
+
+    /* Theme/animations logic (incl. logo src) lives in global-preferences.js
+       so every page uses the exact same code and image paths. */
+    function applyTheme(isLight) { window.FootlelPrefs.applyTheme(isLight); }
+    function applyAnimations(disabled) { window.FootlelPrefs.applyAnimations(disabled); }
+    function applyCompatibility(enabled) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.applyCompatibility === 'function') {
+            window.FootlelPrefs.applyCompatibility(enabled);
+        } else {
+            document.documentElement.classList.toggle('compatibility-mode', Boolean(enabled));
+            if (document.body) document.body.classList.toggle('compatibility-mode', Boolean(enabled));
+        }
+    }
+
+    function hasValidToken() {
+        const t = (localStorage.getItem('footlel_token') || '').trim();
+        return Boolean(t && t !== 'null' && t !== 'undefined');
+    }
+
+    /* PATCH /config/set-user-config with the 4 current states (full object). */
+    function saveUserConfig() {
+        return window.FootlelPrefs.saveUserConfig(
+            Boolean(toggleDark && toggleDark.checked),
+            Boolean(toggleAnim && toggleAnim.checked),
+            Boolean(toggleCompat && toggleCompat.checked),
+            Boolean(toggleEnglish && toggleEnglish.checked)
+        );
+    }
+
+    /* ── Initialization from localStorage ── */
+    (function initToggles() {
+        // Dark mode: ACTIVE by default ('dark')
+        const savedTheme = localStorage.getItem('footlel_theme') || 'dark';
+        const isLight    = savedTheme === 'light';
+        if (toggleDark) toggleDark.checked = !isLight;   // checked = dark active (dark_mode: true)
+        applyTheme(isLight);
+
+        // Disable animations: INACTIVE by default (animation_state: false)
+        const animDisabled = localStorage.getItem('pref_toggle-animaciones') === 'true';
+        if (toggleAnim) toggleAnim.checked = animDisabled;
+        applyAnimations(animDisabled);
+
+        // Compatibility (persistence + backend sync)
+        if (toggleCompat) {
+            const savedCompat = localStorage.getItem('pref_toggle-compat') === 'true';
+            toggleCompat.checked = savedCompat;
+            applyCompatibility(savedCompat);
+            toggleCompat.addEventListener('change', async function () {
+                const state = Boolean(toggleCompat.checked);
+                applyCompatibility(state);
+                localStorage.setItem('pref_toggle-compat', String(state));
+                localStorage.setItem('footlel_compatibility_mode', String(state));
+                if (hasValidToken()) {
+                    try {
+                        const resp = await saveUserConfig();
+                        if (resp && !resp.ok && !isGuest) {
+                            showToast('No se pudo sincronizar el modo compatibilidad.');
+                        }
+                    } catch (e) {
+                        if (!isGuest) showToast('No se pudo sincronizar el modo compatibilidad.');
+                    }
+                }
+            });
+        }
+
+        // English language (RNF5): INACTIVE by default (Spanish, is_english: false)
+        if (toggleEnglish) {
+            const savedIsEnglish = localStorage.getItem('footlel_is_english') === 'true' ||
+                                   localStorage.getItem('footlel_lang') === 'en';
+            toggleEnglish.checked = savedIsEnglish;
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.applyLanguage === 'function') {
+                window.FootlelPrefs.applyLanguage(savedIsEnglish ? 'en' : 'es');
+            }
+        }
+    })();
+
+    /* Sync switches from GET /config/get-user-config (source of truth when footlel_token exists). */
+    if (hasValidToken()) {
+        window.FootlelPrefs.fetchUserConfig().then(function (cfg) {
+            if (!cfg) return;
+            if (typeof cfg.dark_mode === 'boolean') {
+                if (toggleDark) toggleDark.checked = cfg.dark_mode;
+                localStorage.setItem('footlel_theme', cfg.dark_mode ? 'dark' : 'light');
+                localStorage.setItem('footlel_dark_mode', String(cfg.dark_mode));
+                applyTheme(!cfg.dark_mode);
+            }
+            if (typeof cfg.animation_state === 'boolean') {
+                if (toggleAnim) toggleAnim.checked = cfg.animation_state;
+                localStorage.setItem('pref_toggle-animaciones', String(cfg.animation_state));
+                localStorage.setItem('footlel_animation_state', String(cfg.animation_state));
+                applyAnimations(cfg.animation_state);
+            }
+            if (typeof cfg.compatibility_mode === 'boolean') {
+                if (toggleCompat) toggleCompat.checked = cfg.compatibility_mode;
+                localStorage.setItem('pref_toggle-compat', String(cfg.compatibility_mode));
+                localStorage.setItem('footlel_compatibility_mode', String(cfg.compatibility_mode));
+                applyCompatibility(cfg.compatibility_mode);
+            }
+            if (typeof cfg.is_english === 'boolean') {
+                if (toggleEnglish) toggleEnglish.checked = cfg.is_english;
+                localStorage.setItem('footlel_is_english', String(cfg.is_english));
+                localStorage.setItem('footlel_lang', cfg.is_english ? 'en' : 'es');
+                if (window.FootlelPrefs && typeof window.FootlelPrefs.applyLanguage === 'function') {
+                    window.FootlelPrefs.applyLanguage(cfg.is_english ? 'en' : 'es');
+                }
+            }
+        });
+    }
+
+    /* ── Listener: Dark Mode ── */
+    if (toggleDark) {
+        toggleDark.addEventListener('change', async function () {
+            // checked = true → dark mode active (dark_mode: true)
+            const isDark  = Boolean(toggleDark.checked);
+            const isLight = !isDark;
+            applyTheme(isLight);
+            localStorage.setItem('footlel_theme', isLight ? 'light' : 'dark');
+            localStorage.setItem('footlel_dark_mode', String(isDark));
+
+            // Sync with the backend
+            if (hasValidToken()) {
+                try {
+                    const resp = await saveUserConfig();
+                    if (resp && !resp.ok && !isGuest) {
+                        showToast('No se pudo sincronizar el modo oscuro.');
+                    }
+                } catch (e) {
+                    if (!isGuest) showToast('No se pudo sincronizar el modo oscuro.');
+                }
+            }
+        });
+    }
+
+    /* ── Listener: Disable Animations ── */
+    if (toggleAnim) {
+        toggleAnim.addEventListener('change', async function () {
+            const disabled = Boolean(toggleAnim.checked);
+            applyAnimations(disabled);
+            localStorage.setItem('pref_toggle-animaciones', String(disabled));
+            localStorage.setItem('footlel_animation_state', String(disabled));
+
+            // Sync with the backend
+            if (hasValidToken()) {
+                try {
+                    const resp = await saveUserConfig();
+                    if (resp && !resp.ok && !isGuest) {
+                        showToast('No se pudo sincronizar las animaciones.');
+                    }
+                } catch (e) {
+                    if (!isGuest) showToast('No se pudo sincronizar las animaciones.');
+                }
+            }
+        });
+    }
+
+    /* ── Listener: English Language Toggle (RNF5) ── */
+    if (toggleEnglish) {
+        toggleEnglish.addEventListener('change', async function () {
+            const isEnglish = Boolean(toggleEnglish.checked);
+            const targetLang = isEnglish ? 'en' : 'es';
+            localStorage.setItem('footlel_is_english', String(isEnglish));
+            localStorage.setItem('footlel_lang', targetLang);
+
+            if (window.FootlelPrefs && typeof window.FootlelPrefs.setLanguage === 'function') {
+                window.FootlelPrefs.setLanguage(targetLang);
+            }
+
+            // Sync with the backend
+            if (hasValidToken()) {
+                try {
+                    const resp = await saveUserConfig();
+                    if (resp && !resp.ok && !isGuest) {
+                        showToast('No se pudo sincronizar el idioma.');
+                    }
+                } catch (e) {
+                    if (!isGuest) showToast('No se pudo sincronizar el idioma.');
+                }
+            }
+        });
+
+        window.addEventListener('footlel:language-changed', function (ev) {
+            if (ev && ev.detail && typeof ev.detail.isEnglish === 'boolean') {
+                toggleEnglish.checked = ev.detail.isEnglish;
+            } else if (ev && ev.detail && ev.detail.lang) {
+                toggleEnglish.checked = ev.detail.lang === 'en';
+            }
+        });
+    }
+        /* ──────────────────────────────────────────
+       7. DELETE ACCOUNT (MODAL AND FETCH)
+    ────────────────────────────────────────── */
+    const deleteModal = $('modal-eliminar');
+    const btnOpenModal = $('btn-delete'); // This is your original red button
+    const btnCloseIcon = $('btn-cerrar-eliminar');
+    const btnCancelDelete = $('btn-cancelar-eliminar');
+    const btnConfirmDelete = $('btn-confirmar-eliminar');
+    const keywordInput = $('input-palabra-clave');
+    const errorText = $('error-palabra');
+
+    // Function to close and clean up the modal
+    function closeDeleteModal() {
+        deleteModal.classList.add('hidden');
+        keywordInput.value = "";
+        errorText.hidden = true;
+    }
+
+    // Open
+    if (btnOpenModal) {
+        btnOpenModal.addEventListener('click', function(e) {
+            e.preventDefault();
+            deleteModal.classList.remove('hidden');
+        });
+    }
+
+    // Close (with the X or the cancel button)
+    if (btnCloseIcon) btnCloseIcon.addEventListener('click', closeDeleteModal);
+    if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
+
+    // The destructive fetch
+    if (btnConfirmDelete) {
+        btnConfirmDelete.addEventListener('click', async function(e) {
+            e.preventDefault();
+            
+            const keyword = keywordInput.value.toLowerCase().trim();
+            
+            if (keyword === "eliminar" || keyword === "delete") {
+                const token = localStorage.getItem('footlel_token');
+                
+                try {
+                    const response = await fetch(`${API_BASE_URL}/user/eliminate-user`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': 'Bearer ' + token
+                        }
+                    });
+
+                    if (response.ok) {
+                        // We show the success message in green
+                        errorText.style.color = '#4ade80';
+                        errorText.textContent = 'Cuenta eliminada con éxito. Redirigiendo...';
+                        errorText.hidden = false;
+                        
+                        localStorage.clear();
+                        
+                        // We wait 2 seconds before redirecting
+                        setTimeout(function() {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        const data = await response.json();
+                        errorText.style.color = '#ff4c4c'; // Back to red just in case
+                        errorText.textContent = data.detail || 'Error al eliminar la cuenta.';
+                        errorText.hidden = false;
+                    }
+                } catch (error) {
+                    errorText.style.color = '#ff4c4c';
+                    errorText.textContent = 'No se pudo conectar con el servidor.';
+                    errorText.hidden = false;
+                }
+            } else {
+                errorText.textContent = "Palabra incorrecta, escribe 'eliminar'.";
+                errorText.hidden = false;
+            }
+        });
+    }
+})();
+
+</script>
+
+</body>
+</html>

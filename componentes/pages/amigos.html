@@ -1,0 +1,1935 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script>
+        (function () {
+            var isGuest = localStorage.getItem('footlel_guest') === 'true';
+            var token = (localStorage.getItem('footlel_token') || '').trim();
+            if (isGuest || !token || token === 'null' || token === 'undefined') {
+                window.location.replace('menu.html');
+            }
+        })();
+    </script>
+    <script src="../../assets/scripts/global-preferences.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Mis Amigos</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../../assets/styles/amigos.css">
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Logo -->
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Header Actions: Notifications + Profile -->
+        <div class="header-actions">
+
+            <!-- Notifications Bell + Dropdown -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button
+                    class="notif-btn"
+                    id="notifBtn"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notifDropdown"
+                    aria-label="Notificaciones"
+                >
+                    <svg class="notif-bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge" hidden style="display: none;"></span>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div
+                    class="notif-dropdown"
+                    id="notifDropdown"
+                    role="region"
+                    aria-label="Notificaciones"
+                >
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notificaciones</span>
+                    </div>
+                    <ul class="notif-list" id="notifList">
+                        <li class="notif-empty">No tienes notificaciones nuevas</li>
+                    </ul>
+                </div>
+            </div><!-- /notif-wrapper -->
+
+            <!-- Profile + Dropdown -->
+            <div class="profile-wrapper" id="profileWrapper">
+                <button
+                    class="profile-btn"
+                    id="profileBtn"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    type="button"
+                >
+                    <img
+                        src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                        alt="Avatar de usuario"
+                        class="profile-avatar"
+                        id="profileAvatar"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                    >
+                    <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                    <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+
+                <!-- Dropdown -->
+                <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+                    <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        Configuración
+                    </a>
+                    <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Editar Cuenta
+                    </a>
+                    <a href="amigos.html" class="dropdown-item active" role="menuitem" id="ddFriends" aria-current="page">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Mis Amigos
+                    </a>
+                    <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        Ayuda
+                    </a>
+                    <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+                    <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span id="ddSessionLabel">Cerrar Sesión</span>
+                    </a>
+                </nav>
+            </div><!-- /profile-wrapper -->
+
+        </div><!-- /header-actions -->
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         TAB NAVIGATION
+    ═══════════════════════════════════════ -->
+    <nav class="amigos-tabs" role="tablist" aria-label="Secciones de amigos">
+        <button class="amigos-tab is-active" role="tab" aria-selected="true"  aria-controls="tab-amigos"      data-tab="amigos">Mis Amigos</button>
+        <button class="amigos-tab"           role="tab" aria-selected="false" aria-controls="tab-solicitudes" data-tab="solicitudes">
+            Solicitudes
+            <span class="tab-badge" id="requestsBadge" aria-label="0 solicitudes pendientes" hidden style="display: none;">0</span>
+        </button>
+        <button class="amigos-tab"           role="tab" aria-selected="false" aria-controls="tab-buscar"      data-tab="buscar">Buscar</button>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════ -->
+    <main class="main-content" role="main">
+
+        <!-- ────────────────────────────────────
+             TAB 1 — Mis Amigos (GET /user/get-user-friends)
+        ──────────────────────────────────── -->
+        <div id="tab-amigos" class="tab-panel is-active" role="tabpanel" aria-label="Mis Amigos">
+
+            <!-- Search -->
+            <div class="search-bar-wrapper">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" class="search-bar" id="searchFriendsInput" placeholder="Buscar jugador..." aria-label="Buscar entre tus amigos">
+            </div>
+
+            <!-- Error Banner for Tab 1 -->
+            <div class="error-alert-box amigos-alert-banner" id="friendsErrorBanner" role="alert" hidden></div>
+
+            <!-- Friends list -->
+            <ul class="friend-list" id="friendsListContainer" aria-label="Lista de amigos">
+                <li class="friend-row friend-row--empty">Cargando tus amigos...</li>
+            </ul>
+        </div>
+
+        <!-- ────────────────────────────────────
+             TAB 2 — Solicitudes (GET /user/get-user-friend-requests & POST /user/reply-user-friend-request)
+        ──────────────────────────────────── -->
+        <div id="tab-solicitudes" class="tab-panel" role="tabpanel" aria-label="Solicitudes" hidden>
+
+            <!-- Search -->
+            <div class="search-bar-wrapper">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" class="search-bar" id="searchRequestsInput" placeholder="Buscar jugador..." aria-label="Buscar solicitudes">
+            </div>
+
+            <!-- Error Banner for Tab 2 -->
+            <div class="error-alert-box amigos-alert-banner" id="requestsErrorBanner" role="alert" hidden></div>
+
+            <!-- Section 0: Incoming 1v1 match invitations (GET /user/get-user-match-requests) -->
+            <section class="requests-section" aria-labelledby="sectionMatchReqs">
+                <h2 class="requests-section-title" id="sectionMatchReqs">Desafíos 1v1</h2>
+                <ul class="friend-list" id="matchRequestsContainer" aria-label="Desafíos de partida 1v1">
+                    <li class="friend-row friend-row--empty">Cargando desafíos...</li>
+                </ul>
+            </section>
+
+            <!-- Section 1: Incoming Friend Requests -->
+            <section class="requests-section" aria-labelledby="sectionFriendReqs">
+                <h2 class="requests-section-title" id="sectionFriendReqs">Solicitudes de Amistad</h2>
+                <ul class="friend-list" id="friendRequestsContainer" aria-label="Solicitudes de amistad">
+                    <li class="friend-row friend-row--empty">Cargando solicitudes...</li>
+                </ul>
+            </section>
+
+            <!-- Section 2: Sent Requests ("Solicitudes Enviadas") -->
+            <section class="requests-section" aria-labelledby="sectionSentReqs">
+                <h2 class="requests-section-title" id="sectionSentReqs">Solicitudes Enviadas</h2>
+                <ul class="friend-list" id="sentRequestsContainer" aria-label="Solicitudes enviadas">
+                    <!-- Rendered dynamically -->
+                </ul>
+            </section>
+        </div>
+
+        <!-- ────────────────────────────────────
+             TAB 3 — Buscar (POST /user/send-user-friend-request)
+        ──────────────────────────────────── -->
+        <div id="tab-buscar" class="tab-panel" role="tabpanel" aria-label="Buscar usuarios" hidden>
+
+            <div class="buscar-header">
+                <h1 class="buscar-title">Buscar Usuarios</h1>
+                <p class="buscar-desc">Encontrá a otros fanáticos y amigos para competir en duelos de trivia.</p>
+            </div>
+
+            <!-- Main search -->
+            <div class="search-bar-wrapper search-bar-wrapper--buscar">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="search" class="search-bar" id="buscarInput" placeholder="Ingresá el usuario..." aria-label="Buscar usuarios por nombre">
+            </div>
+
+            <!-- Error Banner for Tab 3 -->
+            <div class="error-alert-box amigos-alert-banner" id="searchErrorBanner" role="alert" hidden></div>
+
+            <!-- Suggested players / Search results -->
+            <section aria-labelledby="suggestedTitle">
+                <h2 class="suggested-label" id="suggestedTitle">JUGADORES SUGERIDOS</h2>
+
+                <ul class="friend-list" id="searchUsersContainer" aria-label="Jugadores sugeridos">
+                    <!-- Rendered dynamically -->
+                </ul>
+            </section>
+
+            <!-- Toast: Request sent -->
+            <div class="buscar-toast" id="addToast" aria-live="polite" hidden style="display: none;">
+                ✓ ¡Solicitud Enviada!
+            </div>
+
+        </div><!-- /tab-search -->
+
+    </main>
+
+    <!-- Global floating toast for confirmations across tabs -->
+    <div class="amigos-floating-toast" id="globalAmigosToast" role="status" aria-live="polite" hidden style="display: none;"></div>
+
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS — SOCIAL FRIENDS SYSTEM
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ─────────────────────────────────────────
+       0. VALIDACIÓN DE SESIÓN / MODO INVITADO
+    ───────────────────────────────────────── */
+    var isGuest = localStorage.getItem('footlel_guest') === 'true';
+    var authToken = (localStorage.getItem('footlel_token') || '').trim();
+    if (isGuest || !authToken || authToken === 'null' || authToken === 'undefined') {
+        window.location.replace('menu.html');
+        return;
+    }
+
+    var API_BASE_URL = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    var FALLBACK_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
+
+    var ADD_USER_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>';
+
+    var ALERT_ICON_SVG =
+        '<svg class="error-alert-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" ' +
+             'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" ' +
+             'stroke-linejoin="round" aria-hidden="true">' +
+            '<circle cx="12" cy="12" r="10"/>' +
+            '<line x1="12" y1="8" x2="12" y2="12"/>' +
+            '<line x1="12" y1="16" x2="12.01" y2="16"/>' +
+        '</svg>';
+
+    /* ─────────────────────────────────────────
+       1. HEADER — USER & AVATAR ROBOT
+    ───────────────────────────────────────── */
+    var BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getDeterministicRobotForUser(username) {
+        var clean = String(username || '').trim().toLowerCase();
+        if (!clean) return BASE_ROBOT_AVATARS[0];
+        var hash = 0;
+        for (var i = 0; i < clean.length; i++) {
+            hash = ((hash << 5) - hash) + clean.charCodeAt(i);
+            hash |= 0;
+        }
+        return BASE_ROBOT_AVATARS[Math.abs(hash) % BASE_ROBOT_AVATARS.length];
+    }
+
+    function getOrAssignAvatar(username) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, false);
+        }
+        var userKey = username ? ('footlel_avatar_' + username) : null;
+        var savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.indexOf('avatar-default.png') !== -1 || savedAv.indexOf('seed=footlel-default') !== -1) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
+    function getAvatarForAnyPlayer(username) {
+        var clean = cleanUsername(username);
+        if (!clean) return BASE_ROBOT_AVATARS[0];
+        var stored = localStorage.getItem('footlel_avatar_' + clean);
+        if (stored && stored.indexOf('avatar-default.png') === -1) {
+            return stored;
+        }
+        return getDeterministicRobotForUser(clean);
+    }
+
+    var profileUser = document.getElementById('profileUsername');
+    var savedUser   = (localStorage.getItem('footlel_username') || 'nombre_usuario').trim().replace(/^@+/, '');
+    var currentUserId = Number(localStorage.getItem('footlel_user_id')) || null;
+    var savedAvatar = getOrAssignAvatar(savedUser);
+    if (savedAvatar) {
+        document.getElementById('profileAvatar').src = savedAvatar;
+    }
+    profileUser.textContent = savedUser;
+
+    /* ─────────────────────────────────────────
+       2. PROFILE DROPDOWN TOGGLE
+    ───────────────────────────────────────── */
+    var profileBtn      = document.getElementById('profileBtn');
+    var profileDropdown = document.getElementById('profileDropdown');
+
+    function openDropdown()  { profileDropdown.classList.add('is-open');    profileBtn.setAttribute('aria-expanded', 'true');  }
+    function closeDropdown() { profileDropdown.classList.remove('is-open'); profileBtn.setAttribute('aria-expanded', 'false'); }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown();
+    });
+    document.addEventListener('click', function (e) {
+        if (!document.getElementById('profileWrapper').contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeDropdown(); });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) { item.addEventListener('click', closeDropdown); });
+
+    /* ─────────────────────────────────────────
+       3. ERROR FORMATTER & ALERT HELPERS
+    ───────────────────────────────────────── */
+    function formatBackendError(rawMessage) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.formatBackendError === 'function') {
+            return window.FootlelPrefs.formatBackendError(rawMessage);
+        }
+        if (!rawMessage) return 'Ocurrió un error inesperado.';
+        var msg = String(rawMessage).trim();
+        if (msg.charAt(0) === '{') {
+            try {
+                var parsed = JSON.parse(msg);
+                if (parsed && (parsed.detail || parsed.message)) {
+                    msg = String(parsed.detail || parsed.message).trim();
+                }
+            } catch (_) {}
+        }
+        msg = msg.replace(/^error(\s+de\s+[a-záéíóúñ\s]+)?:\s*/i, '');
+        msg = msg
+            .replace(/\bcontrasenias\b/gi, 'contraseñas')
+            .replace(/\bcontrasenia\b/gi, 'contraseña')
+            .replace(/\binvalidos\b/gi, 'inválidos')
+            .replace(/\binvalidas\b/gi, 'inválidas')
+            .replace(/\binvalido\b/gi, 'inválido')
+            .replace(/\binvalida\b/gi, 'inválida')
+            .replace(/\bcodigos\b/gi, 'códigos')
+            .replace(/\bcodigo\b/gi, 'código')
+            .replace(/\bsesion\b/gi, 'sesión')
+            .replace(/\bpeticion\b/gi, 'petición')
+            .replace(/\bnumero\b/gi, 'número')
+            .replace(/\benvio\b/gi, 'envío');
+        if (msg.length > 0) {
+            msg = msg.charAt(0).toUpperCase() + msg.slice(1);
+        }
+        return msg;
+    }
+
+    function extractErrorDetail(data, fallbackMsg) {
+        if (!data) return fallbackMsg || 'No se pudo completar la operación.';
+        if (typeof data === 'string') return data;
+        if (typeof data.detail === 'string') return data.detail;
+        if (Array.isArray(data.detail) && data.detail.length > 0) {
+            var first = data.detail[0];
+            if (first && typeof first.msg === 'string') return first.msg;
+        }
+        if (typeof data.message === 'string') return data.message;
+        return fallbackMsg || 'No se pudo completar la operación.';
+    }
+
+    var bannerTimers = {};
+    function showAlertBanner(bannerEl, rawMessage, autoHideMs) {
+        if (!bannerEl) return;
+        var cleanMsg = formatBackendError(rawMessage);
+        bannerEl.innerHTML = ALERT_ICON_SVG + '<span class="error-alert-text"></span>';
+        var span = bannerEl.querySelector('.error-alert-text');
+        if (span) span.textContent = cleanMsg;
+        bannerEl.hidden = false;
+
+        var idKey = bannerEl.id || 'default';
+        if (bannerTimers[idKey]) clearTimeout(bannerTimers[idKey]);
+        if (autoHideMs !== 0) {
+            bannerTimers[idKey] = setTimeout(function () {
+                bannerEl.hidden = true;
+            }, autoHideMs || 5500);
+        }
+    }
+
+    function hideAlertBanner(bannerEl) {
+        if (!bannerEl) return;
+        bannerEl.hidden = true;
+    }
+
+    /* ─────────────────────────────────────────
+       4. STATE & STORAGE
+    ───────────────────────────────────────── */
+    var KEYS = {
+        FRIENDS_CACHE: 'footlel_friends_v2_'       + savedUser,
+        SENT_REQUESTS: 'footlel_sent_requests_v2_' + savedUser
+    };
+
+    function loadArrayStorage(key) {
+        var raw = localStorage.getItem(key);
+        if (!raw) return [];
+        try {
+            var parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveArrayStorage(key, arr) {
+        try {
+            localStorage.setItem(key, JSON.stringify(arr));
+        } catch (e) {
+            console.warn('Error guardando en localStorage:', e);
+        }
+    }
+
+    var state = {
+        friends:            [],
+        friendRequests:     [],
+        matchRequests:      [], // incoming 1v1 invitations: array of challenger names
+        sentRequests:       loadArrayStorage(KEYS.SENT_REQUESTS),
+        backendUsers:       [], // Array of { user_id, username, points }
+        userDirectoryByName: {}, // normalized username -> { user_id, username, points }
+        userDirectoryById:   {}, // numeric id -> { user_id, username, points }
+        isLoadingFriends:   true,
+        isLoadingRequests:  true,
+        isLoadingMatch:     true,
+        isLoadingSearch:    true
+    };
+
+    /* ─────────────────────────────────────────
+       5. DOM REFERENCES & HELPERS
+    ───────────────────────────────────────── */
+    var friendsListContainer    = document.getElementById('friendsListContainer');
+    var friendRequestsContainer = document.getElementById('friendRequestsContainer');
+    var matchRequestsContainer  = document.getElementById('matchRequestsContainer');
+    var sentRequestsContainer   = document.getElementById('sentRequestsContainer');
+    var searchUsersContainer    = document.getElementById('searchUsersContainer');
+    var requestsBadge           = document.getElementById('requestsBadge');
+    var searchFriendsInput      = document.getElementById('searchFriendsInput');
+    var searchRequestsInput     = document.getElementById('searchRequestsInput');
+    var buscarInput             = document.getElementById('buscarInput');
+    var suggestedTitle          = document.getElementById('suggestedTitle');
+    var addToast                = document.getElementById('addToast');
+    var globalAmigosToast       = document.getElementById('globalAmigosToast');
+    var friendsErrorBanner      = document.getElementById('friendsErrorBanner');
+    var requestsErrorBanner     = document.getElementById('requestsErrorBanner');
+    var searchErrorBanner       = document.getElementById('searchErrorBanner');
+
+    var addToastTimer    = null;
+    var globalToastTimer = null;
+
+    function normalizeText(str) {
+        return String(str || '')
+            .replace(/^@+/, '')
+            .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    function cleanUsername(str) {
+        if (str === null || str === undefined) return '';
+        var s = String(str).replace(/^@+/, '').trim();
+        if (!s || /^(null|undefined|none)$/i.test(s) || /^usuario[\s_#]*\d+$/i.test(s)) {
+            return '';
+        }
+        return s;
+    }
+
+    function extractValidUsername(item) {
+        if (item === null || item === undefined) return '';
+        if (typeof item === 'string') return cleanUsername(item);
+        if (typeof item === 'object') {
+            return cleanUsername(item.user_name ?? item.friend_name ?? item.username ?? item.sender_name ?? item.challenger_name ?? item.name ?? '');
+        }
+        return '';
+    }
+
+    function registerUserInDirectory(userObj) {
+        if (!userObj) return null;
+        var rawId = userObj.user_id ?? userObj.friend_id ?? userObj.user_id_request ?? userObj.sender_id ?? userObj.id ?? null;
+        var rawName = userObj.user_name ?? userObj.username ?? userObj.friend_name ?? userObj.name ?? '';
+        var clean = cleanUsername(rawName);
+        var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId))) ? Number(rawId) : null;
+        var pts = Number(userObj.points ?? userObj.score ?? userObj.wins ?? 0) || 0;
+
+        if (!clean && numId !== null && state.userDirectoryById[numId]) {
+            clean = cleanUsername(state.userDirectoryById[numId].username);
+        }
+        // Filtro defensivo: ignorar registros huérfanos sin user_name / friend_name válido
+        if (!clean) {
+            return null;
+        }
+        if (numId === null && clean && state.userDirectoryByName[normalizeText(clean)]) {
+            numId = state.userDirectoryByName[normalizeText(clean)].user_id;
+        }
+
+        var record = {
+            user_id:  numId,
+            username: clean,
+            points:   pts
+        };
+
+        if (record.username) {
+            var norm = normalizeText(record.username);
+            var existingByName = state.userDirectoryByName[norm];
+            if (existingByName) {
+                if (record.user_id === null && existingByName.user_id !== null) record.user_id = existingByName.user_id;
+                if (!record.points && existingByName.points) record.points = existingByName.points;
+            }
+            state.userDirectoryByName[norm] = record;
+        }
+        if (record.user_id !== null) {
+            var existingById = state.userDirectoryById[record.user_id];
+            if (existingById) {
+                if (!record.username && existingById.username) {
+                    record.username = existingById.username;
+                }
+                if (!record.points && existingById.points) record.points = existingById.points;
+            }
+            state.userDirectoryById[record.user_id] = record;
+        }
+        return record;
+    }
+
+    function normalizeUserCollection(payload, preferredKeys) {
+        if (!payload) return [];
+        var rawList = null;
+        var parallelIds = null;
+
+        if (Array.isArray(payload)) {
+            rawList = payload;
+        } else if (typeof payload === 'object') {
+            var keysToTry = (preferredKeys || []).concat([
+                'friend_request_names', 'friend_names', 'user_friend_names',
+                'friends', 'user_friends', 'friend_requests', 'user_friend_requests',
+                'requests', 'incoming', 'users', 'data', 'items', 'results', 'leaderboard'
+            ]);
+            for (var i = 0; i < keysToTry.length; i++) {
+                var k = keysToTry[i];
+                if (Array.isArray(payload[k])) {
+                    rawList = payload[k];
+                    break;
+                }
+            }
+            if (!rawList && payload.data && typeof payload.data === 'object') {
+                for (var j = 0; j < keysToTry.length; j++) {
+                    var dk = keysToTry[j];
+                    if (Array.isArray(payload.data[dk])) {
+                        rawList = payload.data[dk];
+                        break;
+                    }
+                }
+            }
+
+            // Detect companion IDs array (e.g. friend_request_ids or friend_ids)
+            var idKeys = ['friend_request_ids', 'friend_ids', 'user_friend_ids', 'friends_ids', 'request_ids', 'ids'];
+            for (var m = 0; m < idKeys.length; m++) {
+                var ik = idKeys[m];
+                if (Array.isArray(payload[ik])) {
+                    parallelIds = payload[ik];
+                    break;
+                }
+                if (payload.data && typeof payload.data === 'object' && Array.isArray(payload.data[ik])) {
+                    parallelIds = payload.data[ik];
+                    break;
+                }
+            }
+        }
+        if (!Array.isArray(rawList)) return [];
+
+        var normalized = [];
+        rawList.forEach(function (item, idx) {
+            if (item === null || item === undefined) return;
+            var pairedId = (Array.isArray(parallelIds) && idx < parallelIds.length && parallelIds[idx] !== null && parallelIds[idx] !== undefined && !isNaN(Number(parallelIds[idx])))
+                ? Number(parallelIds[idx])
+                : null;
+
+            // Case 1: Tuple/Array e.g. [user_id, user_name] or [user_name, points, user_id]
+            if (Array.isArray(item)) {
+                var tupleId = pairedId;
+                var tupleName = '';
+                var tuplePts = 0;
+                if (item.length >= 2 && typeof item[0] === 'number' && typeof item[1] === 'string') {
+                    tupleId = Number(item[0]);
+                    tupleName = cleanUsername(item[1]);
+                    tuplePts = Number(item[2]) || 0;
+                } else if (item.length >= 2 && typeof item[0] === 'string' && typeof item[1] === 'number') {
+                    tupleName = cleanUsername(item[0]);
+                    tuplePts = Number(item[1]) || 0;
+                    if (item.length >= 3 && item[2] !== null && item[2] !== undefined && !isNaN(Number(item[2]))) {
+                        tupleId = Number(item[2]);
+                    }
+                } else if (typeof item[0] === 'string') {
+                    tupleName = cleanUsername(item[0]);
+                }
+                if (!tupleName) return;
+                var recTuple = registerUserInDirectory({ user_id: tupleId, username: tupleName, points: tuplePts });
+                if (recTuple && recTuple.username) {
+                    normalized.push(recTuple);
+                }
+                return;
+            }
+
+            // Case 2: Primitive number (ignore orphan ID without username) or string (username)
+            if (typeof item === 'number') {
+                return;
+            }
+            if (typeof item === 'string') {
+                var trimmed = cleanUsername(item);
+                if (!trimmed) return;
+                var recStrName = registerUserInDirectory({ user_id: pairedId, username: trimmed });
+                if (recStrName && recStrName.username) {
+                    if (pairedId !== null) {
+                        recStrName.user_id = pairedId;
+                        recStrName.user_id_request = pairedId;
+                    }
+                    normalized.push(recStrName);
+                }
+                return;
+            }
+
+            // Case 3: Object { user_id / id / friend_id / user_id_request, user_name / friend_name / username / ... }
+            if (typeof item === 'object') {
+                var validObjName = extractValidUsername(item);
+                if (!validObjName) return;
+                var objWithId = Object.assign({}, item);
+                if (pairedId !== null && objWithId.user_id === undefined && objWithId.user_id_request === undefined && objWithId.id === undefined) {
+                    objWithId.user_id = pairedId;
+                    objWithId.user_id_request = pairedId;
+                }
+                var recObj = registerUserInDirectory(objWithId);
+                if (recObj && recObj.username) {
+                    normalized.push(recObj);
+                }
+            }
+        });
+
+        return normalized;
+    }
+
+    function parseFriendRequestsPayload(data) {
+        console.log('Friend requests payload:', data);
+        if (!data) return [];
+
+        var namesArr = data.friend_request_names || (data.data && data.data.friend_request_names);
+        var idsArr   = data.friend_request_ids   || (data.data && data.data.friend_request_ids);
+
+        if (Array.isArray(namesArr)) {
+            var list = [];
+            for (var i = 0; i < namesArr.length; i++) {
+                var rawName = namesArr[i];
+                if (rawName === null || rawName === undefined) continue;
+                var rawId   = (Array.isArray(idsArr) && i < idsArr.length) ? idsArr[i] : null;
+                var cleanName = extractValidUsername(rawName);
+                // Filtro defensivo: ignorar cualquier registro nulo o cuyo user_name / friend_name venga vacío o null
+                if (!cleanName) continue;
+
+                var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
+                    ? Number(rawId)
+                    : ((typeof rawName === 'object' && rawName !== null && !isNaN(Number(rawName.user_id_request ?? rawName.user_id ?? rawName.request_id ?? rawName.id)))
+                        ? Number(rawName.user_id_request ?? rawName.user_id ?? rawName.request_id ?? rawName.id)
+                        : null);
+
+                registerUserInDirectory({ user_id: numId, username: cleanName });
+                list.push({
+                    user_id:         numId,
+                    user_id_request: numId,
+                    request_id:      numId,
+                    username:        cleanName
+                });
+            }
+            return list;
+        }
+
+        return normalizeUserCollection(data, ['friend_requests', 'user_friend_requests', 'requests', 'incoming']);
+    }
+
+    function parseFriendsPayload(data) {
+        console.log('Friends payload:', data);
+        if (!data) return [];
+
+        var namesArr = data.friend_names || data.user_friend_names || data.friends_names ||
+                       (data.data && (data.data.friend_names || data.data.user_friend_names || data.data.friends_names));
+        var idsArr   = data.friend_ids   || data.user_friend_ids   || data.friends_ids   ||
+                       (data.data && (data.data.friend_ids   || data.data.user_friend_ids   || data.data.friends_ids));
+
+        if (Array.isArray(namesArr)) {
+            var list = [];
+            for (var i = 0; i < namesArr.length; i++) {
+                var rawName = namesArr[i];
+                if (rawName === null || rawName === undefined) continue;
+                var rawId   = (Array.isArray(idsArr) && i < idsArr.length) ? idsArr[i] : null;
+                var cleanName = extractValidUsername(rawName);
+                // Filtro defensivo: ignorar cualquier registro nulo o cuyo user_name / friend_name venga vacío o null
+                if (!cleanName) continue;
+
+                var numId = (rawId !== null && rawId !== undefined && rawId !== '' && !isNaN(Number(rawId)))
+                    ? Number(rawId)
+                    : null;
+
+                var rec = registerUserInDirectory({ user_id: numId, username: cleanName });
+                list.push({
+                    user_id:  numId !== null ? numId : (rec ? rec.user_id : null),
+                    username: cleanName,
+                    points:   rec ? rec.points : 0
+                });
+            }
+            return list;
+        }
+
+        return normalizeUserCollection(data, ['friends', 'user_friends', 'friend_names', 'user_friend_names']);
+    }
+
+    function createAvatarImg(username) {
+        var img = document.createElement('img');
+        img.src = getAvatarForAnyPlayer(username);
+        img.alt = 'Avatar ' + cleanUsername(username);
+        img.className = 'friend-avatar';
+        img.onerror = function () {
+            this.src = FALLBACK_AVATAR;
+        };
+        return img;
+    }
+
+    function showSentRequestToast(msg) {
+        if (!addToast) return;
+        addToast.textContent = msg || '✓ ¡Solicitud Enviada!';
+        addToast.hidden = false;
+        addToast.style.display = 'flex';
+        clearTimeout(addToastTimer);
+        addToastTimer = setTimeout(function () {
+            addToast.hidden = true;
+            addToast.style.display = 'none';
+        }, 3000);
+    }
+
+    function showGlobalToast(msg) {
+        if (!globalAmigosToast) return;
+        globalAmigosToast.textContent = msg;
+        globalAmigosToast.hidden = false;
+        globalAmigosToast.style.display = 'flex';
+        clearTimeout(globalToastTimer);
+        globalToastTimer = setTimeout(function () {
+            globalAmigosToast.hidden = true;
+            globalAmigosToast.style.display = 'none';
+        }, 3000);
+    }
+
+    function getAuthHeaders(includeJson) {
+        var token = (localStorage.getItem('footlel_token') || '').trim();
+        var headers = {
+            'Authorization': 'Bearer ' + token
+        };
+        if (includeJson) {
+            headers['Content-Type'] = 'application/json';
+        }
+        return headers;
+    }
+
+    /* ─────────────────────────────────────────
+       6. RENDER: BADGE CONTADOR DE SOLICITUDES
+    ───────────────────────────────────────── */
+    function updateRequestsBadge() {
+        var count = state.friendRequests.length + state.matchRequests.length;
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.renderHeaderNotifications === 'function') {
+            window.FootlelPrefs.renderHeaderNotifications({
+                friend_request_names: state.friendRequests.map(function (r) { return r.username; }),
+                match_request_names: state.matchRequests.slice()
+            });
+        }
+        if (!requestsBadge) return;
+        requestsBadge.textContent = String(count);
+        requestsBadge.setAttribute('aria-label', count + (count === 1 ? ' solicitud pendiente' : ' solicitudes pendientes'));
+        if (count <= 0) {
+            requestsBadge.hidden = true;
+            requestsBadge.style.display = 'none';
+        } else {
+            requestsBadge.hidden = false;
+            requestsBadge.style.display = 'inline-flex';
+        }
+    }
+
+    /* ─────────────────────────────────────────
+       7. PESTAÑA "MIS AMIGOS" (GET /user/get-user-friends)
+    ───────────────────────────────────────── */
+    async function fetchUserFriends() {
+        state.isLoadingFriends = true;
+        hideAlertBanner(friendsErrorBanner);
+        renderFriendsList();
+
+        try {
+            var response = await fetch(API_BASE_URL + '/user/get-user-friends', {
+                method: 'GET',
+                headers: getAuthHeaders(false)
+            });
+
+            if (response.ok) {
+                var data = await response.json();
+                var parsedFriends = parseFriendsPayload(data);
+                state.friends = parsedFriends;
+                // Persist normalized list so leaderboard.html "Amigos" tab also stays in sync
+                saveArrayStorage(KEYS.FRIENDS_CACHE, parsedFriends);
+            } else {
+                var errData = null;
+                try { errData = await response.json(); } catch (_) {}
+                var detail = extractErrorDetail(errData, '');
+                // If backend returns 404/empty when user has no friends yet, treat as empty list
+                if (response.status === 404 || /no\s+tiene\s+amigos|sin\s+amigos|empty/i.test(detail)) {
+                    state.friends = [];
+                    saveArrayStorage(KEYS.FRIENDS_CACHE, []);
+                } else if (detail) {
+                    showAlertBanner(friendsErrorBanner, detail);
+                }
+            }
+        } catch (err) {
+            console.warn('Error al obtener lista de amigos:', err);
+            showAlertBanner(friendsErrorBanner, 'No pudimos conectar con el servidor para cargar tus amigos.');
+        } finally {
+            state.isLoadingFriends = false;
+            syncSentRequestsWithBackendState();
+            renderFriendsList();
+            renderRequestsTab();
+            renderSearchUsers();
+        }
+    }
+
+    function renderFriendsList() {
+        if (!friendsListContainer) return;
+        friendsListContainer.innerHTML = '';
+
+        if (state.isLoadingFriends) {
+            var loadingLi = document.createElement('li');
+            loadingLi.className = 'friend-row friend-row--empty';
+            loadingLi.textContent = 'Cargando tus amigos...';
+            friendsListContainer.appendChild(loadingLi);
+            return;
+        }
+
+        var validFriends = state.friends.filter(function (f) {
+            return Boolean(extractValidUsername(f));
+        });
+
+        if (validFriends.length === 0) {
+            var emptyAllLi = document.createElement('li');
+            emptyAllLi.className = 'friend-row friend-row--empty';
+            emptyAllLi.textContent = 'Aún no tienes amigos agregados. ¡Busca jugadores en la pestaña Buscar!';
+            friendsListContainer.appendChild(emptyAllLi);
+            return;
+        }
+
+        var query = normalizeText(searchFriendsInput ? searchFriendsInput.value : '');
+        var filtered = validFriends.filter(function (f) {
+            var uName = extractValidUsername(f);
+            if (!uName) return false;
+            if (!query) return true;
+            return normalizeText(uName).includes(query);
+        });
+
+        if (filtered.length === 0) {
+            var noMatchLi = document.createElement('li');
+            noMatchLi.className = 'friend-row friend-row--empty';
+            noMatchLi.textContent = 'No se encontraron amigos con ese nombre.';
+            friendsListContainer.appendChild(noMatchLi);
+            return;
+        }
+
+        filtered.forEach(function (friend) {
+            var displayUsername = extractValidUsername(friend);
+            if (!displayUsername) return;
+            var li = document.createElement('li');
+            li.className = 'friend-row';
+            li.dataset.username = displayUsername;
+
+            var avatar = createAvatarImg(displayUsername);
+
+            var infoDiv = document.createElement('div');
+            infoDiv.className = 'friend-info';
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'friend-name';
+            nameSpan.textContent = displayUsername;
+
+            var statusSpan = document.createElement('span');
+            statusSpan.className = 'friend-status friend-status--online';
+            statusSpan.textContent = 'Amigo en Footlel';
+
+            infoDiv.appendChild(nameSpan);
+            infoDiv.appendChild(statusSpan);
+
+            // "Desafiar 1v1": POST /user/send-user-match-request, then waiting room
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-challenge btn-challenge--active';
+            btn.dataset.username = displayUsername;
+            btn.textContent = 'Desafiar 1v1';
+            btn.title = 'Desafiar a ' + displayUsername + ' a una partida 1v1 online';
+            btn.addEventListener('click', function () {
+                challengeFriend(displayUsername, btn);
+            });
+
+            li.appendChild(avatar);
+            li.appendChild(infoDiv);
+            li.appendChild(btn);
+
+            friendsListContainer.appendChild(li);
+        });
+    }
+
+    /* ─────────────────────────────────────────
+       8. PESTAÑA "SOLICITUDES"
+          - GET /user/get-user-friend-requests
+          - POST /user/reply-user-friend-request
+    ───────────────────────────────────────── */
+    async function fetchFriendRequests() {
+        state.isLoadingRequests = true;
+        hideAlertBanner(requestsErrorBanner);
+        renderRequestsTab();
+
+        try {
+            var response = await fetch(API_BASE_URL + '/user/get-user-friend-requests', {
+                method: 'GET',
+                headers: getAuthHeaders(false)
+            });
+
+            if (response.ok) {
+                var data = await response.json();
+                state.friendRequests = parseFriendRequestsPayload(data);
+            } else {
+                var errData = null;
+                try { errData = await response.json(); } catch (_) {}
+                var detail = extractErrorDetail(errData, '');
+                if (response.status === 404 || /no\s+tiene\s+solicitudes|sin\s+solicitudes|empty/i.test(detail)) {
+                    state.friendRequests = [];
+                } else if (detail) {
+                    showAlertBanner(requestsErrorBanner, detail);
+                }
+            }
+        } catch (err) {
+            console.warn('Error al obtener solicitudes de amistad:', err);
+            showAlertBanner(requestsErrorBanner, 'No pudimos conectar con el servidor para cargar tus solicitudes.');
+        } finally {
+            state.isLoadingRequests = false;
+            syncSentRequestsWithBackendState();
+            updateRequestsBadge();
+            renderRequestsTab();
+            renderSearchUsers();
+        }
+    }
+
+    function resolveUsernameForEntry(entry, btnEl) {
+        if (btnEl) {
+            var btnName = btnEl.getAttribute('data-username') || (btnEl.dataset && btnEl.dataset.username);
+            if (btnName && cleanUsername(btnName)) {
+                return cleanUsername(btnName);
+            }
+            var parentRow = btnEl.closest ? btnEl.closest('[data-username]') : null;
+            if (parentRow) {
+                var rowName = parentRow.getAttribute('data-username') || (parentRow.dataset && parentRow.dataset.username);
+                if (rowName && cleanUsername(rowName)) {
+                    return cleanUsername(rowName);
+                }
+            }
+        }
+        if (!entry) return '';
+        if (typeof entry === 'string') return cleanUsername(entry);
+        return cleanUsername(entry.username || entry.user_name || entry.friend_name || entry.name || '');
+    }
+
+    function resolveUserIdForEntry(entry, btnEl) {
+        if (entry && typeof entry === 'object') {
+            var directId = entry.user_id_request ?? entry.request_id ?? entry.user_id ?? entry.friend_id ?? entry.id;
+            if (directId !== null && directId !== undefined && directId !== '' && !isNaN(Number(directId))) {
+                return Number(directId);
+            }
+        }
+        if (btnEl) {
+            var btnId = btnEl.getAttribute('data-user-id') || (btnEl.dataset && btnEl.dataset.userId);
+            if (btnId !== null && btnId !== undefined && btnId !== '' && !isNaN(Number(btnId))) {
+                return Number(btnId);
+            }
+            var parentRow = btnEl.closest ? btnEl.closest('[data-user-id]') : null;
+            if (parentRow) {
+                var rowId = parentRow.getAttribute('data-user-id') || (parentRow.dataset && parentRow.dataset.userId);
+                if (rowId !== null && rowId !== undefined && rowId !== '' && !isNaN(Number(rowId))) {
+                    return Number(rowId);
+                }
+            }
+        }
+        var clean = resolveUsernameForEntry(entry, btnEl);
+        if (!clean) return null;
+        if (/^\d+$/.test(clean)) return Number(clean);
+        var norm = normalizeText(clean);
+        if (state.userDirectoryByName[norm] && state.userDirectoryByName[norm].user_id !== null) {
+            return Number(state.userDirectoryByName[norm].user_id);
+        }
+        return null;
+    }
+
+    async function replyToFriendRequest(reqEntry, replyBoolean, acceptBtn, rejectBtn) {
+        hideAlertBanner(requestsErrorBanner);
+        if (acceptBtn) acceptBtn.disabled = true;
+        if (rejectBtn) rejectBtn.disabled = true;
+
+        var senderUsername = resolveUsernameForEntry(reqEntry, acceptBtn || rejectBtn);
+        if (!senderUsername) {
+            showAlertBanner(requestsErrorBanner, 'No se pudo obtener el nombre de usuario de la solicitud.');
+            if (acceptBtn) acceptBtn.disabled = false;
+            if (rejectBtn) rejectBtn.disabled = false;
+            return;
+        }
+
+        try {
+            // Send exact schema required by POST /user/reply-user-friend-request:
+            // { "friend_name": String(senderUsername), "reply": Boolean(replyBoolean) }
+            var response = await fetch(API_BASE_URL + '/user/reply-user-friend-request', {
+                method: 'POST',
+                headers: getAuthHeaders(true),
+                body: JSON.stringify({
+                    friend_name: String(senderUsername),
+                    reply: Boolean(replyBoolean)
+                })
+            });
+
+            if (response.ok) {
+                // Immediately remove from pending requests state and update badges & UI
+                state.friendRequests = state.friendRequests.filter(function (item) {
+                    return normalizeText(item.username) !== normalizeText(senderUsername);
+                });
+                updateRequestsBadge();
+                renderRequestsTab();
+
+                if (replyBoolean) {
+                    showGlobalToast('✓ ¡Solicitud aceptada!');
+                } else {
+                    showGlobalToast('Solicitud rechazada');
+                }
+
+                // Reload both friend requests and friends list from backend, and update badge & header notifications
+                await Promise.all([
+                    fetchFriendRequests(),
+                    fetchUserFriends()
+                ]);
+                updateRequestsBadge();
+            } else {
+                var errData = null;
+                try { errData = await response.json(); } catch (_) {}
+                var detail = extractErrorDetail(errData, 'No se pudo procesar la solicitud de amistad.');
+                showAlertBanner(requestsErrorBanner, detail);
+                if (acceptBtn) acceptBtn.disabled = false;
+                if (rejectBtn) rejectBtn.disabled = false;
+            }
+        } catch (err) {
+            console.error('Error al responder solicitud de amistad:', err);
+            showAlertBanner(requestsErrorBanner, 'No pudimos conectar con el servidor. Inténtalo de nuevo.');
+            if (acceptBtn) acceptBtn.disabled = false;
+            if (rejectBtn) rejectBtn.disabled = false;
+        }
+    }
+
+    function renderRequestsTab() {
+        var query = normalizeText(searchRequestsInput ? searchRequestsInput.value : '');
+
+        renderMatchRequests(query);
+
+        // 1. Incoming Friend Requests
+        if (friendRequestsContainer) {
+            friendRequestsContainer.innerHTML = '';
+
+            if (state.isLoadingRequests) {
+                var loadingLi = document.createElement('li');
+                loadingLi.className = 'friend-row friend-row--empty';
+                loadingLi.textContent = 'Cargando solicitudes de amistad...';
+                friendRequestsContainer.appendChild(loadingLi);
+            } else {
+                var visibleFriendReqs = state.friendRequests.filter(function (req) {
+                    var reqName = extractValidUsername(req);
+                    if (!reqName) return false;
+                    if (!query) return true;
+                    return normalizeText(reqName).includes(query);
+                });
+
+                if (visibleFriendReqs.length === 0) {
+                    var emptyReqLi = document.createElement('li');
+                    emptyReqLi.className = 'friend-row friend-row--empty';
+                    emptyReqLi.textContent = 'No tienes solicitudes de amistad pendientes';
+                    friendRequestsContainer.appendChild(emptyReqLi);
+                } else {
+                    visibleFriendReqs.forEach(function (req) {
+                        var displayUsername = extractValidUsername(req);
+                        if (!displayUsername) return;
+                        var reqId = req.user_id_request ?? req.request_id ?? req.user_id ?? null;
+                        var li = document.createElement('li');
+                        li.className = 'friend-row';
+                        li.dataset.username = displayUsername;
+                        if (reqId !== null && reqId !== undefined) {
+                            li.dataset.userId = String(reqId);
+                        }
+
+                        var avatar = createAvatarImg(displayUsername);
+
+                        var infoDiv = document.createElement('div');
+                        infoDiv.className = 'friend-info';
+
+                        var nameSpan = document.createElement('span');
+                        nameSpan.className = 'friend-name';
+                        nameSpan.textContent = displayUsername;
+
+                        var statusSpan = document.createElement('span');
+                        statusSpan.className = 'friend-status';
+                        statusSpan.textContent = 'Solicitud de amistad recibida';
+
+                        infoDiv.appendChild(nameSpan);
+                        infoDiv.appendChild(statusSpan);
+
+                        var actionsDiv = document.createElement('div');
+                        actionsDiv.className = 'req-actions';
+
+                        var acceptBtn = document.createElement('button');
+                        acceptBtn.type = 'button';
+                        acceptBtn.className = 'btn-req btn-req--accept';
+                        acceptBtn.textContent = 'Aceptar';
+                        if (reqId !== null && reqId !== undefined) {
+                            acceptBtn.dataset.userId = String(reqId);
+                        }
+                        acceptBtn.dataset.username = displayUsername;
+
+                        var rejectBtn = document.createElement('button');
+                        rejectBtn.type = 'button';
+                        rejectBtn.className = 'btn-req btn-req--reject';
+                        rejectBtn.textContent = 'Rechazar';
+                        if (reqId !== null && reqId !== undefined) {
+                            rejectBtn.dataset.userId = String(reqId);
+                        }
+                        rejectBtn.dataset.username = displayUsername;
+
+                        acceptBtn.addEventListener('click', function () {
+                            replyToFriendRequest(req, true, acceptBtn, rejectBtn);
+                        });
+                        rejectBtn.addEventListener('click', function () {
+                            replyToFriendRequest(req, false, acceptBtn, rejectBtn);
+                        });
+
+                        actionsDiv.appendChild(acceptBtn);
+                        actionsDiv.appendChild(rejectBtn);
+
+                        li.appendChild(avatar);
+                        li.appendChild(infoDiv);
+                        li.appendChild(actionsDiv);
+
+                        friendRequestsContainer.appendChild(li);
+                    });
+                }
+            }
+        }
+
+        // 2. Sent Requests ("Solicitudes Enviadas")
+        if (sentRequestsContainer) {
+            sentRequestsContainer.innerHTML = '';
+            var visibleSent = state.sentRequests.filter(function (sentItem) {
+                var name = extractValidUsername(sentItem);
+                if (!name) return false;
+                if (!query) return true;
+                return normalizeText(name).includes(query);
+            });
+
+            if (visibleSent.length === 0) {
+                var emptySentLi = document.createElement('li');
+                emptySentLi.className = 'friend-row friend-row--empty';
+                emptySentLi.textContent = 'No tenés solicitudes enviadas pendientes.';
+                sentRequestsContainer.appendChild(emptySentLi);
+            } else {
+                visibleSent.forEach(function (sentItem) {
+                    var clean = extractValidUsername(sentItem);
+                    if (!clean) return;
+                    var li = document.createElement('li');
+                    li.className = 'friend-row';
+
+                    var avatar = createAvatarImg(clean);
+
+                    var infoDiv = document.createElement('div');
+                    infoDiv.className = 'friend-info';
+
+                    var nameSpan = document.createElement('span');
+                    nameSpan.className = 'friend-name';
+                    nameSpan.textContent = clean;
+
+                    var statusSpan = document.createElement('span');
+                    statusSpan.className = 'friend-status';
+                    statusSpan.textContent = 'Solicitud enviada · Pendiente';
+
+                    infoDiv.appendChild(nameSpan);
+                    infoDiv.appendChild(statusSpan);
+
+                    li.appendChild(avatar);
+                    li.appendChild(infoDiv);
+
+                    sentRequestsContainer.appendChild(li);
+                });
+            }
+        }
+    }
+
+    /* ─────────────────────────────────────────
+       9. PESTAÑA "BUSCAR" (POST /user/send-user-friend-request)
+    ───────────────────────────────────────── */
+    function isAlreadySent(userEntry) {
+        var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
+        if (!normName) return false;
+        return state.sentRequests.some(function (u) {
+            var uName = typeof u === 'object' && u !== null ? u.username : u;
+            return normalizeText(uName) === normName;
+        });
+    }
+
+    function isAlreadyFriend(userEntry) {
+        var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
+        var entryId  = (typeof userEntry === 'object' && userEntry !== null && userEntry.user_id !== null && userEntry.user_id !== undefined)
+            ? Number(userEntry.user_id)
+            : null;
+        return state.friends.some(function (f) {
+            var fName = typeof f === 'object' && f !== null ? f.username : f;
+            if (normName && fName && normalizeText(fName) === normName) return true;
+            if (entryId !== null && typeof f === 'object' && f !== null && f.user_id !== null && f.user_id !== undefined) {
+                return Number(f.user_id) === entryId;
+            }
+            return false;
+        });
+    }
+
+    function isAlreadyIncomingRequest(userEntry) {
+        var normName = normalizeText(typeof userEntry === 'string' ? userEntry : userEntry.username);
+        var entryId  = (typeof userEntry === 'object' && userEntry !== null && userEntry.user_id !== null && userEntry.user_id !== undefined)
+            ? Number(userEntry.user_id)
+            : null;
+        return state.friendRequests.some(function (req) {
+            var rName = typeof req === 'object' && req !== null ? req.username : req;
+            if (normName && rName && normalizeText(rName) === normName) return true;
+            if (entryId !== null && typeof req === 'object' && req !== null && req.user_id !== null && req.user_id !== undefined) {
+                return Number(req.user_id) === entryId;
+            }
+            return false;
+        });
+    }
+
+    function syncSentRequestsWithBackendState() {
+        var beforeLen = state.sentRequests.length;
+        state.sentRequests = state.sentRequests.filter(function (sentItem) {
+            var sentName = typeof sentItem === 'object' && sentItem !== null ? sentItem.username : sentItem;
+            if (!sentName) return false;
+            return !isAlreadyFriend({ username: sentName }) && !isAlreadyIncomingRequest({ username: sentName });
+        });
+        if (state.sentRequests.length !== beforeLen) {
+            saveArrayStorage(KEYS.SENT_REQUESTS, state.sentRequests);
+        }
+    }
+
+    function markRequestAsSent(usernameStr) {
+        var clean = cleanUsername(usernameStr);
+        if (!clean) return;
+        if (!isAlreadySent({ username: clean })) {
+            state.sentRequests.push({
+                username: clean
+            });
+            saveArrayStorage(KEYS.SENT_REQUESTS, state.sentRequests);
+        }
+    }
+
+    async function sendFriendRequest(userEntry, btnEl) {
+        hideAlertBanner(searchErrorBanner);
+
+        // Immediately disable button to prevent duplicate submissions
+        if (btnEl) {
+            btnEl.disabled = true;
+            btnEl.setAttribute('aria-disabled', 'true');
+        }
+
+        var nombreDelAmigo = resolveUsernameForEntry(userEntry, btnEl);
+        if (!nombreDelAmigo) {
+            showAlertBanner(searchErrorBanner, 'No se pudo obtener el nombre de usuario de este jugador.');
+            if (btnEl) {
+                btnEl.disabled = false;
+                btnEl.removeAttribute('aria-disabled');
+            }
+            return;
+        }
+
+        var token = (localStorage.getItem('footlel_token') || '').trim();
+
+        try {
+            // OpenAPI schema UserFriend requires: { "friend_name": String(nombreDelAmigo) }
+            var response = await fetch(API_BASE_URL + '/user/send-user-friend-request', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
+                },
+                body: JSON.stringify({ "friend_name": String(nombreDelAmigo) })
+            });
+
+            if (response.ok) {
+                markRequestAsSent(nombreDelAmigo);
+
+                // Remove/hide immediately from "Buscar" and move to "Solicitudes Enviadas"
+                renderSearchUsers();
+                renderRequestsTab();
+                showSentRequestToast('✓ ¡Solicitud Enviada!');
+            } else {
+                var errData = null;
+                try { errData = await response.json(); } catch (_) {}
+                var detail = extractErrorDetail(errData, 'No se pudo enviar la solicitud de amistad.');
+                showAlertBanner(searchErrorBanner, detail);
+
+                // If backend indicates request was already sent or they are already friends, hide from "Buscar" immediately
+                if (/ya\s+son\s+amigos|already\s+friends/i.test(detail)) {
+                    await fetchUserFriends();
+                } else if (/ya\s+fue\s+enviada|ya\s+enviaste|pendiente|already\s+sent/i.test(detail)) {
+                    markRequestAsSent(nombreDelAmigo);
+                    renderSearchUsers();
+                    renderRequestsTab();
+                } else if (btnEl) {
+                    btnEl.disabled = false;
+                    btnEl.removeAttribute('aria-disabled');
+                }
+            }
+        } catch (err) {
+            console.error('Error enviando solicitud de amistad:', err);
+            showAlertBanner(searchErrorBanner, 'No pudimos conectar con el servidor. Inténtalo nuevamente.');
+            if (btnEl) {
+                btnEl.disabled = false;
+                btnEl.removeAttribute('aria-disabled');
+            }
+        }
+    }
+
+    function getCombinedSearchPool(query) {
+        var seen = new Set();
+        var pool = [];
+        var normSelf = normalizeText(savedUser);
+
+        state.backendUsers.forEach(function (u) {
+            if (!u || !u.username) return;
+            var clean = cleanUsername(u.username);
+            if (!clean || /^guest_/i.test(clean)) return;
+            var norm = normalizeText(clean);
+            if (!norm || seen.has(norm)) return;
+
+            // a) Excluir al propio usuario logueado
+            if (norm === normSelf) return;
+            if (currentUserId && u.user_id && Number(u.user_id) === Number(currentUserId)) return;
+
+            // b) Excluir usuarios que ya son amigos (GET /user/get-user-friends)
+            if (isAlreadyFriend(u)) return;
+
+            // c) Excluir usuarios en "Solicitudes Enviadas"
+            if (isAlreadySent(u)) return;
+
+            // d) Excluir usuarios que ya nos enviaron solicitud (friend_request_names de GET /user/get-user-friend-requests)
+            if (isAlreadyIncomingRequest(u)) return;
+
+            if (!query || norm.includes(query)) {
+                seen.add(norm);
+                pool.push(u);
+            }
+        });
+
+        if (!query) {
+            return pool.slice(0, 10);
+        }
+        return pool;
+    }
+
+    function renderSearchUsers() {
+        if (!searchUsersContainer) return;
+        var rawVal = buscarInput ? buscarInput.value : '';
+        var query  = normalizeText(rawVal);
+
+        if (suggestedTitle) {
+            suggestedTitle.textContent = query ? 'RESULTADOS DE BÚSQUEDA' : 'JUGADORES SUGERIDOS';
+        }
+
+        searchUsersContainer.innerHTML = '';
+
+        if (state.isLoadingSearch && state.backendUsers.length === 0) {
+            var loadingLi = document.createElement('li');
+            loadingLi.className = 'friend-row friend-row--empty';
+            loadingLi.textContent = 'Cargando jugadores...';
+            searchUsersContainer.appendChild(loadingLi);
+            return;
+        }
+
+        var listToRender = getCombinedSearchPool(query);
+
+        if (listToRender.length === 0) {
+            var emptyLi = document.createElement('li');
+            emptyLi.className = 'friend-row friend-row--empty';
+            emptyLi.textContent = query
+                ? 'No se encontraron usuarios con ese nombre.'
+                : 'No hay jugadores sugeridos disponibles en este momento.';
+            searchUsersContainer.appendChild(emptyLi);
+            return;
+        }
+
+        listToRender.forEach(function (userEntry) {
+            var clean = cleanUsername(userEntry.username);
+            var li = document.createElement('li');
+            li.className = 'friend-row';
+            li.dataset.username = clean;
+
+            var avatar = createAvatarImg(clean);
+
+            var infoDiv = document.createElement('div');
+            infoDiv.className = 'friend-info';
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'friend-name';
+            nameSpan.textContent = clean;
+
+            infoDiv.appendChild(nameSpan);
+
+            if (userEntry.points) {
+                var ptsSpan = document.createElement('span');
+                ptsSpan.className = 'friend-status';
+                ptsSpan.textContent = '⭐ ' + Math.round(Number(userEntry.points)).toLocaleString('en-US') + ' pts';
+                infoDiv.appendChild(ptsSpan);
+            }
+
+            var btn = document.createElement('button');
+            btn.type = 'button';
+            btn.dataset.username = clean;
+            btn.className = 'btn-add btn-add--active';
+            btn.innerHTML = ADD_USER_ICON_SVG + ' + Agregar';
+            btn.addEventListener('click', function () {
+                sendFriendRequest(userEntry, btn);
+            });
+
+            li.appendChild(avatar);
+            li.appendChild(infoDiv);
+            li.appendChild(btn);
+
+            searchUsersContainer.appendChild(li);
+        });
+    }
+
+    /* ─────────────────────────────────────────
+       10. CARGA DE DIRECTORIO DE JUGADORES (LEADERBOARD + INFO)
+    ───────────────────────────────────────── */
+    async function loadCurrentUserInfo() {
+        try {
+            var r = await fetch(API_BASE_URL + '/user/get-user-info', {
+                headers: getAuthHeaders(false)
+            });
+            if (!r.ok) return;
+            var info = await r.json();
+            if (info && (info.user_id ?? info.id)) {
+                currentUserId = Number(info.user_id ?? info.id);
+                localStorage.setItem('footlel_user_id', String(currentUserId));
+                localStorage.setItem('footlel_user_strid', String(currentUserId));
+            }
+            if (info && info.user_name) {
+                var newUser = cleanUsername(info.user_name) || savedUser;
+                if (newUser !== savedUser) {
+                    savedUser = newUser;
+                    KEYS.FRIENDS_CACHE = 'footlel_friends_v2_'       + savedUser;
+                    KEYS.SENT_REQUESTS = 'footlel_sent_requests_v2_' + savedUser;
+                    state.sentRequests = loadArrayStorage(KEYS.SENT_REQUESTS);
+                }
+                localStorage.setItem('footlel_username', savedUser);
+                profileUser.textContent = savedUser;
+                var updatedAvatar = getOrAssignAvatar(savedUser);
+                if (updatedAvatar) {
+                    document.getElementById('profileAvatar').src = updatedAvatar;
+                }
+            }
+        } catch (_) {}
+    }
+
+    async function loadBackendUsers() {
+        state.isLoadingSearch = true;
+        renderSearchUsers();
+        try {
+            var r = await fetch(API_BASE_URL + '/stat/get-global-leaderboard', {
+                headers: getAuthHeaders(false)
+            });
+            if (r.ok) {
+                var data = await r.json();
+                var parsed = normalizeUserCollection(data, ['leaderboard']);
+                parsed.forEach(function (entry) {
+                    if (!entry.username || /^guest_/i.test(entry.username)) return;
+                    var exists = state.backendUsers.some(function (u) {
+                        return normalizeText(u.username) === normalizeText(entry.username);
+                    });
+                    if (!exists) {
+                        state.backendUsers.push({
+                            username: cleanUsername(entry.username),
+                            points:   Number(entry.points) || 0
+                        });
+                    }
+                });
+            }
+        } catch (err) {
+            console.warn('No se pudo cargar usuarios del leaderboard para búsqueda:', err);
+        } finally {
+            state.isLoadingSearch = false;
+            renderSearchUsers();
+        }
+    }
+
+    /* ─────────────────────────────────────────
+       11. EVENTOS DE BÚSQUEDA Y PESTAÑAS
+    ───────────────────────────────────────── */
+    /* ─────────────────────────────────────────
+       10b. DESAFÍOS 1v1 (MULTIJUGADOR ONLINE)
+          - POST /user/send-user-match-request   { friend_name }
+          - GET  /user/get-user-match-requests
+          - POST /user/reply-user-match-request  { friend_name, reply }
+          - POST /game/start-multiplayer-game    { friend_name }   (lo llama quien ACEPTA)
+          - POST /game/join-multiplayer-game     (polling 5s, ambos, hasta match_started)
+       La sesión de la partida queda en sessionStorage['footlel_mp_session']
+       y la consume tateti-online.html.
+    ───────────────────────────────────────── */
+    // Supports parallel arrays (match_request_names / friend_request_names) or arrays of strings/objects.
+    function parseMatchRequestsPayload(data) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.parseMatchRequestNames === 'function') {
+            return window.FootlelPrefs.parseMatchRequestNames(data);
+        }
+        if (!data) return [];
+        var list = null;
+        if (Array.isArray(data)) {
+            list = data;
+        } else if (typeof data === 'object') {
+            var keys = ['match_request_names', 'friend_request_names', 'match_requests', 'match_invitations', 'requests'];
+            for (var i = 0; i < keys.length; i++) {
+                if (Array.isArray(data[keys[i]])) { list = data[keys[i]]; break; }
+            }
+            if (!list && data.data && typeof data.data === 'object') return parseMatchRequestsPayload(data.data);
+        }
+        if (!list) return [];
+        var names = [];
+        list.forEach(function (entry) {
+            var raw = (entry && typeof entry === 'object')
+                ? (entry.user_name || entry.username || entry.friend_name || entry.sender_name || entry.challenger_name || entry.name || '')
+                : entry;
+            var n = cleanUsername(raw);
+            if (n && names.map(normalizeText).indexOf(normalizeText(n)) === -1) names.push(n);
+        });
+        return names;
+    }
+
+    async function fetchMatchRequests() {
+        try {
+            var response = await fetch(API_BASE_URL + '/user/get-user-match-requests', {
+                method: 'GET',
+                headers: getAuthHeaders(false)
+            });
+            if (response.ok) {
+                state.matchRequests = parseMatchRequestsPayload(await response.json());
+            } else if (response.status === 404) {
+                state.matchRequests = [];
+            }
+        } catch (err) {
+            console.warn('Error al obtener desafíos 1v1:', err);
+        } finally {
+            state.isLoadingMatch = false;
+            updateRequestsBadge();
+            renderRequestsTab();
+        }
+    }
+
+    function renderMatchRequests(query) {
+        if (!matchRequestsContainer) return;
+        matchRequestsContainer.innerHTML = '';
+
+        if (state.isLoadingMatch) {
+            var loadingLi = document.createElement('li');
+            loadingLi.className = 'friend-row friend-row--empty';
+            loadingLi.textContent = 'Cargando desafíos...';
+            matchRequestsContainer.appendChild(loadingLi);
+            return;
+        }
+
+        var visible = state.matchRequests.filter(function (item) {
+            var validName = extractValidUsername(item);
+            if (!validName) return false;
+            return !query || normalizeText(validName).includes(query);
+        });
+
+        if (visible.length === 0) {
+            var emptyLi = document.createElement('li');
+            emptyLi.className = 'friend-row friend-row--empty';
+            emptyLi.textContent = 'No tienes desafíos 1v1 pendientes';
+            matchRequestsContainer.appendChild(emptyLi);
+            return;
+        }
+
+        visible.forEach(function (challengerItem) {
+            var challengerName = extractValidUsername(challengerItem);
+            if (!challengerName) return;
+            var li = document.createElement('li');
+            li.className = 'friend-row';
+            li.dataset.username = challengerName;
+
+            var infoDiv = document.createElement('div');
+            infoDiv.className = 'friend-info';
+
+            var nameSpan = document.createElement('span');
+            nameSpan.className = 'friend-name';
+            nameSpan.textContent = challengerName;
+
+            var statusSpan = document.createElement('span');
+            statusSpan.className = 'friend-status';
+            statusSpan.textContent = '¡' + challengerName + ' te invitó a jugar una partida 1v1!';
+
+            infoDiv.appendChild(nameSpan);
+            infoDiv.appendChild(statusSpan);
+
+            var actionsDiv = document.createElement('div');
+            actionsDiv.className = 'req-actions';
+
+            var acceptBtn = document.createElement('button');
+            acceptBtn.type = 'button';
+            acceptBtn.className = 'btn-req btn-req--accept';
+            acceptBtn.textContent = 'Aceptar 1v1';
+
+            var rejectBtn = document.createElement('button');
+            rejectBtn.type = 'button';
+            rejectBtn.className = 'btn-req btn-req--reject';
+            rejectBtn.textContent = 'Rechazar';
+
+            acceptBtn.addEventListener('click', function () {
+                replyToMatchRequest(challengerName, true, acceptBtn, rejectBtn);
+            });
+            rejectBtn.addEventListener('click', function () {
+                replyToMatchRequest(challengerName, false, acceptBtn, rejectBtn);
+            });
+
+            actionsDiv.appendChild(acceptBtn);
+            actionsDiv.appendChild(rejectBtn);
+
+            li.appendChild(createAvatarImg(challengerName));
+            li.appendChild(infoDiv);
+            li.appendChild(actionsDiv);
+            matchRequestsContainer.appendChild(li);
+        });
+    }
+
+    async function replyToMatchRequest(challengerName, accept, acceptBtn, rejectBtn) {
+        hideAlertBanner(requestsErrorBanner);
+        if (!window.FootlelPrefs || typeof window.FootlelPrefs.acceptMatchAndJoin !== 'function') {
+            showAlertBanner(requestsErrorBanner, 'La página todavía está cargando. Intentá de nuevo en un segundo.');
+            return;
+        }
+        acceptBtn.disabled = true;
+        rejectBtn.disabled = true;
+
+        if (accept) {
+            // reply(true) -> start-multiplayer-game -> waiting room -> join (5s) until match_started -> board
+            acceptBtn.textContent = 'Conectando...';
+            var joined = await window.FootlelPrefs.acceptMatchAndJoin(String(challengerName));
+            if (!joined.ok) {
+                acceptBtn.textContent = 'Aceptar 1v1';
+                acceptBtn.disabled = false;
+                rejectBtn.disabled = false;
+                if (!joined.cancelled) showAlertBanner(requestsErrorBanner, joined.detail || 'No se pudo aceptar el desafío.');
+            }
+            return;
+        }
+
+        var res = await window.FootlelPrefs.replyMatchRequest(String(challengerName), false);
+        if (res.ok) {
+            state.matchRequests = state.matchRequests.filter(function (n) {
+                return normalizeText(n) !== normalizeText(challengerName);
+            });
+            updateRequestsBadge();
+            renderRequestsTab();
+            showGlobalToast('Desafío rechazado');
+        } else {
+            acceptBtn.disabled = false;
+            rejectBtn.disabled = false;
+            showAlertBanner(requestsErrorBanner, res.detail || 'No se pudo rechazar el desafío.');
+        }
+    }
+
+    var challengeActive = false;
+
+    // Player A: POST /user/send-user-match-request -> waiting room ->
+    // POST /game/join-multiplayer-game every 5s until match_started === true -> board.
+    async function challengeFriend(friendName, btnEl) {
+        if (challengeActive) return;
+        hideAlertBanner(friendsErrorBanner);
+        var cleanFriend = cleanUsername(friendName);
+        if (!cleanFriend) {
+            showAlertBanner(friendsErrorBanner, 'No se pudo obtener el nombre de tu amigo.');
+            return;
+        }
+        if (!window.FootlelPrefs || typeof window.FootlelPrefs.startChallengeWait !== 'function') {
+            showAlertBanner(friendsErrorBanner, 'La página todavía está cargando. Intentá de nuevo en un segundo.');
+            return;
+        }
+        challengeActive = true;
+        if (btnEl) btnEl.disabled = true;
+
+        var proceedToWait = false;
+        try {
+            var response = await fetch(API_BASE_URL + '/user/send-user-match-request', {
+                method: 'POST',
+                headers: getAuthHeaders(true),
+                body: JSON.stringify({ friend_name: String(cleanFriend) })
+            });
+            if (response.ok) {
+                proceedToWait = true;
+                showGlobalToast('¡Desafío enviado a ' + cleanFriend + '!');
+            } else {
+                var errData = null;
+                try { errData = await response.json(); } catch (_) {}
+                var detail = extractErrorDetail(errData, 'No se pudo enviar el desafío.');
+                if (/ya\s+(fue\s+)?(enviad|envi[aó]ste|tiene)|pendiente|already\s+sent/i.test(detail)) {
+                    // Invitation already pending: just wait for the answer.
+                    proceedToWait = true;
+                    showGlobalToast('Ya habías desafiado a ' + cleanFriend + '. Esperando respuesta...');
+                } else {
+                    showAlertBanner(friendsErrorBanner, detail);
+                }
+            }
+        } catch (err) {
+            console.error('Error enviando desafío 1v1:', err);
+            showAlertBanner(friendsErrorBanner, 'No pudimos conectar con el servidor. Inténtalo nuevamente.');
+        }
+
+        if (proceedToWait) {
+            var result = await window.FootlelPrefs.startChallengeWait(cleanFriend);
+            if (!result.ok) {
+                if (result.cancelled) {
+                    showGlobalToast('Desafío cancelado');
+                } else {
+                    showAlertBanner(friendsErrorBanner, result.detail || 'No se pudo iniciar la partida.');
+                }
+            }
+        }
+        challengeActive = false;
+        if (btnEl) btnEl.disabled = false;
+    }
+
+    // Header bell polling (global-preferences.js) keeps this list in sync without extra requests.
+    window.addEventListener('footlel:match-requests-updated', function (e) {
+        var names = (e.detail && Array.isArray(e.detail.names)) ? e.detail.names : [];
+        if (names.join('|') === state.matchRequests.join('|') && !state.isLoadingMatch) return;
+        state.matchRequests = names;
+        state.isLoadingMatch = false;
+        renderRequestsTab();
+    });
+
+    if (searchFriendsInput) {
+        searchFriendsInput.addEventListener('input', renderFriendsList);
+    }
+    if (searchRequestsInput) {
+        searchRequestsInput.addEventListener('input', renderRequestsTab);
+    }
+    if (buscarInput) {
+        buscarInput.addEventListener('input', function () {
+            hideAlertBanner(searchErrorBanner);
+            renderSearchUsers();
+        });
+    }
+
+    var tabs   = document.querySelectorAll('.amigos-tab');
+    var panels = document.querySelectorAll('.tab-panel');
+
+    function activateTab(targetTab) {
+        var tabName = targetTab.dataset.tab;
+        var targetId = 'tab-' + tabName;
+
+        tabs.forEach(function (t) {
+            t.classList.remove('is-active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        panels.forEach(function (p) {
+            p.classList.remove('is-active');
+            p.hidden = true;
+        });
+
+        targetTab.classList.add('is-active');
+        targetTab.setAttribute('aria-selected', 'true');
+        var panel = document.getElementById(targetId);
+        if (panel) {
+            panel.classList.add('is-active');
+            panel.hidden = false;
+        }
+
+        // Refresh data when switching to Mis Amigos or Solicitudes tabs
+        if (tabName === 'amigos') {
+            fetchUserFriends();
+        } else if (tabName === 'solicitudes') {
+            fetchFriendRequests();
+            fetchMatchRequests();
+        } else if (tabName === 'buscar') {
+            renderSearchUsers();
+        }
+    }
+
+    tabs.forEach(function (tab) {
+        tab.addEventListener('click', function () {
+            activateTab(tab);
+        });
+    });
+
+    /* ─────────────────────────────────────────
+       12. INICIALIZACIÓN
+    ───────────────────────────────────────── */
+    updateRequestsBadge();
+    renderFriendsList();
+    renderRequestsTab();
+    renderSearchUsers();
+
+    // Check URL query parameter (?tab=friends) or sessionStorage tab request, defaulting to "Mis Amigos" ("amigos")
+    try {
+        var urlParams = new URLSearchParams(window.location.search);
+        var urlTab = (urlParams.get('tab') || '').trim().toLowerCase();
+        var requestedTab = sessionStorage.getItem('footlel_open_tab');
+        if (requestedTab) {
+            sessionStorage.removeItem('footlel_open_tab');
+        }
+        var rawTarget = urlTab || (requestedTab ? String(requestedTab).trim().toLowerCase() : 'amigos');
+        var resolvedTab = 'amigos';
+        if (rawTarget === 'friends' || rawTarget === 'amigos') {
+            resolvedTab = 'amigos';
+        } else if (rawTarget === 'requests' || rawTarget === 'solicitudes') {
+            resolvedTab = 'solicitudes';
+        } else if (rawTarget === 'search' || rawTarget === 'buscar') {
+            resolvedTab = 'buscar';
+        }
+        var matchingTabBtn = document.querySelector('.amigos-tab[data-tab="' + resolvedTab + '"]');
+        if (matchingTabBtn) {
+            activateTab(matchingTabBtn);
+        }
+    } catch (_) {}
+
+    // Load current user info & leaderboard directory first, then fetch friends and friend requests
+    (async function initSocialDashboard() {
+        await Promise.all([
+            loadCurrentUserInfo(),
+            loadBackendUsers()
+        ]);
+        await Promise.all([
+            fetchUserFriends(),
+            fetchFriendRequests(),
+            fetchMatchRequests()
+        ]);
+    })();
+
+})();
+</script>
+
+</body>
+</html>

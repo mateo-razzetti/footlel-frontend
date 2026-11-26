@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Recuperar Cuenta</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Envelope icon via Phosphor Icons (lightweight, no heavy dependencies) -->
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+    <link rel="stylesheet" href="../../assets/styles/login.css">
+    <link rel="stylesheet" href="../../assets/styles/recuperar.css">
+    <!-- Global preferences (theme + animations) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card">
+
+        <header class="card-header recover-header">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
+            <div class="recover-heading">
+                <h1 class="recover-title">Recuperar cuenta</h1>
+                <p class="recover-subtitle">Ingresá tu correo electrónico y te enviaremos un código de seguridad</p>
+            </div>
+        </header>
+
+        <form class="login-form" id="recover-form" action="verificar.html" method="GET" novalidate>
+            <div class="form-group">
+                <div class="input-icon-wrapper">
+                    <i class="ph ph-envelope input-icon" aria-hidden="true"></i>
+                    <input
+                        class="form-input input-with-icon"
+                        type="email"
+                        id="recovery-email"
+                        name="recovery-email"
+                        placeholder="ejemplo@correo.com"
+                        autocomplete="email"
+                        required
+                    >
+                </div>
+                <!-- Email validation error (hidden by default) -->
+                <p class="field-error" id="email-error" aria-live="polite" hidden>
+                    Ingresá un correo válido.
+                </p>
+            </div>
+            <button type="submit" class="btn-primary">Enviar código</button>
+        </form>
+
+        <nav class="secondary-links">
+            <a href="login.html" class="link-back-login">Volver al Login</a>
+        </nav>
+
+    </main>
+
+    <script>
+        const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,8}$/;
+        const recoveryEmailInput = document.getElementById('recovery-email');
+
+        // Pre-cargar correo si ya se había ingresado en este flujo o sesión
+        const savedRecoveryEmail = sessionStorage.getItem('recovery_email')
+            || localStorage.getItem('recovery_email')
+            || localStorage.getItem('footlel_email')
+            || '';
+        if (savedRecoveryEmail && recoveryEmailInput && !recoveryEmailInput.value) {
+            recoveryEmailInput.value = savedRecoveryEmail;
+        }
+
+        /* ── Email validation on submit ── */
+        document.getElementById('recover-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const email      = recoveryEmailInput.value.trim();
+            const emailError = document.getElementById('email-error');
+
+            if (!EMAIL_REGEX.test(email)) {
+                emailError.hidden = false;
+                recoveryEmailInput.focus();
+            } else {
+                emailError.hidden = true;
+                // Guardar correo temporalmente para el paso final en nueva-clave.html
+                sessionStorage.setItem('recovery_email', email);
+                localStorage.setItem('recovery_email', email);
+
+                const existingUser = sessionStorage.getItem('recovery_user_name')
+                    || localStorage.getItem('recovery_user_name')
+                    || localStorage.getItem('footlel_username')
+                    || '';
+                if (existingUser && !/^invitado$/i.test(existingUser) && !/^guest_/i.test(existingUser)) {
+                    sessionStorage.setItem('recovery_user_name', existingUser.replace(/^@+/, '').trim());
+                    localStorage.setItem('recovery_user_name', existingUser.replace(/^@+/, '').trim());
+                }
+
+                window.location.href = 'verificar.html';
+            }
+        });
+
+        /* ── Real-time cleanup ── */
+        recoveryEmailInput.addEventListener('input', () => {
+            const emailError = document.getElementById('email-error');
+            if (!emailError.hidden && EMAIL_REGEX.test(recoveryEmailInput.value.trim())) {
+                emailError.hidden = true;
+            }
+        });
+    </script>
+</body>
+</html>

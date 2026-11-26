@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <script src="../../assets/scripts/global-preferences.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Menú Principal</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Menu stylesheet -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+
+<!-- Decorative background balls (aria-hidden: decoration only) -->
+<div class="bg-balls" aria-hidden="true">
+    <span class="bg-ball bg-ball--1">⚽</span>
+    <span class="bg-ball bg-ball--2">⚽</span>
+    <span class="bg-ball bg-ball--3">⚽</span>
+    <span class="bg-ball bg-ball--4">⚽</span>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PAGE SHELL
+═══════════════════════════════════════ -->
+<div class="page-shell">
+
+    <!-- ─────────────────────────────────
+         HEADER
+    ───────────────────────────────── -->
+    <header class="site-header" role="banner">
+
+        <!-- Logo -->
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Header Actions: Notifications + Profile -->
+        <div class="header-actions">
+
+            <!-- Notifications Bell + Dropdown -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button
+                    class="notif-btn"
+                    id="notifBtn"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notifDropdown"
+                    aria-label="Notificaciones"
+                >
+                    <svg class="notif-bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge" hidden style="display: none;"></span>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div
+                    class="notif-dropdown"
+                    id="notifDropdown"
+                    role="region"
+                    aria-label="Notificaciones"
+                >
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notificaciones</span>
+                    </div>
+                    <ul class="notif-list" id="notifList">
+                        <li class="notif-empty">No tienes notificaciones nuevas</li>
+                    </ul>
+                </div>
+            </div><!-- /notif-wrapper -->
+
+            <!-- Profile + Dropdown -->
+            <div class="profile-wrapper" id="profileWrapper">
+
+                <!-- Trigger button -->
+                <button
+                    class="profile-btn"
+                    id="profileBtn"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="profileDropdown"
+                    type="button"
+                >
+                    <img
+                        src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                        alt="Avatar de usuario"
+                        class="profile-avatar"
+                        id="profileAvatar"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                    >
+                    <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                    <!-- Chevron down -->
+                    <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="6 9 12 15 18 9"/>
+                    </svg>
+                </button>
+
+                <!-- Floating dropdown -->
+                <nav
+                    class="profile-dropdown"
+                    id="profileDropdown"
+                    role="menu"
+                    aria-label="Opciones de cuenta"
+                >
+                    <!-- Settings -->
+                    <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                        Configuración
+                    </a>
+
+                    <!-- Edit Account (registered users only) -->
+                    <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                        </svg>
+                        Editar Cuenta
+                    </a>
+
+                    <!-- My Friends (registered users only) -->
+                    <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Mis Amigos
+                    </a>
+
+                    <!-- Help -->
+                    <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                            <line x1="12" y1="17" x2="12.01" y2="17"/>
+                        </svg>
+                        Ayuda
+                    </a>
+
+                    <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+                    <!-- Log out / Log in -->
+                    <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                             stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                        <span id="ddSessionLabel">Cerrar Sesión</span>
+                    </a>
+                </nav>
+            </div><!-- /profile-wrapper -->
+
+        </div><!-- /header-actions -->
+
+    </header>
+
+    <!-- ─────────────────────────────────
+         MAIN CONTENT
+    ───────────────────────────────── -->
+    <main class="main-content" id="mainContent" role="main">
+
+        <!-- Hero / Welcome -->
+        <section class="hero" aria-labelledby="heroTitle">
+            <h1 class="hero-title" id="heroTitle">
+                Bienvenido <span class="username-highlight" id="user-display">nombre_usuario</span> ⚽
+            </h1>
+            <p class="hero-subtitle">
+                Elegí un modo de juego y comenzá a dominar las canchas de trivia.
+            </p>
+        </section>
+
+        <!-- Cards grid -->
+        <section class="cards-grid" aria-label="Modos de juego">
+
+            <!-- Card 1: Play Tateti -->
+            <article class="game-card" aria-labelledby="cardTatetiTitle">
+                <div class="card-icon" aria-hidden="true">⚽</div>
+                <h2 class="card-title" id="cardTatetiTitle">Jugar Tateti</h2>
+                <p class="card-desc">
+                    El modo estrella de Footlel. Respondé preguntas de fútbol y conquistá el tablero
+                    3×3 antes que tu rival. ¡Estrategia y conocimiento en cada jugada!
+                </p>
+                <a href="modalidades.html" class="btn-outline" id="btnPlay">
+                    <span>JUGAR AHORA</span><span>→</span>
+                </a>
+            </article>
+
+            <!-- Card 2: Ranking Table -->
+            <article class="game-card" aria-labelledby="cardRankingTitle">
+                <div class="card-icon" aria-hidden="true">🏆</div>
+                <h2 class="card-title" id="cardRankingTitle">Tabla de Ranking</h2>
+                <p class="card-desc">
+                    Mirá en qué posición estás entre todos los jugadores de Footlel.
+                    Escalá puestos respondiendo bien y manteniendo tu racha.
+                </p>
+                <a href="leaderboard.html" class="btn-outline">
+                    <span>VER MIS PUNTOS</span><span>→</span>
+                </a>
+            </article>
+
+            <!-- Card 3: Challenge Friends -->
+            <article class="game-card" id="cardFriends" aria-labelledby="cardFriendsTitle">
+                <div class="card-icon" aria-hidden="true">🤝</div>
+                <h2 class="card-title" id="cardFriendsTitle">Desafiar Amigos</h2>
+                <p class="card-desc">
+                    Invitá a tus amigos a un duelo privado de Tateti y demostrá quién sabe
+                    más de fútbol. Compartí el código de partida y a jugar.
+                </p>
+                <a href="amigos.html" class="btn-outline" id="btnChallengeFriends">
+                    <span>INVITAR AMIGO</span><span>→</span>
+                </a>
+            </article>
+
+        </section>
+    </main><!-- /main-content -->
+
+    <!-- ─────────────────────────────────
+         STATS BAR (FOOTER — 4 COLUMNS)
+    ───────────────────────────────── -->
+    <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
+
+        <!-- Column 1: Porcentaje de Aciertos -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">PORCENTAJE DE ACIERTOS</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">i<span class="stat-tooltip" role="tooltip">
+                    <!-- Title above the mathematical formula -->
+                    <span class="tooltip-formula-title">Porcentaje de Aciertos =</span>
+                    <!-- Flex row aligning the vertical fraction and the '× 100' multiplier -->
+                    <span class="tooltip-formula-row">
+                        <span class="tooltip-fraction">
+                            <!-- Numerator: correct guesses (updated dynamically via JS) -->
+                            <span class="tooltip-numerator" id="tooltipCorrectGuesses">0 aciertos</span>
+                            <!-- Denominator: total guesses made (updated dynamically via JS) -->
+                            <span class="tooltip-denominator" id="tooltipTotalGuesses">0 intentos</span>
+                        </span>
+                        <span class="tooltip-multiplier">× 100</span>
+                    </span>
+                </span></span>
+            </div>
+            <span class="stat-value" id="statAccuracy">🎯 0%</span>
+        </div>
+
+        <!-- Column 2: Tu Racha -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">TU RACHA</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Tu Racha">i<span class="stat-tooltip" role="tooltip">Tu racha aumenta por cada victoria consecutiva. ¡Recibís +10 puntos extra por cada victoria de racha acumulada!</span></span>
+            </div>
+            <span class="stat-value" id="statStreak">🔥 0 Días</span>
+        </div>
+
+        <!-- Column 3: Puntos Totales -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">PUNTOS TOTALES</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">i<span class="stat-tooltip" role="tooltip">Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.<br><span class="tooltip-ranks-scale">Rangos: Madera (0-299), Hierro (300-599), Bronce (600-899), Plata (900-1199), Oro (1200-1499), Diamante (1500+).</span></span></span>
+            </div>
+            <span class="stat-value stat-value--rank" id="statPoints"><svg class="rank-shield-svg rank-shield--wood" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2L4 5.5v6.1C4 16.9 7.4 21.6 12 23c4.6-1.4 8-6.1 8-11.4V5.5L12 2z" fill="#8D5B4C" stroke="#5D3A2E" stroke-width="1.6"/><path d="M12 4.2L6.2 6.8v4.7c0 4.1 2.5 7.9 5.8 9.1 3.3-1.2 5.8-5 5.8-9.1V6.8L12 4.2z" fill="#A4705E" opacity="0.55"/><path d="M9.5 5.8v13.2M14.5 5.8v13.2M12 4.2v16.4" stroke="#5D3A2E" stroke-width="1" stroke-linecap="round" opacity="0.65"/></svg><span class="rank-stat-text">0 pts · Madera III</span></span>
+        </div>
+
+        <!-- Column 4: Porcentaje de Victorias -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">PORCENTAJE DE VICTORIAS</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">i<span class="stat-tooltip" role="tooltip">
+                    <!-- Title above the mathematical formula -->
+                    <span class="tooltip-formula-title">Porcentaje de Victorias =</span>
+                    <!-- Flex row aligning the vertical fraction and the '× 100' multiplier -->
+                    <span class="tooltip-formula-row">
+                        <span class="tooltip-fraction">
+                            <!-- Numerator: matches won (updated dynamically via JS) -->
+                            <span class="tooltip-numerator" id="tooltipMatchesWon">0 ganadas</span>
+                            <!-- Denominator: matches played (updated dynamically via JS) -->
+                            <span class="tooltip-denominator" id="tooltipMatchesPlayed">0 jugadas</span>
+                        </span>
+                        <span class="tooltip-multiplier">× 100</span>
+                    </span>
+                </span></span>
+            </div>
+            <span class="stat-value" id="statWins">📈 0%</span>
+        </div>
+
+    </footer>
+
+</div><!-- /page-shell -->
+
+<!-- ═══════════════════════════════════════
+     MODAL: Invitado Restringido (#modal-invitado)
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-invitado"
+     role="dialog" aria-modal="true" aria-labelledby="modal-inv-title">
+    <div class="modal-card">
+        <button class="modal-close" id="close-invitado" type="button" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true">🔒</div>
+        <h2 class="modal-title" id="modal-inv-title">¡Sumate a la cancha!</h2>
+        <p class="modal-text">
+            Iniciá sesión o creá tu cuenta gratis para desafiar a otros jugadores y guardar tus estadísticas diarias.
+        </p>
+        <div class="modal-actions">
+            <a href="login.html" class="modal-btn-primary">Iniciar Sesión</a>
+            <a href="registro.html" class="modal-btn-secondary">Registrarse</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ──────────────────────────────────────────
+       1. MODE DETECTION (Guest vs Registered)
+    ────────────────────────────────────────── */
+    const isGuest = localStorage.getItem('footlel_guest') === 'true';
+
+    /* ──────────────────────────────────────────
+       2. DOM REFERENCES
+    ────────────────────────────────────────── */
+    const heroUsername    = document.getElementById('user-display');
+    const profileAvatar   = document.getElementById('profileAvatar');
+    const profileUser     = document.getElementById('profileUsername');
+    const ddEditAccount   = document.getElementById('ddEditAccount');
+    const ddFriends       = document.getElementById('ddFriends');
+    const ddSessionAction = document.getElementById('ddSessionAction');
+    const ddSessionLabel  = document.getElementById('ddSessionLabel');
+    const ddSessionIcon   = document.getElementById('ddSessionIcon');
+    const statAccuracy    = document.getElementById('statAccuracy');
+    const statStreak      = document.getElementById('statStreak');
+    const statPoints      = document.getElementById('statPoints');
+    const statWins        = document.getElementById('statWins');
+    // References to the numerator and denominator spans inside the mathematical fraction tooltips
+    const tooltipCorrectGuesses = document.getElementById('tooltipCorrectGuesses');
+    const tooltipTotalGuesses   = document.getElementById('tooltipTotalGuesses');
+    const tooltipMatchesWon     = document.getElementById('tooltipMatchesWon');
+    const tooltipMatchesPlayed  = document.getElementById('tooltipMatchesPlayed');
+    const guestModal      = document.getElementById('modal-invitado');
+    const closeGuestBtn   = document.getElementById('close-invitado');
+
+    // Helper that removes any leading '@' symbol and extra whitespace from a username
+    function cleanUsername(rawName) {
+        return String(rawName || '').trim().replace(/^@+/, '');
+    }
+
+    // Updates the vertical fraction numbers inside both stat tooltips
+    function updateFractionTooltips(mappedStats) {
+        // Set numerator for accuracy (correct_guesses from /stat/get-user-stats)
+        if (tooltipCorrectGuesses) {
+            const c = mappedStats.correctGuesses ?? 0;
+            tooltipCorrectGuesses.textContent = `${c} ${c === 1 ? 'acierto' : 'aciertos'}`;
+        }
+        // Set denominator for accuracy (guesses_made from /stat/get-user-stats)
+        if (tooltipTotalGuesses) {
+            const m = mappedStats.guessesMade ?? 0;
+            tooltipTotalGuesses.textContent = `${m} ${m === 1 ? 'intento' : 'intentos'}`;
+        }
+        // Set numerator for win rate (matches_won from /stat/get-user-stats)
+        if (tooltipMatchesWon) {
+            const w = mappedStats.matchesWon ?? 0;
+            tooltipMatchesWon.textContent = `${w} ${w === 1 ? 'ganada' : 'ganadas'}`;
+        }
+        // Set denominator for win rate (matches_played from /stat/get-user-stats)
+        if (tooltipMatchesPlayed) {
+            const p = mappedStats.matchesPlayed ?? 0;
+            tooltipMatchesPlayed.textContent = `${p} ${p === 1 ? 'jugada' : 'jugadas'}`;
+        }
+    }
+
+    const LOGIN_ICON_SVG = `
+        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+        <polyline points="10 17 15 12 10 7"/>
+        <line x1="15" y1="12" x2="3" y2="12"/>
+    `;
+
+    const GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
+
+    function formatStreakText(streakVal) {
+        const n = Math.max(0, parseInt(streakVal, 10) || 0);
+        return `🔥 ${n} ${n === 1 ? 'Día' : 'Días'}`;
+    }
+
+    function formatPercentage(val) {
+        const num = Math.max(0, Math.min(100, Math.round(Number(val) || 0)));
+        return `${num}%`;
+    }
+
+    function formatTotalPoints(pts) {
+        const n = Math.max(0, Math.round(Number(pts) || 0));
+        const isEng = localStorage.getItem('footlel_is_english') === 'true' || localStorage.getItem('footlel_lang') === 'en';
+        if (typeof window.getRankInfo === 'function') {
+            const rank = window.getRankInfo(n, isEng);
+            return `${rank.svg}<span class="rank-stat-text">${n.toLocaleString('en-US')} pts · ${rank.name}</span>`;
+        }
+        return `${n.toLocaleString('en-US')} pts · ${isEng ? 'Wood III' : 'Madera III'}`;
+    }
+
+    function renderStatPoints(pts) {
+        if (!statPoints || isGuest) return;
+        statPoints.dataset.points = String(Math.max(0, Math.round(Number(pts) || 0)));
+        statPoints.innerHTML = formatTotalPoints(pts);
+    }
+
+    /* ──────────────────────────────────────────
+       3. GUEST MODAL CONTROL
+    ────────────────────────────────────────── */
+    function openGuestModal() {
+        if (!guestModal) return;
+        guestModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        const firstBtn = guestModal.querySelector('button, a');
+        if (firstBtn) setTimeout(() => firstBtn.focus(), 60);
+    }
+
+    function closeGuestModal() {
+        if (!guestModal) return;
+        guestModal.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+
+    if (closeGuestBtn) {
+        closeGuestBtn.addEventListener('click', closeGuestModal);
+    }
+    if (guestModal) {
+        guestModal.addEventListener('click', function (e) {
+            if (e.target === guestModal) closeGuestModal();
+        });
+    }
+
+    /* ──────────────────────────────────────────
+       4. FETCH: GET /stat/get-user-stats
+    ────────────────────────────────────────── */
+    const apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    let sessionExpiredRedirecting = false;
+    function handleExpiredSession() {
+        if (sessionExpiredRedirecting) return;
+        sessionExpiredRedirecting = true;
+        try {
+            localStorage.removeItem('footlel_token');
+            localStorage.removeItem('footlel_guest');
+            localStorage.removeItem('footlel_username');
+            localStorage.removeItem('footlel_user_id');
+            localStorage.removeItem('footlel_user_strid');
+            localStorage.removeItem('footlel_email');
+        } catch (_) {}
+        window.location.replace('login.html?expired=1');
+    }
+
+    // GET /stat/get-user-stats with JWT (registered users only).
+    async function fetchUserStatsFromEndpoint() {
+        const token = localStorage.getItem('footlel_token');
+        if (!token || isGuest) return null;
+        try {
+            const res = await fetch(`${apiBaseUrl}/stat/get-user-stats`, {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.status === 401) {
+                handleExpiredSession();
+                return null;
+            }
+            if (res.ok) {
+                const data = await res.json();
+                if (data && typeof data === 'object') {
+                    return data;
+                }
+            }
+        } catch (e) {
+            // Network error; handled by fallback
+        }
+        return null;
+    }
+    function mapUserStatsPayload(statsPayload, userInfo, lbData, username) {
+        const streakKey = 'footlel_streak_' + username;
+        const winsKey   = 'footlel_wins_'   + username;
+        const pointsKey = 'footlel_points_' + username;
+        const accKey    = 'footlel_accuracy_' + username;
+        const winPctKey = 'footlel_win_pct_' + username;
+        // Keys to persist raw numerator/denominator counts in localStorage for instant rendering
+        const corrKey   = 'footlel_correct_guesses_' + username;
+        const madeKey   = 'footlel_guesses_made_'    + username;
+        const playedKey = 'footlel_matches_played_'  + username;
+
+        const localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+        const localWins   = parseInt(localStorage.getItem(winsKey)   || '0', 10) || 0;
+        let correctGuesses = parseInt(localStorage.getItem(corrKey)   || '0', 10) || 0;
+        let guessesMade    = parseInt(localStorage.getItem(madeKey)   || '0', 10) || 0;
+        let matchesPlayed  = parseInt(localStorage.getItem(playedKey) || '0', 10) || 0;
+
+        // 1. Accuracy Percentage (Backend: correct_guesses / guesses_made)
+        let accuracyPct = null;
+        if (statsPayload && typeof statsPayload === 'object') {
+            if (statsPayload.correct_guesses !== undefined && statsPayload.guesses_made !== undefined) {
+                const made = Number(statsPayload.guesses_made) || 0;
+                const corr = Number(statsPayload.correct_guesses) || 0;
+                // Store exact numerator and denominator from backend
+                correctGuesses = corr;
+                guessesMade    = made;
+                localStorage.setItem(corrKey, String(corr));
+                localStorage.setItem(madeKey, String(made));
+                accuracyPct = made > 0 ? (corr / made) * 100 : 0;
+            } else if (statsPayload.accuracy_percentage !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy_percentage);
+            } else if (statsPayload.porcentaje_aciertos !== undefined) {
+                accuracyPct = Number(statsPayload.porcentaje_aciertos);
+            } else if (statsPayload.accuracy !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy);
+            } else if (statsPayload.hits !== undefined && statsPayload.attempts !== undefined) {
+                const att = Number(statsPayload.attempts) || 0;
+                accuracyPct = att > 0 ? (Number(statsPayload.hits) / att) * 100 : 0;
+            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos !== undefined) {
+                const intn = Number(statsPayload.intentos) || 0;
+                accuracyPct = intn > 0 ? (Number(statsPayload.aciertos) / intn) * 100 : 0;
+            }
+            if (accuracyPct !== null && !Number.isNaN(accuracyPct)) {
+                localStorage.setItem(accKey, String(accuracyPct));
+            }
+        }
+        if (accuracyPct === null || Number.isNaN(accuracyPct)) {
+            const savedAcc = localStorage.getItem(accKey);
+            accuracyPct = savedAcc !== null ? Number(savedAcc) : 0;
+        }
+
+        // 2. Daily Streak (Backend: win_streak)
+        let rawStreak = statsPayload && (statsPayload.win_streak ?? statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
+        if (rawStreak === undefined || rawStreak === null) {
+            rawStreak = userInfo && (userInfo.win_streak ?? userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
+        }
+        const finalStreak = (rawStreak !== undefined && rawStreak !== null)
+            ? (Number(rawStreak) || 0)
+            : localStreak;
+        localStorage.setItem(streakKey, String(finalStreak));
+
+        // 3. Total Points (Backend: user_points) & 4. Win Percentage (Backend: matches_won / matches_played)
+        let rawPoints = statsPayload && (statsPayload.user_points ?? statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
+        let rawWins   = statsPayload && (statsPayload.matches_won ?? statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
+        let rawTotalGames = statsPayload && (statsPayload.matches_played ?? statsPayload.total_games ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
+        let winPct = statsPayload && (statsPayload.win_percentage ?? statsPayload.porcentaje_victorias ?? statsPayload.win_rate);
+
+        if (rawWins === undefined || rawWins === null) {
+            rawWins = userInfo && (userInfo.matches_won ?? userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
+        }
+
+        if (lbData && Array.isArray(lbData.leaderboard)) {
+            const normalizedTarget = username.toLowerCase();
+            const userEntry = lbData.leaderboard.find(entry => {
+                const entryName = Array.isArray(entry)
+                    ? entry[0]
+                    : (entry && (entry.user_name || entry.username || entry.name));
+                return String(entryName || '').trim().toLowerCase() === normalizedTarget;
+            });
+            if (userEntry) {
+                const val = Array.isArray(userEntry)
+                    ? userEntry[1]
+                    : (userEntry.user_points ?? userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
+                if (rawPoints === undefined || rawPoints === null) {
+                    rawPoints = Number(val) || 0;
+                }
+            }
+        }
+
+        const effectiveWins = (rawWins !== undefined && rawWins !== null)
+            ? (Number(rawWins) || 0)
+            : localWins;
+        localStorage.setItem(winsKey, String(effectiveWins));
+
+        // Exact backend points without any extra local bonus (+10 removed)
+        let finalPoints;
+        if (rawPoints !== undefined && rawPoints !== null) {
+            finalPoints = Number(rawPoints) || 0;
+            localStorage.setItem(pointsKey, String(finalPoints));
+        } else {
+            const savedPts = localStorage.getItem(pointsKey);
+            finalPoints = savedPts !== null ? (Number(savedPts) || 0) : (effectiveWins * 10);
+        }
+
+        if (rawTotalGames !== undefined && rawTotalGames !== null) {
+            // Save total matches played from backend
+            matchesPlayed = Number(rawTotalGames) || 0;
+            localStorage.setItem(playedKey, String(matchesPlayed));
+        }
+
+        if (winPct === undefined || winPct === null || Number.isNaN(Number(winPct))) {
+            if (rawTotalGames !== undefined && rawTotalGames !== null) {
+                const totalG = Number(rawTotalGames) || 0;
+                winPct = totalG > 0 ? (effectiveWins / totalG) * 100 : 0;
+                localStorage.setItem(winPctKey, String(winPct));
+            } else {
+                const savedWinPct = localStorage.getItem(winPctKey);
+                winPct = savedWinPct !== null ? Number(savedWinPct) : 0;
+            }
+        } else {
+            localStorage.setItem(winPctKey, String(winPct));
+        }
+
+        return {
+            accuracy: accuracyPct,
+            streak: finalStreak,
+            totalPoints: finalPoints,
+            winPercentage: winPct,
+            correctGuesses: correctGuesses,
+            guessesMade: guessesMade,
+            matchesWon: effectiveWins,
+            matchesPlayed: matchesPlayed
+        };
+    }
+    /* ──────────────────────────────────────────
+       5. APPLY UI STATE & AVATAR ROBOT
+    ────────────────────────────────────────── */
+    const BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            let guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.includes('avatar-default.png') || guestAv.startsWith('data:image/svg+xml')) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        const userKey = username ? ('footlel_avatar_' + username) : null;
+        let savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.includes('avatar-default.png') || savedAv.includes('seed=footlel-default')) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
+    const notifWrapper    = document.getElementById('notifWrapper');
+    const notifBtn        = document.getElementById('notifBtn');
+    const notifBadge      = document.getElementById('notifBadge');
+    const notifDropdown   = document.getElementById('notifDropdown');
+    const notifList       = document.getElementById('notifList');
+
+    function renderHeaderNotifications(friendReqs) {
+        if (!notifList || !notifBadge) return;
+
+        const items = [];
+        if (friendReqs && typeof friendReqs === 'object') {
+            const reqNames = Array.isArray(friendReqs.friend_request_names)
+                ? friendReqs.friend_request_names
+                : (Array.isArray(friendReqs.friend_requests)
+                    ? friendReqs.friend_requests
+                    : (Array.isArray(friendReqs.requests)
+                        ? friendReqs.requests
+                        : (Array.isArray(friendReqs) ? friendReqs : [])));
+
+            reqNames.forEach(function (entry) {
+                const rawName = (typeof entry === 'object' && entry !== null)
+                    ? (entry.user_name || entry.username || entry.friend_name || entry.sender_name || entry.name || '')
+                    : entry;
+                const cleanName = cleanUsername(rawName);
+                if (cleanName) {
+                    items.push({
+                        type: 'friend_request',
+                        text: `¡Tenes una nueva solicitud de amistad de ${cleanName}!`,
+                        href: 'amigos.html'
+                    });
+                }
+            });
+
+            const matchInvites = Array.isArray(friendReqs.match_request_names)
+                ? friendReqs.match_request_names
+                : (Array.isArray(friendReqs.match_requests)
+                    ? friendReqs.match_requests
+                    : (Array.isArray(friendReqs.match_invitations) ? friendReqs.match_invitations : []));
+
+            matchInvites.forEach(function (entry) {
+                const rawName = (typeof entry === 'object' && entry !== null)
+                    ? (entry.user_name || entry.username || entry.sender_name || entry.name || '')
+                    : entry;
+                const cleanName = cleanUsername(rawName);
+                if (cleanName) {
+                    items.push({
+                        type: 'match_invite',
+                        text: `El usuario ${cleanName} te invitó a jugar una partida`,
+                        href: 'amigos.html'
+                    });
+                }
+            });
+        }
+
+        notifList.innerHTML = '';
+
+        if (items.length === 0) {
+            notifBadge.textContent = '';
+            notifBadge.hidden = true;
+            notifBadge.style.display = 'none';
+
+            const emptyLi = document.createElement('li');
+            emptyLi.className = 'notif-empty';
+            emptyLi.textContent = 'No tienes notificaciones nuevas';
+            notifList.appendChild(emptyLi);
+            return;
+        }
+
+        notifBadge.textContent = String(items.length);
+        notifBadge.hidden = false;
+        notifBadge.style.display = 'inline-flex';
+
+        items.forEach(function (notif) {
+            const li = document.createElement('li');
+            li.className = 'notif-list-item';
+
+            const link = document.createElement('a');
+            link.href = notif.href;
+            link.className = 'notif-item';
+
+            const dot = document.createElement('span');
+            dot.className = 'notif-item-dot';
+            dot.setAttribute('aria-hidden', 'true');
+
+            const textSpan = document.createElement('span');
+            textSpan.className = 'notif-item-text';
+            textSpan.textContent = notif.text;
+
+            link.appendChild(dot);
+            link.appendChild(textSpan);
+
+            link.addEventListener('click', function () {
+                if (notif.type === 'friend_request') {
+                    try { sessionStorage.setItem('footlel_open_tab', 'solicitudes'); } catch (_) {}
+                }
+                closeNotifDropdown();
+            });
+
+            li.appendChild(link);
+            notifList.appendChild(li);
+        });
+    }
+
+    if (isGuest) {
+        const rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        const guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
+        heroUsername.textContent  = guestName !== 'Invitado' ? guestName : 'Jugador Invitado';
+        profileUser.textContent   = guestName;
+        profileAvatar.src         = getOrAssignAvatar(guestName, true);
+        profileAvatar.alt         = 'Avatar de invitado';
+
+        if (notifWrapper) notifWrapper.style.display = 'none';
+        ddEditAccount.style.display = 'none';
+        ddFriends.style.display     = 'none';
+
+        ddSessionLabel.textContent = 'Iniciar Sesión';
+        ddSessionAction.href       = 'login.html';
+        ddSessionAction.classList.remove('item-danger');
+        ddSessionIcon.innerHTML    = LOGIN_ICON_SVG;
+
+        [statAccuracy, statStreak, statPoints, statWins].forEach(function (el) {
+            if (!el) return;
+            el.textContent = '-----';
+            el.classList.add('stat-placeholder');
+        });
+
+        document.querySelectorAll('a[href*="amigos.html"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                openGuestModal();
+            });
+        });
+
+        const cardFriends = document.getElementById('cardFriends');
+        if (cardFriends) {
+            cardFriends.addEventListener('click', function (e) {
+                if (e.target.closest('a[href*="amigos.html"]')) return;
+                e.preventDefault();
+                openGuestModal();
+            });
+        }
+
+    } else {
+        // Sanitize stored username with cleanUsername() so no '@' ever appears in the UI
+        const savedUsername = cleanUsername(localStorage.getItem('footlel_username') || 'Jugador') || 'Jugador';
+        const savedAvatar = getOrAssignAvatar(savedUsername, false);
+        if (savedAvatar) profileAvatar.src = savedAvatar;
+        heroUsername.textContent = savedUsername;
+        profileUser.textContent  = savedUsername;
+
+        const streakKey = 'footlel_streak_' + savedUsername;
+        if (localStorage.getItem(streakKey) === null) {
+            localStorage.setItem(streakKey, '0');
+        }
+
+        // Initial synchronous render from localStorage
+        const initialStats = mapUserStatsPayload(null, null, null, savedUsername);
+        statAccuracy.textContent = `🎯 ${formatPercentage(initialStats.accuracy)}`;
+        statStreak.textContent   = formatStreakText(initialStats.streak);
+        renderStatPoints(initialStats.totalPoints);
+        statWins.textContent     = `📈 ${formatPercentage(initialStats.winPercentage)}`;
+        // Populate fraction tooltips with cached numerator/denominator values
+        updateFractionTooltips(initialStats);
+
+        window.addEventListener('footlel:language-changed', function () {
+            if (statPoints && statPoints.dataset.points !== undefined) {
+                renderStatPoints(Number(statPoints.dataset.points) || 0);
+            }
+        });
+
+        // Sync preferences from GET /config/get-user-config (registered user with token).
+        if (localStorage.getItem('footlel_token') && window.FootlelPrefs && window.FootlelPrefs.syncConfigFromBackend) {
+            window.FootlelPrefs.syncConfigFromBackend();
+        }
+
+        (async function loadUserFooterStats() {
+            const token = localStorage.getItem('footlel_token');
+            const fetchProtectedJson = (path) => token
+                ? fetch(`${apiBaseUrl}${path}`, { headers: { 'Authorization': 'Bearer ' + token } }).then(r => {
+                    if (r.status === 401) {
+                        handleExpiredSession();
+                        return null;
+                    }
+                    return r.ok ? r.json() : null;
+                })
+                : Promise.resolve(null);
+
+            const [statsResult, infoResult, lbResult, friendReqsResult] = await Promise.allSettled([
+                fetchUserStatsFromEndpoint(),
+                // Updated to match Swagger: GET /user/get-user-info with Authorization Bearer header
+                fetchProtectedJson('/user/get-user-info'),
+                fetch(`${apiBaseUrl}/stat/get-global-leaderboard`).then(r => r.ok ? r.json() : null),
+                fetchProtectedJson('/user/get-user-friend-requests')
+            ]);
+
+            if (sessionExpiredRedirecting) return;
+
+            const statsPayload = statsResult.status === 'fulfilled' ? statsResult.value : null;
+            const userInfo     = infoResult.status === 'fulfilled' ? infoResult.value : null;
+            const lbData       = lbResult.status === 'fulfilled' ? lbResult.value : null;
+            const friendReqs   = friendReqsResult.status === 'fulfilled' ? friendReqsResult.value : null;
+
+            renderHeaderNotifications(friendReqs);
+
+            if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
+                localStorage.setItem('footlel_user_id', String(userInfo.user_id));
+            }
+            if (userInfo && userInfo.user_name) {
+                const cleanFromBackend = cleanUsername(userInfo.user_name);
+                if (cleanFromBackend) {
+                    localStorage.setItem('footlel_username', cleanFromBackend);
+                    heroUsername.textContent = cleanFromBackend;
+                    profileUser.textContent  = cleanFromBackend;
+                    profileAvatar.src        = getOrAssignAvatar(cleanFromBackend, false);
+                }
+            }
+
+            const mapped = mapUserStatsPayload(statsPayload, userInfo, lbData, savedUsername);
+            statAccuracy.textContent = `🎯 ${formatPercentage(mapped.accuracy)}`;
+            statStreak.textContent   = formatStreakText(mapped.streak);
+            renderStatPoints(mapped.totalPoints);
+            statWins.textContent     = `📈 ${formatPercentage(mapped.winPercentage)}`;
+            // Update fraction tooltips with fresh numbers from /stat/get-user-stats
+            updateFractionTooltips(mapped);
+        })().catch(err => console.warn('No se pudieron actualizar las estadísticas del footer:', err));
+    }
+
+    /* ──────────────────────────────────────────
+       6. NOTIFICATIONS & PROFILE DROPDOWN TOGGLE
+    ────────────────────────────────────────── */
+    const profileBtn      = document.getElementById('profileBtn');
+    const profileDropdown = document.getElementById('profileDropdown');
+
+    function openNotifDropdown() {
+        if (!notifDropdown || !notifBtn) return;
+        closeDropdown();
+        notifDropdown.classList.add('is-open');
+        notifBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeNotifDropdown() {
+        if (!notifDropdown || !notifBtn) return;
+        notifDropdown.classList.remove('is-open');
+        notifBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleNotifDropdown() {
+        if (!notifDropdown) return;
+        const isOpen = notifDropdown.classList.contains('is-open');
+        isOpen ? closeNotifDropdown() : openNotifDropdown();
+    }
+
+    function openDropdown() {
+        closeNotifDropdown();
+        profileDropdown.classList.add('is-open');
+        profileBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeDropdown() {
+        profileDropdown.classList.remove('is-open');
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    function toggleDropdown() {
+        var isOpen = profileDropdown.classList.contains('is-open');
+        isOpen ? closeDropdown() : openDropdown();
+    }
+
+    if (notifBtn) {
+        notifBtn.dataset.notifBound = 'true';
+        notifBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            toggleNotifDropdown();
+        });
+    }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        toggleDropdown();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (notifWrapper && !notifWrapper.contains(e.target)) {
+            closeNotifDropdown();
+        }
+        if (!document.getElementById('profileWrapper').contains(e.target)) {
+            closeDropdown();
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            closeNotifDropdown();
+            closeDropdown();
+            closeGuestModal();
+        }
+    });
+
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+            closeDropdown();
+        });
+    });
+
+})();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Verificar Identidad</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/styles/login.css">
+    <link rel="stylesheet" href="../../assets/styles/recuperar.css">
+    <link rel="stylesheet" href="../../assets/styles/verificar.css">
+    <!-- Global preferences (theme + animations) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card">
+
+        <header class="card-header recover-header">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel" class="logo-image logo-wrapper" id="main-logo">
+            <div class="recover-heading">
+                <h1 class="recover-title">Verificá tu identidad</h1>
+                <p class="recover-subtitle">Ingresá el código de 6 dígitos que enviamos a tu correo</p>
+            </div>
+        </header>
+
+        <form class="login-form" id="verify-form" action="nueva-clave.html" method="GET" novalidate>
+            <!-- OTP input boxes -->
+            <div class="otp-container" role="group" aria-label="Código de verificación de 6 dígitos">
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" autocomplete="one-time-code" aria-label="Dígito 1" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 2" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 3" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 4" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 5" required>
+                <input class="otp-input" type="text" inputmode="numeric" maxlength="1"
+                       pattern="[0-9]" aria-label="Dígito 6" required>
+            </div>
+
+            <p class="field-error" id="otp-error" aria-live="polite" hidden style="color: #ff5252; text-align: center; margin-bottom: 12px;">
+                Ingresá los 6 dígitos del código de verificación.
+            </p>
+
+            <button type="submit" class="btn-primary">Verificar</button>
+        </form>
+
+        <!-- Resend countdown -->
+        <p class="resend-text">
+            ¿No recibiste el código?
+            <span class="resend-action">
+                Reenviar en <span class="resend-countdown" id="countdown">00:30</span>
+            </span>
+        </p>
+
+    </main>
+
+    <script>
+        /* ── OTP auto-advance & auto-focus ── */
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+        otpInputs.forEach((input, index) => {
+            // Only allow numeric digits
+            input.addEventListener('input', () => {
+                input.value = input.value.replace(/\D/g, '');
+                if (input.value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+
+            // Move back to the previous field on delete
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            // Paste the full code from the clipboard
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData)
+                    .getData('text')
+                    .replace(/\D/g, '')
+                    .slice(0, 6);
+                pasted.split('').forEach((char, i) => {
+                    if (otpInputs[i]) otpInputs[i].value = char;
+                });
+                const nextEmpty = Math.min(pasted.length, otpInputs.length - 1);
+                otpInputs[nextEmpty].focus();
+            });
+        });
+
+        // Initial focus on the first box
+        otpInputs[0].focus();
+
+        /* ── OTP validation & persistence on submit ── */
+        const verifyForm = document.getElementById('verify-form');
+        const otpError   = document.getElementById('otp-error');
+
+        verifyForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const code = Array.from(otpInputs).map(inp => inp.value.trim()).join('');
+            if (!/^\d{6}$/.test(code)) {
+                otpError.hidden = false;
+                const firstEmpty = Array.from(otpInputs).find(inp => !inp.value.trim()) || otpInputs[0];
+                firstEmpty.focus();
+                return;
+            }
+            otpError.hidden = true;
+            sessionStorage.setItem('recovery_otp', code);
+            localStorage.setItem('recovery_otp', code);
+            window.location.href = 'nueva-clave.html';
+        });
+
+        otpInputs.forEach(inp => {
+            inp.addEventListener('input', () => {
+                if (!otpError.hidden) otpError.hidden = true;
+            });
+        });
+
+        /* ── Resend countdown ── */
+        const countdownEl  = document.getElementById('countdown');
+        const resendAction = document.querySelector('.resend-action');
+        let seconds = 30;
+
+        const tick = setInterval(() => {
+            seconds -= 1;
+            if (seconds <= 0) {
+                clearInterval(tick);
+                resendAction.innerHTML = '<a href="#" class="resend-link">Reenviar código</a>';
+                return;
+            }
+            const mm = String(Math.floor(seconds / 60)).padStart(2, '0');
+            const ss = String(seconds % 60).padStart(2, '0');
+            countdownEl.textContent = `${mm}:${ss}`;
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel - Correo Enviado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/styles/login.css">
+    <style>
+        /* ── Specific overrides exclusive to this screen ── */
+
+        /* The card does not need the global text-align: center; we handle it per section */
+        .confirmation-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+        }
+
+        /* Circle container for the envelope icon */
+        .email-icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(76, 175, 80, 0.12);  /* very soft green */
+            border: 1.5px solid rgba(76, 175, 80, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 28px;
+            flex-shrink: 0;
+        }
+
+        .email-icon {
+            width: 36px;
+            height: 36px;
+            color: #4CAF50;
+        }
+
+        /* Title */
+        .confirmation-title {
+            font-family: var(--font-heading);
+            font-weight: 700;
+            font-size: 22px;
+            letter-spacing: 0.5px;
+            color: var(--color-text-primary);
+            text-align: center;
+            margin-bottom: 14px;
+            line-height: 1.25;
+        }
+
+        /* Descriptive body text */
+        .confirmation-body {
+            font-family: var(--font-body);
+            font-size: 14px;
+            font-weight: 400;
+            color: var(--color-text-muted);
+            text-align: center;
+            line-height: 1.65;
+            margin-bottom: 32px;
+        }
+
+        /* The button reuses .btn-primary; we only remove the default margin-top */
+        .confirmation-card .btn-primary {
+            margin-top: 0;
+            text-decoration: none;       /* when used as an <a> */
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <!-- Preferencias globales (tema + animaciones) -->
+    <script src="../../assets/scripts/global-preferences.js" defer></script>
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+</head>
+<body>
+    <div class="background-overlay"></div>
+    <main class="login-card confirmation-card">
+
+        <!-- Centered envelope icon -->
+        <div class="email-icon-wrapper" aria-hidden="true">
+            <svg
+                class="email-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+            >
+                <!-- Envelope body -->
+                <rect x="2" y="4" width="20" height="16" rx="2"/>
+                <!-- V-shaped envelope flap -->
+                <polyline points="2,4 12,13 22,4"/>
+            </svg>
+        </div>
+
+        <!-- Title -->
+        <h1 class="confirmation-title">¡Revisá tu correo!</h1>
+
+        <!-- Mensaje descriptivo -->
+        <p class="confirmation-body">
+            Te enviamos un enlace de confirmación.<br>
+            Hacé clic en él para activar tu cuenta<br>
+            y empezar a jugar.
+        </p>
+
+        <!-- Main button: uses <a> to redirect without needing JS or <form> -->
+        <a href="login.html" class="btn-primary" role="button">
+            Volver al Login
+        </a>
+
+    </main>
+</body>
+</html>

@@ -1,0 +1,762 @@
+/* ═══════════════════════════════════════════════════════════════
+   FOOTLEL — Main Game (Tic-Tac-Toe)
+   assets/styles/tateti.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Game Header ─────────────────────────────── */
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 32px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border-subtle);
+    position: relative;
+}
+
+.timer-display {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-heading);
+    font-size: 22px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 1px;
+    color: #EAFBEA;
+    background: linear-gradient(180deg, #171717 0%, #0A0A0A 100%);
+    padding: 8px 22px;
+    border-radius: 24px;
+    border: 1px solid rgba(76, 175, 80, 0.35);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.85),
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 0 16px rgba(76, 175, 80, 0.25);
+    text-shadow: 0 0 10px rgba(76, 175, 80, 0.55);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.timer-display span:first-child {
+    font-size: 15px;
+    opacity: 0.75;
+}
+
+.timer-display.time-low {
+    border-color: rgba(244, 67, 54, 0.55);
+    box-shadow:
+        inset 0 2px 6px rgba(0,0,0,0.85),
+        0 0 0 1px rgba(255,255,255,0.03),
+        0 0 18px rgba(244, 67, 54, 0.45);
+    text-shadow: 0 0 10px rgba(244, 67, 54, 0.7);
+    animation: timer-pulse 1s ease-in-out infinite;
+}
+
+@keyframes timer-pulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50%      { transform: translateX(-50%) scale(1.05); }
+}
+
+.turn-indicator {
+    font-family: var(--font-heading);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--color-brand-green);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ── Board ─────────────────────────────────────────────────── */
+/* ── General centering of game content ────────────────────
+   The entire block (board + search) is centered vertically
+   and horizontally in the space between header and footer. */
+.main-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 4px;
+    padding-top: 12px;
+}
+
+/* ── Connection / Backend Error Notice ───────────────────────── */
+.connection-error-notice {
+    margin: 8px auto 16px;
+    max-width: 480px;
+    width: calc(100% - 32px);
+    padding: 16px 20px;
+    background: rgba(239, 83, 80, 0.12);
+    border: 1px solid rgba(239, 83, 80, 0.4);
+    border-radius: 12px;
+    text-align: center;
+    color: #FFFFFF;
+    font-family: var(--font-body, sans-serif);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    animation: errorFadeIn 0.25s ease forwards;
+}
+
+.connection-error-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    color: #ff6b6b;
+}
+
+.connection-error-title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #ff6b6b;
+    margin: 0;
+}
+
+.connection-error-subtitle {
+    font-size: 13.5px;
+    opacity: 0.9;
+    margin: 0 0 8px;
+    color: #FFFFFF;
+    line-height: 1.5;
+}
+
+body.light-mode .connection-error-notice,
+body.light-mode .connection-error-subtitle {
+    color: #1A1A1A;
+}
+
+body.light-mode .connection-error-title,
+body.light-mode .connection-error-header {
+    color: #d32f2f;
+}
+
+.connection-error-btn {
+    background: var(--color-brand-green, #4CAF50);
+    color: #FFFFFF;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 26px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 13.5px;
+}
+
+.board-section {
+    display: flex;
+    justify-content: center;
+    padding: 8px 16px;
+    position: relative;
+}
+
+/* ── Board Loading Overlay ("Generando Tatetí...") ───────────── */
+#board-loading-overlay,
+.board-loading-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 16px;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+}
+
+#board-loading-overlay.hidden,
+.board-loading-overlay.hidden {
+    display: none !important;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.board-loading-card,
+.loading-card {
+    background: linear-gradient(180deg, #242424 0%, #181818 100%);
+    border: 2px solid var(--color-brand-green, #4CAF50);
+    border-radius: 20px;
+    padding: 26px 36px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    text-align: center;
+    box-shadow:
+        0 16px 40px rgba(0, 0, 0, 0.7),
+        0 0 24px rgba(76, 175, 80, 0.28);
+    max-width: 320px;
+}
+
+.board-loading-ball {
+    font-size: 42px;
+    line-height: 1;
+    display: inline-block;
+    animation: footlel-ball-spin 1.15s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+    filter: drop-shadow(0 4px 10px rgba(76, 175, 80, 0.45));
+}
+
+@keyframes footlel-ball-spin {
+    0%   { transform: translateY(0) rotate(0deg) scale(1); }
+    50%  { transform: translateY(-8px) rotate(180deg) scale(1.08); }
+    100% { transform: translateY(0) rotate(360deg) scale(1); }
+}
+
+.board-loading-title {
+    margin: 4px 0 0;
+    font-family: var(--font-heading, 'Montserrat', sans-serif);
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: 0.6px;
+}
+
+.board-loading-subtitle {
+    margin: 0;
+    font-family: var(--font-body, 'Poppins', sans-serif);
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+html.light-mode #board-loading-overlay,
+body.light-mode #board-loading-overlay,
+html.light-mode .board-loading-overlay,
+body.light-mode .board-loading-overlay {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+}
+
+html.light-mode .board-loading-card,
+body.light-mode .board-loading-card,
+html.light-mode .loading-card,
+body.light-mode .loading-card {
+    background: #FFFFFF;
+    border-color: var(--color-brand-green, #4CAF50);
+    box-shadow:
+        0 14px 36px rgba(0, 0, 0, 0.16),
+        0 0 20px rgba(76, 175, 80, 0.22);
+}
+
+html.light-mode .board-loading-title,
+body.light-mode .board-loading-title {
+    color: #1A1A1A;
+}
+
+html.light-mode .board-loading-subtitle,
+body.light-mode .board-loading-subtitle {
+    color: #616161;
+}
+
+.game-board {
+    display: grid;
+    grid-template-columns: repeat(4, 124px); /* Zoom-out: previously 160px */
+    grid-template-rows: repeat(4, 124px);
+    gap: 12px; /* Zoom-out: previously 16px */
+    /* Offset to visually center 3x3 relative to middle column:
+       half a column + gap = (124 + 12) / 2 = 68px. */
+    transform: translateX(-68px);
+}
+
+.empty-corner {
+    background: transparent;
+}
+
+/* Condition Cards (Clubs / Top + National Teams / Left)
+   Unified: always white (#FFFFFF) in both Dark and Light mode, identical
+   radius and subtle shadow. The 3x3 playable cells stay dark. */
+.cond-top,
+.cond-left,
+body.light-mode .cond-top,
+body.light-mode .cond-left,
+html.light-mode .cond-top,
+html.light-mode .cond-left {
+    background: #FFFFFF;
+    border: none;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    color: #1A1A1A;
+    text-align: center;
+}
+.cond-img {
+    display: block;
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    margin: 0;
+}
+
+.cond-img:not([src]),
+.cond-img[src=""] {
+    display: none !important;
+}
+
+/* Playable Cells */
+.playable-cell {
+    background: #1E1E1E;
+    border: 2px solid #333333;
+    border-radius: 12px;
+    cursor: pointer;
+    box-shadow: inset 0 4px 10px rgba(0,0,0,0.5);
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.playable-cell:hover {
+    background: #242424;
+    border-color: var(--color-brand-green);
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.3), inset 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.playable-cell.active-selection {
+    border-color: var(--color-brand-green);
+    background: rgba(76, 175, 80, 0.1);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+/* Conquered States */
+.conquered-p1 {
+    background: rgba(76, 175, 80, 0.2) !important;
+    border: 2px solid var(--color-brand-green) !important;
+    box-shadow: inset 0 0 20px rgba(76, 175, 80, 0.3);
+}
+
+.conquered-p2 {
+    /* Distinct color for P2 to differentiate in Tic-Tac-Toe (bluish border for P2). */
+    background: rgba(33, 150, 243, 0.2) !important;
+    border: 2px solid #2196F3 !important;
+    box-shadow: inset 0 0 20px rgba(33, 150, 243, 0.3);
+}
+
+/* ── Board Marks (X / O) ─────────────────────────────────────── */
+.cell-mark {
+    font-family: var(--font-heading);
+    font-size: 48px; /* Zoom-out: previously 64px, aligned with 124px cell */
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 1px;
+    user-select: none;
+    animation: mark-pop 0.25s ease-out;
+}
+
+@keyframes mark-pop {
+    from { transform: scale(0.4); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.mark-x {
+    color: #4CAF50;
+    text-shadow:
+        0 0 10px rgba(76, 175, 80, 0.85),
+        0 0 24px rgba(76, 175, 80, 0.45),
+        0 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+.mark-o {
+    color: #FFFFFF;
+    text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.7),
+        0 0 24px rgba(33, 150, 243, 0.5),
+        0 2px 2px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 768px) {
+    .cell-mark { font-size: 36px; }
+}
+
+/* ── Bottom Search Bar ───────────────────────────────────────── */
+.search-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    padding: 0 0 32px;
+    width: 532px; /* Exact width of 4 board columns: 124x4 + 12x3 */
+    max-width: 100%;
+    margin: 0 auto;
+    transform: translateX(-68px); /* Same offset as board for alignment */
+    position: relative;
+    z-index: 2000;
+}
+
+.search-wrapper {
+    position: relative;
+    flex: 1; /* Absorbs flexible space previously on direct input */
+    display: flex;
+    z-index: 2001;
+}
+
+.autocomplete-results {
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: 100%;
+    background: rgba(32, 32, 32, 0.98);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    box-shadow: 0 16px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+    max-height: 240px;
+    overflow-y: auto;
+    list-style: none;
+    padding: 8px;
+    margin: 0;
+    display: none;
+    z-index: 9999;
+    border: 1px solid rgba(76, 175, 80, 0.25);
+    animation: dropdown-reveal 0.15s ease-out;
+}
+
+@keyframes dropdown-reveal {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.autocomplete-results li {
+    padding: 12px 16px;
+    color: #FFFFFF;
+    font-family: var(--font-body);
+    font-size: 15px;
+    cursor: pointer;
+    border-radius: 10px;
+    border-left: 3px solid transparent;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.autocomplete-results li:hover,
+.autocomplete-results li:focus-visible {
+    background: rgba(76, 175, 80, 0.14);
+    border-left-color: var(--color-brand-green);
+}
+
+.autocomplete-results::-webkit-scrollbar {
+    width: 8px;
+}
+
+.autocomplete-results::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.autocomplete-results::-webkit-scrollbar-thumb {
+    background: rgba(76, 175, 80, 0.35);
+    border-radius: 8px;
+}
+
+.autocomplete-results::-webkit-scrollbar-thumb:hover {
+    background: rgba(76, 175, 80, 0.55);
+}
+
+.search-input {
+    width: 100%; /* Input takes 100% of wrapper */
+    background: #2A2A2A;
+    border: 1px solid #444444;
+    color: #FFFFFF;
+    padding: 15px 22px; /* Zoom-out: previously 20px 28px */
+    border-radius: 26px;
+    font-family: var(--font-body);
+    font-size: 15px; /* Zoom-out: previously 18px */
+    outline: none;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.search-input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.search-input:focus {
+    border-color: var(--color-brand-green);
+    background: #333333;
+    color: #FFFFFF;
+}
+
+.search-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ── Search Input & Autocomplete in Light Mode ───────────────── */
+html.light-mode .search-input,
+body.light-mode .search-input {
+    background: #FFFFFF;
+    border: 1.5px solid #CCCCCC;
+    color: #1A1A1A;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+html.light-mode .search-input::placeholder,
+body.light-mode .search-input::placeholder {
+    color: #757575;
+}
+
+html.light-mode .search-input:focus,
+body.light-mode .search-input:focus {
+    background: #FFFFFF;
+    border-color: var(--color-brand-green);
+    color: #1A1A1A;
+    box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.18);
+}
+
+html.light-mode .autocomplete-results,
+body.light-mode .autocomplete-results {
+    background: #FFFFFF;
+    border: 1px solid rgba(76, 175, 80, 0.45);
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+html.light-mode .autocomplete-results li,
+body.light-mode .autocomplete-results li {
+    color: #1A1A1A;
+}
+
+html.light-mode .autocomplete-results li:hover,
+html.light-mode .autocomplete-results li:focus-visible,
+body.light-mode .autocomplete-results li:hover,
+body.light-mode .autocomplete-results li:focus-visible {
+    background: rgba(76, 175, 80, 0.14);
+    color: #1A1A1A;
+}
+
+.btn-confirm {
+    background: var(--color-brand-green);
+    color: #fff;
+    border: none;
+    padding: 15px 28px; /* Zoom-out: previously 20px 36px */
+    border-radius: 26px;
+    font-family: var(--font-heading);
+    font-size: 14px; /* Zoom-out: previously 16px */
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-confirm:hover {
+    background: var(--color-brand-green-dk);
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+    transform: translateY(-2px);
+}
+
+.btn-confirm:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.btn-confirm:disabled {
+    background: var(--color-border-subtle);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ── Footer / Scoreboard ───────────────────────────────────────── */
+.game-footer {
+    text-align: center;
+    padding: 24px;
+    background: var(--color-surface-card);
+    border-top: 1px solid var(--color-border-subtle);
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    letter-spacing: 1px;
+}
+
+/* Head-to-head scoreboard (1v1 Local) — match won by 2 rounds, not 3. */
+.score-board {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+}
+
+.score-team {
+    opacity: 0.8;
+}
+
+.score-tally {
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--color-text-primary);
+}
+
+.score-caption {
+    margin-top: 6px;
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    color: var(--color-text-muted);
+    opacity: 0.65;
+}
+
+/* ── Reaction Pop-ups ─────────────────────────────────────── */
+.reaction-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.8);
+    background: var(--color-surface-card);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.reaction-popup.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.reaction-popup.success { border: 2px solid var(--color-brand-green); }
+.reaction-popup.error   { border: 2px solid #F44336; }
+
+.reaction-img {
+    height: 180px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.reaction-text {
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 700;
+}
+
+.reaction-popup.success .reaction-text { color: var(--color-brand-green); }
+.reaction-popup.error .reaction-text   { color: #F44336; }
+
+/* ── End-Game Modals ───────────────────────────────── */
+.endgame-points {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    margin: 16px 0 24px;
+}
+
+.points-green { color: var(--color-brand-green); }
+.points-gray  { color: var(--color-text-muted); }
+
+.score-display {
+    font-family: var(--font-heading);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 16px 0;
+    letter-spacing: 4px;
+}
+
+/* ── Round / End-game / Daily-completed modals: centered, Footlel look ── */
+#modal-ronda,
+#modal-victoria,
+#modal-derrota,
+#modal-desafio {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+#modal-ronda.hidden,
+#modal-victoria.hidden,
+#modal-derrota.hidden,
+#modal-desafio.hidden { display: none !important; }
+
+#modal-ronda .modal-card,
+#modal-victoria .modal-card,
+#modal-derrota .modal-card,
+#modal-desafio .modal-card {
+    background: #292929;
+    border: 2px solid #4CAF50;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+    margin: auto;
+    max-width: 380px;
+    text-align: center;
+}
+
+#modal-ronda .modal-title,
+#modal-victoria .modal-title,
+#modal-derrota .modal-title,
+#modal-desafio .modal-title {
+    color: #F5F5F5;
+    font-size: 22px;
+}
+
+.round-score {
+    font-family: var(--font-heading);
+    font-size: 20px;
+    font-weight: 700;
+    color: #F5F5F5;
+    white-space: pre-wrap;
+    margin: 14px 0 24px;
+}
+
+.endgame-label {
+    font-family: var(--font-body);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--color-text-muted);
+    margin: 4px 0 0;
+}
+
+#modal-victoria .score-display,
+#modal-derrota .score-display { margin: 6px 0 12px; }
+
+/* Light mode */
+body.light-mode #modal-ronda .modal-card,
+body.light-mode #modal-victoria .modal-card,
+body.light-mode #modal-derrota .modal-card,
+body.light-mode #modal-desafio .modal-card {
+    background: #FFFFFF;
+    border-color: #4CAF50;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.18);
+}
+body.light-mode #modal-ronda .modal-title,
+body.light-mode #modal-victoria .modal-title,
+body.light-mode #modal-derrota .modal-title,
+body.light-mode #modal-desafio .modal-title,
+body.light-mode .round-score { color: #1A1A1A; }
+body.light-mode #modal-ronda.modal-backdrop,
+body.light-mode #modal-victoria.modal-backdrop,
+body.light-mode #modal-derrota.modal-backdrop,
+body.light-mode #modal-desafio.modal-backdrop { background: rgba(245, 245, 245, 0.75); }
+body.light-mode #modal-victoria .modal-btn-secondary,
+body.light-mode #modal-derrota .modal-btn-secondary,
+body.light-mode #modal-desafio .modal-btn-secondary {
+    color: #1A1A1A;
+    border-color: rgba(0, 0, 0, 0.2);
+}
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 768px) {
+    .game-board {
+        grid-template-columns: 80px repeat(3, 1fr);
+        grid-template-rows: 80px repeat(3, 100px);
+        gap: 8px;
+    }
+    .cond-img { width: 38px; height: 38px; }
+    .search-section { flex-direction: column; padding: 0 16px 32px; }
+    .search-input, .btn-confirm { width: 100%; }
+}

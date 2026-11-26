@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Footlel — Elegí tu modo</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Styles: tokens + shared components -->
+    <link rel="stylesheet" href="../../assets/styles/menu.css">
+    <!-- Styles specific to this screen -->
+    <link rel="stylesheet" href="../../assets/styles/modalidades.css">
+    <!-- User preferences (light mode / animations) -->
+    <link rel="stylesheet" href="../../assets/styles/global-preferences.css">
+
+    <!-- Global script (theme + logo swap) -->
+    <script src="../../assets/scripts/global-preferences.js"></script>
+</head>
+<body>
+
+<!-- Decorative background balls (aria-hidden: decoration only) -->
+<div class="bg-balls" aria-hidden="true">
+    <span class="bg-ball bg-ball--1">⚽</span>
+    <span class="bg-ball bg-ball--2">⚽</span>
+    <span class="bg-ball bg-ball--3">⚽</span>
+    <span class="bg-ball bg-ball--4">⚽</span>
+</div>
+
+<div class="page-shell">
+
+    <!-- ═══════════════════════════════════════
+         HEADER
+    ═══════════════════════════════════════ -->
+    <header class="site-header" role="banner">
+
+        <!-- Logo (acts as Home) -->
+        <a href="menu.html" class="logo-link" aria-label="Footlel — Inicio">
+            <img src="../../assets/images/logo-oscuro.png" alt="Logo Footlel"
+                 class="logo-img" id="main-logo">
+            <span class="logo-text">FOOT<span>LEL</span></span>
+        </a>
+
+        <!-- Header Actions: Notifications + Profile -->
+        <div class="header-actions">
+
+            <!-- Notifications Bell + Dropdown -->
+            <div class="notif-wrapper" id="notifWrapper">
+                <button
+                    class="notif-btn"
+                    id="notifBtn"
+                    type="button"
+                    aria-haspopup="true"
+                    aria-expanded="false"
+                    aria-controls="notifDropdown"
+                    aria-label="Notificaciones"
+                >
+                    <svg class="notif-bell-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                         fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                    </svg>
+                    <span class="notif-badge" id="notifBadge" hidden style="display: none;"></span>
+                </button>
+
+                <!-- Notifications Dropdown -->
+                <div
+                    class="notif-dropdown"
+                    id="notifDropdown"
+                    role="region"
+                    aria-label="Notificaciones"
+                >
+                    <div class="notif-dropdown-header">
+                        <span class="notif-dropdown-title">Notificaciones</span>
+                    </div>
+                    <ul class="notif-list" id="notifList">
+                        <li class="notif-empty">No tienes notificaciones nuevas</li>
+                    </ul>
+                </div>
+            </div><!-- /notif-wrapper -->
+
+            <!-- Profile + Dropdown -->
+            <div class="profile-wrapper" id="profileWrapper">
+            <button
+                class="profile-btn"
+                id="profileBtn"
+                aria-haspopup="true"
+                aria-expanded="false"
+                aria-controls="profileDropdown"
+                type="button"
+            >
+                <img
+                    src="https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929"
+                    alt="Avatar de usuario"
+                    class="profile-avatar"
+                    id="profileAvatar"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22%3E%3Ccircle cx=%2220%22 cy=%2220%22 r=%2220%22 fill=%22%23292929%22/%3E%3Ccircle cx=%2220%22 cy=%2215%22 r=%226%22 fill=%22%239E9E9E%22/%3E%3Cellipse cx=%2220%22 cy=%2232%22 rx=%2210%22 ry=%228%22 fill=%22%239E9E9E%22/%3E%3C/svg%3E'"
+                >
+                <span class="profile-username" id="profileUsername">nombre_usuario</span>
+                <svg class="profile-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                     fill="none" stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+            </button>
+
+            <!-- Dropdown -->
+            <nav class="profile-dropdown" id="profileDropdown" role="menu" aria-label="Opciones de cuenta">
+
+                <a href="configuracion.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                    Configuración
+                </a>
+
+                <a href="editar-cuenta.html" class="dropdown-item" role="menuitem" id="ddEditAccount">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Editar Cuenta
+                </a>
+
+                <a href="amigos.html" class="dropdown-item" role="menuitem" id="ddFriends">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Mis Amigos
+                </a>
+
+                <a href="ayuda.html" class="dropdown-item" role="menuitem">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Ayuda
+                </a>
+
+                <div class="dropdown-divider" role="separator" aria-hidden="true"></div>
+
+                <a href="login.html" class="dropdown-item item-danger" role="menuitem" id="ddSessionAction">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                         stroke-linejoin="round" aria-hidden="true" id="ddSessionIcon">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16 17 21 12 16 7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                    <span id="ddSessionLabel">Cerrar Sesión</span>
+                </a>
+            </nav>
+            </div><!-- /profile-wrapper -->
+        </div><!-- /header-actions -->
+
+    </header>
+
+    <!-- ═══════════════════════════════════════
+         MAIN CONTENT
+    ═══════════════════════════════════════ -->
+    <main class="main-content" id="mainContent" role="main">
+
+        <!-- Hero -->
+        <section class="hero" aria-labelledby="modalidadesTitle">
+            <h1 class="hero-title" id="modalidadesTitle">Elegí tu modo de juego</h1>
+            <p class="hero-subtitle">
+                Demostrá cuánto sabés sobre el fútbol nacional e internacional.
+            </p>
+        </section>
+
+        <!-- Modes grid -->
+        <section class="mode-grid" aria-label="Modos de juego disponibles">
+
+            <!-- ── Card 1: Daily Challenge (featured) ── -->
+            <article class="mode-card featured" aria-labelledby="modoDiarioTitle">
+                <div class="mode-icon" aria-hidden="true">⚽</div>
+                <h2 class="mode-title" id="modoDiarioTitle">Desafío Diario</h2>
+                <p class="mode-desc">
+                    Una partida exclusiva por día. Juga el Tateti del dia,
+                    sumá puntos al ranking global y mantené tu racha activa.
+                </p>
+                <a href="tateti-diario.html" class="btn-mode" id="btn-diario">
+                    <span>INGRESAR</span><span>→</span>
+                </a>
+            </article>
+
+            <!-- ── Card 2: 1v1 Local (unlocked for everyone) ── -->
+            <article class="mode-card" aria-labelledby="modoLocalTitle">
+                <div class="mode-icon" aria-hidden="true">🕹️</div>
+                <h2 class="mode-title" id="modoLocalTitle">1v1 Local</h2>
+                <p class="mode-desc">
+                    Jugá en el mismo dispositivo con un amigo. Turno a turno,
+                    en el Tateti y demostrá quién sabe más de fútbol.
+                </p>
+                <a href="tateti-local.html" class="btn-mode" id="btn-local">
+                    <span>INGRESAR</span><span>→</span>
+                </a>
+            </article>
+
+            <!-- ── Card 3: 1v1 Online ── -->
+            <article class="mode-card" aria-labelledby="modoOnlineTitle">
+                <div class="mode-icon" aria-hidden="true">🌐</div>
+                <h2 class="mode-title" id="modoOnlineTitle">1v1 Online</h2>
+                <p class="mode-desc">
+                    Desafiá a un amigo real a una partida 1v1 en tiempo real.
+                    Enviale el desafío desde "Mis Amigos" y jueguen apenas lo acepte.
+                </p>
+                <button type="button" class="btn-mode" id="btn-online">
+                    <span>INGRESAR</span><span>→</span>
+                </button>
+            </article>
+
+        </section>
+
+        <!-- ── Guest CTA (hidden for registered users) ── -->
+        <div class="guest-cta-bar hidden" id="cta-invitado-modalidades" aria-live="polite">
+            <p class="guest-cta-bar__text">
+                Iniciá sesión o registrate gratis para competir online, jugar con amigos y guardar tus estadísticas diarias.
+            </p>
+            <div class="guest-cta-bar__actions">
+                <a href="login.html" class="btn-cta-green">Iniciar Sesión</a>
+                <a href="registro.html" class="btn-cta-ghost">Registrarse</a>
+            </div>
+        </div>
+
+    </main><!-- /main-content -->
+
+    <!-- ═══════════════════════════════════════
+         STATS BAR (4 COLUMNS + TOOLTIPS)
+    ═══════════════════════════════════════ -->
+    <footer class="stats-bar" role="contentinfo" aria-label="Tus estadísticas">
+
+        <!-- Column 1: Porcentaje de Aciertos -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">PORCENTAJE DE ACIERTOS</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Aciertos">i<span class="stat-tooltip" role="tooltip">
+                    <!-- Title above the mathematical formula -->
+                    <span class="tooltip-formula-title">Porcentaje de Aciertos =</span>
+                    <!-- Flex row aligning the vertical fraction and the '× 100' multiplier -->
+                    <span class="tooltip-formula-row">
+                        <span class="tooltip-fraction">
+                            <!-- Numerator: correct guesses (updated dynamically via JS) -->
+                            <span class="tooltip-numerator" id="tooltipCorrectGuesses">0 aciertos</span>
+                            <!-- Denominator: total guesses made (updated dynamically via JS) -->
+                            <span class="tooltip-denominator" id="tooltipTotalGuesses">0 intentos</span>
+                        </span>
+                        <span class="tooltip-multiplier">× 100</span>
+                    </span>
+                </span></span>
+            </div>
+            <span class="stat-value" id="statAccuracy">🎯 0%</span>
+        </div>
+
+        <!-- Column 2: Tu Racha -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">TU RACHA</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Tu Racha">i<span class="stat-tooltip" role="tooltip">Tu racha aumenta por cada victoria consecutiva. ¡Recibís +10 puntos extra por cada victoria de racha acumulada!</span></span>
+            </div>
+            <span class="stat-value" id="statStreak">🔥 0 Días</span>
+        </div>
+
+        <!-- Column 3: Puntos Totales -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">PUNTOS TOTALES</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Puntos Totales">i<span class="stat-tooltip" role="tooltip">Suma total de los puntos obtenidos en todas tus partidas y bonificaciones.<br><span class="tooltip-ranks-scale">Rangos: Madera (0-299), Hierro (300-599), Bronce (600-899), Plata (900-1199), Oro (1200-1499), Diamante (1500+).</span></span></span>
+            </div>
+            <span class="stat-value stat-value--rank" id="statPoints"><svg class="rank-shield-svg rank-shield--wood" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 2L4 5.5v6.1C4 16.9 7.4 21.6 12 23c4.6-1.4 8-6.1 8-11.4V5.5L12 2z" fill="#8D5B4C" stroke="#5D3A2E" stroke-width="1.6"/><path d="M12 4.2L6.2 6.8v4.7c0 4.1 2.5 7.9 5.8 9.1 3.3-1.2 5.8-5 5.8-9.1V6.8L12 4.2z" fill="#A4705E" opacity="0.55"/><path d="M9.5 5.8v13.2M14.5 5.8v13.2M12 4.2v16.4" stroke="#5D3A2E" stroke-width="1" stroke-linecap="round" opacity="0.65"/></svg><span class="rank-stat-text">0 pts · Madera III</span></span>
+        </div>
+
+        <!-- Column 4: Porcentaje de Victorias -->
+        <div class="stat-col">
+            <div class="stat-label-row">
+                <span class="stat-label">PORCENTAJE DE VICTORIAS</span>
+                <span class="stat-info" tabindex="0" aria-label="Información sobre Porcentaje de Victorias">i<span class="stat-tooltip" role="tooltip">
+                    <!-- Title above the mathematical formula -->
+                    <span class="tooltip-formula-title">Porcentaje de Victorias =</span>
+                    <!-- Flex row aligning the vertical fraction and the '× 100' multiplier -->
+                    <span class="tooltip-formula-row">
+                        <span class="tooltip-fraction">
+                            <!-- Numerator: matches won (updated dynamically via JS) -->
+                            <span class="tooltip-numerator" id="tooltipMatchesWon">0 ganadas</span>
+                            <!-- Denominator: matches played (updated dynamically via JS) -->
+                            <span class="tooltip-denominator" id="tooltipMatchesPlayed">0 jugadas</span>
+                        </span>
+                        <span class="tooltip-multiplier">× 100</span>
+                    </span>
+                </span></span>
+            </div>
+            <span class="stat-value" id="statWins">📈 0%</span>
+        </div>
+
+    </footer>
+
+</div><!-- /page-shell -->
+
+
+<!-- ═══════════════════════════════════════
+     MODAL 1: Invitado Restringido
+═══════════════════════════════════════ -->
+<div class="modal-backdrop hidden" id="modal-invitado"
+     role="dialog" aria-modal="true" aria-labelledby="modal-inv-title">
+    <div class="modal-card">
+        <button class="modal-close" id="close-invitado" aria-label="Cerrar">✕</button>
+        <div class="modal-icon" aria-hidden="true">🔒</div>
+        <h2 class="modal-title" id="modal-inv-title">¡Sumate a la cancha!</h2>
+        <p class="modal-text">
+            Iniciá sesión o creá tu cuenta gratis para desafiar a otros jugadores
+            y guardar tus estadísticas diarias.
+        </p>
+        <div class="modal-actions">
+            <a href="login.html" class="modal-btn-primary">Iniciar Sesión</a>
+            <a href="registro.html" class="modal-btn-secondary">Registrarse</a>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════
+     VANILLA JS
+═══════════════════════════════════════ -->
+<script>
+(function () {
+    'use strict';
+
+    /* ──────────────────────────────────────────
+       HELPERS
+    ────────────────────────────────────────── */
+    function $(id) { return document.getElementById(id); }
+
+    // Helper that strips any leading '@' symbol and extra spaces from a username
+    function cleanUsername(rawName) {
+        return String(rawName || '').trim().replace(/^@+/, '');
+    }
+
+    /* ──────────────────────────────────────────
+       1. STATE (Guest vs Registered) & AVATAR ROBOT
+    ────────────────────────────────────────── */
+    var BASE_ROBOT_AVATARS = [
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-1&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-2&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-3&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-4&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-5&backgroundColor=292929',
+        'https://api.dicebear.com/8.x/bottts/svg?seed=footlel-6&backgroundColor=292929'
+    ];
+
+    function getOrAssignAvatar(username, guestFlag) {
+        if (window.FootlelPrefs && typeof window.FootlelPrefs.getOrAssignAvatar === 'function') {
+            return window.FootlelPrefs.getOrAssignAvatar(username, guestFlag);
+        }
+        if (guestFlag) {
+            var guestAv = localStorage.getItem('footlel_guest_avatar') || localStorage.getItem('footlel_avatar');
+            if (!guestAv || guestAv.indexOf('avatar-default.png') !== -1 || guestAv.indexOf('data:image/svg+xml') === 0) {
+                guestAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+                localStorage.setItem('footlel_guest_avatar', guestAv);
+                localStorage.setItem('footlel_avatar', guestAv);
+            }
+            return guestAv;
+        }
+        var userKey = username ? ('footlel_avatar_' + username) : null;
+        var savedAv = (userKey && localStorage.getItem(userKey)) || localStorage.getItem('footlel_avatar');
+        if (!savedAv || savedAv.indexOf('avatar-default.png') !== -1 || savedAv.indexOf('seed=footlel-default') !== -1) {
+            savedAv = BASE_ROBOT_AVATARS[Math.floor(Math.random() * 6)];
+            if (userKey) localStorage.setItem(userKey, savedAv);
+            localStorage.setItem('footlel_avatar', savedAv);
+        } else if (userKey && !localStorage.getItem(userKey)) {
+            localStorage.setItem(userKey, savedAv);
+        }
+        return savedAv;
+    }
+
+    var isGuest       = localStorage.getItem('footlel_guest') === 'true';
+    var savedUsername = cleanUsername(localStorage.getItem('footlel_username') || 'Jugador') || 'Jugador';
+    var savedAvatar   = getOrAssignAvatar(savedUsername, isGuest);
+    if (savedAvatar) {
+        $('profileAvatar').src = savedAvatar;
+    }
+
+    var guestCta = $('cta-invitado-modalidades');
+    if (guestCta) {
+        if (isGuest) {
+            guestCta.style.display = 'flex';
+            guestCta.classList.remove('hidden');
+        } else {
+            guestCta.style.display = 'none';
+            guestCta.classList.add('hidden');
+        }
+    }
+
+    var GUEST_AVATAR = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Ccircle cx='20' cy='20' r='20' fill='%23292929'/%3E%3Ccircle cx='20' cy='15' r='6' fill='%239E9E9E'/%3E%3Cellipse cx='20' cy='32' rx='10' ry='8' fill='%239E9E9E'/%3E%3C/svg%3E";
+    var LOGIN_ICON_PATHS = '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>';
+
+    function formatStreakText(streakVal) {
+        var n = Math.max(0, parseInt(streakVal, 10) || 0);
+        return '🔥 ' + n + (n === 1 ? ' Día' : ' Días');
+    }
+
+    function formatPercentage(val) {
+        var num = Math.max(0, Math.min(100, Math.round(Number(val) || 0)));
+        return num + '%';
+    }
+
+    function formatTotalPoints(pts) {
+        var n = Math.max(0, Math.round(Number(pts) || 0));
+        var isEng = localStorage.getItem('footlel_is_english') === 'true' || localStorage.getItem('footlel_lang') === 'en';
+        if (typeof window.getRankInfo === 'function') {
+            var rank = window.getRankInfo(n, isEng);
+            return rank.svg + '<span class="rank-stat-text">' + n.toLocaleString('en-US') + ' pts · ' + rank.name + '</span>';
+        }
+        return n.toLocaleString('en-US') + ' pts · ' + (isEng ? 'Wood III' : 'Madera III');
+    }
+
+    function renderStatPoints(pts) {
+        if (!statPoints || isGuest) return;
+        statPoints.dataset.points = String(Math.max(0, Math.round(Number(pts) || 0)));
+        statPoints.innerHTML = formatTotalPoints(pts);
+    }
+
+    var apiBaseUrl = String(window.API_BASE_URL || 'https://footlel-backend.onrender.com').replace(/\/+$/, '');
+
+    var sessionExpiredRedirecting = false;
+    function handleExpiredSession() {
+        if (sessionExpiredRedirecting) return;
+        sessionExpiredRedirecting = true;
+        try {
+            localStorage.removeItem('footlel_token');
+            localStorage.removeItem('footlel_guest');
+            localStorage.removeItem('footlel_username');
+            localStorage.removeItem('footlel_user_id');
+            localStorage.removeItem('footlel_user_strid');
+            localStorage.removeItem('footlel_email');
+        } catch (_) {}
+        window.location.replace('login.html?expired=1');
+    }
+
+    // GET /stat/get-user-stats with JWT (registered users only).
+    async function fetchUserStatsFromEndpoint() {
+        var token = localStorage.getItem('footlel_token');
+        if (!token || isGuest) return null;
+        try {
+            var res = await fetch(apiBaseUrl + '/stat/get-user-stats', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            if (res.status === 401) {
+                handleExpiredSession();
+                return null;
+            }
+            if (res.ok) {
+                var data = await res.json();
+                if (data && typeof data === 'object') {
+                    return data;
+                }
+            }
+        } catch (e) {
+            // Network error; handled by fallback
+        }
+        return null;
+    }
+    function mapUserStatsPayload(statsPayload, userInfo, lbData, username) {
+        var streakKey = 'footlel_streak_' + username;
+        var winsKey   = 'footlel_wins_'   + username;
+        var pointsKey = 'footlel_points_' + username;
+        var accKey    = 'footlel_accuracy_' + username;
+        var winPctKey = 'footlel_win_pct_' + username;
+        // Keys to persist raw numerator/denominator counts in localStorage
+        var corrKey   = 'footlel_correct_guesses_' + username;
+        var madeKey   = 'footlel_guesses_made_'    + username;
+        var playedKey = 'footlel_matches_played_'  + username;
+
+        var localStreak = parseInt(localStorage.getItem(streakKey) || '0', 10) || 0;
+        var localWins   = parseInt(localStorage.getItem(winsKey)   || '0', 10) || 0;
+        var correctGuesses = parseInt(localStorage.getItem(corrKey)   || '0', 10) || 0;
+        var guessesMade    = parseInt(localStorage.getItem(madeKey)   || '0', 10) || 0;
+        var matchesPlayed  = parseInt(localStorage.getItem(playedKey) || '0', 10) || 0;
+
+        // 1. Accuracy Percentage (Backend: correct_guesses / guesses_made)
+        var accuracyPct = null;
+        if (statsPayload && typeof statsPayload === 'object') {
+            if (statsPayload.correct_guesses !== undefined && statsPayload.guesses_made !== undefined) {
+                var made = Number(statsPayload.guesses_made) || 0;
+                var corr = Number(statsPayload.correct_guesses) || 0;
+                // Store exact numerator and denominator from backend
+                correctGuesses = corr;
+                guessesMade    = made;
+                localStorage.setItem(corrKey, String(corr));
+                localStorage.setItem(madeKey, String(made));
+                accuracyPct = made > 0 ? (corr / made) * 100 : 0;
+            } else if (statsPayload.accuracy_percentage !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy_percentage);
+            } else if (statsPayload.porcentaje_aciertos !== undefined) {
+                accuracyPct = Number(statsPayload.porcentaje_aciertos);
+            } else if (statsPayload.accuracy !== undefined) {
+                accuracyPct = Number(statsPayload.accuracy);
+            } else if (statsPayload.hits !== undefined && statsPayload.attempts !== undefined) {
+                var att = Number(statsPayload.attempts) || 0;
+                accuracyPct = att > 0 ? (Number(statsPayload.hits) / att) * 100 : 0;
+            } else if (statsPayload.aciertos !== undefined && statsPayload.intentos !== undefined) {
+                var intn = Number(statsPayload.intentos) || 0;
+                accuracyPct = intn > 0 ? (Number(statsPayload.aciertos) / intn) * 100 : 0;
+            }
+            if (accuracyPct !== null && !Number.isNaN(accuracyPct)) {
+                localStorage.setItem(accKey, String(accuracyPct));
+            }
+        }
+        if (accuracyPct === null || Number.isNaN(accuracyPct)) {
+            var savedAcc = localStorage.getItem(accKey);
+            accuracyPct = savedAcc !== null ? Number(savedAcc) : 0;
+        }
+
+        // 2. Daily Streak (Backend: win_streak)
+        var rawStreak = statsPayload && (statsPayload.win_streak ?? statsPayload.streak ?? statsPayload.user_streak ?? statsPayload.racha ?? statsPayload.daily_streak);
+        if (rawStreak === undefined || rawStreak === null) {
+            rawStreak = userInfo && (userInfo.win_streak ?? userInfo.user_streak ?? userInfo.streak ?? userInfo.racha ?? userInfo.daily_streak);
+        }
+        var finalStreak = (rawStreak !== undefined && rawStreak !== null)
+            ? (Number(rawStreak) || 0)
+            : localStreak;
+        localStorage.setItem(streakKey, String(finalStreak));
+
+        // 3. Total Points (Backend: user_points) & 4. Win Percentage (Backend: matches_won / matches_played)
+        var rawPoints = statsPayload && (statsPayload.user_points ?? statsPayload.total_points ?? statsPayload.points ?? statsPayload.puntos_totales ?? statsPayload.score);
+        var rawWins   = statsPayload && (statsPayload.matches_won ?? statsPayload.wins ?? statsPayload.user_wins ?? statsPayload.games_won ?? statsPayload.partidas_ganadas);
+        var rawTotalGames = statsPayload && (statsPayload.matches_played ?? statsPayload.total_games ?? statsPayload.partidas_jugadas ?? statsPayload.games_played);
+        var winPct = statsPayload && (statsPayload.win_percentage ?? statsPayload.porcentaje_victorias ?? statsPayload.win_rate);
+
+        if (rawWins === undefined || rawWins === null) {
+            rawWins = userInfo && (userInfo.matches_won ?? userInfo.user_wins ?? userInfo.wins ?? userInfo.games_won ?? userInfo.partidas_ganadas);
+        }
+
+        if (lbData && Array.isArray(lbData.leaderboard)) {
+            var normalizedTarget = username.toLowerCase();
+            var userEntry = lbData.leaderboard.find(function (entry) {
+                var entryName = Array.isArray(entry)
+                    ? entry[0]
+                    : (entry && (entry.user_name || entry.username || entry.name));
+                return String(entryName || '').trim().toLowerCase() === normalizedTarget;
+            });
+            if (userEntry) {
+                var val = Array.isArray(userEntry)
+                    ? userEntry[1]
+                    : (userEntry.user_points ?? userEntry.points ?? userEntry.score ?? userEntry.wins ?? 0);
+                if (rawPoints === undefined || rawPoints === null) {
+                    rawPoints = Number(val) || 0;
+                }
+            }
+        }
+
+        var effectiveWins = (rawWins !== undefined && rawWins !== null)
+            ? (Number(rawWins) || 0)
+            : localWins;
+        localStorage.setItem(winsKey, String(effectiveWins));
+
+        // Exact backend points without any extra local bonus (+10 removed)
+        var finalPoints;
+        if (rawPoints !== undefined && rawPoints !== null) {
+            finalPoints = Number(rawPoints) || 0;
+            localStorage.setItem(pointsKey, String(finalPoints));
+        } else {
+            var savedPts = localStorage.getItem(pointsKey);
+            finalPoints = savedPts !== null ? (Number(savedPts) || 0) : (effectiveWins * 10);
+        }
+
+        if (rawTotalGames !== undefined && rawTotalGames !== null) {
+            matchesPlayed = Number(rawTotalGames) || 0;
+            localStorage.setItem(playedKey, String(matchesPlayed));
+        }
+
+        if (winPct === undefined || winPct === null || Number.isNaN(Number(winPct))) {
+            if (rawTotalGames !== undefined && rawTotalGames !== null) {
+                var totalG = Number(rawTotalGames) || 0;
+                winPct = totalG > 0 ? (effectiveWins / totalG) * 100 : 0;
+                localStorage.setItem(winPctKey, String(winPct));
+            } else {
+                var savedWinPct = localStorage.getItem(winPctKey);
+                winPct = savedWinPct !== null ? Number(savedWinPct) : 0;
+            }
+        } else {
+            localStorage.setItem(winPctKey, String(winPct));
+        }
+
+        return {
+            accuracy: accuracyPct,
+            streak: finalStreak,
+            totalPoints: finalPoints,
+            winPercentage: winPct,
+            correctGuesses: correctGuesses,
+            guessesMade: guessesMade,
+            matchesWon: effectiveWins,
+            matchesPlayed: matchesPlayed
+        };
+    }
+    var profileAvatar   = $('profileAvatar');
+    var profileUser     = $('profileUsername');
+    var ddEditAccount   = $('ddEditAccount');
+    var ddFriends       = $('ddFriends');
+    var ddSessionAction = $('ddSessionAction');
+    var ddSessionLabel  = $('ddSessionLabel');
+    var ddSessionIcon   = $('ddSessionIcon');
+    var statAccuracy    = $('statAccuracy');
+    var statStreak      = $('statStreak');
+    var statPoints      = $('statPoints');
+    var statWins        = $('statWins');
+    // References to the numerator and denominator spans inside the mathematical fraction tooltips
+    var tooltipCorrectGuesses = $('tooltipCorrectGuesses');
+    var tooltipTotalGuesses   = $('tooltipTotalGuesses');
+    var tooltipMatchesWon     = $('tooltipMatchesWon');
+    var tooltipMatchesPlayed  = $('tooltipMatchesPlayed');
+
+    // Updates the vertical fraction numbers inside both stat tooltips
+    function updateFractionTooltips(mappedStats) {
+        if (tooltipCorrectGuesses) {
+            var c = mappedStats.correctGuesses ?? 0;
+            tooltipCorrectGuesses.textContent = c + (c === 1 ? ' acierto' : ' aciertos');
+        }
+        if (tooltipTotalGuesses) {
+            var m = mappedStats.guessesMade ?? 0;
+            tooltipTotalGuesses.textContent = m + (m === 1 ? ' intento' : ' intentos');
+        }
+        if (tooltipMatchesWon) {
+            var w = mappedStats.matchesWon ?? 0;
+            tooltipMatchesWon.textContent = w + (w === 1 ? ' ganada' : ' ganadas');
+        }
+        if (tooltipMatchesPlayed) {
+            var p = mappedStats.matchesPlayed ?? 0;
+            tooltipMatchesPlayed.textContent = p + (p === 1 ? ' jugada' : ' jugadas');
+        }
+    }
+
+    if (isGuest) {
+        var rawGuest = (localStorage.getItem('footlel_username') || localStorage.getItem('footlel_user_strid') || 'Invitado').trim();
+        var guestName = /^\d+$/.test(rawGuest) ? ('Guest_' + rawGuest) : (rawGuest || 'Invitado');
+        profileUser.textContent     = guestName;
+        profileAvatar.src           = getOrAssignAvatar(guestName, true);
+        ddEditAccount.style.display = 'none';
+        ddFriends.style.display     = 'none';
+        ddSessionLabel.textContent  = 'Iniciar Sesión';
+        ddSessionAction.classList.remove('item-danger');
+        ddSessionIcon.innerHTML     = LOGIN_ICON_PATHS;
+        [statAccuracy, statStreak, statPoints, statWins].forEach(function (el) {
+            if (!el) return;
+            el.textContent = '-----';
+            el.classList.add('stat-placeholder');
+        });
+    } else {
+        profileUser.textContent = savedUsername;
+        profileAvatar.src       = getOrAssignAvatar(savedUsername, false);
+
+        var streakKey = 'footlel_streak_' + savedUsername;
+        if (localStorage.getItem(streakKey) === null) {
+            localStorage.setItem(streakKey, '0');
+        }
+
+        var initialStats = mapUserStatsPayload(null, null, null, savedUsername);
+        statAccuracy.textContent = '🎯 ' + formatPercentage(initialStats.accuracy);
+        statStreak.textContent   = formatStreakText(initialStats.streak);
+        renderStatPoints(initialStats.totalPoints);
+        statWins.textContent     = '📈 ' + formatPercentage(initialStats.winPercentage);
+        // Populate fraction tooltips with cached numerator/denominator values
+        updateFractionTooltips(initialStats);
+
+        window.addEventListener('footlel:language-changed', function () {
+            if (statPoints && statPoints.dataset.points !== undefined) {
+                renderStatPoints(Number(statPoints.dataset.points) || 0);
+            }
+        });
+
+        (async function loadUserFooterStats() {
+            var token = localStorage.getItem('footlel_token');
+            var results = await Promise.allSettled([
+                fetchUserStatsFromEndpoint(),
+                // Updated to match Swagger: GET /user/get-user-info with Authorization Bearer header
+                token
+                    ? fetch(apiBaseUrl + '/user/get-user-info', { headers: { 'Authorization': 'Bearer ' + token } }).then(function (r) {
+                        if (r.status === 401) {
+                            handleExpiredSession();
+                            return null;
+                        }
+                        return r.ok ? r.json() : null;
+                    })
+                    : Promise.resolve(null),
+                fetch(apiBaseUrl + '/stat/get-global-leaderboard').then(function (r) { return r.ok ? r.json() : null; })
+            ]);
+
+            if (sessionExpiredRedirecting) return;
+
+            var statsPayload = results[0].status === 'fulfilled' ? results[0].value : null;
+            var userInfo     = results[1].status === 'fulfilled' ? results[1].value : null;
+            var lbData       = results[2].status === 'fulfilled' ? results[2].value : null;
+
+            if (userInfo && typeof userInfo === 'object' && userInfo.user_id !== undefined && userInfo.user_id !== null) {
+                localStorage.setItem('footlel_user_id', String(userInfo.user_id));
+            }
+            if (userInfo && userInfo.user_name) {
+                var cleanFromBackend = cleanUsername(userInfo.user_name);
+                if (cleanFromBackend) {
+                    localStorage.setItem('footlel_username', cleanFromBackend);
+                    profileUser.textContent = cleanFromBackend;
+                    profileAvatar.src = getOrAssignAvatar(cleanFromBackend, false);
+                }
+            }
+
+            var mapped = mapUserStatsPayload(statsPayload, userInfo, lbData, savedUsername);
+            statAccuracy.textContent = '🎯 ' + formatPercentage(mapped.accuracy);
+            statStreak.textContent   = formatStreakText(mapped.streak);
+            renderStatPoints(mapped.totalPoints);
+            statWins.textContent     = '📈 ' + formatPercentage(mapped.winPercentage);
+            // Update fraction tooltips with fresh numbers from /stat/get-user-stats
+            updateFractionTooltips(mapped);
+        })().catch(function (err) { console.warn('No se pudieron actualizar las estadísticas del footer:', err); });
+    }
+
+    /* ──────────────────────────────────────────
+       2. PROFILE DROPDOWN
+    ────────────────────────────────────────── */
+    var profileBtn      = $('profileBtn');
+    var profileDropdown = $('profileDropdown');
+
+    function openDropdown() {
+        profileDropdown.classList.add('is-open');
+        profileBtn.setAttribute('aria-expanded', 'true');
+    }
+    function closeDropdown() {
+        profileDropdown.classList.remove('is-open');
+        profileBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    profileBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        profileDropdown.classList.contains('is-open') ? closeDropdown() : openDropdown();
+    });
+    document.addEventListener('click', function (e) {
+        if (!$('profileWrapper').contains(e.target)) closeDropdown();
+    });
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeDropdown(); closeAllModals(); }
+    });
+    profileDropdown.querySelectorAll('.dropdown-item').forEach(function (item) {
+        item.addEventListener('click', closeDropdown);
+    });
+
+    /* ──────────────────────────────────────────
+       3. MODAL CONTROL (Solo Invitado Restringido)
+    ────────────────────────────────────────── */
+    var guestModal = $('modal-invitado');
+
+    function openModal(el) {
+        if (!el) return;
+        el.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        var firstFocusable = el.querySelector('button, a');
+        if (firstFocusable) setTimeout(function () { firstFocusable.focus(); }, 60);
+    }
+    function closeModal(el) {
+        if (!el) return;
+        el.classList.add('hidden');
+        document.body.style.overflow = '';
+    }
+    function closeAllModals() {
+        closeModal(guestModal);
+    }
+
+    $('close-invitado').addEventListener('click', function () { closeModal(guestModal); });
+    guestModal.addEventListener('click', function (e) { if (e.target === this) closeModal(this); });
+
+    if (isGuest) {
+        document.querySelectorAll('a[href*="amigos.html"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal(guestModal);
+            });
+        });
+    }
+
+    /* ──────────────────────────────────────────
+       4. MODE BUTTONS LOGIC (Guest check only;
+          Daily Challenge completion is checked by Backend in tateti-diario.html)
+    ────────────────────────────────────────── */
+    // Daily Challenge (blocked only for guests; logged-in users navigate to tateti-diario.html)
+    $('btn-diario').addEventListener('click', function (e) {
+        if (isGuest) {
+            e.preventDefault();
+            openModal(guestModal);
+        }
+    });
+
+    // 1v1 Online (blocked for guests). Logged-in users are always redirected to Mis Amigos (?tab=friends).
+    $('btn-online').addEventListener('click', function (e) {
+        if (isGuest) {
+            e.preventDefault();
+            openModal(guestModal);
+            return;
+        }
+        try { sessionStorage.setItem('footlel_open_tab', 'amigos'); } catch (_) {}
+        window.location.href = 'amigos.html?tab=friends';
+    });
+})();
+</script>
+
+</body>
+</html>
